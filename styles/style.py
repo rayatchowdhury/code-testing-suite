@@ -15,13 +15,16 @@ COLORS = {
 MATERIAL_COLORS = {
     'background': '#121212',
     'surface': '#1e1e1e',
+    'surface_dim': '#171717',
+    'surface_variant': '#252525',
     'primary': '#bb86fc',
     'secondary': '#03dac6',
     'error': '#cf6679',
     'text_primary': '#ffffff',
     'text_secondary': '#b3ffffff',  # 70% white
     'button_hover': '#bb86fc20',    # primary with 12% opacity
-    'border': '#333333'
+    'border': '#333333',
+    'outline': '#3f3f3f'
 }
 
 # Styles

@@ -1,5 +1,6 @@
 from PySide6.QtGui import QSyntaxHighlighter, QTextCharFormat, QBrush, QColor
 from PySide6.QtCore import Qt, QRegularExpression
+import re
 
 # Modern color scheme
 STYLES = {
@@ -19,7 +20,7 @@ STYLES = {
 
 class CPPSyntaxHighlighter(QSyntaxHighlighter):
     def __init__(self, document):
-        super().__init__(document)
+        super().__init__(document)  # Add this line to call parent's __init__
         self.highlighting_rules = []
 
         # Standard library classes
@@ -113,12 +114,18 @@ class CPPSyntaxHighlighter(QSyntaxHighlighter):
             '=', '==', '!=', '<', '<=', '>', '>=',
             '\\+', '-', '\\*', '/', '//', '\\%', '\\*\\*',
             '\\+=', '-=', '\\*=', '/=', '\\%=',
-            '\\^', '\\|', '\\&', '\\~', '>>', '<<',
-            '\\{', '\\}', '\\(', '\\)', '\\[', '\\]',
+            '\\^', '\\|', '\\&', '\\~', '>>', '<<'
         ]
-        self.highlighting_rules.extend(
-            (QRegularExpression(f"[{op}]"), operator_format)
-            for op in operators
+        
+        # Add operators as a single pattern
+        operator_pattern = '|'.join(map(re.escape, operators))
+        self.highlighting_rules.append(
+            (QRegularExpression(operator_pattern), operator_format)
+        )
+
+        # Add braces separately
+        self.highlighting_rules.append(
+            (QRegularExpression(r"[\{\}\(\)\[\]]"), operator_format)
         )
 
         # Preprocessor directives

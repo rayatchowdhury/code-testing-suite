@@ -74,7 +74,8 @@ class CodeEditorWindow(QWidget):
             try:
                 with open(file_name, 'r') as file:
                     self.editor_widget.codeEditor.setPlainText(file.read())
-                    self.current_file = file_name
+                    self.editor_widget.currentFilePath = file_name
+                    self.editor_widget.updateTitleBar()
             except Exception as e:
                 QMessageBox.critical(
                     self, "Error", f"Could not open file: {str(e)})")
@@ -85,6 +86,8 @@ class CodeEditorWindow(QWidget):
                                                        "C++ Files (*.cpp *.h);;All Files (*)")
             if file_name:
                 self.current_file = file_name
+                self.editor_widget.currentFilePath = file_name
+                self.editor_widget.updateTitleBar()
             else:
                 return
 

@@ -1,6 +1,7 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QPlainTextEdit, QTextEdit
-from PySide6.QtGui import QFont, QColor, QPainter, QTextFormat, QTextCursor
-from PySide6.QtCore import Qt, QRect, QSize
+from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
+                               QPlainTextEdit, QTextEdit, QLabel, QFileDialog)
+from PySide6.QtGui import QFont, QColor, QPainter, QTextFormat, QTextCursor, QKeySequence, QShortcut
+from PySide6.QtCore import Qt, QRect, QSize, QTimer
 from widgets.display_area_widgets.syntaxhighlighter import CPPSyntaxHighlighter
 from styles.style import MATERIAL_COLORS
 
@@ -88,7 +89,8 @@ class CodeEditor(QPlainTextEdit):
 
         block = self.firstVisibleBlock()
         blockNumber = block.blockNumber()
-        top = round(self.blockBoundingGeometry(block).translated(self.contentOffset()).top())
+        top = round(self.blockBoundingGeometry(
+            block).translated(self.contentOffset()).top())
         bottom = top + round(self.blockBoundingRect(block).height())
 
         while block.isValid() and top <= event.rect().bottom():
@@ -152,6 +154,10 @@ class CodeEditor(QPlainTextEdit):
                 break
         return indent
 
+    def textChanged(self):
+        # Trigger auto-save
+        self.parent().scheduleSave()
+
 
 class LineNumberArea(QWidget):
     def __init__(self, editor):
@@ -168,22 +174,106 @@ class LineNumberArea(QWidget):
 class EditorWidget(QWidget):
     def __init__(self):
         super().__init__()
-        layout = QVBoxLayout(self)  # Pass self directly to QVBoxLayout
+        layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
-        
+
+        # Add title bar
+        self.titleBar = QWidget()
+        titleLayout = QHBoxLayout(self.titleBar)
+        titleLayout.setContentsMargins(5, 2, 5, 2)
+
+        self.fileNameLabel = QLabel("Untitled")
+        titleLayout.addWidget(self.fileNameLabel)
+
+        # Style the title bar
+        self.titleBar.setStyleSheet(f"""
+            QWidget {{
+                background-color: {MATERIAL_COLORS['surface_variant']};
+                border-bottom: 1px solid {MATERIAL_COLORS['outline']};
+            }}
+            QLabel {{
+                color: {MATERIAL_COLORS['text_primary']};
+            }}
+        """)
+
+        layout.addWidget(self.titleBar)
+
         # Create CodeEditor instance
         self.codeEditor = CodeEditor()
+        layout.addWidget(self.codeEditor)
+
+        # File handling setup
+        self.currentFilePath = None
+        self.autoSaveTimer = QTimer()
+        self.autoSaveTimer.setInterval(5000)  # 5 seconds
+        self.autoSaveTimer.timeout.connect(self.saveFile)
+
+        # Connect text changed signal
+        self.codeEditor.textChanged.connect(self.onTextChanged)
+
+        # Setup shortcuts
+        self.setupShortcuts()
+
         self.loadDefaultFile()
 
-        layout.addWidget(self.codeEditor)
+    def setupShortcuts(self):
+        saveShortcut = QShortcut(QKeySequence.Save, self)
+        saveShortcut.activated.connect(self.saveFile)
+
+        saveAsShortcut = QShortcut(QKeySequence.SaveAs, self)
+        saveAsShortcut.activated.connect(self.saveFileAs)
 
     def loadDefaultFile(self):
         try:
-            with open('src/temp.cpp', 'r') as file:
+            self.currentFilePath = 'src/temp.cpp'
+            with open(self.currentFilePath, 'r') as file:
                 code = file.read()
                 self.codeEditor.setPlainText(code)
+                self.updateTitleBar()
         except FileNotFoundError:
-            pass  # If temp.cpp doesn't exist, do nothing
+            self.currentFilePath = None
+            self.updateTitleBar()
+
+    def updateTitleBar(self):
+        if self.currentFilePath:
+            # Use os.path for proper path handling
+            import os
+            filename = os.path.basename(self.currentFilePath)
+            self.fileNameLabel.setText(filename)
+        else:
+            self.fileNameLabel.setText("Untitled")
+
+    def scheduleSave(self):
+        self.autoSaveTimer.start()
+
+    def saveFile(self):
+        if not self.currentFilePath:
+            return self.saveFileAs()
+
+        try:
+            with open(self.currentFilePath, 'w') as file:
+                file.write(self.getCode())
+            return True
+        except Exception as e:
+            print(f"Error saving file: {e}")
+            return False
+
+    def saveFileAs(self):
+        filePath, _ = QFileDialog.getSaveFileName(
+            self,
+            "Save File",
+            "",
+            "C++ Files (*.cpp *.h);;All Files (*.*)"
+        )
+
+        if filePath:
+            self.currentFilePath = filePath
+            self.updateTitleBar()
+            return self.saveFile()
+        return False
+
+    def onTextChanged(self):
+        self.scheduleSave()
 
     def getCode(self):
         return self.codeEditor.toPlainText()
