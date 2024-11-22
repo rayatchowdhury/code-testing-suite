@@ -1,0 +1,21 @@
+- create a extreme well designed beautiful elegant material design pyside6 app
+
+main window will have two widgets
+1. sidebar
+2. Display Area
+
+the sidebar will have 4 buttons
+1. Code Editor
+2. Stress tester
+3. Tle tester 
+4. Help Center
+
+also each respective files has details of what each button will do.
+
+clicking each button will change the main window. aka if I click on the "Code Editor" button the sidebar will have a new button open file, save file, run, etc and the display area will have a code editor.
+other than the main window, each window will havee a go back button on bottom of sidebar clicking on which will go back to the previous window
+
+just create the basic structure of the app with beautifull design and the rest of the work will be done by me.
+each button should have a perfect size and should be properly aligned.
+sidebar should be collapsible.
+sidebar area and display area should have a perfect color combination.
