@@ -9,6 +9,8 @@
 # display area will show description of the application
 
 from PySide6.QtWidgets import QMainWindow, QWidget, QHBoxLayout
+from PySide6.QtGui import QFont
+from PySide6.QtCore import Qt
 from widgets.sidebar import Sidebar
 from widgets.display_area import DisplayArea
 from views.code_editor.code_editor_window import CodeEditorWindow
@@ -21,7 +23,11 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Code Testing Suite")
-        self.setMinimumSize(1200, 800)
+        self.setMinimumSize(1000, 666)
+
+        # Enable antialiasing for the application
+        self.setAttribute(Qt.WA_SetFont)  # Enable custom font
+        self.setFont(QFont("Segoe UI", 10))
 
         # Create main widget and layout
         main_widget = QWidget()
@@ -85,7 +91,7 @@ class MainWindow(QMainWindow):
             item = self.main_layout.takeAt(0)
             if item.widget():
                 item.widget().deleteLater()
-        
+
         # Restore the original sidebar and display area
         self.main_layout.addWidget(self.sidebar)
         self.main_layout.addWidget(self.display_area)

@@ -176,26 +176,41 @@ class EditorWidget(QWidget):
         super().__init__()
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
 
-        # Add title bar
+        # Add title bar with improved styling
         self.titleBar = QWidget()
         titleLayout = QHBoxLayout(self.titleBar)
-        titleLayout.setContentsMargins(5, 2, 5, 2)
-
+        titleLayout.setContentsMargins(10, 5, 10, 5)
+        
+        # Add spacer for center alignment
+        titleLayout.addStretch()
+        
         self.fileNameLabel = QLabel("Untitled")
+        self.fileNameLabel.setObjectName("editor_title")
         titleLayout.addWidget(self.fileNameLabel)
+        
+        # Add spacer for center alignment
+        titleLayout.addStretch()
 
-        # Style the title bar
+        # Enhanced title bar styling
         self.titleBar.setStyleSheet(f"""
             QWidget {{
                 background-color: {MATERIAL_COLORS['surface_variant']};
                 border-bottom: 1px solid {MATERIAL_COLORS['outline']};
             }}
-            QLabel {{
+            QLabel#editor_title {{
                 color: {MATERIAL_COLORS['text_primary']};
+                font-family: 'Segoe UI', system-ui;
+                font-size: 13px;
+                font-weight: 500;
+                padding: 5px 15px;
+                background-color: {MATERIAL_COLORS['surface_dim']};
+                border-radius: 4px;
             }}
         """)
 
+        self.titleBar.setFixedHeight(36)  # Fixed height for consistency
         layout.addWidget(self.titleBar)
 
         # Create CodeEditor instance
@@ -236,9 +251,11 @@ class EditorWidget(QWidget):
 
     def updateTitleBar(self):
         if self.currentFilePath:
-            # Use os.path for proper path handling
             import os
             filename = os.path.basename(self.currentFilePath)
+            # Add modification indicator
+            if self.codeEditor.document().isModified():
+                filename += " *"
             self.fileNameLabel.setText(filename)
         else:
             self.fileNameLabel.setText("Untitled")

@@ -1,30 +1,37 @@
 from PySide6.QtGui import QColor
 
-# Color scheme
+# Modern Pantone-inspired color palette
 COLORS = {
-    'primary': '#2196F3',
-    'primary_dark': '#1976D2',
-    'secondary': '#FFC107',
-    'background': '#FFFFFF',
-    'surface': '#F5F5F5',
-    'sidebar': '#263238',
-    'text_primary': '#212121',
-    'text_secondary': '#757575',
-    'text_light': '#FFFFFF'
-}
-MATERIAL_COLORS = {
-    'background': '#121212',
-    'surface': '#1e1e1e',
-    'surface_dim': '#171717',
-    'surface_variant': '#252525',
-    'primary': '#bb86fc',
-    'secondary': '#03dac6',
-    'error': '#cf6679',
-    'text_primary': '#ffffff',
-    'text_secondary': '#b3ffffff',  # 70% white
-    'button_hover': '#bb86fc20',    # primary with 12% opacity
+    'primary': '#0096C7',           # Pantone Process Blue
+    'primary_dark': '#023E8A',      # Pantone Classic Blue
+    'secondary': '#FFB703',         # Pantone Warm Yellow
+    'accent': '#F72585',            # Pantone Pink
+    'background': '#1B1B1E',        # Dark background
+    'surface': '#242426',           # Slightly lighter surface
+    'sidebar': '#171717',           # Dark sidebar
+    'text_primary': '#FFFFFF',
+    'text_secondary': '#B3B3B3',
+    'text_light': '#FFFFFF',
     'border': '#333333',
-    'outline': '#3f3f3f'
+    'hover': '#2A2A2D',
+    'pressed': '#323235'
+}
+
+# Update Material colors
+MATERIAL_COLORS = {
+    'background': '#1B1B1E',
+    'surface': '#242426',
+    'surface_dim': '#1F1F21',
+    'surface_variant': '#2A2A2D',
+    'primary': '#0096C7',
+    'secondary': '#FFB703',
+    'accent': '#F72585',
+    'error': '#FF6B6B',
+    'text_primary': '#FFFFFF',
+    'text_secondary': '#B3B3B3',
+    'button_hover': '#2A2A2D',
+    'border': '#333333',
+    'outline': '#3F3F3F'
 }
 
 # Styles
@@ -36,18 +43,22 @@ QWidget#sidebar {
 
 QLabel#section_title {
     color: """ + COLORS['text_secondary'] + """;
-    padding: 8px 15px;
-    font-size: 12px;
-    font-weight: bold;
+    padding: 16px 20px 8px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
+    font-family: 'Segoe UI', system-ui;
 }
 
 QLabel#sidebar_title {
     color: """ + COLORS['text_light'] + """;
-    background-color: """ + COLORS['primary_dark'] + """;
-    padding: 20px 15px;
-    font-size: 18px;
+    background-color: """ + COLORS['primary'] + """;
+    padding: 24px 20px;
+    font-size: 20px;
     font-weight: bold;
+    letter-spacing: 0.5px;
+    font-family: 'Segoe UI', system-ui;
 }
 
 QPushButton#sidebar_button {
@@ -55,45 +66,75 @@ QPushButton#sidebar_button {
     background-color: transparent;
     border: none;
     text-align: left;
-    padding: 12px 15px;
+    padding: 12px 20px;
     font-size: 14px;
+    font-weight: 500;
+    border-radius: 6px;
+    margin: 2px 8px;
+    font-family: 'Segoe UI', system-ui;
 }
 
 QPushButton#sidebar_button:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: """ + COLORS['hover'] + """;
 }
 
 QPushButton#sidebar_button:pressed {
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: """ + COLORS['pressed'] + """;
 }
 
 QPushButton#back_button {
     color: """ + COLORS['text_light'] + """;
-    background-color: """ + COLORS['primary_dark'] + """;
+    background-color: """ + COLORS['primary'] + """;
     border: none;
     text-align: center;
-    padding: 12px 15px;
+    padding: 12px 20px;
     font-size: 14px;
-    margin: 10px;
-    border-radius: 4px;
+    font-weight: 600;
+    margin: 12px 16px;
+    border-radius: 8px;
+    font-family: 'Segoe UI', system-ui;
 }
 
 QPushButton#back_button:hover {
-    background-color: """ + COLORS['primary'] + """;
+    background-color: """ + COLORS['primary_dark'] + """;
 }
 
 QFrame#sidebar_section {
     background-color: transparent;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid """ + COLORS['border'] + """;
+    margin-bottom: 8px;
 }
 
 QComboBox, QSpinBox, QSlider {
     color: """ + COLORS['text_light'] + """;
-    background-color: """ + COLORS['primary_dark'] + """;
-    border: none;
-    padding: 5px;
+    background-color: """ + COLORS['surface'] + """;
+    border: 1px solid """ + COLORS['border'] + """;
+    padding: 8px;
     margin: 5px 15px;
+    border-radius: 6px;
+    font-family: 'Segoe UI', system-ui;
+}
+
+QScrollBar:vertical {
+    border: none;
+    background-color: """ + COLORS['sidebar'] + """;
+    width: 8px;
+    margin: 0;
+}
+
+QScrollBar::handle:vertical {
+    background-color: """ + COLORS['border'] + """;
     border-radius: 4px;
+    min-height: 20px;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    border: none;
+    background: none;
+}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background: none;
 }
 """
 

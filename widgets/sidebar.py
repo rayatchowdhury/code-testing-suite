@@ -9,8 +9,8 @@ class SidebarSection(QFrame):
         super().__init__(parent)
         self.setObjectName("sidebar_section")
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 10, 0, 10)
-        layout.setSpacing(5)
+        layout.setContentsMargins(0, 12, 0, 12)
+        layout.setSpacing(6)
         
         # Add section title
         if title:
@@ -28,7 +28,7 @@ class Sidebar(QWidget):
         super().__init__(parent)
         self.setObjectName("sidebar")
         self.setStyleSheet(SIDEBAR_STYLE)
-        self.setFixedWidth(250)
+        self.setFixedWidth(280)  # Slightly wider for better proportions
         
         # Create main layout
         main_layout = QVBoxLayout(self)
@@ -46,11 +46,24 @@ class Sidebar(QWidget):
         scroll.setWidgetResizable(True)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         
+        # Enhance scroll area
+        scroll.setObjectName("sidebar_scroll")
+        scroll.setStyleSheet("""
+            QScrollArea {
+                border: none;
+                background-color: transparent;
+            }
+            QWidget#sidebar_content {
+                background-color: transparent;
+            }
+        """)
+        
         # Create content widget
         self.content = QWidget()
+        self.content.setObjectName("sidebar_content")
         self.content_layout = QVBoxLayout(self.content)
         self.content_layout.setContentsMargins(0, 0, 0, 0)
-        self.content_layout.setSpacing(0)
+        self.content_layout.setSpacing(2)
         
         scroll.setWidget(self.content)
         main_layout.addWidget(scroll)
