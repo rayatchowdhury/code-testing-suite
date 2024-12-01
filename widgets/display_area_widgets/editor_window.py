@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton
 from .editor import EditorWidget
 from .console import ConsoleOutput
-from styles.style import MATERIAL_COLORS
+from styles.style import MATERIAL_COLORS, SCROLLBAR_STYLE  # Add SCROLLBAR_STYLE import
 
 class EditorWindow(QWidget):
     def __init__(self):
@@ -9,6 +9,9 @@ class EditorWindow(QWidget):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
+
+        # Apply scrollbar style to the entire editor window
+        self.setStyleSheet(SCROLLBAR_STYLE)
 
         # Add editor widget (includes title bar)
         self.editor = EditorWidget()
@@ -65,6 +68,14 @@ class EditorWindow(QWidget):
         # Connect signals
         self.compile_btn.clicked.connect(self.compile_code)
         self.run_btn.clicked.connect(self.run_code)
+
+        # Update console style to include scrollbar
+        self.console.setStyleSheet(SCROLLBAR_STYLE + f"""
+            QWidget {{
+                background-color: {MATERIAL_COLORS['surface']};
+                color: {MATERIAL_COLORS['text_primary']};
+            }}
+        """)
 
     def compile_code(self):
         # TODO: Implement compilation logic

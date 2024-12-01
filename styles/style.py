@@ -34,7 +34,49 @@ MATERIAL_COLORS = {
     'outline': '#3F3F3F'
 }
 
-# Styles
+# Unified scrollbar styling for all components
+SCROLLBAR_STYLE = """
+QScrollBar:vertical, QScrollBar:horizontal {
+    border: none;
+    background: transparent;
+    margin: 0;
+}
+
+QScrollBar:vertical {
+    width: 8px;
+}
+
+QScrollBar:horizontal {
+    height: 8px;
+}
+
+QScrollBar::handle {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    min-height: 40px;
+    min-width: 40px;
+}
+
+QScrollBar::handle:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+QScrollBar::handle:pressed {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+QScrollBar::add-line, QScrollBar::sub-line {
+    height: 0;
+    width: 0;
+    background: none;
+}
+
+QScrollBar::add-page, QScrollBar::sub-page {
+    background: none;
+}
+"""
+
+# Modified SIDEBAR_STYLE to use the unified scrollbar style
 SIDEBAR_STYLE = """
 QWidget#sidebar {
     background-color: """ + COLORS['sidebar'] + """;
@@ -81,11 +123,6 @@ QLabel#sidebar_title {
     font-family: 'Segoe UI', system-ui;
     border: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2),
-                inset 0 0 30px rgba(255, 255, 255, 0.05);
-    clip-path: polygon(0 0, 100% 0, 100% 85%, 95% 100%, 0 100%);
 }
 
 QPushButton#sidebar_button {
@@ -99,59 +136,53 @@ QPushButton#sidebar_button {
     border-radius: 12px;
     margin: 4px 12px;
     font-family: 'Segoe UI', system-ui;
-    backdrop-filter: blur(10px);
 }
 
 QPushButton#sidebar_button:hover {
-    background: linear-gradient(135deg,
-                rgba(0, 150, 199, 0.1),
-                rgba(255, 255, 255, 0.05));
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                stop:0 rgba(0, 150, 199, 0.1),
+                stop:1 rgba(255, 255, 255, 0.05));
     border: 1px solid rgba(255, 255, 255, 0.1);
     padding-left: 28px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 QPushButton#sidebar_button:pressed {
-    background: linear-gradient(135deg,
-                rgba(0, 150, 199, 0.15),
-                rgba(255, 255, 255, 0.07));
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                stop:0 rgba(0, 150, 199, 0.15),
+                stop:1 rgba(255, 255, 255, 0.07));
     border: 1px solid rgba(255, 255, 255, 0.15);
     padding-left: 28px;
 }
 
 QPushButton#back_button {
-    color: """ + COLORS['text_light'] + """;
-    background: linear-gradient(135deg,
-                rgba(0, 150, 199, 0.8),
-                rgba(2, 62, 138, 0.9));
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: """ + COLORS['text_secondary'] + """;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                stop:0 rgba(30, 30, 32, 0.95),
+                stop:1 rgba(40, 40, 42, 0.95));
+    border: 1px solid rgba(255, 255, 255, 0.08);
     text-align: center;
-    padding: 14px 24px;
-    font-size: 14px;
-    font-weight: 600;
+    padding: 12px 20px;
+    font-size: 13px;
+    font-weight: 500;
     margin: 16px;
-    border-radius: 12px;
+    border-radius: 8px;
     font-family: 'Segoe UI', system-ui;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 QPushButton#back_button:hover {
-    background: linear-gradient(135deg,
-                rgba(2, 62, 138, 0.9),
-                rgba(0, 150, 199, 0.8));
-    border: 1px solid """ + COLORS['primary'] + """;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3),
-                inset 0 0 20px rgba(255, 255, 255, 0.1);
+    color: """ + COLORS['text_light'] + """;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                stop:0 rgba(40, 40, 42, 0.98),
+                stop:1 rgba(50, 50, 52, 0.98));
+    border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 QPushButton#back_button:pressed {
-    background: linear-gradient(135deg,
-                rgba(2, 62, 138, 1),
-                rgba(0, 150, 199, 0.9));
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2),
-                inset 0 0 15px rgba(0, 0, 0, 0.2);
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                stop:0 rgba(25, 25, 27, 1),
+                stop:1 rgba(35, 35, 37, 1));
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 12px 20px;
 }
 
 QFrame#sidebar_section {
@@ -170,35 +201,25 @@ QComboBox, QSpinBox, QSlider {
     border-radius: 6px;
     font-family: 'Segoe UI', system-ui;
 }
+""" + SCROLLBAR_STYLE
 
-QScrollBar:vertical {
+# Simplified DISPLAY_AREA_STYLE
+DISPLAY_AREA_STYLE = """
+QWidget#display_area {
+    background-color: """ + COLORS['background'] + """;
     border: none;
-    background-color: """ + COLORS['sidebar'] + """;
-    width: 6px;
-    margin: 0;
-}
-
-QScrollBar::handle:vertical {
-    background-color: rgba(255, 255, 255, 0.2);
-    border-radius: 3px;
-    min-height: 20px;
-}
-
-QScrollBar::handle:vertical:hover {
-    background-color: rgba(255, 255, 255, 0.3);
-}
-
-QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
-    border: none;
-    background: none;
-    height: 0px;
-}
-
-QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
-    background: none;
 }
 """
 
+# Simplified WEBVIEW_STYLE
+WEBVIEW_STYLE = """
+QWebEngineView {
+    background-color: """ + COLORS['background'] + """;
+    border: none;
+}
+""" + SCROLLBAR_STYLE
+
+# Simplified SIDEBAR_BUTTON_STYLE - remove redundant properties
 SIDEBAR_BUTTON_STYLE = """
 QPushButton {
     color: """ + COLORS['text_light'] + """;
@@ -215,12 +236,5 @@ QPushButton:hover {
 
 QPushButton:pressed {
     background-color: rgba(255, 255, 255, 0.2);
-}
-"""
-
-DISPLAY_AREA_STYLE = """
-QWidget#display_area {
-    background-color: """ + COLORS['background'] + """;
-    border: none;
 }
 """

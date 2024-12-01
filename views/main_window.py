@@ -22,6 +22,7 @@ from views.tle_tester.tle_tester_window import TLETesterWindow
 from views.help_center.help_center_window import HelpCenterWindow
 from widgets.display_area_widgets.editor_window import EditorWindow
 from views.base_window import SidebarWindowBase
+from styles.style import WEBVIEW_STYLE  # Add this import
 
 
 class MainWindowContent(SidebarWindowBase):
@@ -42,6 +43,7 @@ class MainWindowContent(SidebarWindowBase):
         # Create display area with web view
         self.display_area = DisplayArea()
         self.web_view = QWebEngineView()
+        self.web_view.setStyleSheet(WEBVIEW_STYLE)  # Add this line
         
         # Load and display markdown
         current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -63,9 +65,30 @@ class MainWindowContent(SidebarWindowBase):
         <head>
             <meta charset="UTF-8">
             <base href="{base_url.toString()}">
-        </head>
-        <body>
             <style>
+                ::-webkit-scrollbar {{
+                    width: 8px;
+                    height: 8px;
+                }}
+                
+                ::-webkit-scrollbar-track {{
+                    background: rgba(0, 0, 0, 0.1);
+                }}
+                
+                ::-webkit-scrollbar-thumb {{
+                    background: rgba(255, 255, 255, 0.08);
+                    border-radius: 4px;
+                }}
+                
+                ::-webkit-scrollbar-thumb:hover {{
+                    background: rgba(255, 255, 255, 0.12);
+                }}
+                
+                ::-webkit-scrollbar-corner {{
+                    background: transparent;
+                }}
+
+                /* Rest of your existing CSS */
                 body {{
                     font-family: 'Segoe UI', sans-serif;
                     max-width: 800px;
@@ -118,6 +141,8 @@ class MainWindowContent(SidebarWindowBase):
                     margin-right: 10px;
                 }}
             </style>
+        </head>
+        <body>
             {html_content}
         </body>
         </html>
