@@ -36,48 +36,31 @@ MATERIAL_COLORS = {
 
 # Unified scrollbar styling for all components
 SCROLLBAR_STYLE = """
-QScrollBar:vertical, QScrollBar:horizontal {
-    border: none;
+QScrollBar:vertical {
     background: transparent;
+    width: 8px;
     margin: 0;
 }
 
-QScrollBar:vertical {
-    width: 8px;
-}
-
-QScrollBar:horizontal {
-    height: 8px;
-}
-
-QScrollBar::handle {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                stop:0 """ + COLORS['primary'] + "44" + """,
-                stop:1 """ + COLORS['primary_dark'] + "44" + """);
+QScrollBar::handle:vertical {
+    background-color: rgba(255, 255, 255, 0.2);
+    min-height: 20px;
     border-radius: 4px;
-    min-height: 40px;
-    min-width: 40px;
 }
 
-QScrollBar::handle:hover {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                stop:0 """ + COLORS['primary'] + "66" + """,
-                stop:1 """ + COLORS['primary_dark'] + "66" + """);
+QScrollBar::handle:vertical:hover {
+    background-color: rgba(255, 255, 255, 0.3);
 }
 
-QScrollBar::handle:pressed {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                stop:0 """ + COLORS['primary'] + "88" + """,
-                stop:1 """ + COLORS['primary_dark'] + "88" + """);
+QScrollBar::handle:vertical:pressed {
+    background-color: rgba(255, 255, 255, 0.4);
 }
 
-QScrollBar::add-line, QScrollBar::sub-line {
-    height: 0;
-    width: 0;
-    background: none;
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0px;
 }
 
-QScrollBar::add-page, QScrollBar::sub-page {
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
     background: none;
 }
 """
@@ -159,7 +142,7 @@ QPushButton#back_button {
     padding: 12px 20px;
     font-size: 13px;
     font-weight: 500;
-    margin: 16px;
+    margin: 8px 16px;    /* Fixed comment syntax */
     border-radius: 8px;
     font-family: 'Segoe UI', system-ui;
 }

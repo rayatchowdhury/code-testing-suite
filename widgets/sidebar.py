@@ -54,14 +54,18 @@ class Sidebar(QWidget):
 
         # Add divider after header
         self.add_divider(main_layout)
+        
+        # Add spacing before scroll area
+        main_layout.addSpacing(10)  # Add this line
 
         # 2. Scrollable Content Section
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
+        scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)  # Ensure this is set
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         scroll.setObjectName("sidebar_scroll")
         scroll.setStyleSheet(SCROLLBAR_STYLE)
+        scroll.setFrameShape(QFrame.NoFrame)  # Add this line
 
         # Create content widget for scroll area
         self.content = QWidget()
@@ -69,7 +73,7 @@ class Sidebar(QWidget):
         self.content_layout = QVBoxLayout(self.content)
         self.content_layout.setContentsMargins(0, 0, 0, 0)
         self.content_layout.setSpacing(0)
-        # Add this line to align content to top
+        # Remove the addSpacing from here
         self.content_layout.setAlignment(Qt.AlignTop)
 
         scroll.setWidget(self.content)
@@ -112,26 +116,25 @@ class Sidebar(QWidget):
         layout.addWidget(line_widget)
 
         # Add spacing below the divider
-        layout.addSpacing(10)
 
         return line_widget
 
     def add_footer_divider(self):
         """Add a divider in the footer with the same style as the main divider"""
-        # Add spacing above the divider
-        self.footer.layout().addSpacing(3)
+        # Add minimal spacing above the divider
+        self.footer.layout().addSpacing(1)  # Reduced from 3
 
         # Create a widget to serve as the divider
         line_widget = QWidget()
-        line_widget.setFixedHeight(1)  # Adjust height for the divider
+        line_widget.setFixedHeight(1)
         # Apply a gradient background for a modern look
         line_widget.setStyleSheet("""
            background: qlineargradient(
             spread: pad,
             x1: 0, y1: 0, x2: 1, y2: 0,
-            stop: 0 rgba(96, 125, 139, 0.6),  /* Steel blue grey */
-         stop: 0.5 rgba(69, 90, 100, 0.8), /* Darker grey blue */
-            stop: 1 rgba(38, 50, 56, 0.6)    /* Deep slate grey */
+            stop: 0 rgba(96, 125, 139, 0.6),
+            stop: 0.5 rgba(69, 90, 100, 0.8),
+            stop: 1 rgba(38, 50, 56, 0.6)
                 );
             border-radius: 1px;
             margin-left: 10px;
@@ -139,8 +142,8 @@ class Sidebar(QWidget):
         """)
         self.footer.layout().addWidget(line_widget)
 
-        # Add spacing below the divider
-        self.footer.layout().addSpacing(3)
+        # Add minimal spacing below the divider
+        self.footer.layout().addSpacing(1)  # Reduced from 3
 
         return line_widget
 
