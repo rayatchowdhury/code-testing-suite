@@ -84,14 +84,6 @@ QScrollBar::add-page, QScrollBar::sub-page {
 
 # Modified SIDEBAR_STYLE to use the unified scrollbar style
 SIDEBAR_STYLE = """
-QFrame#sidebar_divider {
-    min-height: 2px;
-    max-height: 2px;
-    margin: 8px 12px;
-    background-color: #F72585;
-    border: 1px solid #FFFFFF;
-}
-
 QWidget#sidebar {
     background-color: """ + COLORS['sidebar'] + """;
     border: none;
@@ -194,6 +186,11 @@ QFrame#sidebar_section {
     border-bottom: 1px solid """ + COLORS['primary'] + "44" + """;
     margin: 2px 0 4px 0;
     padding-bottom: 4px;
+}
+
+QFrame#sidebar_divider {
+    color: """ + COLORS['accent'] + """;  /* This sets the line color */
+    margin: 4px 16px;
 }
 
 QComboBox, QSpinBox, QSlider {
