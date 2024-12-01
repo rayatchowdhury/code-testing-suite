@@ -19,8 +19,7 @@ class StressTesterWindow(SidebarWindowBase):
         action_section = self.sidebar.add_section("Actions")
         for button_text in ['Compile', 'Run', 'Results']:
             self.sidebar.add_button(button_text, action_section)
-            
-        self.sidebar.add_back_button()
+
 
         # Add footer items
         self.sidebar.add_help_button()

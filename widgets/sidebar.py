@@ -89,16 +89,60 @@ class Sidebar(QWidget):
         main_layout.addWidget(self.footer)
 
     def add_divider(self, layout):
-        """Add a horizontal divider line"""
-        divider = QFrame()
-        divider.setObjectName("sidebar_divider")
-        divider.setFrameShape(QFrame.HLine)
-        divider.setFrameShadow(QFrame.Plain)
-        divider.setLineWidth(1)
-        divider.setMidLineWidth(0)
-        divider.setFixedHeight(6)  # Total height including margins
-        layout.addWidget(divider)
-        return divider
+        """Add a visually appealing horizontal divider line with padding."""
+        # Add spacing above the divider
+        layout.addSpacing(10)
+
+        # Create a widget to serve as the divider
+        line_widget = QWidget()
+        line_widget.setFixedHeight(3)  # Adjust height for the divider
+        # Apply a gradient background for a modern look
+        line_widget.setStyleSheet("""
+            background: qlineargradient(
+                spread: pad,
+                x1: 0, y1: 0, x2: 1, y2: 0,
+                stop: 0 rgba(247, 37, 133, 0.6),
+                stop: 0.5 rgba(144, 12, 63, 0.8),
+                stop: 1 rgba(88, 24, 69, 0.6)
+            );
+            border-radius: 1px;
+            margin-left: 10px;
+            margin-right: 10px;
+        """)
+        layout.addWidget(line_widget)
+
+        # Add spacing below the divider
+        layout.addSpacing(10)
+
+        return line_widget
+
+    def add_footer_divider(self):
+        """Add a divider in the footer with the same style as the main divider"""
+        # Add spacing above the divider
+        self.footer.layout().addSpacing(3)
+
+        # Create a widget to serve as the divider
+        line_widget = QWidget()
+        line_widget.setFixedHeight(1)  # Adjust height for the divider
+        # Apply a gradient background for a modern look
+        line_widget.setStyleSheet("""
+           background: qlineargradient(
+            spread: pad,
+            x1: 0, y1: 0, x2: 1, y2: 0,
+            stop: 0 rgba(96, 125, 139, 0.6),  /* Steel blue grey */
+         stop: 0.5 rgba(69, 90, 100, 0.8), /* Darker grey blue */
+            stop: 1 rgba(38, 50, 56, 0.6)    /* Deep slate grey */
+                );
+            border-radius: 1px;
+            margin-left: 10px;
+            margin-right: 10px;
+        """)
+        self.footer.layout().addWidget(line_widget)
+
+        # Add spacing below the divider
+        self.footer.layout().addSpacing(3)
+
+        return line_widget
 
     def add_section(self, title=None):
         section = SidebarSection(title)
@@ -131,21 +175,10 @@ class Sidebar(QWidget):
         self.footer.layout().addWidget(self.back_button)
         return self.back_button
 
-    def add_footer_divider(self):
-        """Add a divider in the footer"""
-        divider = QFrame()
-        divider.setObjectName("footer_divider")
-        divider.setFrameShape(QFrame.HLine)
-        divider.setFrameShadow(QFrame.Plain)
-        divider.setLineWidth(1)
-        divider.setMidLineWidth(0)
-        divider.setFixedHeight(1)  # Thinner than regular divider
-        self.footer.layout().addWidget(divider)
-        return divider
-
     def add_help_button(self):
         help_btn = QPushButton("Help Center")
         help_btn.setObjectName("back_button")
-        help_btn.clicked.connect(lambda: self.button_clicked.emit("Help Center"))
+        help_btn.clicked.connect(
+            lambda: self.button_clicked.emit("Help Center"))
         self.footer.layout().addWidget(help_btn)
         return help_btn
