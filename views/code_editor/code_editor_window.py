@@ -44,7 +44,7 @@ class CodeEditorWindow(SidebarWindowBase):
             self.run_code()
 
     def new_file(self):
-        if self.editor_window.codeEditor.document().isModified():
+        if self.editor_window.editor.codeEditor.document().isModified():
             reply = QMessageBox.question(self, 'Save Changes?',
                                          'Do you want to save your changes before creating a new file?',
                                          QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
@@ -54,11 +54,11 @@ class CodeEditorWindow(SidebarWindowBase):
             elif reply == QMessageBox.Cancel:
                 return
 
-        self.editor_window.codeEditor.clear()
+        self.editor_window.editor.codeEditor.clear()
         self.current_file = None
 
     def open_file(self):
-        if self.editor_window.codeEditor.document().isModified():
+        if self.editor_window.editor.codeEditor.document().isModified():
             reply = QMessageBox.question(self, 'Save Changes?',
                                          'Do you want to save your changes before opening another file?',
                                          QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
@@ -73,9 +73,9 @@ class CodeEditorWindow(SidebarWindowBase):
         if file_name:
             try:
                 with open(file_name, 'r') as file:
-                    self.editor_window.codeEditor.setPlainText(file.read())
-                    self.editor_window.currentFilePath = file_name
-                    self.editor_window.updateTitleBar()
+                    self.editor_window.editor.codeEditor.setPlainText(file.read())
+                    self.editor_window.editor.currentFilePath = file_name
+                    self.editor_window.editor.updateTitleBar()
             except Exception as e:
                 QMessageBox.critical(
                     self, "Error", f"Could not open file: {str(e)})")
@@ -86,15 +86,15 @@ class CodeEditorWindow(SidebarWindowBase):
                                                        "C++ Files (*.cpp *.h);;All Files (*)")
             if file_name:
                 self.current_file = file_name
-                self.editor_window.currentFilePath = file_name
-                self.editor_window.updateTitleBar()
+                self.editor_window.editor.currentFilePath = file_name
+                self.editor_window.editor.updateTitleBar()
             else:
                 return
 
         try:
             with open(self.current_file, 'w') as file:
-                file.write(self.editor_window.getCode())
-            self.editor_window.codeEditor.document().setModified(False)
+                file.write(self.editor_window.editor.getCode())
+            self.editor_window.editor.codeEditor.document().setModified(False)
         except Exception as e:
             QMessageBox.critical(
                 self, "Error", f"Could not save file: {str(e)}))")

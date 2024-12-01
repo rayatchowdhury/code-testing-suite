@@ -51,18 +51,24 @@ QScrollBar:horizontal {
 }
 
 QScrollBar::handle {
-    background-color: rgba(255, 255, 255, 0.1);
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                stop:0 """ + COLORS['primary'] + "44" + """,
+                stop:1 """ + COLORS['primary_dark'] + "44" + """);
     border-radius: 4px;
     min-height: 40px;
     min-width: 40px;
 }
 
 QScrollBar::handle:hover {
-    background-color: rgba(255, 255, 255, 0.15);
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                stop:0 """ + COLORS['primary'] + "66" + """,
+                stop:1 """ + COLORS['primary_dark'] + "66" + """);
 }
 
 QScrollBar::handle:pressed {
-    background-color: rgba(255, 255, 255, 0.2);
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                stop:0 """ + COLORS['primary'] + "88" + """,
+                stop:1 """ + COLORS['primary_dark'] + "88" + """);
 }
 
 QScrollBar::add-line, QScrollBar::sub-line {
@@ -81,53 +87,42 @@ SIDEBAR_STYLE = """
 QWidget#sidebar {
     background-color: """ + COLORS['sidebar'] + """;
     border: none;
-    border-right: 1px solid """ + COLORS['border'] + """;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 QLabel#section_title {
     color: """ + COLORS['accent'] + "CC" + """;
-    padding: 2px 15px 2px 15px;
-    margin: 0;
+    background: transparent;
+    padding: 2px 15px;
+    margin: 4px 0;
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 2px;
     text-transform: uppercase;
     font-family: 'Segoe UI', system-ui;
-    background: transparent;
-    border: none;
-    position: relative;
-}
-
-QLabel#section_title::after {
-    content: '';
-    position: absolute;
-    left: 20px;
-    bottom: 0;
-    width: 24px;
-    height: 2px;
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                             stop:0 """ + COLORS['accent'] + "CC" + """,
-                             stop:1 transparent);
 }
 
 QLabel#sidebar_title {
     color: """ + COLORS['text_light'] + """;
     background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                             stop:0 """ + COLORS['primary_dark'] + "CC" + """,
-                             stop:0.3 """ + COLORS['accent'] + "99" + """,
-                             stop:0.6 """ + COLORS['primary'] + "BB" + """,
-                             stop:1 """ + COLORS['primary_dark'] + "CC" + """);
-    padding: 25px 16px;
+                             stop:0 """ + COLORS['primary_dark'] + "99" + """,
+                             stop:0.4 """ + COLORS['primary'] + "77" + """,
+                             stop:0.6 """ + COLORS['secondary'] + "33" + """,
+                             stop:1 """ + COLORS['primary_dark'] + "99" + """);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin: 8px 12px;
+    padding: 20px 16px;
     font-size: 21px;
     font-weight: 600;
     font-family: 'Segoe UI', system-ui;
-    border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 QPushButton#sidebar_button {
     color: """ + COLORS['text_light'] + """;
-    background: rgba(255, 255, 255, 0.03);
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                             stop:0 rgba(255, 255, 255, 0.05),
+                             stop:1 rgba(255, 255, 255, 0.02));
     border: 1px solid rgba(255, 255, 255, 0.05);
     text-align: left;
     padding: 14px 24px;
@@ -140,26 +135,26 @@ QPushButton#sidebar_button {
 
 QPushButton#sidebar_button:hover {
     background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                stop:0 rgba(0, 150, 199, 0.1),
-                stop:1 rgba(255, 255, 255, 0.05));
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding-left: 28px;
+                stop:0 """ + COLORS['primary'] + "33" + """,
+                stop:1 rgba(255, 255, 255, 0.07));
+    border: 1px solid """ + COLORS['primary'] + "66" + """;
 }
 
 QPushButton#sidebar_button:pressed {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                stop:0 rgba(0, 150, 199, 0.15),
-                stop:1 rgba(255, 255, 255, 0.07));
-    border: 1px solid rgba(255, 255, 255, 0.15);
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                stop:0 """ + COLORS['primary'] + "22" + """,
+                stop:1 rgba(255, 255, 255, 0.05));
+    border: 1px solid """ + COLORS['primary'] + "44" + """;
     padding-left: 28px;
 }
 
 QPushButton#back_button {
     color: """ + COLORS['text_secondary'] + """;
     background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                stop:0 rgba(30, 30, 32, 0.95),
-                stop:1 rgba(40, 40, 42, 0.95));
-    border: 1px solid rgba(255, 255, 255, 0.08);
+                stop:0 rgba(247, 37, 133, 0.15),
+                stop:0.5 rgba(247, 37, 133, 0.08),
+                stop:1 rgba(247, 37, 133, 0.15));
+    border: 1px solid rgba(247, 37, 133, 0.2);
     text-align: center;
     padding: 12px 20px;
     font-size: 13px;
@@ -172,34 +167,44 @@ QPushButton#back_button {
 QPushButton#back_button:hover {
     color: """ + COLORS['text_light'] + """;
     background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                stop:0 rgba(40, 40, 42, 0.98),
-                stop:1 rgba(50, 50, 52, 0.98));
-    border: 1px solid rgba(255, 255, 255, 0.12);
+                stop:0 rgba(247, 37, 133, 0.25),
+                stop:0.5 rgba(247, 37, 133, 0.15),
+                stop:1 rgba(247, 37, 133, 0.25));
+    border: 1px solid rgba(247, 37, 133, 0.3);
 }
 
 QPushButton#back_button:pressed {
     background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                stop:0 rgba(25, 25, 27, 1),
-                stop:1 rgba(35, 35, 37, 1));
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 12px 20px;
+                stop:0 rgba(247, 37, 133, 0.35),
+                stop:0.5 rgba(247, 37, 133, 0.25),
+                stop:1 rgba(247, 37, 133, 0.35));
+    border: 1px solid rgba(247, 37, 133, 0.4);
 }
 
 QFrame#sidebar_section {
-    background-color: transparent;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: transparent;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     margin: 2px 0 4px 0;
     padding-bottom: 4px;
 }
 
 QComboBox, QSpinBox, QSlider {
     color: """ + COLORS['text_light'] + """;
-    background-color: """ + COLORS['surface'] + """;
-    border: 1px solid """ + COLORS['border'] + """;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                stop:0 rgba(255, 255, 255, 0.05),
+                stop:1 rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(255, 255, 255, 0.1);
     padding: 8px;
     margin: 5px 15px;
     border-radius: 6px;
     font-family: 'Segoe UI', system-ui;
+}
+
+QComboBox:hover, QSpinBox:hover, QSlider:hover {
+    border: 1px solid """ + COLORS['primary'] + "44" + """;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                stop:0 """ + COLORS['primary'] + "22" + """,
+                stop:1 rgba(255, 255, 255, 0.05));
 }
 """ + SCROLLBAR_STYLE
 
