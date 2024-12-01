@@ -9,8 +9,8 @@ class SidebarSection(QFrame):
         super().__init__(parent)
         self.setObjectName("sidebar_section")
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 4, 0, 4)
-        layout.setSpacing(2)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
         
         # Add section title
         if title:
@@ -43,6 +43,7 @@ class Sidebar(QWidget):
         self.header = QWidget()
         header_layout = QVBoxLayout(self.header)
         header_layout.setContentsMargins(0, 0, 0, 0)
+        header_layout.setSpacing(0)
         if title:
             title_label = QLabel(title)
             title_label.setObjectName("sidebar_title")
@@ -65,7 +66,8 @@ class Sidebar(QWidget):
         self.content.setObjectName("sidebar_content")
         self.content_layout = QVBoxLayout(self.content)
         self.content_layout.setContentsMargins(0, 0, 0, 0)
-        self.content_layout.setSpacing(2)
+        self.content_layout.setSpacing(0)
+        self.content_layout.setAlignment(Qt.AlignTop)  # Add this line to align content to top
         
         scroll.setWidget(self.content)
         main_layout.addWidget(scroll)
@@ -74,6 +76,7 @@ class Sidebar(QWidget):
         self.footer = QWidget()
         footer_layout = QVBoxLayout(self.footer)
         footer_layout.setContentsMargins(0, 0, 0, 0)
+        footer_layout.setSpacing(0)
         self.back_button = None
         
         # Add divider before adding footer
@@ -91,6 +94,7 @@ class Sidebar(QWidget):
 
     def add_section(self, title=None):
         section = SidebarSection(title)
+        section.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)  # Add this line
         self.content_layout.addWidget(section)
         return section
     
