@@ -10,7 +10,7 @@
 
 from PySide6.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QSplitter, QPushButton
 from PySide6.QtGui import QFont
-from PySide6.QtCore import Qt, QUrl
+from PySide6.QtCore import Qt, QUrl, Signal
 from PySide6.QtWebEngineWidgets import QWebEngineView
 import markdown2
 import os
@@ -26,6 +26,8 @@ from styles.style import WEBVIEW_STYLE  # Add this import
 
 
 class MainWindowContent(SidebarWindowBase):
+    button_clicked = Signal(str)  # Add this line at class level
+    
     def __init__(self, parent=None):
         super().__init__(parent)
         
@@ -40,7 +42,7 @@ class MainWindowContent(SidebarWindowBase):
         # Add exit button to footer instead of content
         exit_btn = QPushButton("Exit")
         exit_btn.setObjectName("back_button")
-        exit_btn.clicked.connect(lambda: self.button_clicked.emit("Exit"))
+        exit_btn.clicked.connect(self.handle_exit)  # Change this line
         self.sidebar.footer.layout().addWidget(exit_btn)
 
         # Create display area with web view
@@ -159,6 +161,11 @@ class MainWindowContent(SidebarWindowBase):
 
         # Connect signals
         self.sidebar.button_clicked.connect(self.handle_button_click)
+
+    def handle_exit(self):
+        """Handle exit button click"""
+        if self.parent:
+            self.parent.close()
 
     def handle_button_click(self, button_text):
         if button_text == 'Exit':
