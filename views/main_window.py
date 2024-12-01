@@ -21,46 +21,25 @@ from views.stress_tester.stress_tester_window import StressTesterWindow
 from views.tle_tester.tle_tester_window import TLETesterWindow
 from views.help_center.help_center_window import HelpCenterWindow
 from widgets.display_area_widgets.editor_window import EditorWindow
+from views.base_window import SidebarWindowBase
 
 
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Code Testing Suite")
-        self.setMinimumSize(1000, 666)
-
-        # Enable antialiasing for the application
-        self.setAttribute(Qt.WA_SetFont)  # Enable custom font
-        self.setFont(QFont("Segoe UI", 10))
-
-        # Create main widget and layout
-        main_widget = QWidget()
-        self.setCentralWidget(main_widget)
-        layout = QHBoxLayout(main_widget)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-
-        # Create splitter
-        self.splitter = QSplitter()
-        layout.addWidget(self.splitter)
-
-        # Store main layout and widgets as class attributes
-        self.main_widget = main_widget
-        self.main_layout = layout
-
-        # Create sidebar and add buttons
+class MainWindowContent(SidebarWindowBase):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        
+        # Create sidebar
         self.sidebar = Sidebar("Code Testing Suite")
+        
         main_section = self.sidebar.add_section("Navigation")
         for button_text in ['Code Editor', 'Stress Tester', 'TLE Tester', 'Help Center']:
             self.sidebar.add_button(button_text, main_section)
-
-        # Add exit button at bottom
+            
         self.sidebar.add_spacer()
         exit_btn = self.sidebar.add_button("Exit")
-        # Using same style as back button
         exit_btn.setObjectName("back_button")
 
-        # Create display area with markdown content
+        # Create display area with web view
         self.display_area = DisplayArea()
         self.web_view = QWebEngineView()
         
@@ -100,7 +79,7 @@ class MainWindow(QMainWindow):
                     max-width: 100%;
                     height: auto;
                     border-radius: 8px;
-                    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+                    border: 1px solid #333;
                 }}
                 h1, h2, h3, h4 {{
                     color: #58a6ff;
@@ -132,7 +111,7 @@ class MainWindow(QMainWindow):
                     border-radius: 8px;
                     padding: 15px;
                     margin: 15px 0;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                    border: 1px solid #333;
                 }}
                 .emoji {{
                     font-size: 1.5em;
@@ -147,52 +126,49 @@ class MainWindow(QMainWindow):
         self.web_view.setHtml(html_content, baseUrl=base_url)
         self.display_area.layout.addWidget(self.web_view)
 
-        # Add widgets to splitter instead of layout
-        self.splitter.addWidget(self.sidebar)
-        self.splitter.addWidget(self.display_area)
-        
-        # Set initial sizes (25% sidebar, 75% display area)
-        window_width = self.width()
-        self.splitter.setSizes([int(window_width * 0.25), int(window_width * 0.75)])
-        
-        # Style the splitter handle
-        self.splitter.setStyleSheet("""
-            QSplitter::handle {
-                background-color: #333333;
-                width: 2px;
-            }
-            QSplitter::handle:hover {
-                background-color: #0096C7;
-            }
-        """)
+        # Setup splitter
+        self.setup_splitter(self.sidebar, self.display_area)
 
         # Connect signals
-        self.sidebar.button_clicked.connect(self.handle_navigation)
+        self.sidebar.button_clicked.connect(self.handle_button_click)
 
-    def handle_navigation(self, button_text):
+    def handle_button_click(self, button_text):
         if button_text == 'Exit':
-            self.close()
+            self.parent.close()
         elif button_text in ['Code Editor', 'Stress Tester', 'TLE Tester', 'Help Center']:
-            self.splitter.setParent(None)  # Remove splitter instead of individual widgets
+            # Remove current content
+            self.web_view.setParent(None)
+            self.display_area.setParent(None)
+            self.splitter.setParent(None)
+            
+            # Create and show new window
             if button_text == 'Code Editor':
-                code_editor = CodeEditorWindow(self)
-                self.main_layout.addWidget(code_editor)
+                window = CodeEditorWindow(self.parent)
             elif button_text == 'Stress Tester':
-                stress_tester = StressTesterWindow(self)
-                self.main_layout.addWidget(stress_tester)
+                window = StressTesterWindow(self.parent)
             elif button_text == 'TLE Tester':
-                tle_tester = TLETesterWindow(self)
-                self.main_layout.addWidget(tle_tester)
+                window = TLETesterWindow(self.parent)
             elif button_text == 'Help Center':
-                help_center = HelpCenterWindow(self)
-                self.main_layout.addWidget(help_center)
+                window = HelpCenterWindow(self.parent)
+                
+            self.parent.setCentralWidget(window)
 
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Code Testing Suite")
+        self.setMinimumSize(1000, 700)
+        
+        # Enable antialiasing
+        self.setAttribute(Qt.WA_SetFont)
+        self.setFont(QFont("Segoe UI", 10))
+        
+        # Create and set central widget
+        self.central_widget = MainWindowContent(self)
+        self.setCentralWidget(self.central_widget)
+        
     def return_to_main(self):
-        # Remove the current widget
-        while self.main_layout.count():
-            item = self.main_layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
-
-        # Restore the splitter with sidebar and display area
-        self.main_layout.addWidget(self.splitter)
+        # Create and set new main content
+        self.central_widget = MainWindowContent(self)
+        self.setCentralWidget(self.central_widget)

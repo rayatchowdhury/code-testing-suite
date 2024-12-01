@@ -18,17 +18,13 @@
 #
 # the display area will show as per the button clicked
 
-from PySide6.QtWidgets import QWidget, QHBoxLayout
+from views.base_window import SidebarWindowBase
 from widgets.sidebar import Sidebar
 from widgets.display_area import DisplayArea
 
-class TLETesterWindow(QWidget):
+class TLETesterWindow(SidebarWindowBase):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.parent = parent
-        layout = QHBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
 
         # Create sidebar with sections and buttons
         self.sidebar = Sidebar("TLE Tester")
@@ -46,10 +42,11 @@ class TLETesterWindow(QWidget):
             
         self.sidebar.add_back_button()
 
+        # Create display area
         self.display_area = DisplayArea()
 
-        layout.addWidget(self.sidebar)
-        layout.addWidget(self.display_area)
+        # Setup splitter with sidebar and display area
+        self.setup_splitter(self.sidebar, self.display_area)
 
         # Connect signals
         self.sidebar.button_clicked.connect(self.handle_button_click)

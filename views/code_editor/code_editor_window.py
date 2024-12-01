@@ -1,32 +1,30 @@
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QFileDialog, QMessageBox
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QFileDialog, QMessageBox, QSplitter
+from PySide6.QtCore import Qt
 from widgets.sidebar import Sidebar
 from widgets.display_area_widgets.editor_window import EditorWindow
 import subprocess
 import os
+from views.base_window import SidebarWindowBase
 
 
-class CodeEditorWindow(QWidget):
+class CodeEditorWindow(SidebarWindowBase):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.parent = parent
-        layout = QHBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
 
-        # Create sidebar and editor window
+        # Create sidebar
         self.sidebar = Sidebar("Code Editor")
-        self.editor_window = EditorWindow()  # Using EditorWindow instead of EditorWidget
-        self.current_file = None
-
-        # Add buttons to sidebar
+        
         main_section = self.sidebar.add_section("File Operations")
         for button_text in ['New File', 'Open File', 'Save File', 'Run Code']:
             self.sidebar.add_button(button_text, main_section)
         self.sidebar.add_back_button()
 
-        # Add widgets to layout
-        layout.addWidget(self.sidebar)
-        layout.addWidget(self.editor_window)
+        # Create editor window
+        self.editor_window = EditorWindow()
+        self.current_file = None
+
+        # Setup splitter
+        self.setup_splitter(self.sidebar, self.editor_window)
 
         # Connect signals
         self.sidebar.button_clicked.connect(self.handle_button_click)
