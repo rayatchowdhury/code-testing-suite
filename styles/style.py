@@ -188,6 +188,13 @@ QFrame#sidebar_section {
     padding-bottom: 4px;
 }
 
+QFrame#sidebar_divider {
+    background-color: rgba(255, 255, 255, 0.1);
+    min-height: 1px;
+    max-height: 1px;
+    margin: 8px 12px;
+}
+
 QComboBox, QSpinBox, QSlider {
     color: """ + COLORS['text_light'] + """;
     background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
@@ -206,7 +213,20 @@ QComboBox:hover, QSpinBox:hover, QSlider:hover {
                 stop:0 """ + COLORS['primary'] + "22" + """,
                 stop:1 rgba(255, 255, 255, 0.05));
 }
-""" + SCROLLBAR_STYLE
+""" + SCROLLBAR_STYLE + """
+QScrollArea#sidebar_scroll {
+    border: none;
+    background: transparent;
+}
+
+QWidget#sidebar_content {
+    background: transparent;
+}
+
+QWidget#sidebar > QWidget {
+    background: """ + COLORS['sidebar'] + """;
+}
+"""
 
 # Simplified DISPLAY_AREA_STYLE
 DISPLAY_AREA_STYLE = """

@@ -8,7 +8,7 @@
 # - Exit
 # display area will show description of the application
 
-from PySide6.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QSplitter
+from PySide6.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QSplitter, QPushButton
 from PySide6.QtGui import QFont
 from PySide6.QtCore import Qt, QUrl
 from PySide6.QtWebEngineWidgets import QWebEngineView
@@ -32,13 +32,16 @@ class MainWindowContent(SidebarWindowBase):
         # Create sidebar
         self.sidebar = Sidebar("Code Testing Suite")
         
+        # Add navigation buttons to content section
         main_section = self.sidebar.add_section("Navigation")
         for button_text in ['Code Editor', 'Stress Tester', 'TLE Tester', 'Help Center']:
             self.sidebar.add_button(button_text, main_section)
-            
-        self.sidebar.add_spacer()
-        exit_btn = self.sidebar.add_button("Exit")
+        
+        # Add exit button to footer instead of content
+        exit_btn = QPushButton("Exit")
         exit_btn.setObjectName("back_button")
+        exit_btn.clicked.connect(lambda: self.button_clicked.emit("Exit"))
+        self.sidebar.footer.layout().addWidget(exit_btn)
 
         # Create display area with web view
         self.display_area = DisplayArea()

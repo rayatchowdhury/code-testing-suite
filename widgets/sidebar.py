@@ -30,8 +30,8 @@ class Sidebar(QWidget):
         self.setStyleSheet(SIDEBAR_STYLE)
         
         # Set consistent size constraints
-        self.setMinimumWidth(250)  # Increased minimum width
-        self.setMaximumWidth(350)  # Adjusted maximum width
+        self.setMinimumWidth(250)
+        self.setMaximumWidth(350)
         self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
         
         # Create main layout
@@ -39,30 +39,28 @@ class Sidebar(QWidget):
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
         
-        # Add title if provided
+        # 1. Header Section
+        self.header = QWidget()
+        header_layout = QVBoxLayout(self.header)
+        header_layout.setContentsMargins(0, 0, 0, 0)
         if title:
             title_label = QLabel(title)
             title_label.setObjectName("sidebar_title")
-            main_layout.addWidget(title_label)
+            header_layout.addWidget(title_label)
+        main_layout.addWidget(self.header)
         
-        # Create scroll area for content
+        # Add divider after header
+        self.add_divider(main_layout)
+        
+        # 2. Scrollable Content Section
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        
-        # Enhance scroll area
+        scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         scroll.setObjectName("sidebar_scroll")
-        scroll.setStyleSheet(SCROLLBAR_STYLE + """
-            QScrollArea {
-                border: none;
-                background-color: transparent;
-            }
-            QWidget#sidebar_content {
-                background-color: transparent;
-            }
-        """)
+        scroll.setStyleSheet(SCROLLBAR_STYLE)
         
-        # Create content widget
+        # Create content widget for scroll area
         self.content = QWidget()
         self.content.setObjectName("sidebar_content")
         self.content_layout = QVBoxLayout(self.content)
@@ -72,9 +70,25 @@ class Sidebar(QWidget):
         scroll.setWidget(self.content)
         main_layout.addWidget(scroll)
         
-        # Store back button reference
+        # 3. Footer Section (reordered)
+        self.footer = QWidget()
+        footer_layout = QVBoxLayout(self.footer)
+        footer_layout.setContentsMargins(0, 0, 0, 0)
         self.back_button = None
+        
+        # Add divider before adding footer
+        self.add_divider(main_layout)
+        
+        # Now add the footer
+        main_layout.addWidget(self.footer)
     
+    def add_divider(self, layout):
+        """Add a horizontal divider line"""
+        divider = QFrame()
+        divider.setObjectName("sidebar_divider")
+        layout.addWidget(divider)
+        return divider
+
     def add_section(self, title=None):
         section = SidebarSection(title)
         self.content_layout.addWidget(section)
@@ -96,6 +110,8 @@ class Sidebar(QWidget):
         self.content_layout.addItem(spacer)
     
     def add_back_button(self):
-        self.add_spacer()
-        self.back_button = self.add_button("Back")
+        self.back_button = QPushButton("Back")
         self.back_button.setObjectName("back_button")
+        self.back_button.clicked.connect(lambda: self.button_clicked.emit("Back"))
+        self.footer.layout().addWidget(self.back_button)
+        return self.back_button
