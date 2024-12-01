@@ -1,5 +1,6 @@
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QFileDialog, QMessageBox, QSplitter
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QFileDialog, QMessageBox, QSplitter, QPushButton
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont
 from widgets.sidebar import Sidebar
 from widgets.display_area_widgets.editor_window import EditorWindow
 import subprocess
@@ -21,7 +22,19 @@ class CodeEditorWindow(SidebarWindowBase):
         # Add footer items
         self.sidebar.add_help_button()
         self.sidebar.add_footer_divider()
-        self.sidebar.add_back_button()
+        
+        # Create buttons
+        back_btn = QPushButton("Back")
+        back_btn.setObjectName("back_button")
+        back_btn.clicked.connect(lambda: self.handle_button_click("Back"))
+        
+        options_btn = QPushButton("⚙️")
+        options_btn.setObjectName("back_button")
+        options_btn.setFont(QFont('Segoe UI', 14))
+        options_btn.clicked.connect(lambda: self.handle_button_click("Options"))
+        
+        # Setup horizontal footer buttons
+        self.sidebar.setup_horizontal_footer_buttons(back_btn, options_btn)
 
         # Create editor window
         self.editor_window = EditorWindow()

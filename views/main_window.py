@@ -43,11 +43,18 @@ class MainWindowContent(SidebarWindowBase):
         self.sidebar.add_help_button()
         self.sidebar.add_footer_divider()
         
-        # Add exit button to footer
+        # Create buttons
         exit_btn = QPushButton("Exit")
         exit_btn.setObjectName("back_button")
         exit_btn.clicked.connect(self.handle_exit)
-        self.sidebar.footer.layout().addWidget(exit_btn)
+        
+        options_btn = QPushButton("⚙️")
+        options_btn.setObjectName("back_button")
+        options_btn.setFont(QFont('Segoe UI', 14))  # Increase font size for emoji
+        options_btn.clicked.connect(lambda: self.handle_button_click("Options"))
+        
+        # Setup horizontal footer buttons
+        self.sidebar.setup_horizontal_footer_buttons(exit_btn, options_btn)
 
         # Create display area with web view
         self.display_area = DisplayArea()

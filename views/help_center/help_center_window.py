@@ -11,6 +11,8 @@
 from views.base_window import SidebarWindowBase
 from widgets.sidebar import Sidebar
 from widgets.display_area import DisplayArea
+from PySide6.QtWidgets import QPushButton
+from PySide6.QtGui import QFont  # Changed import location and using PySide6
 
 class HelpCenterWindow(SidebarWindowBase):
     def __init__(self, parent=None):
@@ -23,9 +25,21 @@ class HelpCenterWindow(SidebarWindowBase):
         for button_text in ['Introduction', 'Stress Testing', 'TLE Testing', 'FAQ', 'Author Description']:
             self.sidebar.add_button(button_text, main_section)
             
-        # Add back button in footer
+        # Add footer divider
         self.sidebar.add_footer_divider()
-        self.sidebar.add_back_button()
+        
+        # Create buttons
+        back_btn = QPushButton("Back")
+        back_btn.setObjectName("back_button")
+        back_btn.clicked.connect(lambda: self.handle_button_click("Back"))
+        
+        options_btn = QPushButton("⚙️")
+        options_btn.setObjectName("back_button")
+        options_btn.setFont(QFont('Segoe UI', 14))  # Increase font size for emoji
+        options_btn.clicked.connect(lambda: self.handle_button_click("Options"))
+        
+        # Setup horizontal footer buttons
+        self.sidebar.setup_horizontal_footer_buttons(back_btn, options_btn)
 
         # Create display area
         self.display_area = DisplayArea()

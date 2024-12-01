@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QPushButton, QSpacerItem,
                                QSizePolicy, QLabel, QFrame, QScrollArea, QComboBox,
-                               QSpinBox, QSlider)
+                               QSpinBox, QSlider, QHBoxLayout)
 from PySide6.QtCore import Qt, Signal
 from styles.style import SIDEBAR_STYLE, SIDEBAR_BUTTON_STYLE, SCROLLBAR_STYLE, COLORS
 
@@ -143,9 +143,44 @@ class Sidebar(QWidget):
         self.footer.layout().addWidget(line_widget)
 
         # Add minimal spacing below the divider
-        self.footer.layout().addSpacing(1)  # Reduced from 3
+        self.footer.layout().addSpacing(2)  # Reduced from 3
 
         return line_widget
+
+    def add_vertical_footer_divider(self):
+        """Add a vertical divider in the footer"""
+        line_widget = QWidget()
+        line_widget.setFixedWidth(1)
+        line_widget.setMinimumHeight(30)  # Match button height
+        # Apply a gradient background for a modern look
+        line_widget.setStyleSheet("""
+           background: qlineargradient(
+            spread: pad,
+            x1: 0, y1: 0, x2: 0, y2: 1,
+            stop: 0 rgba(96, 125, 139, 0.6),
+            stop: 0.5 rgba(69, 90, 100, 0.8),
+            stop: 1 rgba(38, 50, 56, 0.6)
+           );
+        """)
+        return line_widget
+
+    def setup_horizontal_footer_buttons(self, left_btn, right_btn):
+        """Setup two buttons horizontally in the footer with a divider"""
+        container = QWidget()
+        layout = QHBoxLayout(container)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        
+        # Add left button with 2/3 stretch
+        layout.addWidget(left_btn, stretch=2)
+        
+        # Add vertical divider with no stretch
+        layout.addWidget(self.add_vertical_footer_divider(), stretch=0)
+        
+        # Add right button with 1/3 stretch
+        layout.addWidget(right_btn, stretch=1)
+        
+        self.footer.layout().addWidget(container)
 
     def add_section(self, title=None):
         section = SidebarSection(title)
