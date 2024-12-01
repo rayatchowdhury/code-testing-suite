@@ -9,8 +9,8 @@ class SidebarSection(QFrame):
         super().__init__(parent)
         self.setObjectName("sidebar_section")
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 12, 0, 12)
-        layout.setSpacing(6)
+        layout.setContentsMargins(0, 4, 0, 4)
+        layout.setSpacing(2)
         
         # Add section title
         if title:
