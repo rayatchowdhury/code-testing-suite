@@ -8,8 +8,8 @@ class DisplayArea(QWidget):
         self.setObjectName("display_area")
         self.setStyleSheet(DISPLAY_AREA_STYLE)
         
-        self.layout = QVBoxLayout(self)
-        self.layout.setContentsMargins(20, 20, 20, 20)
+        self.layout = QVBoxLayout(self)  # Store as property, not method
+        self.layout.setContentsMargins(0, 0, 0, 0)
     
     def set_content(self, widget):
         # Clear previous content

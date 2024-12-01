@@ -28,7 +28,9 @@ class Sidebar(QWidget):
         super().__init__(parent)
         self.setObjectName("sidebar")
         self.setStyleSheet(SIDEBAR_STYLE)
-        self.setFixedWidth(280)  # Slightly wider for better proportions
+        # Remove setFixedWidth and set minimum/maximum instead
+        self.setMinimumWidth(200)
+        self.setMaximumWidth(400)
         
         # Create main layout
         main_layout = QVBoxLayout(self)
