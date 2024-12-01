@@ -22,6 +22,11 @@ class StressTesterWindow(SidebarWindowBase):
             
         self.sidebar.add_back_button()
 
+        # Add footer items
+        self.sidebar.add_help_button()
+        self.sidebar.add_footer_divider()
+        self.sidebar.add_back_button()
+
         # Create display area
         self.display_area = DisplayArea()
 

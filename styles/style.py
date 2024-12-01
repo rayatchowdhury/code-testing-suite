@@ -193,6 +193,11 @@ QFrame#sidebar_divider {
     margin: 4px 16px;
 }
 
+QFrame#footer_divider {
+    color: """ + COLORS['border'] + """;  /* Lighter color for footer divider */
+    margin: 4px 16px;
+}
+
 QComboBox, QSpinBox, QSlider {
     color: """ + COLORS['text_light'] + """;
     background: qlineargradient(x1:0, y1:0, x2:1, y2:1,

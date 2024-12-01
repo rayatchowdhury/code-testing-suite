@@ -23,6 +23,8 @@ class HelpCenterWindow(SidebarWindowBase):
         for button_text in ['Introduction', 'Stress Testing', 'TLE Testing', 'FAQ', 'Author Description']:
             self.sidebar.add_button(button_text, main_section)
             
+        # Add back button in footer
+        self.sidebar.add_footer_divider()
         self.sidebar.add_back_button()
 
         # Create display area

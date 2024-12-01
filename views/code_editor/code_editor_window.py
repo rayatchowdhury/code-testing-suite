@@ -17,6 +17,10 @@ class CodeEditorWindow(SidebarWindowBase):
         main_section = self.sidebar.add_section("File Operations")
         for button_text in ['New File', 'Open File', 'Save File', 'Run Code']:
             self.sidebar.add_button(button_text, main_section)
+        
+        # Add footer items
+        self.sidebar.add_help_button()
+        self.sidebar.add_footer_divider()
         self.sidebar.add_back_button()
 
         # Create editor window

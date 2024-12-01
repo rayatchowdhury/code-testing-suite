@@ -130,3 +130,22 @@ class Sidebar(QWidget):
             lambda: self.button_clicked.emit("Back"))
         self.footer.layout().addWidget(self.back_button)
         return self.back_button
+
+    def add_footer_divider(self):
+        """Add a divider in the footer"""
+        divider = QFrame()
+        divider.setObjectName("footer_divider")
+        divider.setFrameShape(QFrame.HLine)
+        divider.setFrameShadow(QFrame.Plain)
+        divider.setLineWidth(1)
+        divider.setMidLineWidth(0)
+        divider.setFixedHeight(1)  # Thinner than regular divider
+        self.footer.layout().addWidget(divider)
+        return divider
+
+    def add_help_button(self):
+        help_btn = QPushButton("Help Center")
+        help_btn.setObjectName("back_button")
+        help_btn.clicked.connect(lambda: self.button_clicked.emit("Help Center"))
+        self.footer.layout().addWidget(help_btn)
+        return help_btn

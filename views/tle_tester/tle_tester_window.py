@@ -21,6 +21,7 @@
 from views.base_window import SidebarWindowBase
 from widgets.sidebar import Sidebar
 from widgets.display_area import DisplayArea
+from views.help_center.help_center_window import HelpCenterWindow  # Fix the import path
 
 class TLETesterWindow(SidebarWindowBase):
     def __init__(self, parent=None):
@@ -40,6 +41,8 @@ class TLETesterWindow(SidebarWindowBase):
         for button_text in ['Compile', 'Run', 'Results']:
             self.sidebar.add_button(button_text, action_section)
             
+        self.sidebar.add_help_button()
+        self.sidebar.add_footer_divider()
         self.sidebar.add_back_button()
 
         # Create display area
@@ -54,5 +57,7 @@ class TLETesterWindow(SidebarWindowBase):
     def handle_button_click(self, button_text):
         if button_text == 'Back':
             self.parent.return_to_main()
+        elif button_text == 'Help Center':
+            self.parent.setCentralWidget(HelpCenterWindow(self.parent))
         # Handle other button clicks here
         pass

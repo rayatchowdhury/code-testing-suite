@@ -36,13 +36,17 @@ class MainWindowContent(SidebarWindowBase):
         
         # Add navigation buttons to content section
         main_section = self.sidebar.add_section("Navigation")
-        for button_text in ['Code Editor', 'Stress Tester', 'TLE Tester', 'Help Center']:
+        for button_text in ['Code Editor', 'Stress Tester', 'TLE Tester']:
             self.sidebar.add_button(button_text, main_section)
         
-        # Add exit button to footer instead of content
+        # Add footer items with Help Center
+        self.sidebar.add_help_button()
+        self.sidebar.add_footer_divider()
+        
+        # Add exit button to footer
         exit_btn = QPushButton("Exit")
         exit_btn.setObjectName("back_button")
-        exit_btn.clicked.connect(self.handle_exit)  # Change this line
+        exit_btn.clicked.connect(self.handle_exit)
         self.sidebar.footer.layout().addWidget(exit_btn)
 
         # Create display area with web view
