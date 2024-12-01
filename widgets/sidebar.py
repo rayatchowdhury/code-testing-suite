@@ -2,7 +2,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QPushButton, QSpacerItem,
                              QSizePolicy, QLabel, QFrame, QScrollArea, QComboBox,
                              QSpinBox, QSlider)
 from PySide6.QtCore import Qt, Signal
-from styles.style import SIDEBAR_STYLE, SIDEBAR_BUTTON_STYLE
+from styles.style import SIDEBAR_STYLE, SIDEBAR_BUTTON_STYLE, SCROLLBAR_STYLE
 
 class SidebarSection(QFrame):
     def __init__(self, title, parent=None):
@@ -52,7 +52,7 @@ class Sidebar(QWidget):
         
         # Enhance scroll area
         scroll.setObjectName("sidebar_scroll")
-        scroll.setStyleSheet("""
+        scroll.setStyleSheet(SCROLLBAR_STYLE + """
             QScrollArea {
                 border: none;
                 background-color: transparent;
