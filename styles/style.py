@@ -87,11 +87,13 @@ QLabel#section_title {
 
 QLabel#sidebar_title {
     color: """ + COLORS['text_light'] + """;
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                             stop:0 """ + COLORS['primary_dark'] + "CC" + """,
-                             stop:0.3 """ + COLORS['primary'] + "99" + """,
-                             stop:0.7 """ + COLORS['secondary'] + "77" + """,
-                             stop:1 """ + COLORS['primary_dark'] + "CC" + """);
+background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1,
+                             stop: 0 """ + COLORS['primary'] + "CC" + """,
+                             stop: 0.4 """ + COLORS['secondary'] + "77" + """,
+                             stop: 0.6 """ + COLORS['surface'] + "55" + """,
+                             stop: 1 """ + COLORS['primary_dark'] + "AA" + """);
+
+
     border: 2px solid """ + COLORS['primary'] + "44" + """;
     border-radius: 12px;
     margin: 8px 12px;
