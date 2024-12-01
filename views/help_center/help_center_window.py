@@ -24,9 +24,6 @@ class HelpCenterWindow(SidebarWindowBase):
         main_section = self.sidebar.add_section("Help Topics")
         for button_text in ['Introduction', 'Stress Testing', 'TLE Testing', 'FAQ', 'Author Description']:
             self.sidebar.add_button(button_text, main_section)
-            
-        # Add footer divider
-        self.sidebar.add_footer_divider()
         
         # Create buttons
         back_btn = QPushButton("Back")
@@ -38,7 +35,7 @@ class HelpCenterWindow(SidebarWindowBase):
         options_btn.setFont(QFont('Segoe UI', 14))  # Increase font size for emoji
         options_btn.clicked.connect(lambda: self.handle_button_click("Options"))
         
-        # Setup horizontal footer buttons
+        # Setup horizontal footer buttons (without horizontal divider)
         self.sidebar.setup_horizontal_footer_buttons(back_btn, options_btn)
 
         # Create display area
