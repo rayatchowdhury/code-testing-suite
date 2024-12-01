@@ -6,9 +6,9 @@ COLORS = {
     'primary_dark': '#023E8A',      # Pantone Classic Blue
     'secondary': '#FFB703',         # Pantone Warm Yellow
     'accent': '#F72585',            # Pantone Pink
-    'background': '#1B1B1E',        # Dark background
+    'background': '#1e1e1e',        # Dark background
     'surface': '#242426',           # Slightly lighter surface
-    'sidebar': '#171717',           # Dark sidebar
+    'sidebar': '#1c1c1c',           # Dark sidebar
     'text_primary': '#FFFFFF',
     'text_secondary': '#B3B3B3',
     'text_light': '#FFFFFF',
@@ -105,12 +105,12 @@ QLabel#section_title {
 QLabel#sidebar_title {
     color: """ + COLORS['text_light'] + """;
     background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                             stop:0 """ + COLORS['primary_dark'] + "99" + """,
-                             stop:0.4 """ + COLORS['primary'] + "77" + """,
-                             stop:0.6 """ + COLORS['secondary'] + "33" + """,
-                             stop:1 """ + COLORS['primary_dark'] + "99" + """);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
+                             stop:0 """ + COLORS['primary_dark'] + "CC" + """,
+                             stop:0.3 """ + COLORS['primary'] + "99" + """,
+                             stop:0.7 """ + COLORS['secondary'] + "77" + """,
+                             stop:1 """ + COLORS['primary_dark'] + "CC" + """);
+    border: 2px solid """ + COLORS['primary'] + "44" + """;
+    border-radius: 12px;
     margin: 8px 12px;
     padding: 20px 16px;
     font-size: 21px;
@@ -189,7 +189,7 @@ QFrame#sidebar_section {
 }
 
 QFrame#sidebar_divider {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: #ffffff;
     min-height: 1px;
     max-height: 1px;
     margin: 8px 12px;
