@@ -8,7 +8,7 @@ COLORS = {
     'accent': '#F72585',            # Pantone Pink
     'background': '#1e1e1e',        # Dark background
     'surface': '#242426',           # Slightly lighter surface
-    'sidebar': '#1c1c1c',           # Dark sidebar
+    'sidebar': '#1e1e1e',           # Dark sidebar
     'text_primary': '#FFFFFF',
     'text_secondary': '#B3B3B3',
     'text_light': '#FFFFFF',
@@ -84,6 +84,14 @@ QScrollBar::add-page, QScrollBar::sub-page {
 
 # Modified SIDEBAR_STYLE to use the unified scrollbar style
 SIDEBAR_STYLE = """
+QFrame#sidebar_divider {
+    min-height: 2px;
+    max-height: 2px;
+    margin: 8px 12px;
+    background-color: #F72585;
+    border: 1px solid #FFFFFF;
+}
+
 QWidget#sidebar {
     background-color: """ + COLORS['sidebar'] + """;
     border: none;
@@ -183,16 +191,9 @@ QPushButton#back_button:pressed {
 
 QFrame#sidebar_section {
     background: transparent;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid """ + COLORS['primary'] + "44" + """;
     margin: 2px 0 4px 0;
     padding-bottom: 4px;
-}
-
-QFrame#sidebar_divider {
-    background-color: #ffffff;
-    min-height: 1px;
-    max-height: 1px;
-    margin: 8px 12px;
 }
 
 QComboBox, QSpinBox, QSlider {
