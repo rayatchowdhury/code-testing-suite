@@ -15,8 +15,9 @@ from PySide6.QtWidgets import QPushButton
 from PySide6.QtGui import QFont  # Changed import location and using PySide6
 
 class HelpCenterWindow(SidebarWindowBase):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, previous_window=None):
         super().__init__(parent)
+        self.previous_window = previous_window
 
         # Create sidebar with sections and buttons
         self.sidebar = Sidebar("Help Center")
@@ -49,7 +50,10 @@ class HelpCenterWindow(SidebarWindowBase):
 
     def handle_button_click(self, button_text):
         if button_text == 'Back':
-            self.parent.return_to_main()
+            if self.previous_window:
+                self.parent.setCentralWidget(self.previous_window.__class__(self.parent))
+            else:
+                self.parent.return_to_main()
         elif button_text == 'Options':
             super().handle_button_click(button_text)
         # Handle other button clicks here
