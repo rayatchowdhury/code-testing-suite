@@ -1,12 +1,12 @@
 {
-    "cpp_version": "c++23",
+    "cpp_version": "c++17",
     "workspace_folder": "C:/Users/Rayat/Desktop/final_project/resources",
-    "gemini_api_key": "skdjhfkjshfkjshfjksh",
+    "gemini_api_key": "dfgsdfgsfgsdfgsdfgsdfgsdfg",
     "editor_settings": {
-        "autosave": false,
-        "autosave_interval": 7,
+        "autosave": true,
+        "autosave_interval": 5,
         "tab_width": 4,
-        "font_size": 13,
-        "bracket_matching": false
+        "font_size": 12,
+        "bracket_matching": true
     }
 }
