@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QSplitter
 from PySide6.QtCore import Qt
-from views.config_view import ConfigView  # Add this import
+from views.config.config_view import ConfigView  # Add this import
 
 class SidebarWindowBase(QWidget):
     def __init__(self, parent=None):

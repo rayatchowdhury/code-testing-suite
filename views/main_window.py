@@ -23,7 +23,7 @@ from views.help_center.help_center_window import HelpCenterWindow
 from widgets.display_area_widgets.editor_window import EditorWindow
 from views.base_window import SidebarWindowBase
 from styles.style import WEBVIEW_STYLE  # Add this import
-from views.config_view import ConfigView  # Add at top with other imports
+from views.config.config_view import ConfigView  # Add at top with other imports
 
 
 class MainWindowContent(SidebarWindowBase):
