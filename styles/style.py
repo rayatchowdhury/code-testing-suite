@@ -90,6 +90,7 @@ QLabel#sidebar_title {
 background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1,
                              stop: 0 """ + COLORS['primary'] + "CC" + """,
                              stop: 0.5 rgba(144, 12, 63, 0.8),
+                             
                              stop: 0.6 """ + COLORS['surface'] + "55" + """,
                              stop: 1 """ + COLORS['primary_dark'] + "AA" + """);
 
