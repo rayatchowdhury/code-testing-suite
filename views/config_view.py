@@ -11,9 +11,8 @@ class ConfigView(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Settings")
-        self.setFixedSize(550, 600)  # Fixed size to prevent layout issues
-        self.setWindowFlags(self.windowFlags() & ~
-                            Qt.WindowContextHelpButtonHint)
+        self.setFixedSize(600, 700)  # Fixed size to prevent layout issues
+        self.setWindowFlags(Qt.Dialog | Qt.WindowCloseButtonHint)
         self.setStyleSheet("""
             QDialog {
                 background-color: #1e1e1e;
@@ -178,82 +177,65 @@ class ConfigView(QDialog):
 
         # Editor Settings - Enhanced
         editor_frame, editor_layout = self.create_section("📝 Editor Settings")
-        
-        # Auto-save group
-        autosave_group = self.create_group("Auto-save Options")
-        autosave_layout = QVBoxLayout()
+        editor_layout.setSpacing(15)  # Increase spacing between settings
+
+        # Auto-save settings
+        autosave_group = QFrame()
+        autosave_layout = QHBoxLayout(autosave_group)
+        autosave_layout.setContentsMargins(0, 0, 0, 0)
         autosave_layout.setSpacing(8)
         
-        # Autosave checkbox with better alignment
-        self.autosave = QCheckBox("Enable Auto-save")
-        self.autosave.setStyleSheet("margin-left: 2px;")
-        
-        # Interval settings in a horizontal layout
-        interval_layout = QHBoxLayout()
-        interval_layout.setSpacing(10)
-        interval_label = QLabel("Save Interval:")
+        self.autosave = QCheckBox("Enable Auto-save in every ")
+
         self.autosave_interval = QSpinBox()
         self.autosave_interval.setRange(1, 10)
-        self.autosave_interval.setSuffix(" min")
-        self.autosave_interval.setFixedWidth(70)
-        interval_layout.addWidget(interval_label)
-        interval_layout.addWidget(self.autosave_interval)
-        interval_layout.addStretch()
+        self.autosave_interval.setSuffix(" mins")
+        self.autosave_interval.setFixedWidth(100)
         
         autosave_layout.addWidget(self.autosave)
-        autosave_layout.addLayout(interval_layout)
-        autosave_group.layout().addLayout(autosave_layout)
+        autosave_layout.addWidget(self.autosave_interval)
+        
+        # Enable/disable interval based on checkbox
+        self.autosave.toggled.connect(self.autosave_interval.setEnabled)
+        self.autosave.setChecked(True)
+        
         editor_layout.addWidget(autosave_group)
+        
+        # Add separator
+        line = QFrame()
+        line.setFrameShape(QFrame.HLine)
+        line.setFrameShadow(QFrame.Sunken)
+        line.setStyleSheet("background-color: #3d3d3d;")
+        editor_layout.addWidget(line)
 
-        # Editor Appearance
-        appearance_group = self.create_group("Editor Appearance")
-        appearance_layout = QVBoxLayout()
-        appearance_layout.setSpacing(10)
+        # Tab Width and Font Size in a grid
+        settings_layout = QHBoxLayout()
+        settings_layout.setSpacing(20)
         
         # Tab Width settings
-        tab_layout = QHBoxLayout()
-        tab_layout.setSpacing(10)
+        tab_layout = QVBoxLayout()
         tab_label = QLabel("Tab Width:")
         self.tab_width = QSpinBox()
         self.tab_width.setRange(2, 8)
         self.tab_width.setFixedWidth(60)
         tab_layout.addWidget(tab_label)
         tab_layout.addWidget(self.tab_width)
-        tab_layout.addStretch()
+        settings_layout.addLayout(tab_layout)
         
         # Font size settings
-        font_layout = QHBoxLayout()
-        font_layout.setSpacing(10)
+        font_layout = QVBoxLayout()
         font_label = QLabel("Font Size:")
-        self.font_size = QSlider(Qt.Horizontal)
+        self.font_size = QSpinBox()
         self.font_size.setRange(8, 24)
-        self.font_size.setPageStep(2)
-        self.font_size_label = QLabel("14px")
-        self.font_size_label.setFixedWidth(40)
+        self.font_size.setSuffix("px")
+        self.font_size.setFixedWidth(70)
         font_layout.addWidget(font_label)
         font_layout.addWidget(self.font_size)
-        font_layout.addWidget(self.font_size_label)
+        settings_layout.addLayout(font_layout)
+        settings_layout.addStretch()
         
-        # Checkboxes with better spacing
-        self.show_line_numbers = QCheckBox("Show Line Numbers")
-        self.show_whitespace = QCheckBox("Show Whitespace Characters")
-        self.word_wrap = QCheckBox("Enable Word Wrap")
-        
-        for checkbox in [self.show_line_numbers, self.show_whitespace, self.word_wrap]:
-            checkbox.setStyleSheet("margin-left: 2px;")
-        
-        # Add all widgets to appearance layout
-        appearance_layout.addLayout(tab_layout)
-        appearance_layout.addLayout(font_layout)
-        appearance_layout.addWidget(self.show_line_numbers)
-        appearance_layout.addWidget(self.show_whitespace)
-        appearance_layout.addWidget(self.word_wrap)
-        
-        appearance_group.layout().addLayout(appearance_layout)
-        editor_layout.addWidget(appearance_group)
-        
-        # Add spacing between groups
-        editor_layout.addSpacing(5)
+        editor_layout.addLayout(settings_layout)
+        editor_layout.addStretch()
 
         layout.addWidget(editor_frame)
         # Buttons
@@ -343,8 +325,7 @@ class ConfigView(QDialog):
         try:
             with open('config.json', 'r') as f:
                 config = json.load(f)
-                self.cpp_version.setCurrentText(
-                    config.get('cpp_version', 'c++17'))
+                self.cpp_version.setCurrentText(config.get('cpp_version', 'c++17'))
                 self.workspace_path.setText(config.get('workspace_folder', ''))
                 self.api_key.setText(config.get('gemini_api_key', ''))
                 editor_settings = config.get('editor_settings', {})
@@ -352,11 +333,7 @@ class ConfigView(QDialog):
                 self.autosave_interval.setValue(editor_settings.get('autosave_interval', 5))
                 self.tab_width.setValue(editor_settings.get('tab_width', 4))
                 self.font_size.setValue(editor_settings.get('font_size', 14))
-                self.show_line_numbers.setChecked(editor_settings.get('show_line_numbers', True))
-                self.show_whitespace.setChecked(editor_settings.get('show_whitespace', False))
-                self.word_wrap.setChecked(editor_settings.get('word_wrap', True))
         except FileNotFoundError:
-            # Use defaults if file doesn't exist
             pass
 
     def save_config(self):
@@ -368,10 +345,7 @@ class ConfigView(QDialog):
                 'autosave': self.autosave.isChecked(),
                 'autosave_interval': self.autosave_interval.value(),
                 'tab_width': self.tab_width.value(),
-                'font_size': self.font_size.value(),
-                'show_line_numbers': self.show_line_numbers.isChecked(),
-                'show_whitespace': self.show_whitespace.isChecked(),
-                'word_wrap': self.word_wrap.isChecked()
+                'font_size': self.font_size.value()
             }
         }
 
