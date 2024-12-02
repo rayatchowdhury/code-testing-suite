@@ -23,6 +23,7 @@ from views.help_center.help_center_window import HelpCenterWindow
 from widgets.display_area_widgets.editor_window import EditorWindow
 from views.base_window import SidebarWindowBase
 from styles.style import WEBVIEW_STYLE  # Add this import
+from views.config_view import ConfigView  # Add at top with other imports
 
 
 class MainWindowContent(SidebarWindowBase):
@@ -181,6 +182,9 @@ class MainWindowContent(SidebarWindowBase):
     def handle_button_click(self, button_text):
         if button_text == 'Exit':
             self.parent.close()
+        elif button_text == 'Options':
+            config_dialog = ConfigView(self)
+            config_dialog.exec()
         elif button_text in ['Code Editor', 'Stress Tester', 'TLE Tester', 'Help Center']:
             # Remove current content
             self.web_view.setParent(None)

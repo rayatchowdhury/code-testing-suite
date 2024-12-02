@@ -51,6 +51,8 @@ class CodeEditorWindow(SidebarWindowBase):
     def handle_button_click(self, button_text):
         if button_text == 'Back':
             self.parent.return_to_main()
+        elif button_text == 'Options':
+            super().handle_button_click(button_text)
         elif button_text == 'New File':
             self.new_file()
         elif button_text == 'Open File':

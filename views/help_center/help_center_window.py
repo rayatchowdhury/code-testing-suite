@@ -50,5 +50,7 @@ class HelpCenterWindow(SidebarWindowBase):
     def handle_button_click(self, button_text):
         if button_text == 'Back':
             self.parent.return_to_main()
+        elif button_text == 'Options':
+            super().handle_button_click(button_text)
         # Handle other button clicks here
         pass

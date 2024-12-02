@@ -73,5 +73,7 @@ class TLETesterWindow(SidebarWindowBase):
             self.parent.return_to_main()
         elif button_text == 'Help Center':
             self.parent.setCentralWidget(HelpCenterWindow(self.parent))
+        elif button_text == 'Options':
+            super().handle_button_click(button_text)
         # Handle other button clicks here
         pass

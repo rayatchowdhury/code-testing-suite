@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QSplitter
 from PySide6.QtCore import Qt
+from views.config_view import ConfigView  # Add this import
 
 class SidebarWindowBase(QWidget):
     def __init__(self, parent=None):
@@ -48,3 +49,6 @@ class SidebarWindowBase(QWidget):
                 self.parent.return_to_main()
             else:
                 print("Warning: Parent window does not implement return_to_main()")
+        elif button_text == 'Options':
+            config_dialog = ConfigView(self)
+            config_dialog.exec()
