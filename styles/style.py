@@ -4,7 +4,7 @@ from PySide6.QtGui import QColor
 COLORS = {
     'primary': '#0096C7',           # Pantone Process Blue
     'primary_dark': '#023E8A',      # Pantone Classic Blue
-    'secondary': '#FFB703',         # Pantone Warm Yellow
+    'secondary': '#ffb600',         # Pantone Warm Yellow
     'accent': '#F72585',            # Pantone Pink
     'background': '#1e1e1e',        # Dark background
     'surface': '#242426',           # Slightly lighter surface
@@ -89,7 +89,7 @@ QLabel#sidebar_title {
     color: """ + COLORS['text_light'] + """;
 background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1,
                              stop: 0 """ + COLORS['primary'] + "CC" + """,
-                             stop: 0.4 """ + COLORS['secondary'] + "77" + """,
+                             stop: 0.5 rgba(144, 12, 63, 0.8),
                              stop: 0.6 """ + COLORS['surface'] + "55" + """,
                              stop: 1 """ + COLORS['primary_dark'] + "AA" + """);
 
@@ -133,7 +133,7 @@ QPushButton#sidebar_button:pressed {
     padding-left: 28px;
 }
 
-QPushButton#back_button {
+QPushButton#back_button { 
     color: """ + COLORS['text_secondary'] + """;
     background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
                 stop:0 rgba(247, 37, 133, 0.15),
@@ -141,10 +141,10 @@ QPushButton#back_button {
                 stop:1 rgba(247, 37, 133, 0.15));
     border: 1px solid rgba(247, 37, 133, 0.2);
     text-align: center;
-    padding: 12px 20px;
-    font-size: 13px;
+    padding: 10px 18px; /* Balanced spacing */
+    font-size: 14px;    /* Slightly larger for better readability */
     font-weight: 500;
-    margin: 8px 16px;    /* Fixed comment syntax */
+    margin: 8px 16px; 
     border-radius: 8px;
     font-family: 'Segoe UI', system-ui;
 }
@@ -164,6 +164,7 @@ QPushButton#back_button:pressed {
                 stop:0.5 rgba(247, 37, 133, 0.25),
                 stop:1 rgba(247, 37, 133, 0.35));
     border: 1px solid rgba(247, 37, 133, 0.4);
+    padding: 11px 17px 9px 19px; /* Simulate pressed state by adjusting padding */
 }
 
 QFrame#sidebar_section {
