@@ -1,16 +1,30 @@
 from PySide6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel,
-                               QComboBox, QLineEdit, QCheckBox, QSpinBox,
-                               QPushButton, QFileDialog, QFrame, QWidget, QSlider)
+                              QComboBox, QLineEdit, QCheckBox, QSpinBox,
+                              QPushButton, QFileDialog, QFrame, QWidget, QSlider,
+                              QMessageBox)  # Add QMessageBox
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QIcon, QFont
 import json
 import os
 
 
+class ConfigError(Exception):
+    """Base exception for configuration errors"""
+    pass
+
+class ConfigLoadError(ConfigError):
+    """Error loading configuration"""
+    pass
+
+class ConfigSaveError(ConfigError):
+    """Error saving configuration"""
+    pass
+
 class ConfigView(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Settings")
+        self.setWindowTitle("Configurations")
+        self.setWindowIcon(QIcon("resources/icons/settings.png"))
         self.setFixedSize(600, 700)  # Fixed size to prevent layout issues
         self.setWindowFlags(Qt.Dialog | Qt.WindowCloseButtonHint)
         self.setStyleSheet("""
@@ -123,6 +137,7 @@ class ConfigView(QDialog):
                 background: #00b4d8;
             }
         """)
+        self.config_file = 'config.json'
         self.setup_ui()
         self.load_config()
 
@@ -132,7 +147,7 @@ class ConfigView(QDialog):
         layout.setContentsMargins(20, 20, 20, 20)
 
         # Title
-        title = QLabel("⚙️ Application Settings")
+        title = QLabel("⚙️ Configurations")
         title.setStyleSheet(
             "font-size: 24px; color: #58a6ff; font-weight: bold; margin-bottom: 10px;")
         layout.addWidget(title)
@@ -184,23 +199,41 @@ class ConfigView(QDialog):
         autosave_layout = QHBoxLayout(autosave_group)
         autosave_layout.setContentsMargins(0, 0, 0, 0)
         autosave_layout.setSpacing(8)
-        
+
         self.autosave = QCheckBox("Enable Auto-save in every ")
+        self.autosave.setStyleSheet("""
+            QCheckBox {
+                color: #e0e0e0;
+                spacing: 8px;
+            }
+            QCheckBox::indicator {
+                width: 18px;
+                height: 18px;
+                border-radius: 3px;
+                border: 1px solid #3d3d3d;
+            }
+            QCheckBox::indicator:unchecked {
+                background-color: #2d2d2d;
+            }
+            QCheckBox::indicator:checked {
+                background-color: #0096C7;
+            }
+        """)
 
         self.autosave_interval = QSpinBox()
         self.autosave_interval.setRange(1, 10)
         self.autosave_interval.setSuffix(" mins")
         self.autosave_interval.setFixedWidth(100)
-        
+
         autosave_layout.addWidget(self.autosave)
         autosave_layout.addWidget(self.autosave_interval)
-        
+
         # Enable/disable interval based on checkbox
         self.autosave.toggled.connect(self.autosave_interval.setEnabled)
         self.autosave.setChecked(True)
-        
+
         editor_layout.addWidget(autosave_group)
-        
+
         # Add separator
         line = QFrame()
         line.setFrameShape(QFrame.HLine)
@@ -209,31 +242,31 @@ class ConfigView(QDialog):
         editor_layout.addWidget(line)
 
         # Tab Width and Font Size in a grid
-        settings_layout = QHBoxLayout()
+        settings_layout = QVBoxLayout()
         settings_layout.setSpacing(20)
-        
+
         # Tab Width settings
-        tab_layout = QVBoxLayout()
+        tab_layout = QHBoxLayout()
         tab_label = QLabel("Tab Width:")
         self.tab_width = QSpinBox()
         self.tab_width.setRange(2, 8)
-        self.tab_width.setFixedWidth(60)
+        self.tab_width.setFixedWidth(100)
         tab_layout.addWidget(tab_label)
         tab_layout.addWidget(self.tab_width)
         settings_layout.addLayout(tab_layout)
-        
+
         # Font size settings
-        font_layout = QVBoxLayout()
+        font_layout = QHBoxLayout()
         font_label = QLabel("Font Size:")
         self.font_size = QSpinBox()
         self.font_size.setRange(8, 24)
         self.font_size.setSuffix("px")
-        self.font_size.setFixedWidth(70)
+        self.font_size.setFixedWidth(100)
         font_layout.addWidget(font_label)
         font_layout.addWidget(self.font_size)
         settings_layout.addLayout(font_layout)
         settings_layout.addStretch()
-        
+
         editor_layout.addLayout(settings_layout)
         editor_layout.addStretch()
 
@@ -295,12 +328,12 @@ class ConfigView(QDialog):
                 padding: 2px;
             }
         """)
-        
+
         # Main layout for the group
         main_layout = QVBoxLayout(group)
         main_layout.setSpacing(8)
         main_layout.setContentsMargins(12, 8, 12, 12)
-        
+
         # Add title
         title_label = QLabel(title)
         title_label.setStyleSheet("""
@@ -312,44 +345,142 @@ class ConfigView(QDialog):
             margin-bottom: 5px;
         """)
         main_layout.addWidget(title_label)
-        
+
         return group
 
     def select_workspace(self):
-        folder = QFileDialog.getExistingDirectory(
-            self, "Select Workspace Folder")
-        if folder:
-            self.workspace_path.setText(folder)
+        """Select workspace with validation"""
+        try:
+            folder = QFileDialog.getExistingDirectory(
+                self, "Select Workspace Folder")
+            if folder:
+                if not os.access(folder, os.W_OK):
+                    raise ConfigError("Selected folder is not writable")
+                self.workspace_path.setText(folder)
+        except ConfigError as e:
+            QMessageBox.critical(self, "Error", str(e))
+        except Exception as e:
+            QMessageBox.critical(self, "Error", 
+                f"Error selecting workspace: {str(e)}")
+
+    def validate_inputs(self):
+        """Validate all input fields"""
+        if not self.workspace_path.text().strip():
+            raise ConfigError("Workspace path cannot be empty")
+        
+        if not os.path.exists(self.workspace_path.text()):
+            raise ConfigError("Selected workspace path does not exist")
+            
+        if not self.api_key.text().strip():
+            raise ConfigError("API key cannot be empty")
+            
+        # Validate API key format (basic check)
+        if len(self.api_key.text()) < 8:
+            raise ConfigError("API key seems invalid (too short)")
 
     def load_config(self):
+        """Load configuration with error handling"""
         try:
-            with open('config.json', 'r') as f:
-                config = json.load(f)
-                self.cpp_version.setCurrentText(config.get('cpp_version', 'c++17'))
-                self.workspace_path.setText(config.get('workspace_folder', ''))
-                self.api_key.setText(config.get('gemini_api_key', ''))
-                editor_settings = config.get('editor_settings', {})
-                self.autosave.setChecked(editor_settings.get('autosave', True))
-                self.autosave_interval.setValue(editor_settings.get('autosave_interval', 5))
-                self.tab_width.setValue(editor_settings.get('tab_width', 4))
-                self.font_size.setValue(editor_settings.get('font_size', 14))
-        except FileNotFoundError:
-            pass
+            if not os.path.exists(self.config_file):
+                # Create default config if doesn't exist
+                self.save_default_config()
+                return
 
-    def save_config(self):
-        config = {
-            'cpp_version': self.cpp_version.currentText(),
-            'workspace_folder': self.workspace_path.text(),
-            'gemini_api_key': self.api_key.text(),
+            with open(self.config_file, 'r') as f:
+                config = json.load(f)
+                
+            # Validate config structure
+            required_keys = ['cpp_version', 'workspace_folder', 'gemini_api_key', 'editor_settings']
+            if not all(key in config for key in required_keys):
+                raise ConfigLoadError("Invalid config file structure")
+
+            # Set values with validation
+            self.cpp_version.setCurrentText(config.get('cpp_version', 'c++17'))
+            
+            workspace = config.get('workspace_folder', '')
+            if workspace and not os.path.exists(workspace):
+                QMessageBox.warning(self, "Warning", 
+                    f"Configured workspace folder does not exist:\n{workspace}")
+            self.workspace_path.setText(workspace)
+            
+            self.api_key.setText(config.get('gemini_api_key', ''))
+            
+            editor_settings = config.get('editor_settings', {})
+            self.autosave.setChecked(editor_settings.get('autosave', True))
+            self.autosave_interval.setValue(
+                min(max(editor_settings.get('autosave_interval', 5), 1), 10))
+            self.tab_width.setValue(
+                min(max(editor_settings.get('tab_width', 4), 2), 8))
+            self.font_size.setValue(
+                min(max(editor_settings.get('font_size', 14), 8), 24))
+
+        except json.JSONDecodeError as e:
+            QMessageBox.critical(self, "Error", 
+                f"Failed to parse config file: {str(e)}")
+            self.save_default_config()
+        except ConfigLoadError as e:
+            QMessageBox.critical(self, "Error", str(e))
+            self.save_default_config()
+        except Exception as e:
+            QMessageBox.critical(self, "Error", 
+                f"Unexpected error loading config: {str(e)}")
+            self.save_default_config()
+
+    def save_default_config(self):
+        """Save default configuration"""
+        default_config = {
+            'cpp_version': 'c++17',
+            'workspace_folder': '',
+            'gemini_api_key': '',
             'editor_settings': {
-                'autosave': self.autosave.isChecked(),
-                'autosave_interval': self.autosave_interval.value(),
-                'tab_width': self.tab_width.value(),
-                'font_size': self.font_size.value()
+                'autosave': True,
+                'autosave_interval': 5,
+                'tab_width': 4,
+                'font_size': 14
             }
         }
+        try:
+            with open(self.config_file, 'w') as f:
+                json.dump(default_config, f, indent=4)
+            self.load_config()  # Reload with defaults
+        except Exception as e:
+            QMessageBox.critical(self, "Error", 
+                f"Failed to save default config: {str(e)}")
 
-        with open('config.json', 'w') as f:
-            json.dump(config, f, indent=4)
+    def save_config(self):
+        """Save configuration with validation"""
+        try:
+            self.validate_inputs()
+            
+            config = {
+                'cpp_version': self.cpp_version.currentText(),
+                'workspace_folder': self.workspace_path.text(),
+                'gemini_api_key': self.api_key.text(),
+                'editor_settings': {
+                    'autosave': self.autosave.isChecked(),
+                    'autosave_interval': self.autosave_interval.value(),
+                    'tab_width': self.tab_width.value(),
+                    'font_size': self.font_size.value()
+                }
+            }
 
-        self.accept()
+            # Create backup of existing config
+            if os.path.exists(self.config_file):
+                backup_file = f"{self.config_file}.bak"
+                try:
+                    os.replace(self.config_file, backup_file)
+                except Exception as e:
+                    QMessageBox.warning(self, "Warning", 
+                        f"Failed to create backup: {str(e)}")
+
+            # Save new config
+            with open(self.config_file, 'w') as f:
+                json.dump(config, f, indent=4)
+
+            self.accept()
+
+        except ConfigError as e:
+            QMessageBox.critical(self, "Validation Error", str(e))
+        except Exception as e:
+            QMessageBox.critical(self, "Error", 
+                f"Failed to save configuration: {str(e)}")
