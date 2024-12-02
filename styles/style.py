@@ -168,6 +168,40 @@ QPushButton#back_button:pressed {
     padding: 11px 17px 9px 19px; /* Simulate pressed state by adjusting padding */
 }
 
+QPushButton#footer_button { 
+    color: """ + COLORS['text_secondary'] + """;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                stop:0 rgba(38, 50, 56, 0.7),
+                stop:0.5 rgba(55, 71, 79, 0.5),
+                stop:1 rgba(69, 90, 100, 0.7));
+    border: 1px solid rgba(96, 125, 139, 0.4);
+    text-align: center;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 500;
+    margin: 8px 16px; 
+    border-radius: 8px;
+    font-family: 'Segoe UI', system-ui;
+}
+
+QPushButton#footer_button:hover {
+    color: """ + COLORS['text_light'] + """;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                stop:0 rgba(55, 71, 79, 0.8),
+                stop:0.5 rgba(69, 90, 100, 0.6),
+                stop:1 rgba(96, 125, 139, 0.8));
+    border: 1px solid rgba(120, 144, 156, 0.5);
+}
+
+QPushButton#footer_button:pressed {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                stop:0 rgba(69, 90, 100, 0.9),
+                stop:0.5 rgba(84, 110, 122, 0.7),
+                stop:1 rgba(120, 144, 156, 0.9));
+    border: 1px solid rgba(144, 164, 174, 0.6);
+    padding: 11px 17px 9px 19px;
+}
+
 QFrame#sidebar_section {
     background: transparent;
     border-bottom: 1px solid """ + COLORS['primary'] + "44" + """;

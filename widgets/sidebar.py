@@ -207,7 +207,7 @@ class Sidebar(QWidget):
 
     def add_back_button(self):
         self.back_button = QPushButton("Back")
-        self.back_button.setObjectName("back_button")
+        self.back_button.setObjectName("footer_button")  # Changed from back_button
         self.back_button.clicked.connect(
             lambda: self.button_clicked.emit("Back"))
         self.footer.layout().addWidget(self.back_button)
@@ -215,7 +215,7 @@ class Sidebar(QWidget):
 
     def add_help_button(self):
         help_btn = QPushButton("Help Center")
-        help_btn.setObjectName("back_button")
+        help_btn.setObjectName("footer_button")  # Changed from back_button
         help_btn.clicked.connect(
             lambda: self.button_clicked.emit("Help Center"))
         self.footer.layout().addWidget(help_btn)
