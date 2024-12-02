@@ -1,11 +1,12 @@
 {
-    "cpp_version": "c++14",
-    "workspace_folder": "C:/Users/Rayat/Desktop/final_project/widgets",
-    "gemini_api_key": "sdfsfsdfsdf",
-    "editor_settings": {
-        "autosave": true,
-        "autosave_interval": 1,
-        "tab_width": 4,
-        "font_size": 14
-    }
+  "cpp_version": "c++14",
+  "workspace_folder": "C:/Users/Rayat/Desktop/final_project/widgets",
+  "gemini_api_key": "sdfsfsdfsdf",
+  "editor_settings": {
+    "autosave": false,
+    "autosave_interval": 6,
+    "tab_width": 4,
+    "font_size": 14,
+    "font_family": "Consolas"
+  }
 }

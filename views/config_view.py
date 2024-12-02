@@ -253,7 +253,6 @@ class ConfigView(QDialog):
         self.tab_width.setFixedWidth(100)
         tab_layout.addWidget(tab_label)
         tab_layout.addWidget(self.tab_width)
-        settings_layout.addLayout(tab_layout)
 
         # Font size settings
         font_layout = QHBoxLayout()
@@ -264,8 +263,18 @@ class ConfigView(QDialog):
         self.font_size.setFixedWidth(100)
         font_layout.addWidget(font_label)
         font_layout.addWidget(self.font_size)
-        settings_layout.addLayout(font_layout)
         settings_layout.addStretch()
+        self.font_family = QComboBox()
+        self.font_family.addItems(
+            ["Consolas", "Courier New", "Monospace", "Arial", "Verdana", "Tahoma", "Times New Roman", "Calibri", "Comic Sans MS"])
+        self.font_family.setFixedWidth(200)
+        font_family_label = QLabel("Font Family:")
+        font_family_layout = QHBoxLayout()
+        font_family_layout.addWidget(font_family_label)
+        font_family_layout.addWidget(self.font_family)
+        font_layout.addLayout(font_family_layout)
+        settings_layout.addLayout(font_layout)
+        settings_layout.addLayout(tab_layout)
 
         editor_layout.addLayout(settings_layout)
         editor_layout.addStretch()
@@ -275,15 +284,19 @@ class ConfigView(QDialog):
         layout.addStretch()
         btn_layout = QHBoxLayout()
         cancel_btn = QPushButton("Cancel")
+        reset_btn = QPushButton("Reset to Defaults")
         save_btn = QPushButton("Save Changes")
         save_btn.setObjectName("save_button")
         cancel_btn.setFixedWidth(100)
+        reset_btn.setFixedWidth(120)
         save_btn.setFixedWidth(120)
         btn_layout.addStretch()
         btn_layout.addWidget(cancel_btn)
+        btn_layout.addWidget(reset_btn)
         btn_layout.addWidget(save_btn)
 
         save_btn.clicked.connect(self.save_config)
+        reset_btn.clicked.connect(self.reset_to_defaults)
         cancel_btn.clicked.connect(self.reject)
         layout.addLayout(btn_layout)
 
@@ -436,7 +449,8 @@ class ConfigView(QDialog):
                 'autosave': True,
                 'autosave_interval': 5,
                 'tab_width': 4,
-                'font_size': 14
+                'font_size': 12,
+                'font_family': 'Consolas'  # New default font family
             }
         }
         try:
@@ -484,3 +498,19 @@ class ConfigView(QDialog):
         except Exception as e:
             QMessageBox.critical(self, "Error", 
                 f"Failed to save configuration: {str(e)}")
+
+    def reset_to_defaults(self):
+        """Reset all settings to defaults with confirmation"""
+        reply = QMessageBox.question(self, 'Confirm Reset',
+                                   'Are you sure you want to reset all settings to defaults?',
+                                   QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        
+        if reply == QMessageBox.Yes:
+            self.cpp_version.setCurrentText('c++17')
+            self.workspace_path.clear()
+            self.api_key.clear()
+            self.autosave.setChecked(True)
+            self.autosave_interval.setValue(5)
+            self.tab_width.setValue(4)
+            self.font_size.setValue(12)
+            self.font_family.setCurrentText('Consolas')
