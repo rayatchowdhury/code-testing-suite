@@ -40,14 +40,15 @@ QWidget#console_title {{
 }}
 
 QLabel#output_title, QLabel#input_title {{
-    background: #2A2A2A;
-    color: #E0E0E0;
-    font-family: 'Segoe UI';
-    font-size: 13px;
+    color: {COLORS['accent']}CC;
+    background: transparent;
+    padding: 2px 15px;
+    margin: 4px 0;
+    font-size: 11px;
     font-weight: 600;
-    padding: 4px 8px;
-    margin: 4px 8px 0 8px;
-    letter-spacing: 0.5px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: 'Segoe UI', system-ui;
 }}
 
 QPlainTextEdit {{
@@ -68,14 +69,14 @@ QPlainTextEdit#console_input {{
     border-color: #1F1F1F;
 }}
 
-QPushButton#compile_run_btn {{ 
+QPushButton#compile_run_btn {{
     color: #D0D0D0;  /* Dimmer white */
     background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
                 stop:0 rgba(46, 125, 50, 0.25),   /* Darker green */
                 stop:0.3 rgba(37, 110, 41, 0.2),  /* Darker green */
                 stop:0.7 rgba(26, 92, 30, 0.23),  /* Darker green */
                 stop:1 rgba(16, 75, 20, 0.25));   /* Darker green */
-    
+
     text-align: center;
     padding: 4px 12px;  /* Reduced padding */
     font-size: 13px;    /* Slightly smaller font */
@@ -113,5 +114,4 @@ QPushButton#compile_run_btn:disabled {{
                 stop:0 rgba(46, 125, 50, 0.08),
                 stop:1 rgba(16, 75, 20, 0.08));
     border: 1.2px solid rgba(46, 125, 50, 0.15);
-}}
-"""
+}}"""

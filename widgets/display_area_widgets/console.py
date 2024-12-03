@@ -42,6 +42,7 @@ class ConsoleOutput(QWidget):
         
         # Output title with center alignment and different styling
         output_title = QLabel("Output")
+        output_title.setObjectName("output_title")  # Add this line
         output_title.setAlignment(Qt.AlignCenter)
         output_title.setFixedHeight(26)  # Reduced from default
         
@@ -54,6 +55,7 @@ class ConsoleOutput(QWidget):
         
         # Input title with center alignment and matching style
         input_title = QLabel("Input")
+        input_title.setObjectName("input_title")  # Add this line
         input_title.setAlignment(Qt.AlignCenter)
         input_title.setFixedHeight(26)  # Reduced from default
         
@@ -93,6 +95,8 @@ class ConsoleOutput(QWidget):
         main_layout.addWidget(self.container)
         
         self.waiting_for_input = False
+        self.command_history = []  # Add this line
+        self.history_index = 0     # Add this line
         self.setup_text_formats()
 
         # Add text buffer and update timer

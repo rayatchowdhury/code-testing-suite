@@ -28,7 +28,7 @@ class CompilerWorker(QObject):
                 return
 
             self.output.emit(("Compilation successful!\n", 'success'))
-            self.output.emit(("Running program...\n", 'info'))
+            self.output.emit(("Running program...\n\n", 'info'))
             
             exe_path = os.path.splitext(filepath)[0] + ('.exe' if os.name == 'nt' else '')
             self.process = QProcess()
