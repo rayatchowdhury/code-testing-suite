@@ -2,7 +2,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QPushButton, QSpacerItem,
                                QSizePolicy, QLabel, QFrame, QScrollArea, QComboBox,
                                QSpinBox, QSlider, QHBoxLayout)
 from PySide6.QtCore import Qt, Signal
-from styles.style import SIDEBAR_STYLE, SIDEBAR_BUTTON_STYLE, SCROLLBAR_STYLE, COLORS
+from styles import SIDEBAR_STYLE, SIDEBAR_BUTTON_STYLE, SCROLLBAR_STYLE
 
 
 class SidebarSection(QFrame):

@@ -85,14 +85,30 @@ class CodeEditorDisplay(QWidget):
         # Add inner panel to outer panel
         outer_layout.addWidget(left_panel)
 
-        # Right panel setup - just use ConsoleOutput
+        # Right panel setup with dark glassmorphism
+        console_container = QWidget()
+        console_container.setStyleSheet("""
+            QWidget {
+                background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
+                    stop:0 rgba(22, 22, 24, 0.98),
+                    stop:0.3 rgba(26, 26, 28, 0.95),
+                    stop:0.7 rgba(22, 22, 24, 0.98),
+                    stop:1 rgba(26, 26, 28, 0.95)
+                );
+                border: none;
+            }
+        """)
+        
+        console_layout = QVBoxLayout(console_container)
+        console_layout.setContentsMargins(0, 0, 0, 0)
         self.console = ConsoleOutput()
-        self.console.setMinimumWidth(250)  # Changed from 300 to 250
-
+        self.console.setMinimumWidth(250)
+        console_layout.addWidget(self.console)
+        
         # Add panels to splitter
         self.splitter.addWidget(outer_panel)
-        self.splitter.addWidget(self.console)
-        
+        self.splitter.addWidget(console_container)
+
         # Configure splitter
         self.splitter.setCollapsible(0, False)  # Left panel (editor) not collapsible
         self.splitter.setCollapsible(1, True)   # Right panel (console) collapsible
