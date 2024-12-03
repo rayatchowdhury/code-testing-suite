@@ -20,7 +20,6 @@ from views.code_editor.code_editor_window import CodeEditorWindow
 from views.stress_tester.stress_tester_window import StressTesterWindow
 from views.tle_tester.tle_tester_window import TLETesterWindow
 from views.help_center.help_center_window import HelpCenterWindow
-from widgets.display_area_widgets.editor_window import EditorWindow
 from views.base_window import SidebarWindowBase
 from styles.style import WEBVIEW_STYLE  # Add this import
 from views.config.config_view import ConfigView  # Add at top with other imports

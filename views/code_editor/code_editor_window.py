@@ -1,12 +1,9 @@
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QFileDialog, QMessageBox, QSplitter, QPushButton
-from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QFileDialog, QMessageBox, QPushButton
 from PySide6.QtGui import QFont
 from widgets.sidebar import Sidebar
-from widgets.display_area_widgets.editor_window import EditorWindow
-import subprocess
-import os
 from views.base_window import SidebarWindowBase
-
+from views.code_editor.code_editor_display_area import CodeEditorDisplay
+import os
 
 class CodeEditorWindow(SidebarWindowBase):
     def __init__(self, parent=None):
@@ -16,7 +13,7 @@ class CodeEditorWindow(SidebarWindowBase):
         self.sidebar = Sidebar("Code Editor")
         
         main_section = self.sidebar.add_section("File Operations")
-        for button_text in ['New File', 'Open File', 'Save File', 'Run Code']:
+        for button_text in ['New File', 'Open File', 'Save File']:  # Removed 'Run Code'
             self.sidebar.add_button(button_text, main_section)
         
         # Add footer items
@@ -36,125 +33,86 @@ class CodeEditorWindow(SidebarWindowBase):
         # Setup horizontal footer buttons
         self.sidebar.setup_horizontal_footer_buttons(back_btn, options_btn)
 
-        # Create editor window
-        self.editor_window = EditorWindow()
-        self.current_file = None
+        # Create editor display
+        self.editor_display = CodeEditorDisplay()
 
         # Setup splitter
-        self.setup_splitter(self.sidebar, self.editor_window)
+        self.setup_splitter(self.sidebar, self.editor_display)
 
         # Connect signals
         self.sidebar.button_clicked.connect(self.handle_button_click)
-        self.editor_window.compile_btn.clicked.connect(self.compile_code)
-        self.editor_window.run_btn.clicked.connect(self.run_code)
+        self.editor_display.saveRequested.connect(self.save_file)
 
     def handle_button_click(self, button_text):
         if button_text == 'Back':
+            if self.editor_display.isCurrentFileModified():
+                self.handle_unsaved_changes()
             self.parent.return_to_main()
+        elif button_text == 'New File':
+            if self.editor_display.isCurrentFileModified():
+                self.handle_unsaved_changes()
+            self.editor_display.add_new_tab()
+        elif button_text == 'Open File':
+            self.open_file()
+        elif button_text == 'Save File':
+            self.save_file()
         elif button_text == 'Help Center':
             from views.help_center.help_center_window import HelpCenterWindow
             self.parent.setCentralWidget(HelpCenterWindow(self.parent, self))
         elif button_text == 'Options':
             super().handle_button_click(button_text)
-        elif button_text == 'New File':
-            self.new_file()
-        elif button_text == 'Open File':
-            self.open_file()
-        elif button_text == 'Save File':
+
+    def handle_unsaved_changes(self):
+        reply = QMessageBox.question(
+            self, 'Save Changes?',
+            'Do you want to save your changes?',
+            QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel
+        )
+
+        if reply == QMessageBox.Save:
             self.save_file()
-        elif button_text == 'Run Code':
-            self.run_code()
+        return reply != QMessageBox.Cancel
 
-    def new_file(self):
-        if self.editor_window.editor.codeEditor.document().isModified():
-            reply = QMessageBox.question(self, 'Save Changes?',
-                                         'Do you want to save your changes before creating a new file?',
-                                         QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
+    def save_file(self):
+        editor = self.editor_display.getCurrentEditor()
+        if not editor:
+            return False
 
-            if reply == QMessageBox.Save:
-                self.save_file()
-            elif reply == QMessageBox.Cancel:
-                return
+        if not editor.currentFilePath:
+            file_name, _ = QFileDialog.getSaveFileName(
+                self, "Save File", "",
+                "C++ Files (*.cpp *.h);;All Files (*)"
+            )
+            if not file_name:
+                return False
+            editor.currentFilePath = file_name
+            editor.updateTitleBar()
 
-        self.editor_window.editor.codeEditor.clear()
-        self.current_file = None
+        try:
+            with open(editor.currentFilePath, 'w') as file:
+                file.write(editor.getCode())
+            editor.codeEditor.document().setModified(False)
+            return True
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Could not save file: {str(e)}")
+            return False
 
     def open_file(self):
-        if self.editor_window.editor.codeEditor.document().isModified():
-            reply = QMessageBox.question(self, 'Save Changes?',
-                                         'Do you want to save your changes before opening another file?',
-                                         QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
-
-            if reply == QMessageBox.Save:
-                self.save_file()
-            elif reply == QMessageBox.Cancel:
+        if self.editor_display.isCurrentFileModified():
+            if not self.handle_unsaved_changes():
                 return
 
-        file_name, _ = QFileDialog.getOpenFileName(self, "Open File", "",
-                                                   "C++ Files (*.cpp *.h);;All Files (*)")
+        file_name, _ = QFileDialog.getOpenFileName(
+            self, "Open File", "",
+            "C++ Files (*.cpp *.h);;All Files (*)"
+        )
+        
         if file_name:
             try:
                 with open(file_name, 'r') as file:
-                    self.editor_window.editor.codeEditor.setPlainText(file.read())
-                    self.editor_window.editor.currentFilePath = file_name
-                    self.editor_window.editor.updateTitleBar()
+                    new_tab = self.editor_display.add_new_tab(os.path.basename(file_name))
+                    new_tab.editor.codeEditor.setPlainText(file.read())
+                    new_tab.editor.currentFilePath = file_name
+                    new_tab.editor.updateTitleBar()
             except Exception as e:
-                QMessageBox.critical(
-                    self, "Error", f"Could not open file: {str(e)})")
-
-    def save_file(self):
-        if not self.current_file:
-            file_name, _ = QFileDialog.getSaveFileName(self, "Save File", "",
-                                                       "C++ Files (*.cpp *.h);;All Files (*)")
-            if file_name:
-                self.current_file = file_name
-                self.editor_window.editor.currentFilePath = file_name
-                self.editor_window.editor.updateTitleBar()
-            else:
-                return
-
-        try:
-            with open(self.current_file, 'w') as file:
-                file.write(self.editor_window.editor.getCode())
-            self.editor_window.editor.codeEditor.document().setModified(False)
-        except Exception as e:
-            QMessageBox.critical(
-                self, "Error", f"Could not save file: {str(e)}))")
-
-    def compile_code(self):
-        if not self.current_file:
-            self.save_file()  # Save file if not saved
-            if not self.current_file:  # If user cancelled save
-                return
-
-        try:
-            compile_process = subprocess.run(['g++', self.current_file, '-o',
-                                           os.path.splitext(self.current_file)[0]],
-                                           capture_output=True, text=True)
-            
-            if compile_process.returncode == 0:
-                self.editor_window.console.displayOutput("Compilation successful!")
-            else:
-                self.editor_window.console.displayOutput(f"Compilation Error:\n{compile_process.stderr}")
-        
-        except Exception as e:
-            self.editor_window.console.displayOutput(f"Error: {str(e)}")
-
-    def run_code(self):
-        if not self.current_file or not os.path.exists(os.path.splitext(self.current_file)[0]):
-            self.compile_code()
-            if not self.current_file:  # If compilation failed or was cancelled
-                return
-
-        try:
-            run_process = subprocess.run([os.path.splitext(self.current_file)[0]],
-                                       capture_output=True, text=True)
-            
-            self.editor_window.console.displayOutput("Program Output:")
-            self.editor_window.console.displayOutput(run_process.stdout)
-            
-            if run_process.returncode != 0:
-                self.editor_window.console.displayOutput(f"Runtime Error:\n{run_process.stderr}")
-        
-        except Exception as e:
-            self.editor_window.console.displayOutput(f"Error: {str(e)}")
+                QMessageBox.critical(self, "Error", f"Could not open file: {str(e)}")

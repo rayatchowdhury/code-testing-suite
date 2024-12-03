@@ -24,6 +24,8 @@ MATERIAL_COLORS = {
     'surface_dim': '#1F1F21',
     'surface_variant': '#2A2A2D',
     'primary': '#0096C7',
+    'primary_container': '#004B63',  # Added - darker shade of primary
+    'on_primary_container': '#FFFFFF',  # Added - text on primary container
     'secondary': '#FFB703',
     'accent': '#F72585',
     'error': '#FF6B6B',
@@ -31,7 +33,8 @@ MATERIAL_COLORS = {
     'text_secondary': '#B3B3B3',
     'button_hover': '#2A2A2D',
     'border': '#333333',
-    'outline': '#3F3F3F'
+    'outline': '#3F3F3F',
+    'on_primary': '#FFFFFF',  # Added - text on primary
 }
 
 # Unified scrollbar styling for all components
