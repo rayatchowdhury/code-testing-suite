@@ -4,6 +4,7 @@ from PySide6.QtGui import QFont
 from views.config.config_view import ConfigView
 from widgets.sidebar import Sidebar  # Add this import
 from widgets.display_area import DisplayArea  # Add this import
+from styles.style import SPLITTER_STYLE  # Add this import
 
 class SidebarWindowBase(QWidget):
     def __init__(self, parent=None, title=None):
@@ -18,6 +19,7 @@ class SidebarWindowBase(QWidget):
         
         # Create splitter
         self.splitter = QSplitter(Qt.Horizontal)
+        self.splitter.setStyleSheet(SPLITTER_STYLE)  # Add this line
         self.layout().addWidget(self.splitter)
         
         # Initialize sidebar and display area if title is provided
@@ -75,8 +77,7 @@ class SidebarWindowBase(QWidget):
     def handle_button_click(self, button_text):
         if button_text == 'Back':
             if self.can_close():
-                self.parent.window_manager.show_window('main')
+                if not self.parent.window_manager.go_back():
+                    self.parent.window_manager.show_window('main')
         elif button_text == 'Options':
             ConfigView(self).exec()
-        elif button_text == 'Help Center':
-            self.parent.window_manager.show_window('help_center')

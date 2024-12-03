@@ -72,7 +72,8 @@ class TLETesterWindow(SidebarWindowBase):
         pass
 
     def handle_button_click(self, button_text):
-        if (button_text == 'Help Center'):
-            self.parent.window_manager.show_window('help_center')
+        if button_text == 'Help Center':
+            if self.can_close():
+                self.parent.window_manager.show_window('help_center')
         else:
             super().handle_button_click(button_text)

@@ -11,6 +11,7 @@ class WindowManager(QStackedWidget):
         super().__init__(parent)
         self.windows = {}
         self.current_window = None
+        self.window_history = []  # Add navigation history
         self.window_classes = {
             'main': MainWindowContent,
             'code_editor': CodeEditorWindow,
@@ -27,18 +28,35 @@ class WindowManager(QStackedWidget):
                 if not window_class:
                     return False
                 
-                window = window_class(self.parent())  # Changed from self.parent() to parent
+                window = window_class(self.parent())
                 self.windows[window_name] = window
                 self.addWidget(window)
             
             window = self.windows[window_name]
-            window.show()  # Add this line
+            window.show()
             self.setCurrentWidget(window)
+            
+            # Simplified history management
+            if self.current_window and self.current_window != window_name:
+                if window_name != 'help_center' or self.current_window != self.window_history[-1]:
+                    self.window_history.append(self.current_window)
+            
             self.current_window = window_name
             return True
             
         except RuntimeError:
             return False
+
+    def go_back(self):
+        if not self.window_history:
+            return False
+            
+        previous_window = self.window_history.pop()
+        self.show_window(previous_window)
+        self.current_window = previous_window
+        # Remove the last entry to prevent duplicates
+        self.window_history = self.window_history[:-1]
+        return True
 
     def get_current_window(self):
         """Get the currently active window"""
@@ -48,6 +66,8 @@ class WindowManager(QStackedWidget):
         """Clean up a window's resources"""
         try:
             if window_name in self.windows:
+                # Also clean up from history
+                self.window_history = [w for w in self.window_history if w != window_name]
                 window = self.windows[window_name]
                 if hasattr(window, 'cleanup'):
                     window.cleanup()
