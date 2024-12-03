@@ -36,9 +36,10 @@ class WindowManager(QStackedWidget):
             window.show()
             self.setCurrentWidget(window)
             
-            # Simplified history management
+            # Only add to history if there's a current window and it's different
             if self.current_window and self.current_window != window_name:
-                if window_name != 'help_center' or self.current_window != self.window_history[-1]:
+                # Add to history unless it would create a duplicate with the last entry
+                if not self.window_history or self.window_history[-1] != self.current_window:
                     self.window_history.append(self.current_window)
             
             self.current_window = window_name
