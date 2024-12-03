@@ -1,39 +1,29 @@
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
-                               QPlainTextEdit, QTextEdit, QLabel, QFileDialog)
+from PySide6.QtWidgets import (QWidget, QVBoxLayout, QPlainTextEdit, 
+                              QTextEdit, QFileDialog)
 from PySide6.QtGui import QFont, QColor, QPainter, QTextFormat, QTextCursor, QKeySequence, QShortcut
 from PySide6.QtCore import Qt, QRect, QSize, QTimer
 from widgets.display_area_widgets.syntaxhighlighter import CPPSyntaxHighlighter
-from styles.style import MATERIAL_COLORS
-from styles.components.editor import EDITOR_WIDGET_STYLE
-
+from styles.constants.editor_colors import EDITOR_COLORS
+from styles.components.editor import get_editor_style, EDITOR_WIDGET_STYLE
 
 class CodeEditor(QPlainTextEdit):
     def __init__(self):
         super().__init__()
+        self._setup_editor()
+        self._setup_line_numbers()
+        self._setup_syntax_highlighting()
+
+    def _setup_editor(self):
         # Default values
-        font_size = 12
-        font_family = 'Consolas'
-        tab_spaces = 4
-        auto_indent = True
-        bracket_matching = True
+        self.setFont(QFont('Consolas', 12))
+        self.tab_spaces = 4
+        self.auto_indent = True
+        self.bracket_matching = True
+        self.setStyleSheet(get_editor_style())
+        
+        self.bracket_pairs = {'{': '}', '[': ']', '(': ')', '"': '"', "'": "'"}
 
-        self.setFont(QFont(font_family, font_size))
-        self.tab_spaces = tab_spaces
-        self.auto_indent = auto_indent
-        self.bracket_matching = bracket_matching
-
-        # Use material colors instead of hardcoded values
-        self.setStyleSheet(f"""
-            QPlainTextEdit {{
-                background-color: {MATERIAL_COLORS['surface']};
-                color: {MATERIAL_COLORS['text_primary']};
-            }}
-        """)
-
-        # Add syntax highlighter
-        self.highlighter = CPPSyntaxHighlighter(self.document())
-
-        # Line number area setup
+    def _setup_line_numbers(self):
         self.lineNumberArea = LineNumberArea(self)
         self.document().blockCountChanged.connect(self.updateLineNumberAreaWidth)
         self.updateRequest.connect(self.updateLineNumberArea)
@@ -41,13 +31,8 @@ class CodeEditor(QPlainTextEdit):
         self.updateLineNumberAreaWidth(0)
         self.highlightCurrentLine()
 
-        self.bracket_pairs = {
-            '{': '}',
-            '[': ']',
-            '(': ')',
-            '"': '"',
-            "'": "'"
-        }
+    def _setup_syntax_highlighting(self):
+        self.highlighter = CPPSyntaxHighlighter(self.document())
 
     def lineNumberAreaWidth(self):
         digits = len(str(max(1, self.blockCount())))
@@ -67,8 +52,7 @@ class CodeEditor(QPlainTextEdit):
         extraSelections = []
         if not self.isReadOnly():
             selection = QTextEdit.ExtraSelection()
-            lineColor = QColor('#2d2d30')
-            selection.format.setBackground(lineColor)
+            selection.format.setBackground(QColor(EDITOR_COLORS['current_line']))
             selection.format.setProperty(QTextFormat.FullWidthSelection, True)
             selection.cursor = self.textCursor()
             selection.cursor.clearSelection()
@@ -86,7 +70,7 @@ class CodeEditor(QPlainTextEdit):
 
     def lineNumberAreaPaintEvent(self, event):
         painter = QPainter(self.lineNumberArea)
-        painter.fillRect(event.rect(), QColor('#1e1e1e'))
+        painter.fillRect(event.rect(), QColor(EDITOR_COLORS['background_darker']))
 
         block = self.firstVisibleBlock()
         blockNumber = block.blockNumber()
@@ -97,7 +81,7 @@ class CodeEditor(QPlainTextEdit):
         while block.isValid() and top <= event.rect().bottom():
             if block.isVisible() and bottom >= event.rect().top():
                 number = str(blockNumber + 1)
-                painter.setPen(QColor('#858585'))
+                painter.setPen(QColor(EDITOR_COLORS['line_number']))
                 painter.drawText(0, top, self.lineNumberArea.width() - 5,
                                  self.fontMetrics().height(), Qt.AlignRight, number)
             block = block.next()

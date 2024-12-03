@@ -139,6 +139,9 @@ class CompilerRunner(QObject):
         
         self.stop_execution()
         if self.console:
-            self.console.clear()
-            self.console.setInputEnabled(True)
+            try:
+                self.console.clear()
+                self.console.setInputEnabled(True)
+            except AttributeError as e:
+                print(f"Warning: Console operation failed - {str(e)}")
         self.worker.compile_and_run(filepath)

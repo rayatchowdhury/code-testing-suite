@@ -1,23 +1,29 @@
 from ..constants.colors import MATERIAL_COLORS
+from ..constants.editor_colors import EDITOR_COLORS
+
+def get_editor_style():
+    return f"""
+        QPlainTextEdit {{
+            background-color: {EDITOR_COLORS['background']};
+            color: {EDITOR_COLORS['text']};
+            selection-background-color: {EDITOR_COLORS['selection']};
+            border: none;
+            font-family: 'Cascadia Code', 'Consolas', monospace;
+            font-size: 14px;
+        }}
+    """
 
 EDITOR_WIDGET_STYLE = f"""
 QWidget#editor_widget {{
-    background: {MATERIAL_COLORS['surface_dim']};
+    background: {EDITOR_COLORS['background_darker']};
     border: none;
 }}
 
-QPlainTextEdit#code_editor {{
-    background: {MATERIAL_COLORS['surface']};
-    color: {MATERIAL_COLORS['text_primary']};
-    border: none;
-    font-family: 'Cascadia Code', 'Consolas', monospace;
-    font-size: 14px;
-    selection-background-color: {MATERIAL_COLORS['primary']}44;
-}}
+{get_editor_style()}
 
 QLineNumber {{
-    background: {MATERIAL_COLORS['surface_dim']};
-    color: {MATERIAL_COLORS['text_secondary']};
+    background: {EDITOR_COLORS['background_darker']};
+    color: {EDITOR_COLORS['line_number']};
     border: none;
     font-family: 'Cascadia Code', 'Consolas', monospace;
     font-size: 14px;

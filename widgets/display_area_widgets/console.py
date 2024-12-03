@@ -199,6 +199,12 @@ class ConsoleOutput(QWidget):
         except RuntimeError:
             return True
 
+    def clear(self):
+        """Clear both output and input areas"""
+        self.output.clear()
+        self.input.clear()
+        self.text_buffer.clear()  # Clear any pending text in buffer
+
     def keyPressEvent(self, event: QKeyEvent):
         if event.key() == Qt.Key_Up and self.command_history:
             self.history_index = max(0, self.history_index - 1)

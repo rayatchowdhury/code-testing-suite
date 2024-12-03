@@ -3,7 +3,7 @@ using namespace std;
 int main()
 {
     cout<<"hello"<<endl;
-    int t=10;
+    int t=100
     while(t--)
     {
         cout<<t<<endl;

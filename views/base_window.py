@@ -62,7 +62,7 @@ class SidebarWindowBase(QWidget):
         """Update splitter sizes to maintain proper proportions"""
         total_width = self.width()
         if total_width > 0:
-            self.splitter.setSizes([int(total_width * 0.2), int(total_width * 0.8)])
+            self.splitter.setSizes([250, 850])
 
     def resizeEvent(self, event):
         """Handle resize events to maintain splitter proportions"""

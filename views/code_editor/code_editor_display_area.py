@@ -67,7 +67,7 @@ class CodeEditorDisplay(QWidget):
 
         # Simplified console setup - no more container wrapper needed
         self.console = ConsoleOutput()
-        self.console.setMinimumWidth(250)
+        self.console.setMinimumWidth(200)
         
         # Add panels to splitter
         self.splitter.addWidget(outer_panel)
@@ -79,7 +79,7 @@ class CodeEditorDisplay(QWidget):
         
         # Set initial sizes using ratio (approximately 73% to 27%)
         total_width = self.width() or 1100  # fallback width if widget not sized yet
-        self.splitter.setSizes([int(total_width * 0.73), int(total_width * 0.27)])
+        self.splitter.setSizes([600, 250])
 
         # Add splitter to main layout
         main_layout.addWidget(self.splitter)
