@@ -2,8 +2,15 @@
 using namespace std;
 int main()
 {
-    int a;
-    cin>>a;
-    cout<<a;
-    
+    cout<<"hello"<<endl;
+    int t;
+    cin>>t;
+    while(t--)
+    {
+        int a;
+        cin>>a;
+        cout<<a*a<<endl;
+    }
+    return 0;
 }
+

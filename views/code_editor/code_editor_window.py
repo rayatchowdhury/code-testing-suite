@@ -47,7 +47,7 @@ class CodeEditorWindow(SidebarWindowBase):
     def cleanup(self):
         """Clean up resources"""
         if hasattr(self.editor_display, 'compiler_runner'):
-            self.editor_display.compiler_runner._cleanup_thread()
+            self.editor_display.compiler_runner.stop_execution()
 
     def can_close(self):
         """Check if window can be closed"""

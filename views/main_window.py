@@ -102,7 +102,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Code Testing Suite")
-        self.setMinimumSize(1000, 700)
+        self.setMinimumSize(1150, 700)  # Increased from 1000 to 1150
         
         # Create window manager and set as central widget
         from utils.window_manager import WindowManager

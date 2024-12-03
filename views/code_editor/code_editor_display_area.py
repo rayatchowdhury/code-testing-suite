@@ -88,7 +88,7 @@ class CodeEditorDisplay(QWidget):
         button_layout.setContentsMargins(0, 0, 0, 0)
 
         # Create single compile & run button
-        self.compile_run_btn = QPushButton("Compile & Run")
+        self.compile_run_btn = QPushButton("Compile && Run")  # Note: && for proper & display
         self.compile_run_btn.setFlat(True)
         self.compile_run_btn.setFixedHeight(40)
         self.compile_run_btn.setStyleSheet(f"""
@@ -117,7 +117,7 @@ class CodeEditorDisplay(QWidget):
         self.splitter.addWidget(right_panel)
         
         # Set initial sizes (3:1 ratio)
-        self.splitter.setSizes([900, 300])
+        self.splitter.setSizes([8, 3])
         self.splitter.setStyleSheet(MATERIAL_COLORS['splitter_style'])
 
         # Add splitter to main layout
