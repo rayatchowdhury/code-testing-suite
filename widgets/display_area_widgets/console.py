@@ -1,5 +1,5 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QTextEdit, QLineEdit, QScrollBar, QLabel, QPushButton
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QPlainTextEdit, QLineEdit, QScrollBar, QLabel, QPushButton
+from PySide6.QtCore import Qt, Signal, QTimer
 from PySide6.QtGui import QKeyEvent, QTextCharFormat, QColor, QTextCursor
 from styles.style import MATERIAL_COLORS
 
@@ -47,11 +47,13 @@ class ConsoleOutput(QWidget):
         """)
         self.layout.addWidget(output_title)
         
-        # Output area with styling
-        self.output = QTextEdit()
+        # Output area with styling and buffer management
+        self.output = QPlainTextEdit()
         self.output.setReadOnly(True)
+        self.output.setMaximumBlockCount(1000)  # Limit the number of blocks
+        self.output.document().setMaximumBlockCount(1000)  # Ensure both are set
         self.output.setStyleSheet(f"""
-            QTextEdit {{
+            QPlainTextEdit {{
                 background-color: {MATERIAL_COLORS['surface_dim']};
                 color: {MATERIAL_COLORS['text_primary']};
                 border: 1px solid {MATERIAL_COLORS['outline']};
@@ -81,10 +83,11 @@ class ConsoleOutput(QWidget):
         self.layout.addWidget(input_title)
         
         # Input area with styling
-        self.input = QTextEdit()  # Changed to QTextEdit for multiline input
+        self.input = QPlainTextEdit()  # Changed to QPlainTextEdit for multiline input
         self.input.setFixedHeight(150)  # Set height for approximately 8 lines
+        self.input.setMaximumBlockCount(100)  # Limit input history
         self.input.setStyleSheet(f"""
-            QTextEdit {{
+            QPlainTextEdit {{
                 background-color: {MATERIAL_COLORS['surface']};
                 color: {MATERIAL_COLORS['text_primary']};
                 border: 1px solid {MATERIAL_COLORS['outline']};
@@ -94,7 +97,7 @@ class ConsoleOutput(QWidget):
                 font-size: 12px;
                 margin: 8px;
             }}
-            QTextEdit[readOnly="false"]::placeholder {{
+            QPlainTextEdit[readOnly="false"]::placeholder {{
                 color: {MATERIAL_COLORS['text_secondary']};
             }}
         """)
@@ -156,6 +159,13 @@ class ConsoleOutput(QWidget):
         self.waiting_for_input = False
         self.setup_text_formats()
 
+        # Add text buffer and update timer
+        self.text_buffer = []
+        self.buffer_timer = QTimer()
+        self.buffer_timer.timeout.connect(self.flush_buffer)
+        self.buffer_timer.setInterval(10)  # Update every 100ms
+        self.buffer_timer.start()
+
     def setup_text_formats(self):
         """Setup different text formats for console output"""
         self.formats = {
@@ -174,25 +184,47 @@ class ConsoleOutput(QWidget):
         return fmt
 
     def append_formatted(self, text, format_type='default'):
-        """Append text with specified format"""
+        """Buffer text for batch processing"""
+        self.text_buffer.append((text, format_type))
+        if not self.buffer_timer.isActive():
+            self.buffer_timer.start()
+
+    def flush_buffer(self):
+        """Process buffered text in batches"""
+        if not self.text_buffer:
+            self.buffer_timer.stop()
+            return
+
+        # Process up to 10 items at a time
+        batch = self.text_buffer[:10]
+        self.text_buffer = self.text_buffer[10:]
+
         cursor = self.output.textCursor()
-        cursor.movePosition(QTextCursor.End)
-        cursor.insertText(text, self.formats[format_type])
+        cursor.movePosition(QTextCursor.End)  # Fixed: Use QTextCursor.End instead of cursor.End
+        
+        # Batch insert texts
+        for text, format_type in batch:
+            cursor.insertText(text, self.formats[format_type])
+
         self.output.setTextCursor(cursor)
-        # Scroll to bottom
+        self.output.ensureCursorVisible()
+
+        # Only scroll if we're near the bottom
         scrollbar = self.output.verticalScrollBar()
-        scrollbar.setValue(scrollbar.maximum())
+        if scrollbar.value() >= scrollbar.maximum() - 10:
+            scrollbar.setValue(scrollbar.maximum())
 
     def displayOutput(self, text, format_type='default'):
-        """Display output with formatting"""
+        """Buffer output for display"""
         if not text:
             return
         self.append_formatted(text.rstrip() + '\n', format_type)
 
     def _handle_text_change(self):
-        """Handle text changes in input area"""
-        if '\n' in self.input.toPlainText():
-            text = self.input.toPlainText().strip()
+        """Handle text changes in input area with improved performance"""
+        text = self.input.toPlainText()
+        if '\n' in text:
+            text = text.strip()
             if text:
                 lines = text.split('\n')
                 formatted_text = '\n'.join(f"> {line}" for line in lines if line.strip())
@@ -203,6 +235,8 @@ class ConsoleOutput(QWidget):
                     self.append_formatted(formatted_text + '\n', 'input')
                     self.inputSubmitted.emit(text)
                 else:
+                    if len(self.command_history) > 100:  # Limit command history
+                        self.command_history.pop(0)
                     self.command_history.append(text)
                     self.history_index = len(self.command_history)
                     self.append_formatted(formatted_text + '\n', 'input')
@@ -247,4 +281,25 @@ class ConsoleOutput(QWidget):
             super().keyPressEvent(event)
 
     def clear(self):
+        """Clear both buffer and output"""
+        self.text_buffer.clear()
         self.output.clear()
+        self.output.setMaximumBlockCount(1000)  # Reset block count limit
+
+    def cleanup(self):
+        """Clean up resources safely"""
+        try:
+            if hasattr(self, 'buffer_timer') and self.buffer_timer is not None:
+                if not self.buffer_timer.isDestroyed():
+                    self.buffer_timer.stop()
+            if hasattr(self, 'text_buffer'):
+                self.text_buffer.clear()
+        except (RuntimeError, AttributeError):
+            pass  # Handle case where Qt objects are already deleted
+
+    def __del__(self):
+        """Safe cleanup on deletion"""
+        try:
+            self.cleanup()
+        except:
+            pass  # Suppress all exceptions during deletion
