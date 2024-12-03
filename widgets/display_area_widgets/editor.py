@@ -174,62 +174,24 @@ class LineNumberArea(QWidget):
 class EditorWidget(QWidget):
     def __init__(self):
         super().__init__()
+        self._setup_ui()
+        self._setup_file_handling()
+        self.loadDefaultFile()
+
+    def _setup_ui(self):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
-
-        # Add title bar with improved styling
-        self.titleBar = QWidget()
-        titleLayout = QHBoxLayout(self.titleBar)
-        titleLayout.setContentsMargins(10, 5, 10, 5)
-        
-        # Add spacer for center alignment
-        titleLayout.addStretch()
-        
-        self.fileNameLabel = QLabel("Untitled")
-        self.fileNameLabel.setObjectName("editor_title")
-        titleLayout.addWidget(self.fileNameLabel)
-        
-        # Add spacer for center alignment
-        titleLayout.addStretch()
-
-        # Enhanced title bar styling
-        self.titleBar.setStyleSheet(f"""
-            QWidget {{
-                background-color: {MATERIAL_COLORS['surface_variant']};
-                border-bottom: 1px solid {MATERIAL_COLORS['outline']};
-            }}
-            QLabel#editor_title {{
-                color: {MATERIAL_COLORS['text_primary']};
-                font-family: 'Segoe UI', system-ui;
-                font-size: 13px;
-                font-weight: 500;
-                padding: 5px 15px;
-                background-color: {MATERIAL_COLORS['surface_dim']};
-                border-radius: 4px;
-            }}
-        """)
-
-        self.titleBar.setFixedHeight(36)  # Fixed height for consistency
-        layout.addWidget(self.titleBar)
-
-        # Create CodeEditor instance
         self.codeEditor = CodeEditor()
         layout.addWidget(self.codeEditor)
 
-        # File handling setup
+    def _setup_file_handling(self):
         self.currentFilePath = None
         self.autoSaveTimer = QTimer()
-        self.autoSaveTimer.setInterval(5000)  # 5 seconds
+        self.autoSaveTimer.setInterval(5000)
         self.autoSaveTimer.timeout.connect(self.saveFile)
-
-        # Connect text changed signal
         self.codeEditor.textChanged.connect(self.onTextChanged)
-
-        # Setup shortcuts
         self.setupShortcuts()
-
-        self.loadDefaultFile()
 
     def setupShortcuts(self):
         saveShortcut = QShortcut(QKeySequence.Save, self)
@@ -244,21 +206,8 @@ class EditorWidget(QWidget):
             with open(self.currentFilePath, 'r') as file:
                 code = file.read()
                 self.codeEditor.setPlainText(code)
-                self.updateTitleBar()
         except FileNotFoundError:
             self.currentFilePath = None
-            self.updateTitleBar()
-
-    def updateTitleBar(self):
-        if self.currentFilePath:
-            import os
-            filename = os.path.basename(self.currentFilePath)
-            # Add modification indicator
-            if self.codeEditor.document().isModified():
-                filename += " *"
-            self.fileNameLabel.setText(filename)
-        else:
-            self.fileNameLabel.setText("Untitled")
 
     def scheduleSave(self):
         self.autoSaveTimer.start()
@@ -270,6 +219,7 @@ class EditorWidget(QWidget):
         try:
             with open(self.currentFilePath, 'w') as file:
                 file.write(self.getCode())
+            self.codeEditor.document().setModified(False)  # Reset modified state
             return True
         except Exception as e:
             print(f"Error saving file: {e}")
@@ -285,8 +235,11 @@ class EditorWidget(QWidget):
 
         if filePath:
             self.currentFilePath = filePath
-            self.updateTitleBar()
-            return self.saveFile()
+            success = self.saveFile()
+            if success:
+                # Reset modified state after successful save
+                self.codeEditor.document().setModified(False)
+            return success
         return False
 
     def onTextChanged(self):

@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QFileDialog, QMessageBox, QPushButton
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, QCloseEvent
 from widgets.sidebar import Sidebar
 from views.base_window import SidebarWindowBase
 from views.code_editor.code_editor_display_area import CodeEditorDisplay
@@ -53,16 +53,26 @@ class CodeEditorWindow(SidebarWindowBase):
         """Check if window can be closed"""
         return not self.editor_display.isCurrentFileModified()
 
+    def closeEvent(self, event: QCloseEvent):
+        """Handle window close event"""
+        if self.can_close():
+            self.cleanup()
+            event.accept()
+            self.parent.window_manager.show_window('main')
+        else:
+            result = self.handle_unsaved_changes()
+            if result != QMessageBox.Cancel:
+                self.cleanup()
+                event.accept()
+                self.parent.window_manager.show_window('main')
+            else:
+                event.ignore()
+
     def handle_button_click(self, button_text):
         if button_text == 'Help Center':
             self.parent.window_manager.show_window('help_center')
         elif button_text == 'Back':
-            if self.can_close():
-                self.parent.window_manager.show_window('main')
-            else:
-                result = self.handle_unsaved_changes()
-                if result != QMessageBox.Cancel:
-                    self.parent.window_manager.show_window('main')
+            self.close()  # This will trigger closeEvent
         elif button_text == 'New File':
             if self.editor_display.isCurrentFileModified():
                 self.handle_unsaved_changes()
@@ -125,6 +135,8 @@ class CodeEditorWindow(SidebarWindowBase):
                     new_tab = self.editor_display.add_new_tab(os.path.basename(file_name))
                     new_tab.editor.codeEditor.setPlainText(file.read())
                     new_tab.editor.currentFilePath = file_name
-                    new_tab.editor.updateTitleBar()
+                    # Force update tab title immediately after setting the file
+                    self.editor_display.updateTabTitle(self.editor_display.tab_widget.currentIndex())
+                    new_tab.editor.codeEditor.document().setModified(False)
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Could not open file: {str(e)}")

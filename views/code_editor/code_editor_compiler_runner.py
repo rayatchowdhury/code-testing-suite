@@ -7,44 +7,51 @@ class CompilerWorker(QObject):
     output = Signal(str)
     error = Signal(str)
 
-    def compile(self, filepath):
+    def compile_and_run(self, filepath):
         try:
+            # First compile
+            self.output.emit("Compiling...")
             compile_process = subprocess.run(
                 ['g++', filepath, '-o', os.path.splitext(filepath)[0]],
                 capture_output=True, text=True
             )
             
-            if compile_process.returncode == 0:
-                self.output.emit("Compilation successful!")
-                return True
-            else:
+            if compile_process.returncode != 0:
                 self.error.emit(f"Compilation Error:\n{compile_process.stderr}")
-                return False
-        except Exception as e:
-            self.error.emit(f"Error: {str(e)}")
-            return False
-
-    def run(self, filepath):
-        exe_path = os.path.splitext(filepath)[0]
-        try:
+                self.finished.emit()
+                return
+                
+            self.output.emit("Compilation successful!")
+            
+            # Then run
+            self.output.emit("\nRunning program...")
+            exe_path = os.path.splitext(filepath)[0]
             run_process = subprocess.run(
                 [exe_path],
                 capture_output=True, 
                 text=True
             )
             
-            self.output.emit("Program Output:")
-            self.output.emit(run_process.stdout)
+            if run_process.stdout:
+                self.output.emit("\nProgram Output:")
+                self.output.emit(run_process.stdout)
             
             if run_process.returncode != 0:
-                self.error.emit(f"Runtime Error:\n{run_process.stderr}")
+                self.error.emit(f"\nRuntime Error:\n{run_process.stderr}")
+            elif not run_process.stdout:
+                self.output.emit("\nProgram completed with no output.")
+                
+        except FileNotFoundError:
+            self.error.emit("Error: G++ compiler not found. Please install a C++ compiler.")
+        except PermissionError:
+            self.error.emit("Error: Permission denied. Cannot create or run executable.")
         except Exception as e:
             self.error.emit(f"Error: {str(e)}")
         finally:
             self.finished.emit()
 
 class CompilerRunner(QObject):
-    finished = Signal()  # Add this signal
+    finished = Signal()
 
     def __init__(self, console_output):
         super().__init__()
@@ -59,9 +66,12 @@ class CompilerRunner(QObject):
             self.thread = None
         self.worker = None
 
-    def _setup_thread(self):
+    def compile_and_run_code(self, filepath):
+        if not filepath:
+            self.console.displayOutput("Error: No file to compile")
+            return
+
         self._cleanup_thread()
-            
         self.worker = CompilerWorker()
         self.thread = QThread()
         
@@ -69,30 +79,10 @@ class CompilerRunner(QObject):
         self.worker.output.connect(self.console.displayOutput)
         self.worker.error.connect(self.console.displayOutput)
         self.worker.finished.connect(self.thread.quit)
-        self.worker.finished.connect(self.finished)  # Forward the finished signal
+        self.worker.finished.connect(self.finished)
         self.thread.finished.connect(self._cleanup_thread)
         
-        return True
-
-    def compile_code(self, filepath):
-        if not filepath:
-            self.console.displayOutput("Error: No file to compile")
-            return False
-
-        self._setup_thread()
-        self.thread.started.connect(lambda: self.worker.compile(filepath))
+        self.thread.started.connect(lambda: self.worker.compile_and_run(filepath))
         self.thread.start()
 
-    def run_code(self, filepath):
-        if not filepath:
-            self.console.displayOutput("Error: No file to run")
-            return
-
-        exe_path = os.path.splitext(filepath)[0]
-        if not os.path.exists(exe_path):
-            self.console.displayOutput("Error: Executable not found. Compile first.")
-            return
-
-        self._setup_thread()
-        self.thread.started.connect(lambda: self.worker.run(filepath))
-        self.thread.start()
+# Remove compile_code and run_code methods as they're no longer needed

@@ -24,6 +24,7 @@ MATERIAL_COLORS = {
     'surface_dim': '#1F1F21',
     'surface_variant': '#2A2A2D',
     'primary': '#0096C7',
+    'primary_dark': '#023E8A',  # Added - darker shade for pressed states
     'primary_container': '#004B63',  # Added - darker shade of primary
     'on_primary_container': '#FFFFFF',  # Added - text on primary container
     'secondary': '#FFB703',
@@ -35,6 +36,28 @@ MATERIAL_COLORS = {
     'border': '#333333',
     'outline': '#3F3F3F',
     'on_primary': '#FFFFFF',  # Added - text on primary
+    'outline_variant': '#2C2C2C',  # Added - slightly darker variant of outline
+    'surface_bright': '#2F2F33',   # Added - slightly lighter surface for hover states
+    'error_container': '#420101',  # Added - dark red for error states
+    'splitter_style': """
+    QSplitter::handle {
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 rgba(255, 255, 255, 0),
+                    stop:0.5 rgba(255, 255, 255, 0.1),
+                    stop:1 rgba(255, 255, 255, 0));
+        width: 2px;
+        margin: 2px 0px;
+    }
+
+    QSplitter::handle:hover {
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 rgba(0, 150, 199, 0),
+                    stop:0.5 rgba(0, 150, 199, 0.3),
+                    stop:1 rgba(0, 150, 199, 0));
+    }
+""",
+    'tab_height': '36px',  # Add this new value
+    'text_disabled': '#666666',  # Add this line - gray color for disabled text
 }
 
 # Unified scrollbar styling for all components
@@ -298,3 +321,27 @@ QSplitter::handle:hover {
                 stop:1 rgba(0, 150, 199, 0));
 }
 """
+
+def _get_tab_style(self):
+    return f"""
+        QTabWidget::pane {{
+            border: none;
+            background: {MATERIAL_COLORS['surface']};
+        }}
+        QTabBar {{
+            background: {MATERIAL_COLORS['surface_variant']};
+        }}
+        QTabBar::tab {{
+            background: {MATERIAL_COLORS['surface']};
+            color: {MATERIAL_COLORS['text_secondary']};
+            padding: 0 16px;
+            border: none;
+            border-right: 1px solid {MATERIAL_COLORS['outline_variant']};
+            min-width: 100px;
+            max-width: 200px;
+            font-family: 'Segoe UI';
+            font-size: 12px;
+            height: {MATERIAL_COLORS['tab_height']};  /* Fixed height for tabs */
+        }}
+        # ...existing code...
+    """

@@ -5,7 +5,7 @@
     "editor_settings": {
         "autosave": true,
         "autosave_interval": 5,
-        "tab_width": 4,
+        "tab_width": 8,
         "font_size": 12,
         "bracket_matching": true
     }
