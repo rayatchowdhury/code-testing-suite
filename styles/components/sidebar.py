@@ -35,7 +35,7 @@ QLabel#sidebar_title {{
     background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1,
                              stop: 0 rgba(30, 30, 30, 0.98),
                              stop: 0.03 rgba(30, 30, 30, 0.98),
-                             stop: 0.5 rgba(144, 12, 63, 0.8),
+                             stop: 0.5 rgba(135, 20, 65, 0.8),
                              stop: 0.6 rgba(30, 30, 30, 0.6),
                              stop: 1 rgba(30, 30, 30, 0.98));
     border: 2px solid {COLORS['primary']}44;
@@ -78,37 +78,41 @@ QPushButton#sidebar_button:pressed {{
 }}
 
 QPushButton#back_button {{ 
-    color: {COLORS['text_secondary']};
+    color: {COLORS['text_light']};
     background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                stop:0 rgba(247, 37, 133, 0.15),
-                stop:0.5 rgba(247, 37, 133, 0.08),
-                stop:1 rgba(247, 37, 133, 0.15));
-    border: 1px solid rgba(247, 37, 133, 0.2);
+                stop:0 rgba(247, 37, 133, 0.18),
+                stop:0.3 rgba(247, 37, 133, 0.12),
+                stop:0.7 rgba(144, 12, 63, 0.15),
+                stop:1 rgba(88, 24, 69, 0.18));
+    border: 1.2px solid rgba(247, 37, 133, 0.25);
     text-align: center;
-    padding: 10px 18px;
+    padding: 12px 20px;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     margin: 8px 16px; 
-    border-radius: 8px;
+    border-radius: 10px;
     font-family: 'Segoe UI', system-ui;
+    letter-spacing: 0.3px;
 }}
 
 QPushButton#back_button:hover {{
-    color: {COLORS['text_light']};
+    color: white;
     background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                stop:0 rgba(247, 37, 133, 0.25),
-                stop:0.5 rgba(247, 37, 133, 0.15),
-                stop:1 rgba(247, 37, 133, 0.25));
-    border: 1px solid rgba(247, 37, 133, 0.3);
+                stop:0 rgba(247, 37, 133, 0.32),
+                stop:0.3 rgba(247, 37, 133, 0.26),
+                stop:0.7 rgba(144, 12, 63, 0.29),
+                stop:1 rgba(88, 24, 69, 0.32));
+    border: 1.5px solid rgba(247, 37, 133, 0.5);
 }}
 
 QPushButton#back_button:pressed {{
     background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                stop:0 rgba(247, 37, 133, 0.35),
-                stop:0.5 rgba(247, 37, 133, 0.25),
-                stop:1 rgba(247, 37, 133, 0.35));
-    border: 1px solid rgba(247, 37, 133, 0.4);
-    padding: 11px 17px 9px 19px;
+                stop:0 rgba(247, 37, 133, 0.38),
+                stop:0.3 rgba(247, 37, 133, 0.32),
+                stop:0.7 rgba(144, 12, 63, 0.35),
+                stop:1 rgba(88, 24, 69, 0.38));
+    border: 1.2px solid rgba(247, 37, 133, 0.5);
+    padding: 13px 19px 11px 21px;
 }}
 
 QPushButton#footer_button {{ 

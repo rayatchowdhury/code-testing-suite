@@ -5,6 +5,7 @@ COLORS = {
     'primary_dark': '#023E8A',
     'secondary': '#ffb600',
     'accent': '#F72585',
+    'accent_2':'aaaaaa',
     'background': '#1e1e1e',
     'surface': '#242426',
     'sidebar': '#1e1e1e',
