@@ -27,14 +27,16 @@ class WindowManager(QStackedWidget):
                 if not window_class:
                     return False
                 
-                window = window_class(self.parent(), **kwargs)
+                window = window_class(self.parent())  # Changed from self.parent() to parent
                 self.windows[window_name] = window
                 self.addWidget(window)
             
             window = self.windows[window_name]
+            window.show()  # Add this line
             self.setCurrentWidget(window)
             self.current_window = window_name
             return True
+            
         except RuntimeError:
             return False
 
@@ -49,8 +51,15 @@ class WindowManager(QStackedWidget):
                 window = self.windows[window_name]
                 if hasattr(window, 'cleanup'):
                     window.cleanup()
+                # Don't try to set current widget to None
                 if window == self.currentWidget():
-                    self.setCurrentWidget(None)
+                    # If removing current widget, switch to main window if possible
+                    if 'main' in self.windows and window_name != 'main':
+                        self.setCurrentWidget(self.windows['main'])
+                    # Otherwise try to switch to any other available window
+                    elif len(self.windows) > 1:
+                        other_window = next(w for name, w in self.windows.items() if name != window_name)
+                        self.setCurrentWidget(other_window)
                 self.removeWidget(window)
                 window.deleteLater()
                 del self.windows[window_name]
@@ -59,5 +68,9 @@ class WindowManager(QStackedWidget):
 
     def cleanup_all(self):
         """Clean up all windows safely"""
-        for window_name in list(self.windows.keys()):
+        # Cleanup in reverse order, leaving main window for last if it exists
+        window_names = sorted(list(self.windows.keys()), 
+                            key=lambda x: 0 if x == 'main' else 1, 
+                            reverse=True)
+        for window_name in window_names:
             self.cleanup_window(window_name)

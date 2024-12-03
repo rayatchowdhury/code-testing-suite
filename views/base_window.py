@@ -1,70 +1,82 @@
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QSplitter
-from PySide6.QtCore import Qt, QTimer
-from views.config.config_view import ConfigView  # Add this import
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QSplitter, QPushButton
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont
+from views.config.config_view import ConfigView
+from widgets.sidebar import Sidebar  # Add this import
+from widgets.display_area import DisplayArea  # Add this import
 
 class SidebarWindowBase(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, title=None):
         super().__init__(parent)
         self.parent = parent
+        self.has_unsaved_changes = False
         
-        # Set default window size
-        self.resize(1200, 800)  # Default size for all windows
-        
-        # Create main layout
-        layout = QHBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
+        # Setup layout
+        self.setLayout(QHBoxLayout())
+        self.layout().setContentsMargins(0, 0, 0, 0)
+        self.layout().setSpacing(0)
         
         # Create splitter
         self.splitter = QSplitter(Qt.Horizontal)
-        layout.addWidget(self.splitter)
+        self.layout().addWidget(self.splitter)
         
-        # Style the splitter
-        self.splitter.setStyleSheet("""
-            QSplitter::handle {
-                background-color: #333333;
-                width: 2px;
-            }
-            QSplitter::handle:hover {
-                background-color: #0096C7;
-            }
-        """)
+        # Initialize sidebar and display area if title is provided
+        if title:
+            self.init_sidebar(title)
+
+    def init_sidebar(self, title):
+        """Initialize sidebar with title and common features"""
+        self.sidebar = Sidebar(title)
+        self.display_area = DisplayArea()
         
-        self.has_unsaved_changes = False
+        back_btn, options_btn = self.create_footer_buttons()
+        self.sidebar.add_help_button()
+        self.sidebar.add_footer_divider()
+        self.sidebar.setup_horizontal_footer_buttons(back_btn, options_btn)
+        
+        self.setup_splitter(self.sidebar, self.display_area)
+        self.sidebar.button_clicked.connect(self.handle_button_click)
+
+    def create_footer_buttons(self):
+        back_btn = QPushButton("Back")
+        back_btn.setObjectName("back_button")
+        back_btn.clicked.connect(lambda: self.handle_button_click("Back"))
+        
+        options_btn = QPushButton("⚙️")
+        options_btn.setObjectName("back_button")
+        options_btn.setFont(QFont('Segoe UI', 14))
+        options_btn.clicked.connect(lambda: self.handle_button_click("Options"))
+        
+        return back_btn, options_btn
 
     def setup_splitter(self, sidebar, content):
-        # Add widgets to splitter
         self.splitter.addWidget(sidebar)
         self.splitter.addWidget(content)
-        
-        # Set initial sizes (25% sidebar, 75% content)
-        total_width = self.width()
-        self.splitter.setSizes([int(total_width * 0.25), int(total_width * 0.75)])
-        
-        # Set minimum widths
         sidebar.setMinimumWidth(250)
         content.setMinimumWidth(600)
+        self.update_splitter_sizes()
 
-    def cleanup(self):
-        """Clean up resources before window is destroyed"""
-        pass
+    def update_splitter_sizes(self):
+        """Update splitter sizes to maintain proper proportions"""
+        total_width = self.width()
+        if total_width > 0:
+            self.splitter.setSizes([int(total_width * 0.2), int(total_width * 0.8)])
 
-    def save_state(self):
-        """Save window state before hiding"""
-        pass
+    def resizeEvent(self, event):
+        """Handle resize events to maintain splitter proportions"""
+        super().resizeEvent(event)
+        self.update_splitter_sizes()
 
-    def restore_state(self):
-        """Restore window state when shown"""
-        pass
-
-    def can_close(self):
-        """Check if window can be closed"""
-        return not self.has_unsaved_changes
+    def cleanup(self): pass
+    def save_state(self): pass
+    def restore_state(self): pass
+    def can_close(self): return not self.has_unsaved_changes
 
     def handle_button_click(self, button_text):
         if button_text == 'Back':
             if self.can_close():
                 self.parent.window_manager.show_window('main')
         elif button_text == 'Options':
-            config_dialog = ConfigView(self)
-            config_dialog.exec()
+            ConfigView(self).exec()
+        elif button_text == 'Help Center':
+            self.parent.window_manager.show_window('help_center')

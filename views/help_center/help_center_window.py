@@ -16,26 +16,21 @@ from PySide6.QtGui import QFont  # Changed import location and using PySide6
 
 class HelpCenterWindow(SidebarWindowBase):
     def __init__(self, parent=None):
-        super().__init__(parent)
+        # Initialize base class first
+        super().__init__(parent, title=None)
 
         # Create sidebar with sections and buttons
         self.sidebar = Sidebar("Help Center")
         
         main_section = self.sidebar.add_section("Help Topics")
         for button_text in ['Introduction', 'Stress Testing', 'TLE Testing', 'FAQ', 'Author Description']:
-            self.sidebar.add_button(button_text, main_section)
+            btn = self.sidebar.add_button(button_text, main_section)
+            btn.clicked.connect(lambda checked, text=button_text: self.load_help_content(text))
         
-        # Create buttons
-        back_btn = QPushButton("Back")
-        back_btn.setObjectName("back_button")
-        back_btn.clicked.connect(lambda: self.handle_button_click("Back"))
+        self.sidebar.add_help_button()
+        self.sidebar.add_footer_divider()
         
-        options_btn = QPushButton("⚙️")
-        options_btn.setObjectName("back_button")
-        options_btn.setFont(QFont('Segoe UI', 14))  # Increase font size for emoji
-        options_btn.clicked.connect(lambda: self.handle_button_click("Options"))
-        
-        # Setup horizontal footer buttons (without horizontal divider)
+        back_btn, options_btn = self.create_footer_buttons()
         self.sidebar.setup_horizontal_footer_buttons(back_btn, options_btn)
 
         # Create display area
@@ -44,13 +39,6 @@ class HelpCenterWindow(SidebarWindowBase):
         # Setup splitter with sidebar and display area
         self.setup_splitter(self.sidebar, self.display_area)
 
-        # Connect signals
-        self.sidebar.button_clicked.connect(self.handle_button_click)
-
-    def handle_button_click(self, button_text):
-        if button_text == 'Back':
-            self.parent.window_manager.show_window('main')
-        elif button_text == 'Options':
-            super().handle_button_click(button_text)
-        # Handle other button clicks here
+    def load_help_content(self, topic):
+        # Add your help content loading logic here
         pass

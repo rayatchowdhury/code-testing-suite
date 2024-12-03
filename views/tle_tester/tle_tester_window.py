@@ -21,42 +21,33 @@
 from views.base_window import SidebarWindowBase
 from widgets.sidebar import Sidebar
 from widgets.display_area import DisplayArea
-from views.help_center.help_center_window import HelpCenterWindow  # Fix the import path
-from PySide6.QtWidgets import QPushButton
-from PySide6.QtGui import QFont
 
 class TLETesterWindow(SidebarWindowBase):
     def __init__(self, parent=None):
-        super().__init__(parent)
+        # Initialize base class first
+        super().__init__(parent, title=None)
 
         # Create sidebar with sections and buttons
         self.sidebar = Sidebar("TLE Tester")
         
         edit_section = self.sidebar.add_section("Edit Code")
         for button_text in ['Edit Generator', 'Edit Test Code']:
-            self.sidebar.add_button(button_text, edit_section)
+            btn = self.sidebar.add_button(button_text, edit_section)
+            btn.clicked.connect(lambda checked, text=button_text: self.handle_edit_button(text))
             
         options_section = self.sidebar.add_section("Test Options")
-        self.sidebar.add_button('TLE Options', options_section)
+        tle_btn = self.sidebar.add_button('TLE Options', options_section)
+        tle_btn.clicked.connect(self.handle_tle_options)
         
         action_section = self.sidebar.add_section("Actions")
         for button_text in ['Compile', 'Run', 'Results']:
-            self.sidebar.add_button(button_text, action_section)
+            btn = self.sidebar.add_button(button_text, action_section)
+            btn.clicked.connect(lambda checked, text=button_text: self.handle_action_button(text))
             
         self.sidebar.add_help_button()
         self.sidebar.add_footer_divider()
 
-        # Create buttons
-        back_btn = QPushButton("Back")
-        back_btn.setObjectName("back_button")
-        back_btn.clicked.connect(lambda: self.handle_button_click("Back"))
-        
-        options_btn = QPushButton("⚙️")
-        options_btn.setObjectName("back_button")
-        options_btn.setFont(QFont('Segoe UI', 14))
-        options_btn.clicked.connect(lambda: self.handle_button_click("Options"))
-        
-        # Setup horizontal footer buttons
+        back_btn, options_btn = self.create_footer_buttons()
         self.sidebar.setup_horizontal_footer_buttons(back_btn, options_btn)
 
         # Create display area
@@ -64,17 +55,24 @@ class TLETesterWindow(SidebarWindowBase):
 
         # Setup splitter with sidebar and display area
         self.setup_splitter(self.sidebar, self.display_area)
-
-        # Connect signals
+        
+        # Connect signals - moved from handle_action_button
         self.sidebar.button_clicked.connect(self.handle_button_click)
 
-    def handle_button_click(self, button_text):
-        if button_text == 'Back':
-            self.parent.return_to_main()
-        elif button_text == 'Help Center':
-            from views.help_center.help_center_window import HelpCenterWindow
-            self.parent.setCentralWidget(HelpCenterWindow(self.parent, self))
-        elif button_text == 'Options':
-            super().handle_button_click(button_text)
-        # Handle other button clicks here
+    def handle_edit_button(self, button_text):
+        # Add your edit button handling logic here
         pass
+
+    def handle_tle_options(self):
+        # Add your TLE options handling logic here
+        pass
+
+    def handle_action_button(self, button_text):
+        # Add your action button handling logic here
+        pass
+
+    def handle_button_click(self, button_text):
+        if (button_text == 'Help Center'):
+            self.parent.window_manager.show_window('help_center')
+        else:
+            super().handle_button_click(button_text)

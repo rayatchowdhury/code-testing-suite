@@ -74,6 +74,9 @@ class MainWindowContent(SidebarWindowBase):
 
         # Setup splitter
         self.setup_splitter(self.sidebar, self.display_area)
+        
+        # Set initial splitter sizes after a short delay
+        QTimer.singleShot(100, self.update_splitter_sizes)
 
         # Connect signals
         self.sidebar.button_clicked.connect(self.handle_button_click)
@@ -101,11 +104,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Code Testing Suite")
         self.setMinimumSize(1000, 700)
         
-        # Enable antialiasing
-        self.setAttribute(Qt.WA_SetFont)
-        self.setFont(QFont("Segoe UI", 10))
-        
-        # Create window manager
+        # Create window manager and set as central widget
         from utils.window_manager import WindowManager
         self.window_manager = WindowManager(self)
         self.setCentralWidget(self.window_manager)
