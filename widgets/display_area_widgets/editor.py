@@ -4,6 +4,7 @@ from PySide6.QtGui import QFont, QColor, QPainter, QTextFormat, QTextCursor, QKe
 from PySide6.QtCore import Qt, QRect, QSize, QTimer
 from widgets.display_area_widgets.syntaxhighlighter import CPPSyntaxHighlighter
 from styles.style import MATERIAL_COLORS
+from styles.components.editor import EDITOR_WIDGET_STYLE
 
 
 class CodeEditor(QPlainTextEdit):
@@ -174,6 +175,8 @@ class LineNumberArea(QWidget):
 class EditorWidget(QWidget):
     def __init__(self):
         super().__init__()
+        self.setObjectName("editor_widget")
+        self.setStyleSheet(EDITOR_WIDGET_STYLE)
         self._setup_ui()
         self._setup_file_handling()
         self.loadDefaultFile()

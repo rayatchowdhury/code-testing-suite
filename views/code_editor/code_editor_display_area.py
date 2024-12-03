@@ -5,13 +5,8 @@ from widgets.display_area_widgets.editor import EditorWidget
 from widgets.display_area_widgets.console import ConsoleOutput
 from tools.compiler_runner import CompilerRunner
 from styles.style import MATERIAL_COLORS
-
-SPLITTER_STYLE = """
-QSplitter::handle {
-    background: transparent;
-    width: 2px;
-}
-"""
+from styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE
+from styles.components.editor import get_tab_style
 
 class EditorTab(QWidget):
     def __init__(self):
@@ -48,22 +43,7 @@ class CodeEditorDisplay(QWidget):
         # Create outer panel with ultra-dim gradient
         outer_panel = QWidget()
         outer_panel.setMinimumWidth(400)  # Set minimum width for editor panel
-        outer_panel.setStyleSheet(f"""
-            background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
-                stop:0.0 #1A0611,
-                stop:0.1 #200714,
-                stop:0.2 #260817,
-                stop:0.3 #200714,
-                stop:0.4 #1A0611,
-                stop:0.5 #260817,
-                stop:0.6 #1A0611,
-                stop:0.7 #200714,
-                stop:0.8 #260817,
-                stop:0.9 #200714,
-                stop:1.0 #1A0611
-            );
-            padding: 3px;
-        """)
+        outer_panel.setStyleSheet(OUTER_PANEL_STYLE)
         outer_layout = QVBoxLayout(outer_panel)
         outer_layout.setContentsMargins(3, 3, 3, 3)  # Increased margins slightly
         outer_layout.setSpacing(0)
@@ -85,29 +65,13 @@ class CodeEditorDisplay(QWidget):
         # Add inner panel to outer panel
         outer_layout.addWidget(left_panel)
 
-        # Right panel setup with dark glassmorphism
-        console_container = QWidget()
-        console_container.setStyleSheet("""
-            QWidget {
-                background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
-                    stop:0 rgba(22, 22, 24, 0.98),
-                    stop:0.3 rgba(26, 26, 28, 0.95),
-                    stop:0.7 rgba(22, 22, 24, 0.98),
-                    stop:1 rgba(26, 26, 28, 0.95)
-                );
-                border: none;
-            }
-        """)
-        
-        console_layout = QVBoxLayout(console_container)
-        console_layout.setContentsMargins(0, 0, 0, 0)
+        # Simplified console setup - no more container wrapper needed
         self.console = ConsoleOutput()
         self.console.setMinimumWidth(250)
-        console_layout.addWidget(self.console)
         
         # Add panels to splitter
         self.splitter.addWidget(outer_panel)
-        self.splitter.addWidget(console_container)
+        self.splitter.addWidget(self.console)  # Add console directly
 
         # Configure splitter
         self.splitter.setCollapsible(0, False)  # Left panel (editor) not collapsible
@@ -141,61 +105,7 @@ class CodeEditorDisplay(QWidget):
         self.console.compile_run_btn.clicked.connect(self.compile_and_run_code)
 
     def _get_tab_style(self):
-        return f"""
-            QTabWidget::pane {{
-                border: none;
-                background: {MATERIAL_COLORS['surface']};
-            }}
-            QTabBar {{
-                background: {MATERIAL_COLORS['surface_variant']};
-            }}
-            QTabBar::tab {{
-                background: {MATERIAL_COLORS['surface']};
-                color: {MATERIAL_COLORS['text_secondary']};
-                padding: 8px 16px;
-                border: none;
-                border-right: 1px solid {MATERIAL_COLORS['outline_variant']};
-                min-width: 100px;
-                max-width: 200px;
-                font-family: 'Segoe UI';
-                font-size: 12px;
-            }}
-            QTabBar::tab:selected {{
-                background: {MATERIAL_COLORS['surface_variant']};
-                color: {MATERIAL_COLORS['text_primary']};
-                border-bottom: 2px solid {MATERIAL_COLORS['primary']};
-            }}
-            QTabBar::tab:hover {{
-                background: {MATERIAL_COLORS['surface_bright']};
-                color: {MATERIAL_COLORS['text_primary']};
-            }}
-            QTabBar::close-button {{
-                image: url(resources/icons/close.png);
-                subcontrol-position: right;
-            }}
-            QTabBar::close-button:hover {{
-                background: {MATERIAL_COLORS['error_container']};
-                border-radius: 2px;
-            }}
-            QPushButton#new_tab_button {{
-                background: {MATERIAL_COLORS['primary_container']};
-                color: {MATERIAL_COLORS['on_primary_container']};
-                border: none;
-                padding: 8px;
-                font-size: 20px;
-                font-weight: bold;
-                min-width: 36px;
-                max-width: 36px;
-            }}
-            QPushButton#new_tab_button:hover {{
-                background: {MATERIAL_COLORS['primary']};
-                color: {MATERIAL_COLORS['on_primary']};
-            }}
-            QPushButton#new_tab_button:pressed {{
-                background: {MATERIAL_COLORS['primary_dark']};
-                color: {MATERIAL_COLORS['on_primary']};
-            }}
-        """
+        return get_tab_style()
 
     def add_new_tab(self, title="Untitled"):
         """Add a new editor tab"""

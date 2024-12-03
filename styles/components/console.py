@@ -1,6 +1,19 @@
-from ..constants.colors import MATERIAL_COLORS, COLORS  # Add COLORS import
+from ..constants.colors import MATERIAL_COLORS, COLORS
 
-CONSOLE_STYLE = f"""
+CONSOLE_CONTAINER_STYLE = """
+QWidget#console_container {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
+        stop:0 rgba(22, 22, 24, 0.98),
+        stop:0.3 rgba(26, 26, 28, 0.95),
+        stop:0.7 rgba(22, 22, 24, 0.98),
+        stop:1 rgba(26, 26, 28, 0.95)
+    );
+    border: none;
+}
+"""
+
+# Update existing CONSOLE_STYLE to include the container style
+CONSOLE_STYLE = CONSOLE_CONTAINER_STYLE + f"""
 * {{
     background-color: transparent;
 }}

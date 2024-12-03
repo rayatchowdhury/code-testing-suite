@@ -4,7 +4,9 @@ from .components import (
     SIDEBAR_STYLE,
     SIDEBAR_BUTTON_STYLE,
     SPLITTER_STYLE,
-    CONSOLE_STYLE
+    CONSOLE_STYLE,
+    EDITOR_WIDGET_STYLE,
+    get_tab_style
 )
 
 # Simplified DISPLAY_AREA_STYLE
@@ -23,15 +25,6 @@ QWebEngineView {{
 }}
 """ + SCROLLBAR_STYLE
 
-def get_tab_style():
-    return f"""
-        QTabWidget::pane {{
-            border: none;
-            background: {MATERIAL_COLORS['surface']};
-        }}
-        # ...existing tab styles...
-    """
-
 # Export all styles
 __all__ = [
     'COLORS',
@@ -43,5 +36,6 @@ __all__ = [
     'DISPLAY_AREA_STYLE',
     'WEBVIEW_STYLE',
     'CONSOLE_STYLE',
+    'EDITOR_WIDGET_STYLE',
     'get_tab_style'
 ]

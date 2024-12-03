@@ -9,11 +9,22 @@ class ConsoleOutput(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.setObjectName("console_widget")  # Add this line
-        self.setStyleSheet(CONSOLE_STYLE)
+        self.setObjectName("console_widget")
+        self.setStyleSheet(CONSOLE_STYLE)  # Single style import includes container
+        
+        # Create a container with dark glassmorphism
+        self.container = QWidget()
+        self.container.setObjectName("console_container")
+        
+        container_layout = QVBoxLayout(self.container)
+        container_layout.setContentsMargins(0, 0, 0, 0)
+        
+        # Setup the console UI inside the container
+        self.setObjectName("console_widget")
         
         # Initialize layout
         self.layout = QVBoxLayout()
+        self.layout.setContentsMargins(0, 0, 0, 0)
         
         # Create a container widget for content
         content_widget = QWidget()
@@ -68,7 +79,14 @@ class ConsoleOutput(QWidget):
         
         # Add content widget to main layout
         self.layout.addWidget(content_widget)
-        self.setLayout(self.layout)
+        
+        # Add console to container
+        container_layout.addLayout(self.layout)
+        
+        # Set up main layout
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.addWidget(self.container)
         
         self.waiting_for_input = False
         self.setup_text_formats()
@@ -186,34 +204,4 @@ class ConsoleOutput(QWidget):
             self.history_index = max(0, self.history_index - 1)
             self.input.setText(self.command_history[self.history_index])
         elif event.key() == Qt.Key_Down and self.command_history:
-            self.history_index = min(len(self.command_history), self.history_index + 1)
-            if self.history_index < len(self.command_history):
-                self.input.setText(self.command_history[self.history_index])
-            else:
-                self.input.clear()
-        else:
-            super().keyPressEvent(event)
-
-    def clear(self):
-        """Clear both buffer and output"""
-        self.text_buffer.clear()
-        self.output.clear()
-        self.output.setMaximumBlockCount(1000)  # Reset block count limit
-
-    def cleanup(self):
-        """Clean up resources safely"""
-        try:
-            if hasattr(self, 'buffer_timer') and self.buffer_timer is not None:
-                if not self.buffer_timer.isDestroyed():
-                    self.buffer_timer.stop()
-            if hasattr(self, 'text_buffer'):
-                self.text_buffer.clear()
-        except (RuntimeError, AttributeError):
-            pass  # Handle case where Qt objects are already deleted
-
-    def __del__(self):
-        """Safe cleanup on deletion"""
-        try:
-            self.cleanup()
-        except:
-            pass  # Suppress all exceptions during deletion
+            self.history_index
