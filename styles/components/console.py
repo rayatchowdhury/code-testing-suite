@@ -1,4 +1,4 @@
-from ..constants.colors import MATERIAL_COLORS
+from ..constants.colors import MATERIAL_COLORS, COLORS  # Add COLORS import
 
 CONSOLE_STYLE = f"""
 * {{
@@ -6,15 +6,23 @@ CONSOLE_STYLE = f"""
 }}
 
 QWidget#console_title {{
-    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0,
-        stop:0 #2C3333,
-        stop:1 #2C3333
-    );
-    color: {MATERIAL_COLORS['text_primary']};
-    font-weight: bold;
-    font-family: 'Segoe UI';
-    font-size: 16px;
-    border-bottom: 1px solid #1A1A1A;
+    background: qlineargradient(x1: 1, y1: 0, x2: 0, y2: 1,
+                             stop: 0 rgba(25, 25, 27, 0.98),
+                             stop: 0.03 rgba(25, 25, 27, 0.98),
+                             stop: 0.5 rgba(45, 55, 65, 0.8),
+                             stop: 0.6 rgba(30, 30, 30, 0.6),
+                             stop: 0.8 rgba(24, 24, 26, 0.98),
+                             stop: 1 rgba(24, 24, 26, 0.98));
+    color: {COLORS['text_light']};
+    border-radius: 12px;
+    margin: 8px auto;
+    padding: 8px 24px;
+    font-size: 18px;
+    font-weight: 600;
+    font-family: 'Segoe UI', system-ui;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    max-width: 250px;
 }}
 
 QLabel#output_title, QLabel#input_title {{

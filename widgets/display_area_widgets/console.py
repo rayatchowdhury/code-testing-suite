@@ -23,10 +23,10 @@ class ConsoleOutput(QWidget):
         content_layout.setSpacing(0)
         
         # Console title
-        console_title = QLabel("Console")
+        console_title = QLabel("CONSOLE")  # Changed to uppercase
         console_title.setObjectName("console_title")
-        console_title.setFixedHeight(36)  # Match tab height
-        console_title.setAlignment(Qt.AlignCenter)
+        console_title.setFixedHeight(65)  # Increased from 36 to 64
+        console_title.setAlignment(Qt.AlignCenter)  # Changed to center alignment
         
         # Output title with center alignment and different styling
         output_title = QLabel("Output")

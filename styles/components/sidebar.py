@@ -1,11 +1,20 @@
-
 from ..constants.colors import COLORS
 from .scrollbar import SCROLLBAR_STYLE
 
 SIDEBAR_STYLE = f"""
+QWidget {{
+    background: transparent;
+}}
+
+QWidget#sidebar, QWidget#sidebar_scroll, QWidget#sidebar_content {{
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
+        stop:0 rgba(22, 22, 24, 0.98),
+        stop:0.3 rgba(26, 26, 28, 0.95),
+        stop:0.7 rgba(22, 22, 24, 0.98),
+        stop:1 rgba(26, 26, 28, 0.95));
+}}
+
 QWidget#sidebar {{
-    background-color: {COLORS['sidebar']};
-    border: none;
     border-right: 1px solid rgba(255, 255, 255, 0.1);
 }}
 
@@ -24,10 +33,11 @@ QLabel#section_title {{
 QLabel#sidebar_title {{
     color: {COLORS['text_light']};
     background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1,
-                             stop: 0 {COLORS['primary']}CC,
+                             stop: 0 rgba(30, 30, 30, 0.98),
+                             stop: 0.03 rgba(30, 30, 30, 0.98),
                              stop: 0.5 rgba(144, 12, 63, 0.8),
-                             stop: 0.6 {COLORS['surface']}55,
-                             stop: 1 {COLORS['primary_dark']}AA);
+                             stop: 0.6 rgba(30, 30, 30, 0.6),
+                             stop: 1 rgba(30, 30, 30, 0.98));
     border: 2px solid {COLORS['primary']}44;
     border-radius: 12px;
     margin: 8px 12px;
@@ -163,15 +173,18 @@ QComboBox:hover, QSpinBox:hover, QSlider:hover {{
 """ + SCROLLBAR_STYLE + """
 QScrollArea#sidebar_scroll {{
     border: none;
-    background: transparent;
 }}
 
 QWidget#sidebar_content {{
-    background: transparent;
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
+        stop:0 rgba(22, 22, 24, 0.98),
+        stop:0.3 rgba(26, 26, 28, 0.95),
+        stop:0.7 rgba(22, 22, 24, 0.98),
+        stop:1 rgba(26, 26, 28, 0.95));
 }}
 
 QWidget#sidebar > QWidget {{
-    background: {COLORS['sidebar']};
+    background: transparent;
 }}
 """
 
