@@ -1,4 +1,5 @@
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QPlainTextEdit, QLabel, QPushButton)
+from PySide6.QtWidgets import (QWidget, QVBoxLayout, QPlainTextEdit, QLabel, 
+                              QPushButton, QScrollBar, QSizePolicy)
 from PySide6.QtCore import Qt, Signal, QTimer
 from PySide6.QtGui import QKeyEvent, QTextCharFormat, QColor, QTextCursor
 from styles import CONSOLE_STYLE, MATERIAL_COLORS
@@ -65,10 +66,12 @@ class ConsoleOutput(QWidget):
         self.input.textChanged.connect(self._handle_text_change)
         
         # Compile & Run button with modern gradient and glow effect
-        self.compile_run_btn = QPushButton("▶ Compile && Run")
+        self.compile_run_btn = QPushButton()
         self.compile_run_btn.setObjectName("compile_run_btn")
-        self.compile_run_btn.setFlat(True)
+        self.compile_run_btn.setText("Compile && Run ⚡")  # Set text explicitly
+        self.compile_run_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.compile_run_btn.setFixedHeight(40)
+        self.compile_run_btn.setCursor(Qt.PointingHandCursor)  # Add hand cursor
         
         content_layout.addWidget(console_title)
         content_layout.addWidget(output_title)
@@ -76,6 +79,7 @@ class ConsoleOutput(QWidget):
         content_layout.addWidget(input_title)
         content_layout.addWidget(self.input)
         content_layout.addWidget(self.compile_run_btn)
+        content_layout.addSpacing(5)
         
         # Add content widget to main layout
         self.layout.addWidget(content_widget)
