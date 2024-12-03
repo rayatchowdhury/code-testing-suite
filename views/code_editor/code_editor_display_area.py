@@ -1,15 +1,15 @@
-from PySide6.QtWidgets import (QWidget, QHBoxLayout, QVBoxLayout, 
-                              QPushButton, QTabWidget, QSplitter, QLabel)
-from PySide6.QtCore import Signal, Qt
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QSplitter, QHBoxLayout, QTabWidget, QPushButton
 import os
+from PySide6.QtCore import Qt, Signal
 from widgets.display_area_widgets.editor import EditorWidget
 from widgets.display_area_widgets.console import ConsoleOutput
+from tools.compiler_runner import CompilerRunner
 from styles.style import MATERIAL_COLORS
-from views.code_editor.code_editor_compiler_runner import CompilerRunner
 
 SPLITTER_STYLE = """
 QSplitter::handle {
-    background-color: #CCCCCC;
+    background: transparent;
+    width: 2px;
 }
 """
 
@@ -24,11 +24,15 @@ class EditorTab(QWidget):
 class CodeEditorDisplay(QWidget):
     saveRequested = Signal()
     
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent=None):
+        super().__init__(parent)
         self._setup_ui()
         self._connect_signals()
         self.add_new_tab()
+
+        # Update compiler runner instantiation if it exists
+        if hasattr(self, 'compiler_runner'):
+            self.compiler_runner = CompilerRunner(self.console)
 
     def _setup_ui(self):
         main_layout = QHBoxLayout(self)
@@ -38,87 +42,64 @@ class CodeEditorDisplay(QWidget):
         # Create splitter
         self.splitter = QSplitter(Qt.Horizontal)
         self.splitter.setStyleSheet(SPLITTER_STYLE)
+        self.splitter.setChildrenCollapsible(False)  # Prevent panels from collapsing
+        self.splitter.setHandleWidth(2)  # Set a small handle width
 
-        # Left panel setup
+        # Create outer panel with ultra-dim gradient
+        outer_panel = QWidget()
+        outer_panel.setMinimumWidth(400)  # Set minimum width for editor panel
+        outer_panel.setStyleSheet(f"""
+            background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
+                stop:0.0 #1A0611,
+                stop:0.1 #200714,
+                stop:0.2 #260817,
+                stop:0.3 #200714,
+                stop:0.4 #1A0611,
+                stop:0.5 #260817,
+                stop:0.6 #1A0611,
+                stop:0.7 #200714,
+                stop:0.8 #260817,
+                stop:0.9 #200714,
+                stop:1.0 #1A0611
+            );
+            padding: 3px;
+        """)
+        outer_layout = QVBoxLayout(outer_panel)
+        outer_layout.setContentsMargins(3, 3, 3, 3)  # Increased margins slightly
+        outer_layout.setSpacing(0)
+
+        # Create inner panel for content
         left_panel = QWidget()
+        left_panel.setStyleSheet(f"""
+          background-color: {MATERIAL_COLORS['surface']};
+        """)
+        
         left_layout = QVBoxLayout(left_panel)
         left_layout.setContentsMargins(0, 0, 0, 0)
         left_layout.setSpacing(0)
 
-        # Tab widget setup
+        # Add tab widget to inner panel
         self.tab_widget = self._create_tab_widget()
         left_layout.addWidget(self.tab_widget)
 
-        # Right panel setup with title
-        right_panel = QWidget()
-        right_layout = QVBoxLayout(right_panel)
-        right_layout.setContentsMargins(0, 0, 0, 0)
-        right_layout.setSpacing(0)
+        # Add inner panel to outer panel
+        outer_layout.addWidget(left_panel)
 
-        # Add console title
-        console_title = QLabel("Console")
-        console_title.setFixedHeight(36)  # Match tab height
-        console_title.setAlignment(Qt.AlignCenter)  # Center align the text
-        console_title.setStyleSheet(f"""
-            QLabel {{
-                background: {MATERIAL_COLORS['surface_variant']};
-                color: {MATERIAL_COLORS['text_primary']};
-                font-weight: bold;
-                font-family: 'Segoe UI';
-                font-size: 13px;
-                border-bottom: 1px solid {MATERIAL_COLORS['outline_variant']};
-            }}
-        """)
-        right_layout.addWidget(console_title)
-
-        # Console setup
+        # Right panel setup - just use ConsoleOutput
         self.console = ConsoleOutput()
-        right_layout.addWidget(self.console)
-
-        # Button layout setup - Create a container for single button
-        button_container = QWidget()
-        button_container.setFixedHeight(40)
-        button_container.setStyleSheet(f"""
-            QWidget {{
-                background: {MATERIAL_COLORS['surface_variant']};
-                border-top: 1px solid {MATERIAL_COLORS['outline_variant']};
-            }}
-        """)
-        button_layout = QHBoxLayout(button_container)
-        button_layout.setContentsMargins(0, 0, 0, 0)
-
-        # Create single compile & run button
-        self.compile_run_btn = QPushButton("Compile && Run")  # Note: && for proper & display
-        self.compile_run_btn.setFlat(True)
-        self.compile_run_btn.setFixedHeight(40)
-        self.compile_run_btn.setStyleSheet(f"""
-            QPushButton {{
-                background: transparent;
-                color: {MATERIAL_COLORS['text_primary']};
-                border: none;
-                font-weight: bold;
-                font-family: 'Segoe UI';
-            }}
-            QPushButton:hover {{
-                background: rgba(255, 255, 255, 0.1);
-            }}
-            QPushButton:pressed {{
-                background: rgba(255, 255, 255, 0.15);
-            }}
-            QPushButton:disabled {{
-                color: {MATERIAL_COLORS['text_disabled']};
-            }}
-        """)
-        button_layout.addWidget(self.compile_run_btn)
-        right_layout.addWidget(button_container)
+        self.console.setMinimumWidth(250)  # Changed from 300 to 250
 
         # Add panels to splitter
-        self.splitter.addWidget(left_panel)
-        self.splitter.addWidget(right_panel)
+        self.splitter.addWidget(outer_panel)
+        self.splitter.addWidget(self.console)
         
-        # Set initial sizes (3:1 ratio)
-        self.splitter.setSizes([8, 3])
-        self.splitter.setStyleSheet(MATERIAL_COLORS['splitter_style'])
+        # Configure splitter
+        self.splitter.setCollapsible(0, False)  # Left panel (editor) not collapsible
+        self.splitter.setCollapsible(1, True)   # Right panel (console) collapsible
+        
+        # Set initial sizes using ratio (approximately 73% to 27%)
+        total_width = self.width() or 1100  # fallback width if widget not sized yet
+        self.splitter.setSizes([int(total_width * 0.73), int(total_width * 0.27)])
 
         # Add splitter to main layout
         main_layout.addWidget(self.splitter)
@@ -139,50 +120,9 @@ class CodeEditorDisplay(QWidget):
         tab_widget.setStyleSheet(self._get_tab_style())
         return tab_widget
 
-    def _create_button_layout(self):
-        layout = QHBoxLayout()
-        layout.setContentsMargins(6, 4, 6, 6)  # Reduced vertical padding
-        layout.setSpacing(6)  # Slightly reduced spacing
-        
-        self.compile_btn = QPushButton("Compile")
-        self.run_btn = QPushButton("Run")
-        
-        button_style = f"""
-            QPushButton {{
-                background-color: {MATERIAL_COLORS['primary_container']};
-                color: {MATERIAL_COLORS['on_primary_container']};
-                border: none;
-                border-radius: 4px;
-                padding: 4px 16px;  # Reduced vertical padding
-                font-weight: bold;
-                font-family: 'Segoe UI';
-                min-width: 80px;
-                min-height: 24px;  # Reduced height
-            }}
-            QPushButton:hover {{
-                background-color: {MATERIAL_COLORS['primary']};
-                color: {MATERIAL_COLORS['on_primary']};
-            }}
-            QPushButton:pressed {{
-                background-color: {MATERIAL_COLORS['primary_dark']};
-                padding: 7px 19px 5px 21px;
-            }}
-            QPushButton:disabled {{
-                background-color: {MATERIAL_COLORS['surface_variant']};
-                color: {MATERIAL_COLORS['text_secondary']};
-            }}
-        """
-        
-        for btn in (self.compile_btn, self.run_btn):
-            btn.setStyleSheet(button_style)
-            layout.addWidget(btn)
-        
-        layout.addStretch()
-        return layout
-
     def _connect_signals(self):
         self.new_tab_button.clicked.connect(lambda: self.add_new_tab())
-        self.compile_run_btn.clicked.connect(self.compile_and_run_code)
+        self.console.compile_run_btn.clicked.connect(self.compile_and_run_code)
 
     def _get_tab_style(self):
         return f"""
@@ -298,10 +238,10 @@ class CodeEditorDisplay(QWidget):
             self.saveRequested.emit()
             return
 
-        self.compile_run_btn.setEnabled(False)
+        self.console.compile_run_btn.setEnabled(False)
         
         def on_complete():
-            self.compile_run_btn.setEnabled(True)
+            self.console.compile_run_btn.setEnabled(True)
             self.compiler_runner.finished.disconnect(on_complete)
         
         self.compiler_runner.finished.connect(on_complete)

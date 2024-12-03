@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QTextEdit, QLineEdit, QScrollBar, QLabel
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QTextEdit, QLineEdit, QScrollBar, QLabel, QPushButton
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QKeyEvent, QTextCharFormat, QColor, QTextCursor
 from styles.style import MATERIAL_COLORS
@@ -15,6 +15,22 @@ class ConsoleOutput(QWidget):
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setSpacing(0)  # Remove spacing between widgets
         
+        # Console title
+        console_title = QLabel("Console")
+        console_title.setFixedHeight(36)  # Match tab height
+        console_title.setAlignment(Qt.AlignCenter)
+        console_title.setStyleSheet(f"""
+            QLabel {{
+                background: {MATERIAL_COLORS['surface_variant']};
+                color: {MATERIAL_COLORS['text_primary']};
+                font-weight: bold;
+                font-family: 'Segoe UI';
+                font-size: 16px;
+                border-bottom: 1px solid {MATERIAL_COLORS['outline_variant']};
+            }}
+        """)
+        self.layout.addWidget(console_title)
+        
         # Output title with center alignment and different styling
         output_title = QLabel("Console Output")
         output_title.setAlignment(Qt.AlignCenter)
@@ -23,7 +39,6 @@ class ConsoleOutput(QWidget):
             QLabel {{
                 background: {MATERIAL_COLORS['surface_dim']};
                 color: {MATERIAL_COLORS['text_primary']};
-                font-weight: bold;
                 font-family: 'Segoe UI';
                 font-size: 12px;
                 padding: 6px;
@@ -39,10 +54,12 @@ class ConsoleOutput(QWidget):
             QTextEdit {{
                 background-color: {MATERIAL_COLORS['surface_dim']};
                 color: {MATERIAL_COLORS['text_primary']};
-                border: none;
+                border: 1px solid {MATERIAL_COLORS['outline']};
+                border-radius: 4px;
+                padding: 6px;
                 font-family: 'Consolas', monospace;
                 font-size: 12px;
-                padding: 8px;
+                margin: 8px;
             }}
         """)
         self.layout.addWidget(self.output)
@@ -55,11 +72,9 @@ class ConsoleOutput(QWidget):
             QLabel {{
                 background: {MATERIAL_COLORS['surface_dim']};
                 color: {MATERIAL_COLORS['text_primary']};
-                font-weight: bold;
                 font-family: 'Segoe UI';
                 font-size: 12px;
                 padding: 6px;
-                border-top: 1px solid {MATERIAL_COLORS['outline_variant']};
                 border-bottom: 1px solid {MATERIAL_COLORS['outline_variant']};
             }}
         """)
@@ -87,6 +102,56 @@ class ConsoleOutput(QWidget):
         self.input.textChanged.connect(self._handle_text_change)
         self.layout.addWidget(self.input)
         
+        # Compile & Run button with modern gradient and glow effect
+        self.compile_run_btn = QPushButton("▶ Compile && Run")
+        self.compile_run_btn.setObjectName("compile_run_btn")
+        self.compile_run_btn.setFlat(True)
+        self.compile_run_btn.setFixedHeight(40)
+        self.compile_run_btn.setStyleSheet(f"""
+            QPushButton#compile_run_btn {{
+                background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #1A4D2E,
+                    stop:0.3 #2D6A4F,
+                    stop:0.7 #2D6A4F,
+                    stop:1 #1A4D2E
+                );
+                color: #E9F5DB;
+                border: 1px solid #2D6A4F;
+                border-radius: 6px;
+                font-weight: bold;
+                font-family: 'Segoe UI';
+                font-size: 13px;
+                margin: 8px;
+                padding: 4px 16px;
+            }}
+            QPushButton#compile_run_btn:hover {{
+                background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #2D6A4F,
+                    stop:0.3 #40916C,
+                    stop:0.7 #40916C,
+                    stop:1 #2D6A4F
+                );
+                border: 1px solid #40916C;
+                color: white;
+            }}
+            QPushButton#compile_run_btn:pressed {{
+                background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #1A4D2E,
+                    stop:0.3 #2D6A4F,
+                    stop:0.7 #2D6A4F,
+                    stop:1 #1A4D2E
+                );
+                border: 1px solid #1A4D2E;
+                padding: 5px 17px 3px 15px;
+            }}
+            QPushButton#compile_run_btn:disabled {{
+                background: #1A1A1A;
+                border: 1px solid #2A2A2A;
+                color: #666666;
+            }}
+        """)
+        self.layout.addWidget(self.compile_run_btn)
+
         self.setLayout(self.layout)
         self.waiting_for_input = False
         self.setup_text_formats()

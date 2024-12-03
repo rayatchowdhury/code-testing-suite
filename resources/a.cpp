@@ -3,14 +3,10 @@ using namespace std;
 int main()
 {
     cout<<"hello"<<endl;
-    int t;
-    cin>>t;
+    int t=1000000;
     while(t--)
     {
-        int a;
-        cin>>a;
-        cout<<a*a<<endl;
+        cout<<t<<endl;
     }
     return 0;
 }
-

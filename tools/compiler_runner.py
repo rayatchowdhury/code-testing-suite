@@ -1,11 +1,6 @@
 from PySide6.QtCore import QObject, Signal, QProcess
-import subprocess
 import os
-import queue
-import threading
-import select
 import sys
-import time
 
 class CompilerWorker(QObject):
     finished = Signal()
