@@ -10,7 +10,7 @@
 
 from PySide6.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QSplitter, QPushButton
 from PySide6.QtGui import QFont
-from PySide6.QtCore import Qt, QUrl, Signal
+from PySide6.QtCore import Qt, QUrl, Signal, QTimer
 from PySide6.QtWebEngineWidgets import QWebEngineView
 import markdown2
 import os
@@ -90,22 +90,9 @@ class MainWindowContent(SidebarWindowBase):
             config_dialog = ConfigView(self)
             config_dialog.exec()
         elif button_text in ['Code Editor', 'Stress Tester', 'TLE Tester', 'Help Center']:
-            # Remove current content
-            self.web_view.setParent(None)
-            self.display_area.setParent(None)
-            self.splitter.setParent(None)
-            
-            # Create and show new window
-            if button_text == 'Code Editor':
-                window = CodeEditorWindow(self.parent)
-            elif button_text == 'Stress Tester':
-                window = StressTesterWindow(self.parent)
-            elif button_text == 'TLE Tester':
-                window = TLETesterWindow(self.parent)
-            elif button_text == 'Help Center':
-                window = HelpCenterWindow(self.parent)
-                
-            self.parent.setCentralWidget(window)
+            # Convert button text to window name
+            window_name = button_text.lower().replace(' ', '_')
+            self.parent.window_manager.show_window(window_name)
 
 
 class MainWindow(QMainWindow):
@@ -118,11 +105,31 @@ class MainWindow(QMainWindow):
         self.setAttribute(Qt.WA_SetFont)
         self.setFont(QFont("Segoe UI", 10))
         
-        # Create and set central widget
-        self.central_widget = MainWindowContent(self)
-        self.setCentralWidget(self.central_widget)
+        # Create window manager
+        from utils.window_manager import WindowManager
+        self.window_manager = WindowManager(self)
+        self.setCentralWidget(self.window_manager)
+        
+        # Show main window content
+        self.window_manager.show_window('main')
         
     def return_to_main(self):
-        # Create and set new main content
-        self.central_widget = MainWindowContent(self)
-        self.setCentralWidget(self.central_widget)
+        """Return to main window"""
+        self.window_manager.show_window('main')
+
+    def closeEvent(self, event):
+        """Handle application close"""
+        try:
+            current = self.window_manager.get_current_window()
+            if current and not current.can_close():
+                event.ignore()
+                return
+            
+            # Accept the event immediately
+            event.accept()
+            
+            # Cleanup windows after accepting the event
+            QTimer.singleShot(0, self.window_manager.cleanup_all)
+            
+        except RuntimeError:
+            event.accept()

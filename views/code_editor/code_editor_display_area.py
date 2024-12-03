@@ -126,6 +126,15 @@ class CodeEditorDisplay(QWidget):
             self.saveRequested.emit()
             return
 
+        self.compile_btn.setEnabled(False)
+        self.run_btn.setEnabled(False)
+        
+        def on_complete():
+            self.compile_btn.setEnabled(True)
+            self.run_btn.setEnabled(True)
+            self.compiler_runner.finished.disconnect(on_complete)
+        
+        self.compiler_runner.finished.connect(on_complete)
         self.compiler_runner.compile_code(current_tab.editor.currentFilePath)
 
     def run_code(self):
@@ -134,6 +143,15 @@ class CodeEditorDisplay(QWidget):
             self.compile_code()
             return
 
+        self.compile_btn.setEnabled(False)
+        self.run_btn.setEnabled(False)
+        
+        def on_complete():
+            self.compile_btn.setEnabled(True)
+            self.run_btn.setEnabled(True)
+            self.compiler_runner.finished.disconnect(on_complete)
+        
+        self.compiler_runner.finished.connect(on_complete)
         self.compiler_runner.run_code(current_tab.editor.currentFilePath)
 
     def getCurrentEditor(self):

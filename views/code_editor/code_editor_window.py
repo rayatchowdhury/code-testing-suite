@@ -4,6 +4,7 @@ from widgets.sidebar import Sidebar
 from views.base_window import SidebarWindowBase
 from views.code_editor.code_editor_display_area import CodeEditorDisplay
 import os
+from PySide6.QtCore import QTimer
 
 class CodeEditorWindow(SidebarWindowBase):
     def __init__(self, parent=None):
@@ -43,11 +44,23 @@ class CodeEditorWindow(SidebarWindowBase):
         self.sidebar.button_clicked.connect(self.handle_button_click)
         self.editor_display.saveRequested.connect(self.save_file)
 
+    def cleanup(self):
+        """Clean up resources"""
+        if hasattr(self.editor_display, 'compiler_runner'):
+            self.editor_display.compiler_runner._cleanup_thread()
+
+    def can_close(self):
+        """Check if window can be closed"""
+        return not self.editor_display.isCurrentFileModified()
+
     def handle_button_click(self, button_text):
         if button_text == 'Back':
-            if self.editor_display.isCurrentFileModified():
-                self.handle_unsaved_changes()
-            self.parent.return_to_main()
+            if self.can_close():
+                self.parent.window_manager.show_window('main')
+            else:
+                result = self.handle_unsaved_changes()
+                if result != QMessageBox.Cancel:
+                    self.parent.window_manager.show_window('main')
         elif button_text == 'New File':
             if self.editor_display.isCurrentFileModified():
                 self.handle_unsaved_changes()

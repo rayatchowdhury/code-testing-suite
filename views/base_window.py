@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QSplitter
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from views.config.config_view import ConfigView  # Add this import
 
 class SidebarWindowBase(QWidget):
@@ -29,6 +29,8 @@ class SidebarWindowBase(QWidget):
                 background-color: #0096C7;
             }
         """)
+        
+        self.has_unsaved_changes = False
 
     def setup_splitter(self, sidebar, content):
         # Add widgets to splitter
@@ -43,12 +45,26 @@ class SidebarWindowBase(QWidget):
         sidebar.setMinimumWidth(250)
         content.setMinimumWidth(600)
 
+    def cleanup(self):
+        """Clean up resources before window is destroyed"""
+        pass
+
+    def save_state(self):
+        """Save window state before hiding"""
+        pass
+
+    def restore_state(self):
+        """Restore window state when shown"""
+        pass
+
+    def can_close(self):
+        """Check if window can be closed"""
+        return not self.has_unsaved_changes
+
     def handle_button_click(self, button_text):
         if button_text == 'Back':
-            if hasattr(self.parent, 'return_to_main'):
-                self.parent.return_to_main()
-            else:
-                print("Warning: Parent window does not implement return_to_main()")
+            if self.can_close():
+                self.parent.window_manager.show_window('main')
         elif button_text == 'Options':
             config_dialog = ConfigView(self)
             config_dialog.exec()
