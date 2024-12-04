@@ -2,16 +2,18 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QPlainTextEdit,
                               QTextEdit, QFileDialog)
 from PySide6.QtGui import QFont, QColor, QPainter, QTextFormat, QTextCursor, QKeySequence, QShortcut
 from PySide6.QtCore import Qt, QRect, QSize, QTimer
-from widgets.display_area_widgets.syntaxhighlighter import CPPSyntaxHighlighter
+from widgets.display_area_widgets.syntaxhighlighter import CPPSyntaxHighlighter, PythonSyntaxHighlighter, JavaSyntaxHighlighter
+import os
 from styles.constants.editor_colors import EDITOR_COLORS
 from styles.components.editor import get_editor_style, EDITOR_WIDGET_STYLE
+from utils.file_operations import FileOperations
 
 class CodeEditor(QPlainTextEdit):
     def __init__(self):
         super().__init__()
         self._setup_editor()
         self._setup_line_numbers()
-        self._setup_syntax_highlighting()
+        self.current_highlighter = None
 
     def _setup_editor(self):
         # Default values
@@ -31,8 +33,26 @@ class CodeEditor(QPlainTextEdit):
         self.updateLineNumberAreaWidth(0)
         self.highlightCurrentLine()
 
-    def _setup_syntax_highlighting(self):
-        self.highlighter = CPPSyntaxHighlighter(self.document())
+    def _setup_syntax_highlighting(self, file_path=None):
+        """Setup syntax highlighting based on file extension"""
+        if self.current_highlighter:
+            self.current_highlighter.setDocument(None)
+            self.current_highlighter = None
+            
+        if not file_path:
+            return
+
+        highlighter_map = {
+            'cpp': CPPSyntaxHighlighter,
+            'h': CPPSyntaxHighlighter,
+            'hpp': CPPSyntaxHighlighter,
+            'py': PythonSyntaxHighlighter,
+            'java': JavaSyntaxHighlighter
+        }
+        
+        ext = file_path.lower().split('.')[-1]
+        if ext in highlighter_map:
+            self.current_highlighter = highlighter_map[ext](self.document())
 
     def lineNumberAreaWidth(self):
         digits = len(str(max(1, self.blockCount())))
@@ -163,7 +183,7 @@ class EditorWidget(QWidget):
         self.setStyleSheet(EDITOR_WIDGET_STYLE)
         self._setup_ui()
         self._setup_file_handling()
-        self.loadDefaultFile()
+        # Remove loadDefaultFile() call and its template loading
 
     def _setup_ui(self):
         layout = QVBoxLayout(self)
@@ -187,14 +207,7 @@ class EditorWidget(QWidget):
         saveAsShortcut = QShortcut(QKeySequence.SaveAs, self)
         saveAsShortcut.activated.connect(self.saveFileAs)
 
-    def loadDefaultFile(self):
-        try:
-            self.currentFilePath = 'src/temp.cpp'
-            with open(self.currentFilePath, 'r') as file:
-                code = file.read()
-                self.codeEditor.setPlainText(code)
-        except FileNotFoundError:
-            self.currentFilePath = None
+    # Remove loadDefaultFile method as it's not needed anymore
 
     def scheduleSave(self):
         self.autoSaveTimer.start()
@@ -203,30 +216,19 @@ class EditorWidget(QWidget):
         if not self.currentFilePath:
             return self.saveFileAs()
 
-        try:
-            with open(self.currentFilePath, 'w') as file:
-                file.write(self.getCode())
-            self.codeEditor.document().setModified(False)  # Reset modified state
+        if FileOperations.save_file(self.currentFilePath, self.getCode(), self):
+            self.codeEditor.document().setModified(False)
+            self.codeEditor._setup_syntax_highlighting(self.currentFilePath)
             return True
-        except Exception as e:
-            print(f"Error saving file: {e}")
-            return False
+        return False
 
     def saveFileAs(self):
-        filePath, _ = QFileDialog.getSaveFileName(
-            self,
-            "Save File",
-            "",
-            "C++ Files (*.cpp *.h);;All Files (*.*)"
-        )
-
-        if filePath:
-            self.currentFilePath = filePath
-            success = self.saveFile()
-            if success:
-                # Reset modified state after successful save
-                self.codeEditor.document().setModified(False)
-            return success
+        new_path = FileOperations.save_file_as(self, self.getCode(), self.currentFilePath)
+        if new_path:
+            self.currentFilePath = new_path
+            self.codeEditor.document().setModified(False)
+            self.codeEditor._setup_syntax_highlighting(self.currentFilePath)
+            return True
         return False
 
     def onTextChanged(self):

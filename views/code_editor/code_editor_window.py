@@ -6,6 +6,7 @@ from views.code_editor.code_editor_display_area import CodeEditorDisplay
 from tools.compiler_runner import CompilerRunner
 import os
 from PySide6.QtCore import QTimer
+from utils.file_operations import FileOperations
 
 class CodeEditorWindow(SidebarWindowBase):
     def __init__(self, parent=None):
@@ -81,6 +82,7 @@ class CodeEditorWindow(SidebarWindowBase):
         elif button_text == 'Open File':
             self.open_file()
         elif button_text == 'Save File':
+            # Just delegate to the editor's save functionality
             self.save_file()
         elif button_text == 'Options':
             super().handle_button_click(button_text)
@@ -97,47 +99,22 @@ class CodeEditorWindow(SidebarWindowBase):
         return reply != QMessageBox.Cancel
 
     def save_file(self):
+        """Delegate save operation to current editor widget"""
         editor = self.editor_display.getCurrentEditor()
-        if not editor:
-            return False
-
-        if not editor.currentFilePath:
-            file_name, _ = QFileDialog.getSaveFileName(
-                self, "Save File", "",
-                "C++ Files (*.cpp *.h);;All Files (*)"
-            )
-            if not file_name:
-                return False
-            editor.currentFilePath = file_name
-            editor.updateTitleBar()
-
-        try:
-            with open(editor.currentFilePath, 'w') as file:
-                file.write(editor.getCode())
-            editor.codeEditor.document().setModified(False)
-            return True
-        except Exception as e:
-            QMessageBox.critical(self, "Error", f"Could not save file: {str(e)}")
-            return False
+        if editor:
+            return editor.saveFile()
+        return False
 
     def open_file(self):
         if self.editor_display.isCurrentFileModified():
             if not self.handle_unsaved_changes():
                 return
 
-        file_name, _ = QFileDialog.getOpenFileName(
-            self, "Open File", "",
-            "C++ Files (*.cpp *.h);;All Files (*)"
-        )
-        
-        if file_name:
-            try:
-                with open(file_name, 'r') as file:
-                    new_tab = self.editor_display.add_new_tab(os.path.basename(file_name))
-                    new_tab.editor.codeEditor.setPlainText(file.read())
-                    new_tab.editor.currentFilePath = file_name
-                    # Force update tab title immediately after setting the file
-                    self.editor_display.updateTabTitle(self.editor_display.tab_widget.currentIndex())
-                    new_tab.editor.codeEditor.document().setModified(False)
-            except Exception as e:
-                QMessageBox.critical(self, "Error", f"Could not open file: {str(e)}")
+        file_name, content = FileOperations.open_file(self)
+        if file_name and content:
+            new_tab = self.editor_display.add_new_tab(os.path.basename(file_name))
+            new_tab.editor.codeEditor.setPlainText(content)
+            new_tab.editor.currentFilePath = file_name
+            new_tab.editor.codeEditor._setup_syntax_highlighting(file_name)
+            self.editor_display.updateTabTitle(self.editor_display.tab_widget.currentIndex())
+            new_tab.editor.codeEditor.document().setModified(False)

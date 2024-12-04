@@ -2,14 +2,8 @@
 using namespace std;
 int main()
 {
-    cout<<"hello"<<endl;
-    int t;
-    cin>>t;
-    while(t--)
-    {
-        int a;
-        cin>>a;
-        cout<<a*a<<endl;
-    }
+    int a,b;
+    cin>>a>>b;
+    cout<<a/b<<endl;
     return 0;
 }

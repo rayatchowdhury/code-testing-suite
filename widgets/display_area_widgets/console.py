@@ -108,15 +108,25 @@ class ConsoleOutput(QWidget):
 
     def setup_text_formats(self):
         """Setup different text formats for console output"""
-        self.formats = {
-            'default': self._create_format(MATERIAL_COLORS['text_primary']),
-            'success': self._create_format('#4CAF50'),  # Green
-            'error': self._create_format('#FF5252'),    # Red
-            'info': self._create_format('#2196F3'),     # Blue
-            'warning': self._create_format('#FFC107'),  # Amber
-            'input': self._create_format('#E040FB'),    # Purple
-            'prompt': self._create_format('#FF4081'),   # Pink
+        colors = {
+            'default': MATERIAL_COLORS['text_primary'],
+            'success': '#4CAF50',    # Green
+            'error': '#FF5252',      # Red
+            'info': '#2196F3',       # Blue
+            'warning': '#FFC107',    # Amber
+            'input': '#E040FB',      # Purple
+            'prompt': '#FF4081',     # Pink
+            'filename': '#FFA726',   # Orange
+            'executable': '#26C6DA',  # Cyan
         }
+        
+        self.formats = {
+            format_type: self._create_format(color)
+            for format_type, color in colors.items()
+        }
+
+        # Create fallback format
+        self.fallback_format = self._create_format(colors['default'])
 
     def _create_format(self, color):
         fmt = QTextCharFormat()
@@ -125,6 +135,9 @@ class ConsoleOutput(QWidget):
 
     def append_formatted(self, text, format_type='default'):
         """Buffer text for batch processing"""
+        # Use default format type if the requested one doesn't exist
+        if format_type not in self.formats:
+            format_type = 'default'
         self.text_buffer.append((text, format_type))
         if not self.buffer_timer.isActive():
             self.buffer_timer.start()
