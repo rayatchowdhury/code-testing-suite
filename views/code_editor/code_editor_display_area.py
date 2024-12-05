@@ -18,8 +18,7 @@ class EditorTab(QWidget):
         layout.addWidget(self.editor)
 
 class CodeEditorDisplay(QWidget):
-    saveRequested = Signal()
-    filePathChanged = Signal()  # Add new signal
+    filePathChanged = Signal()
     
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -123,27 +122,22 @@ class CodeEditorDisplay(QWidget):
         index = self.tab_widget.addTab(new_tab, title)
         self.tab_widget.setCurrentWidget(new_tab)
         
-        # Connect signals for file state changes
-        new_tab.editor.codeEditor.document().modificationChanged.connect(
-            lambda modified: self.updateTabTitle(index)
-        )
-        new_tab.editor.codeEditor.textChanged.connect(
-            lambda: self.updateTabTitle(index)
-        )
+        # Combine signal connections
+        editor = new_tab.editor
+        doc = editor.codeEditor.document()
         
-        # Connect file path change signal
-        def on_file_path_change():
+        def update_title():
             self.updateTabTitle(index)
             self.filePathChanged.emit()
-            
-        new_tab.editor.filePathChanged.connect(on_file_path_change)
         
-        # Update title immediately
+        doc.modificationChanged.connect(lambda _: update_title())
+        editor.filePathChanged.connect(update_title)
+        
         self.updateTabTitle(index)
         return new_tab
 
     def updateTabTitle(self, index, deleted=False):
-        """Update tab title based on file state"""
+        """Update tab title and tooltip based on file state"""
         tab = self.tab_widget.widget(index)
         if not tab:
             return
@@ -151,6 +145,10 @@ class CodeEditorDisplay(QWidget):
         editor = tab.editor
         if not editor:
             return
+
+        # Set tooltip to show full path
+        tooltip = editor.currentFilePath or "Untitled"
+        self.tab_widget.setTabToolTip(index, tooltip)
 
         if deleted:
             title = f"[Deleted] {os.path.basename(editor.currentFilePath)}"
@@ -171,32 +169,29 @@ class CodeEditorDisplay(QWidget):
         self.tab_widget.setTabText(index, title)
 
     def close_tab(self, index):
-        """Close the specified tab with save check"""
+        """Close tab with save check"""
         tab = self.tab_widget.widget(index)
-        if not tab:
+        if not tab or not tab.editor.codeEditor.document().isModified():
+            self._remove_tab(index)
             return
             
-        if tab.editor.codeEditor.document().isModified():
-            reply = QMessageBox.question(
-                self,
-                'Save Changes?',
-                f'Save changes to {self.tab_widget.tabText(index)}?',
-                QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel
-            )
-            
-            if reply == QMessageBox.Save:
-                if not tab.editor.saveFile():
-                    return  # Don't close if save failed
-            elif reply == QMessageBox.Cancel:
-                return
+        reply = QMessageBox.question(
+            self, 'Save Changes?',
+            f'Save changes to {self.tab_widget.tabText(index)}?',
+            QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel
+        )
+        
+        if reply == QMessageBox.Save and tab.editor.saveFile():
+            self._remove_tab(index)
+        elif reply == QMessageBox.Discard:
+            self._remove_tab(index)
 
-        if self.tab_widget.count() > 1:
-            self.tab_widget.removeTab(index)
-            self.filePathChanged.emit()
-        else:
-            self.tab_widget.removeTab(index)
+    def _remove_tab(self, index):
+        """Handle tab removal and UI updates"""
+        self.tab_widget.removeTab(index)
+        if self.tab_widget.count() == 0:
             self.show_welcome_screen()
-            self.filePathChanged.emit()
+        self.filePathChanged.emit()
         
     @property
     def editor(self):
@@ -207,7 +202,8 @@ class CodeEditorDisplay(QWidget):
     def compile_and_run_code(self):
         current_tab = self.tab_widget.currentWidget()
         if not current_tab or not current_tab.editor.currentFilePath:
-            self.saveRequested.emit()
+            if current_tab:
+                current_tab.editor.saveFile()
             return
 
         self.console.compile_run_btn.setEnabled(False)

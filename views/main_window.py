@@ -8,7 +8,7 @@
 # - Exit
 # display area will show description of the application
 
-from PySide6.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QSplitter, QPushButton
+from PySide6.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QSplitter, QPushButton, QMessageBox
 from PySide6.QtGui import QFont
 from PySide6.QtCore import Qt, QUrl, Signal, QTimer
 from PySide6.QtWebEngineWidgets import QWebEngineView
@@ -117,17 +117,50 @@ class MainWindow(QMainWindow):
         self.window_manager.show_window('main')
 
     def closeEvent(self, event):
-        """Handle application close"""
+        """Handle application close with improved unsaved changes check"""
         try:
             current = self.window_manager.get_current_window()
-            if current and not current.can_close():
-                event.ignore()
-                return
             
-            # Accept the event immediately
+            # If current window is code editor, check for unsaved changes
+            if current and isinstance(current, CodeEditorWindow):
+                if current.editor_display.has_editor:
+                    # Check for any unsaved changes
+                    has_unsaved = any(
+                        current.editor_display.tab_widget.widget(i).editor.codeEditor.document().isModified()
+                        for i in range(current.editor_display.tab_widget.count())
+                    )
+                    
+                    if has_unsaved:
+                        # Count unsaved files
+                        unsaved_count = sum(1 for i in range(current.editor_display.tab_widget.count())
+                                          if current.editor_display.tab_widget.widget(i).editor.codeEditor.document().isModified())
+                        
+                        message = f'You have {unsaved_count} unsaved files. Do you want to save them?' if unsaved_count > 1 else 'Do you want to save your changes?'
+                        
+                        reply = QMessageBox.question(
+                            self, 'Save Changes?', message,
+                            QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel
+                        )
+                        
+                        if reply == QMessageBox.Cancel:
+                            event.ignore()
+                            return
+                        elif reply == QMessageBox.Save:
+                            # Try to save all modified files
+                            success = True
+                            for i in range(current.editor_display.tab_widget.count()):
+                                tab = current.editor_display.tab_widget.widget(i)
+                                if tab.editor.codeEditor.document().isModified():
+                                    if not tab.editor.saveFile():
+                                        success = False
+                                        break
+                            
+                            if not success:
+                                event.ignore()
+                                return
+            
+            # Accept the event and cleanup
             event.accept()
-            
-            # Cleanup windows after accepting the event
             QTimer.singleShot(0, self.window_manager.cleanup_all)
             
         except RuntimeError:

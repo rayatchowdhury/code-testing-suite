@@ -110,8 +110,39 @@ class CodeEditor(QPlainTextEdit):
             blockNumber += 1
 
     def keyPressEvent(self, event):
+        # Special handling for curly braces with multi-line formatting
+        if self.bracket_matching and event.text() == '{':
+            cursor = self.textCursor()
+            pos = cursor.positionInBlock()
+            current_line = cursor.block().text()
+            indent = self.get_line_indentation(current_line)
+            
+            # Insert opening brace
+            super().keyPressEvent(event)
+            
+            # Create formatted structure
+            cursor = self.textCursor()
+            cursor.insertText('\n' + indent + ' ' * self.tab_spaces)  # Middle line
+            middle_line_position = cursor.position()
+            cursor.insertText('\n' + indent + '}')  # Closing brace
+            
+            # Move cursor to middle line
+            cursor.setPosition(middle_line_position)
+            self.setTextCursor(cursor)
+            return
+            
+        if (self.bracket_matching and
+                event.text() in ['[', '(', '"', "'"]):
+            # Regular single-line bracket handling for other types
+            cursor = self.textCursor()
+            super().keyPressEvent(event)
+            self.insertPlainText(self.bracket_pairs[event.text()])
+            cursor.movePosition(QTextCursor.Left)
+            self.setTextCursor(cursor)
+            return
+
+        # Handle new line with indentation
         if event.key() == Qt.Key_Return and self.auto_indent:
-            # Handle new line with indentation
             cursor = self.textCursor()
             current_line = cursor.block().text()
             indent = self.get_line_indentation(current_line)
@@ -123,16 +154,6 @@ class CodeEditor(QPlainTextEdit):
                 not event.modifiers() & Qt.ShiftModifier):
             # Insert spaces instead of tab
             self.insertPlainText(" " * self.tab_spaces)
-            return
-
-        if (self.bracket_matching and
-                event.text() in self.bracket_pairs):
-            # Handle bracket autocompletion
-            cursor = self.textCursor()
-            super().keyPressEvent(event)
-            self.insertPlainText(self.bracket_pairs[event.text()])
-            cursor.movePosition(QTextCursor.Left)
-            self.setTextCursor(cursor)
             return
 
         # Handle backspace with tab awareness
@@ -159,10 +180,6 @@ class CodeEditor(QPlainTextEdit):
                 break
         return indent
 
-    def textChanged(self):
-        # Trigger auto-save
-        self.parent().scheduleSave()
-
 
 class LineNumberArea(QWidget):
     def __init__(self, editor):
@@ -177,7 +194,7 @@ class LineNumberArea(QWidget):
 
 
 class EditorWidget(QWidget):
-    filePathChanged = Signal()  # Add this signal
+    filePathChanged = Signal()
 
     def __init__(self):
         super().__init__()
@@ -185,7 +202,6 @@ class EditorWidget(QWidget):
         self.setStyleSheet(EDITOR_WIDGET_STYLE)
         self._setup_ui()
         self._setup_file_handling()
-        # Remove loadDefaultFile() call and its template loading
 
     def _setup_ui(self):
         layout = QVBoxLayout(self)
@@ -196,46 +212,35 @@ class EditorWidget(QWidget):
 
     def _setup_file_handling(self):
         self.currentFilePath = None
-        self.autoSaveTimer = QTimer()
-        self.autoSaveTimer.setInterval(5000)
-        self.autoSaveTimer.timeout.connect(self.saveFile)
-        self.codeEditor.textChanged.connect(self.onTextChanged)
         self.setupShortcuts()
 
     def setupShortcuts(self):
-        saveShortcut = QShortcut(QKeySequence.Save, self)
-        saveShortcut.activated.connect(self.saveFile)
-
-        saveAsShortcut = QShortcut(QKeySequence.SaveAs, self)
-        saveAsShortcut.activated.connect(self.saveFileAs)
-
-    # Remove loadDefaultFile method as it's not needed anymore
-
-    def scheduleSave(self):
-        self.autoSaveTimer.start()
+        # Bind shortcuts to saveFile/saveFileAs directly
+        QShortcut(QKeySequence.Save, self).activated.connect(self.saveFile)
+        QShortcut(QKeySequence.SaveAs, self).activated.connect(self.saveFileAs)
 
     def saveFile(self):
+        """Save to current path or prompt for new path if none exists"""
         if not self.currentFilePath:
             return self.saveFileAs()
-
-        if FileOperations.save_file(self.currentFilePath, self.getCode(), self):
-            self.codeEditor.document().setModified(False)
-            self.codeEditor._setup_syntax_highlighting(self.currentFilePath)
-            return True
-        return False
+        return self._save_to_path(self.currentFilePath)
 
     def saveFileAs(self):
+        """Always prompt for new save location"""
         new_path = FileOperations.save_file_as(self, self.getCode(), self.currentFilePath)
         if new_path:
             self.currentFilePath = new_path
-            self.filePathChanged.emit()  # Emit when path changes
-            self.codeEditor.document().setModified(False)
-            self.codeEditor._setup_syntax_highlighting(self.currentFilePath)
-            return True
+            self.filePathChanged.emit()
+            return self._save_to_path(new_path)
         return False
 
-    def onTextChanged(self):
-        self.scheduleSave()
+    def _save_to_path(self, path):
+        """Internal method to save file and update editor state"""
+        if FileOperations.save_file(path, self.getCode(), self):
+            self.codeEditor.document().setModified(False)
+            self.codeEditor._setup_syntax_highlighting(path)
+            return True
+        return False
 
     def getCode(self):
         return self.codeEditor.toPlainText()

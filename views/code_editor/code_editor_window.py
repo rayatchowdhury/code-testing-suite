@@ -49,8 +49,8 @@ class CodeEditorWindow(SidebarWindowBase):
 
         # Connect signals
         self.sidebar.button_clicked.connect(self.handle_button_click)
-        self.editor_display.saveRequested.connect(self.save_file)
-
+        # Remove saveRequested connection since we removed that signal
+        
         # Connect additional signals for state tracking
         self.editor_display.tab_widget.tabCloseRequested.connect(self.save_editor_state)
         self.editor_display.tab_widget.currentChanged.connect(self.save_editor_state)
@@ -77,33 +77,35 @@ class CodeEditorWindow(SidebarWindowBase):
         return True
 
     def closeEvent(self, event: QCloseEvent):
-        """Handle window close event"""
+        """Handle window close event with improved unsaved changes check"""
         if not self.editor_display.has_editor:
             event.accept()
             self.parent.window_manager.show_window('main')
             return
             
-        if self.can_close():
+        # Check for any unsaved changes
+        has_unsaved = any(self.editor_display.tab_widget.widget(i).editor.codeEditor.document().isModified()
+                         for i in range(self.editor_display.tab_widget.count()))
+        
+        if not has_unsaved:
+            self.cleanup()
+            event.accept()
+            self.parent.window_manager.show_window('main')
+            return
+            
+        # Handle unsaved changes
+        result = self.handle_unsaved_changes()
+        if result == QMessageBox.Save:  # Save was successful
             self.save_editor_state()
             self.cleanup()
             event.accept()
             self.parent.window_manager.show_window('main')
-        else:
-            result = self.handle_unsaved_changes()
-            if result == QMessageBox.Save:
-                if self.save_file():  # Only continue if save was successful
-                    self.save_editor_state()
-                    self.cleanup()
-                    event.accept()
-                    self.parent.window_manager.show_window('main')
-                else:
-                    event.ignore()
-            elif result == QMessageBox.Discard:
-                self.cleanup()
-                event.accept()
-                self.parent.window_manager.show_window('main')
-            else:  # Cancel
-                event.ignore()
+        elif result == QMessageBox.Discard:
+            self.cleanup()
+            event.accept()
+            self.parent.window_manager.show_window('main')
+        else:  # Cancel or save failed
+            event.ignore()
 
     def handle_button_click(self, button_text):
         if button_text == 'Help Center':
@@ -123,21 +125,42 @@ class CodeEditorWindow(SidebarWindowBase):
                 if self.handle_unsaved_changes() != QMessageBox.Cancel:
                     self.open_file()
         elif button_text == 'Save File':
-            # Just delegate to the editor's save functionality
-            self.save_file()
+            editor = self.editor_display.getCurrentEditor()
+            if editor:
+                editor.saveFile()
         elif button_text == 'Options':
             super().handle_button_click(button_text)
 
     def handle_unsaved_changes(self):
+        """Handle unsaved changes with a dialog"""
+        # Count unsaved files
+        unsaved_count = sum(1 for i in range(self.editor_display.tab_widget.count())
+                         if self.editor_display.tab_widget.widget(i).editor.codeEditor.document().isModified())
+        
+        if unsaved_count > 1:
+            message = f'You have {unsaved_count} unsaved files. Do you want to save them?'
+        else:
+            message = 'Do you want to save your changes?'
+            
         reply = QMessageBox.question(
-            self, 'Save Changes?',
-            'Do you want to save your changes?',
+            self, 'Save Changes?', message,
             QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel
         )
-
+        
         if reply == QMessageBox.Save:
-            self.save_file()
-        return reply != QMessageBox.Cancel
+            return self._save_all_modified()
+        return reply
+
+    def _save_all_modified(self):
+        """Save all modified files"""
+        success = True
+        for i in range(self.editor_display.tab_widget.count()):
+            tab = self.editor_display.tab_widget.widget(i)
+            if tab.editor.codeEditor.document().isModified():
+                if not tab.editor.saveFile():
+                    success = False
+                    break
+        return QMessageBox.Save if success else QMessageBox.Cancel
 
     def save_file(self):
         """Delegate save operation to current editor widget"""
@@ -147,31 +170,28 @@ class CodeEditorWindow(SidebarWindowBase):
         return False
 
     def open_file(self):
-        if not self.editor_display.has_editor:
-            file_name, content = FileOperations.open_file(self)
-            if file_name is not None:
-                new_tab = self.editor_display.add_new_tab(os.path.basename(file_name))
-                new_tab.editor.currentFilePath = file_name
-                new_tab.editor.codeEditor.setPlainText(content or "")
-                new_tab.editor.codeEditor._setup_syntax_highlighting(file_name)
-                new_tab.editor.codeEditor.document().setModified(False)
-                self.save_editor_state()
+        """Handle opening a file with improved logic"""
+        # Check for unsaved changes first
+        if self.editor_display.has_editor and self.editor_display.isCurrentFileModified():
+            if self.handle_unsaved_changes() == QMessageBox.Cancel:
                 return
 
-        if self.editor_display.isCurrentFileModified():
-            if not self.handle_unsaved_changes():
-                return
-
+        # Open file dialog
         file_name, content = FileOperations.open_file(self)
-        if file_name is not None:
-            current_editor = self.editor_display.getCurrentEditor()
-            if (current_editor and not current_editor.currentFilePath and 
-                not current_editor.codeEditor.document().isModified() and 
-                not current_editor.codeEditor.toPlainText().strip()):
-                self._update_existing_tab(current_editor, file_name, content)
-            else:
-                self._create_new_tab(file_name, content)
-            self.save_editor_state()
+        if file_name is None:
+            return
+
+        # Try to reuse current tab if it's empty and untitled
+        current_editor = self.editor_display.getCurrentEditor()
+        if (self.editor_display.has_editor and current_editor and 
+            not current_editor.currentFilePath and 
+            not current_editor.codeEditor.document().isModified() and 
+            not current_editor.codeEditor.toPlainText().strip()):
+            self._update_existing_tab(current_editor, file_name, content)
+        else:
+            self._create_new_tab(file_name, content)
+        
+        self.save_editor_state()
 
     def _update_existing_tab(self, editor, file_path, content):
         editor.currentFilePath = file_path
