@@ -109,9 +109,10 @@ QPushButton#compile_run_btn:pressed {{
 }}
 
 QPushButton#compile_run_btn:disabled {{
-    color: #81C784;  /* Dimmer disabled text */
+    color: #707070;  /* Dimmer grey text */
     background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                stop:0 rgba(46, 125, 50, 0.08),
-                stop:1 rgba(16, 75, 20, 0.08));
-    border: 1.2px solid rgba(46, 125, 50, 0.15);
-}}"""
+                stop:0 rgba(40, 40, 40, 0.08),
+                stop:1 rgba(30, 30, 30, 0.08));
+    border: 1.2px solid rgba(60, 60, 60, 0.15);
+}}
+"""

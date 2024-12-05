@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QPlainTextEdit, 
                               QTextEdit, QFileDialog)
 from PySide6.QtGui import QFont, QColor, QPainter, QTextFormat, QTextCursor, QKeySequence, QShortcut
-from PySide6.QtCore import Qt, QRect, QSize, QTimer
+from PySide6.QtCore import Qt, QRect, QSize, QTimer, Signal
 from widgets.display_area_widgets.syntaxhighlighter import CPPSyntaxHighlighter, PythonSyntaxHighlighter, JavaSyntaxHighlighter
 import os
 from styles.constants.editor_colors import EDITOR_COLORS
@@ -177,6 +177,8 @@ class LineNumberArea(QWidget):
 
 
 class EditorWidget(QWidget):
+    filePathChanged = Signal()  # Add this signal
+
     def __init__(self):
         super().__init__()
         self.setObjectName("editor_widget")
@@ -226,6 +228,7 @@ class EditorWidget(QWidget):
         new_path = FileOperations.save_file_as(self, self.getCode(), self.currentFilePath)
         if new_path:
             self.currentFilePath = new_path
+            self.filePathChanged.emit()  # Emit when path changes
             self.codeEditor.document().setModified(False)
             self.codeEditor._setup_syntax_highlighting(self.currentFilePath)
             return True

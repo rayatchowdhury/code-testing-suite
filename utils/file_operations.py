@@ -50,18 +50,30 @@ class FileOperations:
 
     @staticmethod
     def open_file(parent):
-        file_name, _ = QFileDialog.getOpenFileName(
-            parent,
-            "Open File",
-            "",
-            FileOperations.FILE_FILTERS
-        )
+        try:
+            file_name, _ = QFileDialog.getOpenFileName(
+                parent,
+                "Open File",
+                "",
+                FileOperations.FILE_FILTERS
+            )
+            
+            if file_name and os.path.exists(file_name):
+                try:
+                    with open(file_name, 'r', encoding='utf-8') as file:
+                        return file_name, file.read()
+                except UnicodeDecodeError:
+                    # Try alternative encodings if UTF-8 fails
+                    try:
+                        with open(file_name, 'r', encoding='latin-1') as file:
+                            return file_name, file.read()
+                    except Exception as e:
+                        QMessageBox.critical(parent, "Error", f"Could not decode file: {str(e)}")
+                except Exception as e:
+                    QMessageBox.critical(parent, "Error", f"Could not read file: {str(e)}")
+            elif file_name:  # File was selected but doesn't exist
+                QMessageBox.critical(parent, "Error", "File not found")
+        except Exception as e:
+            QMessageBox.critical(parent, "Error", f"Error opening file: {str(e)}")
         
-        if file_name:
-            try:
-                with open(file_name, 'r') as file:
-                    content = file.read()
-                return file_name, content
-            except Exception as e:
-                QMessageBox.critical(parent, "Error", f"Could not open file: {str(e)}")
         return None, None
