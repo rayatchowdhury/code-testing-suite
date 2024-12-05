@@ -4,8 +4,10 @@ import os.path
 from .config_exceptions import *
 
 class ConfigManager:
+    CONFIG_DIR = os.path.join(os.path.expanduser('~'), '.code_testing_suite')
+    
     def __init__(self, config_file='config.json'):
-        self.config_file = config_file
+        self.config_file = os.path.join(self.CONFIG_DIR, config_file)
 
     def load_config(self):
         try:
@@ -36,6 +38,9 @@ class ConfigManager:
 
     def save_config(self, config):
         try:
+            # Ensure config directory exists
+            os.makedirs(self.CONFIG_DIR, exist_ok=True)
+
             # Backup existing config
             if os.path.exists(self.config_file):
                 backup_file = f"{self.config_file}.bak"
