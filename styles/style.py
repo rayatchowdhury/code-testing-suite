@@ -8,6 +8,7 @@ from .components import (
     EDITOR_WIDGET_STYLE,
     get_tab_style
 )
+from .components.ai_panel import AI_PANEL_STYLE
 
 # Simplified DISPLAY_AREA_STYLE
 DISPLAY_AREA_STYLE = f"""
@@ -37,5 +38,6 @@ __all__ = [
     'WEBVIEW_STYLE',
     'CONSOLE_STYLE',
     'EDITOR_WIDGET_STYLE',
-    'get_tab_style'
+    'get_tab_style',
+    'AI_PANEL_STYLE'
 ]

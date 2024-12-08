@@ -5,7 +5,7 @@ from PySide6.QtCore import Qt, Signal, QUrl
 from widgets.display_area_widgets.editor import EditorWidget
 from widgets.display_area_widgets.console import ConsoleOutput
 from tools.compiler_runner import CompilerRunner
-from styles.style import MATERIAL_COLORS
+from styles.style import MATERIAL_COLORS, AI_PANEL_STYLE  # Add import
 from styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE
 from styles.components.editor import get_tab_style
 
@@ -70,6 +70,25 @@ class CodeEditorDisplay(QWidget):
 
         # Add inner panel to outer panel
         outer_layout.addWidget(left_panel)
+
+        # Create AI panel container widget with explicit background
+        self.ai_panel_container = QWidget()
+        self.ai_panel_container.setObjectName("ai_panel_container")
+        self.ai_panel_container.setStyleSheet(AI_PANEL_STYLE)  # Use AI_PANEL_STYLE instead of inline style
+        self.ai_panel_container.hide()
+        
+        ai_panel = QHBoxLayout(self.ai_panel_container)
+        ai_panel.setContentsMargins(5, 5, 5, 5)
+        ai_panel.setSpacing(5)
+
+        ai_buttons = ['Explain', 'Fix', 'Optimize', 'Document']
+        for btn_text in ai_buttons:
+            btn = QPushButton(btn_text)
+            btn.setObjectName("ai_button")
+            btn.setFixedHeight(30)
+            ai_panel.addWidget(btn)
+
+        outer_layout.addWidget(self.ai_panel_container)
 
         # Simplified console setup - no more container wrapper needed
         self.console = ConsoleOutput()
@@ -257,6 +276,7 @@ class CodeEditorDisplay(QWidget):
         self.tab_widget.hide()
         self.console.compile_run_btn.setEnabled(False)
         self.new_tab_button.hide()  # Hide new tab button when showing welcome screen
+        self.ai_panel_container.hide()
 
     def show_editor(self):
         """Show the editor and hide welcome screen"""
@@ -265,3 +285,4 @@ class CodeEditorDisplay(QWidget):
         self.tab_widget.show()
         self.console.compile_run_btn.setEnabled(True)
         self.new_tab_button.show()  # Show new tab button when showing editor
+        self.ai_panel_container.show()
