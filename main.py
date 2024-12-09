@@ -4,7 +4,8 @@ from PySide6.QtCore import Qt
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtGui import QIcon
 from views.main_window import MainWindow
-
+import qasync
+import asyncio
 
 def main():
     # Set attributes before creating QApplication
@@ -15,10 +16,17 @@ def main():
     
     # Set application icon
     app.setWindowIcon(QIcon("resources/icons/app_icon.png"))
+    
+    # Create event loop
+    loop = qasync.QEventLoop(app)
+    asyncio.set_event_loop(loop)
+    
     window = MainWindow()
     window.show()
-    sys.exit(app.exec())
-
+    
+    # Run the event loop
+    with loop:
+        loop.run_forever()
 
 if __name__ == '__main__': 
     main()

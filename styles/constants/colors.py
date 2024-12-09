@@ -1,4 +1,3 @@
-
 # Modern Pantone-inspired color palette
 COLORS = {
     'primary': '#0096C7',
@@ -40,4 +39,6 @@ MATERIAL_COLORS = {
     'error_container': '#420101',
     'tab_height': '36px',
     'text_disabled': '#666666',
+    'on_surface': '#FFFFFF',  # Text on surface color
+    'primary_darker': '#012E52',  # Darker shade for pressed state
 }
