@@ -1,3 +1,7 @@
+<div align="center">
+![Code Testing Suite](resources/readme/header_image.png)
+<div>
+
 # 🚀 Code Testing Suite
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -5,8 +9,6 @@
 [![Qt](https://img.shields.io/badge/Qt-6.0+-green.svg)](https://www.qt.io)
 
 Welcome to the **Code Testing Suite**! A powerful desktop application designed to streamline your coding workflow with advanced testing capabilities and AI assistance. 🎯
-
-![Code Testing Suite](resources/readme/header_image.png)
 
 ## Table of Contents
 
@@ -25,6 +27,7 @@ Welcome to the **Code Testing Suite**! A powerful desktop application designed t
 <td>
 
 ### 📝 Code Editor
+
 - Syntax highlighting
 - Auto-completion
 - Multiple file support
@@ -34,6 +37,7 @@ Welcome to the **Code Testing Suite**! A powerful desktop application designed t
 <td>
 
 ### 🔄 Stress Tester
+
 - Custom test cases
 - Automated testing
 - Performance analysis
@@ -45,6 +49,7 @@ Welcome to the **Code Testing Suite**! A powerful desktop application designed t
 <td>
 
 ### ⏱️ TLE Tester
+
 - Time limit testing
 - Memory usage tracking
 - Performance optimization
@@ -54,6 +59,7 @@ Welcome to the **Code Testing Suite**! A powerful desktop application designed t
 <td>
 
 ### 🤖 AI Assistant
+
 - Code explanations
 - Bug detection
 - Optimization suggestions
@@ -66,12 +72,14 @@ Welcome to the **Code Testing Suite**! A powerful desktop application designed t
 ## 🚀 Quick Start
 
 1. **Clone the repository**:
+
    ```bash
    git clone https://github.com/yourusername/code-testing-suite.git
    cd code-testing-suite
    ```
 
 2. **Install dependencies**:
+
    ```bash
    pip install -r requirements.txt
    ```
@@ -86,18 +94,23 @@ Welcome to the **Code Testing Suite**! A powerful desktop application designed t
 <div align="center">
 
 ### 🖥️ Main Interface
+
 ![Main Window](resources/readme/main_window.png)
 
 ### ✏️ Code Editor
+
 ![Code Editor](resources/readme/editor_window.png)
 
 ### 🔄 Stress Testing
+
 ![Stress Tester](resources/readme/stress_window.png)
 
 ### 📊 Results View
+
 ![Results](resources/readme/results.png)
 
 ### ❓ Help Center
+
 ![Help Center](resources/readme/help_center.png)
 
 </div>
@@ -126,6 +139,7 @@ We welcome contributions! Here's how you can help:
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
+
 <div align="center">
 Made with ❤️ for developers who love clean code and efficient testing
 </div>
