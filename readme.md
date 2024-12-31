@@ -1,8 +1,8 @@
 # Code Testing Suite
 
-Welcome to the Code Testing Suite! This application is designed to help developers test their code efficiently with features like stress testing, TLE testing, and a code editor with AI assistance.
+Welcome to the **Code Testing Suite**! This application is designed to help developers test their code efficiently with features like stress testing, TLE testing, and a code editor with AI assistance.
 
-[Code Testing Suite]
+![Code Testing Suite](resources/readme/header_image.png)
 
 ## Table of Contents
 
@@ -38,6 +38,7 @@ Welcome to the Code Testing Suite! This application is designed to help develope
    ```
 
 3. **Run the application**:
+
    ```bash
    python main.py
    ```
@@ -72,13 +73,21 @@ Welcome to the Code Testing Suite! This application is designed to help develope
 
 ![Main Window](resources/readme/main_window.png)
 
+### Code Editor
+
+![Code Editor](resources/readme/editor_window.png)
+
 ### Stress Tester
 
 ![Stress Tester](resources/readme/stress_window.png)
 
 ### Results
 
-![TLE Tester](resources/readme/results.png)
+![Results](resources/readme/results.png)
+
+### Help Center
+
+![Help Center](resources/readme/help_center.png)
 
 ## Configuration
 
