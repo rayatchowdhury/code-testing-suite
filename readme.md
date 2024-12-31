@@ -2,7 +2,7 @@
 
 Welcome to the Code Testing Suite! This application is designed to help developers test their code efficiently with features like stress testing, TLE testing, and a code editor with AI assistance.
 
-![Code Testing Suite](resources/readme/header_image.png)
+[Code Testing Suite]
 
 ## Table of Contents
 
@@ -25,20 +25,22 @@ Welcome to the Code Testing Suite! This application is designed to help develope
 ## Installation
 
 1. **Clone the repository**:
-    ```bash
-    git clone https://github.com/yourusername/code-testing-suite.git
-    cd code-testing-suite
-    ```
+
+   ```bash
+   git clone https://github.com/yourusername/code-testing-suite.git
+   cd code-testing-suite
+   ```
 
 2. **Install dependencies**:
-    ```bash
-    pip install -r requirements.txt
-    ```
+
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 3. **Run the application**:
-    ```bash
-    python main.py
-    ```
+   ```bash
+   python main.py
+   ```
 
 ## Usage
 
@@ -67,19 +69,16 @@ Welcome to the Code Testing Suite! This application is designed to help develope
 ## Screenshots
 
 ### Main Window
+
 ![Main Window](resources/readme/main_window.png)
 
-### Code Editor
-![Code Editor](resources/readme/code_editor.png)
-
 ### Stress Tester
-![Stress Tester](resources/readme/stress_tester.png)
 
-### TLE Tester
-![TLE Tester](resources/readme/tle_tester.png)
+![Stress Tester](resources/readme/stress_window.png)
 
-### Help Center
-![Help Center](resources/readme/help_center.png)
+### Results
+
+![TLE Tester](resources/readme/results.png)
 
 ## Configuration
 
