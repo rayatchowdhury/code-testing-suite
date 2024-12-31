@@ -6,7 +6,7 @@
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org)
 [![Qt](https://img.shields.io/badge/Qt-6.0+-green.svg)](https://www.qt.io)
 
-<img src="resources/readme/header_image.png" alt="Code Testing Suite" width="300px">
+<img src="resources/readme/header_image.png" alt="Code Testing Suite" width="100px">
 
 <p align="center">
 A powerful desktop application designed to streamline your coding workflow with advanced testing capabilities and AI assistance. 🎯
