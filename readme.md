@@ -1,6 +1,10 @@
-# Code Testing Suite
+# 🚀 Code Testing Suite
 
-Welcome to the **Code Testing Suite**! This application is designed to help developers test their code efficiently with features like stress testing, TLE testing, and a code editor with AI assistance.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org)
+[![Qt](https://img.shields.io/badge/Qt-6.0+-green.svg)](https://www.qt.io)
+
+Welcome to the **Code Testing Suite**! A powerful desktop application designed to streamline your coding workflow with advanced testing capabilities and AI assistance. 🎯
 
 ![Code Testing Suite](resources/readme/header_image.png)
 
@@ -14,101 +18,114 @@ Welcome to the **Code Testing Suite**! This application is designed to help deve
 - [Contributing](#contributing)
 - [License](#license)
 
-## Features
+## ✨ Features
 
-- **Code Editor**: Write and edit code with syntax highlighting and auto-completion.
-- **Stress Tester**: Perform stress tests on your code to ensure robustness.
-- **TLE Tester**: Test your code for Time Limit Exceeded (TLE) scenarios.
-- **Help Center**: Access guides and FAQs to help you use the application.
-- **AI Assistance**: Get code explanations, bug fixes, and optimizations using AI.
+<table>
+<tr>
+<td>
 
-## Installation
+### 📝 Code Editor
+- Syntax highlighting
+- Auto-completion
+- Multiple file support
+- AI-powered assistance
+
+</td>
+<td>
+
+### 🔄 Stress Tester
+- Custom test cases
+- Automated testing
+- Performance analysis
+- Error detection
+
+</td>
+</tr>
+<tr>
+<td>
+
+### ⏱️ TLE Tester
+- Time limit testing
+- Memory usage tracking
+- Performance optimization
+- Detailed reports
+
+</td>
+<td>
+
+### 🤖 AI Assistant
+- Code explanations
+- Bug detection
+- Optimization suggestions
+- Smart documentation
+
+</td>
+</tr>
+</table>
+
+## 🚀 Quick Start
 
 1. **Clone the repository**:
-
    ```bash
    git clone https://github.com/yourusername/code-testing-suite.git
    cd code-testing-suite
    ```
 
 2. **Install dependencies**:
-
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **Run the application**:
-
+3. **Launch the application**:
    ```bash
    python main.py
    ```
 
-## Usage
+## 📸 Screenshots
 
-### Code Editor
+<div align="center">
 
-- Open the Code Editor from the sidebar.
-- Create, open, and save files.
-- Use the AI assistant for code explanations, bug fixes, and optimizations.
-
-### Stress Tester
-
-- Open the Stress Tester from the sidebar.
-- Set the number of tests using the slider.
-- Compile and run your code to perform stress tests.
-
-### TLE Tester
-
-- Open the TLE Tester from the sidebar.
-- Test your code for Time Limit Exceeded scenarios.
-
-### Help Center
-
-- Access the Help Center from the sidebar.
-- Read guides and FAQs to help you use the application.
-
-## Screenshots
-
-### Main Window
-
+### 🖥️ Main Interface
 ![Main Window](resources/readme/main_window.png)
 
-### Code Editor
-
+### ✏️ Code Editor
 ![Code Editor](resources/readme/editor_window.png)
 
-### Stress Tester
-
+### 🔄 Stress Testing
 ![Stress Tester](resources/readme/stress_window.png)
 
-### Results
-
+### 📊 Results View
 ![Results](resources/readme/results.png)
 
-### Help Center
-
+### ❓ Help Center
 ![Help Center](resources/readme/help_center.png)
 
-## Configuration
+</div>
 
-You can configure the application settings by clicking on the ⚙️ button in the footer. This will open the configuration dialog where you can set various options such as:
+## ⚙️ Configuration
 
-- C++ version
-- Workspace folder
-- Gemini API key for AI assistance
-- Editor settings
+Access settings through the gear icon (⚙️) to configure:
 
-## Contributing
+- 📦 C++ version
+- 📁 Workspace folder
+- 🤖 Gemini API key
+- ✏️ Editor preferences
 
-We welcome contributions! Please follow these steps to contribute:
+## 🤝 Contributing
 
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature-branch`).
-3. Make your changes.
-4. Commit your changes (`git commit -am 'Add new feature'`).
-5. Push to the branch (`git push origin feature-branch`).
-6. Create a new Pull Request.
+We welcome contributions! Here's how you can help:
 
-## License
+1. Fork the repository
+2. Create your feature branch: `git checkout -b feature/AmazingFeature`
+3. Commit your changes: `git commit -m 'Add AmazingFeature'`
+4. Push to the branch: `git push origin feature/AmazingFeature`
+5. Open a Pull Request
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+<div align="center">
+Made with ❤️ for developers who love clean code and efficient testing
+</div>
