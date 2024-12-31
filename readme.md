@@ -1,6 +1,4 @@
 <div align="center">
-![Code Testing Suite](resources/readme/header_image.png)
-</div>
 
 # 🚀 Code Testing Suite
 
@@ -8,23 +6,32 @@
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org)
 [![Qt](https://img.shields.io/badge/Qt-6.0+-green.svg)](https://www.qt.io)
 
-Welcome to the **Code Testing Suite**! A powerful desktop application designed to streamline your coding workflow with advanced testing capabilities and AI assistance. 🎯
+<img src="resources/readme/header_image.png" alt="Code Testing Suite" width="800px">
 
-## Table of Contents
+<p align="center">
+A powerful desktop application designed to streamline your coding workflow with advanced testing capabilities and AI assistance. 🎯
+</p>
 
-- [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Screenshots](#screenshots)
-- [Configuration](#configuration)
-- [Contributing](#contributing)
-- [License](#license)
+</div>
+
+---
+
+## 📋 Table of Contents
+
+- [✨ Features](#-features)
+- [🚀 Installation](#-installation)
+- [📖 Usage](#-usage)
+- [📸 Screenshots](#-screenshots)
+- [⚙️ Configuration](#️-configuration)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
 
 ## ✨ Features
 
+<div align="center">
 <table>
 <tr>
-<td>
+<td width="50%" align="center">
 
 ### 📝 Code Editor
 
@@ -34,7 +41,7 @@ Welcome to the **Code Testing Suite**! A powerful desktop application designed t
 - AI-powered assistance
 
 </td>
-<td>
+<td width="50%" align="center">
 
 ### 🔄 Stress Tester
 
@@ -46,7 +53,7 @@ Welcome to the **Code Testing Suite**! A powerful desktop application designed t
 </td>
 </tr>
 <tr>
-<td>
+<td width="50%" align="center">
 
 ### ⏱️ TLE Tester
 
@@ -56,7 +63,7 @@ Welcome to the **Code Testing Suite**! A powerful desktop application designed t
 - Detailed reports
 
 </td>
-<td>
+<td width="50%" align="center">
 
 ### 🤖 AI Assistant
 
@@ -68,18 +75,20 @@ Welcome to the **Code Testing Suite**! A powerful desktop application designed t
 </td>
 </tr>
 </table>
+</div>
 
-## 🚀 Quick Start
+## 🚀 Installation
+
+<details>
+<summary>Click to expand installation steps</summary>
 
 1. **Clone the repository**:
-
    ```bash
    git clone https://github.com/yourusername/code-testing-suite.git
    cd code-testing-suite
    ```
 
 2. **Install dependencies**:
-
    ```bash
    pip install -r requirements.txt
    ```
@@ -88,45 +97,50 @@ Welcome to the **Code Testing Suite**! A powerful desktop application designed t
    ```bash
    python main.py
    ```
+</details>
 
 ## 📸 Screenshots
 
 <div align="center">
 
-### 🖥️ Main Interface
+<details>
+<summary>Click to view screenshots</summary>
 
-![Main Window](resources/readme/main_window.png)
+### 🖥️ Main Interface
+<img src="resources/readme/main_window.png" alt="Main Window" width="800px">
 
 ### ✏️ Code Editor
-
-![Code Editor](resources/readme/editor_window.png)
+<img src="resources/readme/editor_window.png" alt="Code Editor" width="800px">
 
 ### 🔄 Stress Testing
-
-![Stress Tester](resources/readme/stress_window.png)
+<img src="resources/readme/stress_window.png" alt="Stress Tester" width="800px">
 
 ### 📊 Results View
-
-![Results](resources/readme/results.png)
+<img src="resources/readme/results.png" alt="Results" width="800px">
 
 ### ❓ Help Center
+<img src="resources/readme/help_center.png" alt="Help Center" width="800px">
 
-![Help Center](resources/readme/help_center.png)
+</details>
 
 </div>
 
 ## ⚙️ Configuration
 
-Access settings through the gear icon (⚙️) to configure:
+<div align="center">
 
-- 📦 C++ version
-- 📁 Workspace folder
-- 🤖 Gemini API key
-- ✏️ Editor preferences
+| Setting | Description |
+|---------|-------------|
+| 📦 C++ Version | Select your preferred C++ standard |
+| 📁 Workspace | Choose your project workspace folder |
+| 🤖 API Key | Configure Gemini AI API access |
+| ✏️ Editor | Customize editor appearance and behavior |
+
+</div>
 
 ## 🤝 Contributing
 
-We welcome contributions! Here's how you can help:
+We welcome contributions! Follow these steps:
 
 1. Fork the repository
 2. Create your feature branch: `git checkout -b feature/AmazingFeature`
@@ -141,5 +155,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 <div align="center">
-Made with ❤️ for developers who love clean code and efficient testing
+
+### Made with ❤️ for developers who love clean code and efficient testing
+
+[⬆ Back to top](#-code-testing-suite)
+
 </div>
