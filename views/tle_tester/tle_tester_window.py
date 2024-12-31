@@ -20,24 +20,21 @@
 
 from views.base_window import SidebarWindowBase
 from widgets.sidebar import Sidebar
-from widgets.display_area import DisplayArea
+from views.tle_tester.tle_tester_display_area import TLETesterDisplay
+from views.tle_tester.time_limit_slider import TimeLimitSlider
+from tools.tle_runner import TLERunner
 
 class TLETesterWindow(SidebarWindowBase):
     def __init__(self, parent=None):
-        # Initialize base class first
         super().__init__(parent, title=None)
-
-        # Create sidebar with sections and buttons
+        
         self.sidebar = Sidebar("TLE Tester")
         
-        edit_section = self.sidebar.add_section("Edit Code")
-        for button_text in ['Edit Generator', 'Edit Test Code']:
-            btn = self.sidebar.add_button(button_text, edit_section)
-            btn.clicked.connect(lambda checked, text=button_text: self.handle_edit_button(text))
-            
-        options_section = self.sidebar.add_section("Test Options")
-        tle_btn = self.sidebar.add_button('TLE Options', options_section)
-        tle_btn.clicked.connect(self.handle_tle_options)
+        # Add time limit slider section (now in milliseconds)
+        options_section = self.sidebar.add_section("Time Limit (ms)")
+        self.time_limit_slider = TimeLimitSlider()
+        self.time_limit_slider.valueChanged.connect(self.handle_time_limit_changed)
+        options_section.layout().addWidget(self.time_limit_slider)
         
         action_section = self.sidebar.add_section("Actions")
         for button_text in ['Compile', 'Run', 'Results']:
@@ -51,24 +48,23 @@ class TLETesterWindow(SidebarWindowBase):
         self.sidebar.setup_horizontal_footer_buttons(back_btn, options_btn)
 
         # Create display area
-        self.display_area = DisplayArea()
+        self.display_area = TLETesterDisplay()
 
         # Setup splitter with sidebar and display area
         self.setup_splitter(self.sidebar, self.display_area)
         
-        # Connect signals - moved from handle_action_button
+        # Connect signals
         self.sidebar.button_clicked.connect(self.handle_button_click)
 
-    def handle_edit_button(self, button_text):
-        # Add your edit button handling logic here
-        pass
-
-    def handle_tle_options(self):
-        # Add your TLE options handling logic here
-        pass
+        self.tle_runner = TLERunner(self.display_area.workspace_dir)
+        self.tle_runner.compilationOutput.connect(self.display_area.console.displayOutput)
 
     def handle_action_button(self, button_text):
-        # Add your action button handling logic here
+        if button_text == 'Compile':
+            self.tle_runner.compile_all()
+        elif button_text == 'Run':
+            time_limit = self.time_limit_slider.value()
+            self.tle_runner.run_tle_test(time_limit)
         pass
 
     def handle_button_click(self, button_text):
@@ -77,3 +73,6 @@ class TLETesterWindow(SidebarWindowBase):
                 self.parent.window_manager.show_window('help_center')
         else:
             super().handle_button_click(button_text)
+
+    def handle_time_limit_changed(self, value):
+        print(f"Time limit changed to: {value} ms")
