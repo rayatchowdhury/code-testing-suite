@@ -1,6 +1,6 @@
 <div align="center">
 ![Code Testing Suite](resources/readme/header_image.png)
-<div>
+</div>
 
 # 🚀 Code Testing Suite
 
