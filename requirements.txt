@@ -1,0 +1,26 @@
+# Qt dependencies
+PySide6>=6.5.0
+PySide6-Essentials>=6.5.0
+PySide6-AddOns>=6.5.0
+
+# Async support
+qasync>=0.23.0
+asyncio>=3.4.3
+
+# For AI features
+google-generativeai>=0.3.0
+aiohttp>=3.8.0
+
+# Code parsing and highlighting
+Pygments>=2.15.0
+
+# File operations and utilities
+pathlib>=1.0.1
+
+# For running tests and benchmarking
+psutil>=5.9.0
+pytest>=7.3.1
+
+# Development tools (optional)
+black>=23.3.0  # code formatting
+pylint>=2.17.0  # code analysis
