@@ -36,7 +36,7 @@ class CodeEditorDisplay(QWidget):
         self.splitter = QSplitter(Qt.Horizontal)
         self.splitter.setStyleSheet(SPLITTER_STYLE)
         self.splitter.setChildrenCollapsible(False)  # Prevent panels from collapsing
-        self.splitter.setHandleWidth(2)  # Set a small handle width
+        self.splitter.setHandleWidth(0)  # Add this line to hide the splitter handle
 
         # Create outer panel with ultra-dim gradient
         outer_panel = QWidget()

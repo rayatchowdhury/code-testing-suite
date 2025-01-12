@@ -2,7 +2,7 @@ from ..constants.colors import MATERIAL_COLORS
 
 SPLITTER_STYLE = """
 QSplitter::handle {
-    background: transparent;
+    background: 1b1b1e;
     width: 2px;
 }
 """

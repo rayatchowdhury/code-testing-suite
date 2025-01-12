@@ -55,8 +55,6 @@ class Sidebar(QWidget):
         # Add divider after header
         self.add_divider(main_layout)
         
-        # Add spacing before scroll area
-        main_layout.addSpacing(10)  # Add this line
 
         # 2. Scrollable Content Section
         scroll = QScrollArea()
@@ -94,13 +92,22 @@ class Sidebar(QWidget):
 
     def add_divider(self, layout):
         """Add a visually appealing horizontal divider line with padding."""
-        # Add spacing above the divider
-        layout.addSpacing(10)
+        # Create container for the divider section with background
+        container = QWidget()
+        container.setStyleSheet("background-color: #1b1b1e;")
+        container_layout = QVBoxLayout(container)
+        container_layout.setContentsMargins(0, 0, 0, 0)
+        container_layout.setSpacing(0)
+
+        # Add top spacing
+        top_space = QWidget()
+        top_space.setFixedHeight(10)
+        top_space.setStyleSheet("background-color: #1b1b1e;")
+        container_layout.addWidget(top_space)
 
         # Create a widget to serve as the divider
         line_widget = QWidget()
-        line_widget.setFixedHeight(3)  # Adjust height for the divider
-        # Apply a gradient background for a modern look
+        line_widget.setFixedHeight(3)
         line_widget.setStyleSheet("""
             background: qlineargradient(
                 spread: pad,
@@ -113,21 +120,35 @@ class Sidebar(QWidget):
             margin-left: 10px;
             margin-right: 10px;
         """)
-        layout.addWidget(line_widget)
+        container_layout.addWidget(line_widget)
 
-        # Add spacing below the divider
+        # Add bottom spacing
+        bottom_space = QWidget()
+        bottom_space.setFixedHeight(10)
+        bottom_space.setStyleSheet("background-color: #1b1b1e;")
+        container_layout.addWidget(bottom_space)
 
+        layout.addWidget(container)
         return line_widget
 
     def add_footer_divider(self):
         """Add a divider in the footer with the same style as the main divider"""
-        # Add minimal spacing above the divider
-        self.footer.layout().addSpacing(1)  # Reduced from 3
+        # Create container for the footer divider section
+        container = QWidget()
+        container.setStyleSheet("background-color: #1e1e1e;")
+        container_layout = QVBoxLayout(container)
+        container_layout.setContentsMargins(0, 0, 0, 0)
+        container_layout.setSpacing(0)
+
+        # Add top spacing
+        top_space = QWidget()
+        top_space.setFixedHeight(1)
+        top_space.setStyleSheet("background-color: #1e1e1e;")
+        container_layout.addWidget(top_space)
 
         # Create a widget to serve as the divider
         line_widget = QWidget()
         line_widget.setFixedHeight(1)
-        # Apply a gradient background for a modern look
         line_widget.setStyleSheet("""
            background: qlineargradient(
             spread: pad,
@@ -135,16 +156,20 @@ class Sidebar(QWidget):
             stop: 0 rgba(96, 125, 139, 0.6),
             stop: 0.5 rgba(69, 90, 100, 0.8),
             stop: 1 rgba(38, 50, 56, 0.6)
-                );
-            border-radius: 1px;
-            margin-left: 10px;
-            margin-right: 10px;
+           );
+           border-radius: 1px;
+           margin-left: 10px;
+           margin-right: 10px;
         """)
-        self.footer.layout().addWidget(line_widget)
+        container_layout.addWidget(line_widget)
 
-        # Add minimal spacing below the divider
-        self.footer.layout().addSpacing(2)  # Reduced from 3
+        # Add bottom spacing
+        bottom_space = QWidget()
+        bottom_space.setFixedHeight(2)
+        bottom_space.setStyleSheet("background-color: #1e1e1e;")
+        container_layout.addWidget(bottom_space)
 
+        self.footer.layout().addWidget(container)
         return line_widget
 
     def add_vertical_footer_divider(self):

@@ -3,7 +3,7 @@ from .scrollbar import SCROLLBAR_STYLE
 
 SIDEBAR_STYLE = f"""
 QWidget {{
-    background: transparent;
+    background:  '#1B1B1E';
 }}
 
 QWidget#sidebar, QWidget#sidebar_scroll, QWidget#sidebar_content {{
@@ -150,7 +150,7 @@ QPushButton#footer_button:pressed {{
 }}
 
 QFrame#sidebar_section {{
-    background: transparent;
+    background: 1b1b1e;
     border-bottom: 1px solid {COLORS['primary']}44;
     margin: 2px 0 4px 0;
     padding-bottom: 4px;
@@ -188,7 +188,7 @@ QWidget#sidebar_content {{
 }}
 
 QWidget#sidebar > QWidget {{
-    background: transparent;
+    background: 1b1b1e;
 }}
 """
 

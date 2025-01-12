@@ -30,7 +30,7 @@ class TLETesterDisplay(QWidget):
         self.splitter = QSplitter(Qt.Horizontal)
         self.splitter.setStyleSheet(SPLITTER_STYLE)
         self.splitter.setChildrenCollapsible(False)
-        self.splitter.setHandleWidth(2)
+        self.splitter.setHandleWidth(0)
 
         # Create outer panel
         outer_panel = QWidget()
