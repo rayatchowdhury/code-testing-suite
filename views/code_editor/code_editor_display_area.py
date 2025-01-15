@@ -1,9 +1,12 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QSplitter, QHBoxLayout, QTabWidget, QPushButton, QMessageBox
+from PySide6.QtWidgets import (QWidget, QVBoxLayout, QSplitter, QHBoxLayout, 
+                              QTabWidget, QPushButton, QMessageBox)
 from PySide6.QtWebEngineWidgets import QWebEngineView
-import os
 from PySide6.QtCore import Qt, Signal, QUrl
+import os
+
 from widgets.display_area_widgets.editor import EditorWidget
-from widgets.display_area_widgets.console import ConsoleOutput
+from widgets.display_area_widgets.console import ConsoleOutput 
+from widgets.display_area_widgets.ai_panel import AIPanel
 from tools.compiler_runner import CompilerRunner
 from styles.style import MATERIAL_COLORS
 from styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE
@@ -92,6 +95,9 @@ class CodeEditorDisplay(QWidget):
 
         # Initialize compiler
         self.compiler_runner = CompilerRunner(self.console)
+
+        # Initialize AI panel with editor type
+        self.ai_panel = AIPanel(panel_type="editor")
 
     def _create_tab_widget(self):
         tab_widget = QTabWidget()

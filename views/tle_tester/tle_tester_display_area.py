@@ -1,11 +1,13 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QSplitter, QHBoxLayout, QPushButton
 from PySide6.QtCore import Qt, Signal
+import os
+
 from widgets.display_area_widgets.editor import EditorWidget
 from widgets.display_area_widgets.console import ConsoleOutput
+from widgets.display_area_widgets.ai_panel import AIPanel
 from tools.tle_compiler_runner import TLECompilerRunner
 from styles.style import MATERIAL_COLORS
-from styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE  # Add this line
-import os
+from styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE
 
 class TLETesterDisplay(QWidget):
     filePathChanged = Signal()
@@ -81,9 +83,9 @@ class TLETesterDisplay(QWidget):
             self.file_buttons[name] = btn
             button_layout.addWidget(btn)
 
-        # Create editor
+        # Create editor and AI panel in correct order
         self.editor = EditorWidget()
-
+        
         # Create inner panel for content
         content_panel = QWidget()
         content_panel.setStyleSheet(f"background-color: {MATERIAL_COLORS['surface']};")
@@ -92,6 +94,10 @@ class TLETesterDisplay(QWidget):
         content_layout.setSpacing(0)
         content_layout.addWidget(button_panel)
         content_layout.addWidget(self.editor)
+
+        # Initialize AI panel with tle type
+        self.ai_panel = self.editor.ai_panel
+        self.ai_panel.set_panel_type("tle")
 
         # Add inner panel to outer panel
         outer_layout.addWidget(content_panel)

@@ -15,7 +15,7 @@ QWidget#console_container {
 # Update existing CONSOLE_STYLE to include the container style
 CONSOLE_STYLE = CONSOLE_CONTAINER_STYLE + f"""
 * {{
-    background-color: '#1B1B1E';
+    background-color: transparent;
 }}
 
 QWidget#console_title {{

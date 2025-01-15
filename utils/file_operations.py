@@ -11,7 +11,7 @@ class FileOperations:
     @staticmethod
     def save_file(filepath, content, parent=None):
         try:
-            with open(filepath, 'w') as file:
+            with open(filepath, 'w', encoding='utf-8') as file:
                 file.write(content)
             return True
         except Exception as e:
@@ -32,11 +32,14 @@ class FileOperations:
 
     @staticmethod
     def save_file_as(parent, content, current_path=None):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
         file_name, selected_filter = QFileDialog.getSaveFileName(
             parent,
             "Save File",
             current_path or "",
-            FileOperations.FILE_FILTERS
+            FileOperations.FILE_FILTERS,
+            options=options
         )
 
         if file_name:
@@ -77,3 +80,12 @@ class FileOperations:
             QMessageBox.critical(parent, "Error", f"Error opening file: {str(e)}")
         
         return None, None
+
+    @staticmethod
+    def load_file(file_path, parent=None):
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                return f.read()
+        except Exception as e:
+            # Log or display an error message as needed
+            return None

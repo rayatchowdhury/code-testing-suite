@@ -21,24 +21,33 @@ MATERIAL_COLORS = {
     'surface': '#242426',
     'surface_dim': '#1F1F21',
     'surface_variant': '#2A2A2D',
+    'surface_bright': '#2F2F33',
+    
     'primary': '#0096C7',
     'primary_dark': '#023E8A',
+    'primary_darker': '#012E52',
     'primary_container': '#004B63',
-    'on_primary_container': '#FFFFFF',
+    
     'secondary': '#FFB703',
     'accent': '#F72585',
     'error': '#FF6B6B',
+    'error_container': '#420101',
+    
+    'outline': '#3F3F3F',
+    'outline_variant': '#2C2C2C',
+    'border': '#333333',
+    
     'text_primary': '#FFFFFF',
     'text_secondary': '#B3B3B3',
-    'button_hover': '#2A2A2D',
-    'border': '#333333',
-    'outline': '#3F3F3F',
-    'on_primary': '#FFFFFF',
-    'outline_variant': '#2C2C2C',
-    'surface_bright': '#2F2F33',
-    'error_container': '#420101',
-    'tab_height': '36px',
     'text_disabled': '#666666',
-    'on_surface': '#FFFFFF',  # Text on surface color
-    'primary_darker': '#012E52',  # Darker shade for pressed state
+    
+    'on_primary': '#FFFFFF',
+    'on_primary_container': '#FFFFFF',
+    'on_surface': '#FFFFFF',
+    'on_surface_variant': '#B3B3B3',
+    'on_surface_dim': '#999999',
+    'on_surface_disabled': '#666666',
+    
+    'button_hover': '#2A2A2D',
+    'tab_height': '36px'
 }

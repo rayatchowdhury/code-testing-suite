@@ -1,17 +1,28 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QPlainTextEdit, QLineEdit,
                               QTextEdit, QFileDialog, QHBoxLayout, QPushButton,
                               QMessageBox, QDialog, QScrollArea, QLabel, QFrame)
-from PySide6.QtGui import QFont, QColor, QPainter, QTextFormat, QTextCursor, QKeySequence, QShortcut
+from PySide6.QtGui import (QFont, QColor, QPainter, QTextFormat, QTextCursor, 
+                          QKeySequence, QShortcut)
 from PySide6.QtCore import Qt, QRect, QSize, QTimer, Signal, QObject
-from widgets.display_area_widgets.syntaxhighlighter import CPPSyntaxHighlighter, PythonSyntaxHighlighter, JavaSyntaxHighlighter
 import os
-from styles.constants.editor_colors import EDITOR_COLORS
-from styles.components.editor import get_editor_style, EDITOR_WIDGET_STYLE, AI_PANEL_STYLE, AI_DIALOG_STYLE
-from utils.file_operations import FileOperations
-from tools.editor_ai import EditorAI
 import asyncio
 import qasync
 from qasync import asyncSlot, QEventLoop
+from markdown import markdown
+from pygments import highlight
+from pygments.formatters import HtmlFormatter
+from pygments.lexers import get_lexer_by_name
+
+from .syntaxhighlighter import (CPPSyntaxHighlighter, PythonSyntaxHighlighter, 
+                               JavaSyntaxHighlighter)
+from styles.constants.editor_colors import EDITOR_COLORS
+from styles.constants.colors import MATERIAL_COLORS
+from styles.components.editor import (EDITOR_WIDGET_STYLE, get_editor_style,
+                                    AI_DIALOG_STYLE)
+from styles.components.ai_panel import AI_PANEL_STYLE
+from utils.file_operations import FileOperations
+from tools.editor_ai import EditorAI
+from .ai_panel import AIPanel
 
 class CodeEditor(QPlainTextEdit):
     def __init__(self):
@@ -89,7 +100,7 @@ class CodeEditor(QPlainTextEdit):
             self.lineNumberArea.scroll(0, dy)
         else:
             self.lineNumberArea.update(
-                0, rect.y(), self.lineNumberArea.width(), rect.height())
+                            0, rect.y(), self.lineNumberArea.width(), rect.height())
         if rect.contains(self.viewport().rect()):
             self.updateLineNumberAreaWidth(0)
 
@@ -186,6 +197,7 @@ class CodeEditor(QPlainTextEdit):
         return indent
 
 
+
 class LineNumberArea(QWidget):
     def __init__(self, editor):
         super().__init__(editor)
@@ -208,7 +220,8 @@ class EditorWidget(QWidget):
         self.editor_ai = EditorAI()
         self._setup_ui()
         self._setup_file_handling()
-        self._connect_ai_buttons()
+        
+        # Remove _connect_ai_buttons() call from here
 
     def _setup_ui(self):
         layout = QVBoxLayout(self)
@@ -219,123 +232,173 @@ class EditorWidget(QWidget):
         self.codeEditor = CodeEditor()
         layout.addWidget(self.codeEditor)
 
-        # Add AI panel container below editor
-        self.ai_panel_container = QWidget()
-        self.ai_panel_container.setObjectName("ai_panel_container")
-        self.ai_panel_container.setStyleSheet(AI_PANEL_STYLE)
-        
-        ai_panel = QHBoxLayout(self.ai_panel_container)
-        ai_panel.setContentsMargins(5, 5, 5, 5)
-        ai_panel.setSpacing(5)
+        # Create and add AI panel with connections to editor functions
+        self.ai_panel = AIPanel(panel_type="editor", parent=self)
+        self.ai_panel.analysisRequested.connect(self._analysis_code)
+        self.ai_panel.issuesRequested.connect(self._find_issues)  # Changed from fix to issues
+        self.ai_panel.tipsRequested.connect(self._get_tips)   # Changed from optimize to tips
+        self.ai_panel.documentRequested.connect(self._document_code)
+        self.ai_panel.generateRequested.connect(self._generate_code)
+        self.ai_panel.customCommandRequested.connect(self._handle_custom_command)
+        layout.addWidget(self.ai_panel)
 
-        # Add normal AI buttons on the left
-        button_container = QWidget()
-        button_layout = QHBoxLayout(button_container)
-        button_layout.setContentsMargins(0, 0, 0, 0)
-        button_layout.setSpacing(5)
-        
-        ai_buttons = ['Explain', 'Fix', 'Optimize', 'Document']
-        self.ai_buttons = {}
-        for btn_text in ai_buttons:
-            btn = QPushButton(btn_text)
-            btn.setObjectName("ai_button")
-            btn.setFixedHeight(30)
-            self.ai_buttons[btn_text] = btn
-            button_layout.addWidget(btn)
-        
-        ai_panel.addWidget(button_container)
+        # Map AI actions to methods
+        self.ai_actions = {
+            'analysis': ('Code Explanation', self._process_explanation),
+            'issues': ('Potential Issues', self._process_explanation),
+            'tips': ('Improvement Tips', self._process_explanation),
+            'document': ('Documentation', self._process_code),
+            'generate': ('Generated Code', self._process_code),
+            'custom': ('Custom Command', self._process_code)
+        }
 
-        # Add custom command input that takes remaining space
-        self.command_input = QLineEdit()
-        self.command_input.setObjectName("ai_command_input")
-        self.command_input.setPlaceholderText("Type custom AI command and press Enter")
-        self.command_input.returnPressed.connect(self._handle_custom_command)
-        self.command_input.setMinimumWidth(170)
-        ai_panel.addWidget(self.command_input, 1)  # 1 is the stretch factor
+    # Remove _connect_ai_buttons method since we're using signals now
 
-        layout.addWidget(self.ai_panel_container)
-
-    def _handle_custom_command(self):
+    def _handle_custom_command(self, command: str, code: str = None):
         """Handle custom AI command"""
-        command = self.command_input.text().strip()
-        if command:
-            self._process_ai_request(
-                lambda code: self.editor_ai.custom_command(command, code),
-                "Custom Command"
-            )
-            self.command_input.clear()
+        if code is None:
+            code = self.getCode()
+        asyncio.create_task(
+            self._process_code('custom', code, command=command)
+        )
 
-    def _connect_ai_buttons(self):
-        """Connect AI buttons to their respective actions"""
-        self.ai_buttons['Explain'].clicked.connect(self._explain_code)
-        self.ai_buttons['Fix'].clicked.connect(self._fix_code)
-        self.ai_buttons['Optimize'].clicked.connect(self._optimize_code)
-        self.ai_buttons['Document'].clicked.connect(self._document_code)
+    def _clean_code_response(self, text: str) -> str:
+        """Strip everything but the actual code."""
+        # First, clean any markdown artifacts
+        markdown_patterns = [
+            '```python', '```cpp', '```java', '```c', '```',
+            '```c++', '```javascript', '```txt',
+            '---', '===', '###'
+        ]
+        
+        cleaned = text.strip()
+        for pattern in markdown_patterns:
+            cleaned = cleaned.replace(pattern, '')
+        
+        # Clean up whitespace and empty lines
+        cleaned = '\n'.join(line.rstrip() for line in cleaned.splitlines())
+        while '\n\n\n' in cleaned:
+            cleaned = cleaned.replace('\n\n\n', '\n\n')
+            
+        return cleaned.strip()
+
+    def _apply_changes(self, text: str, dialog: QDialog):
+        """Apply code changes with undo support."""
+        cleaned_code = self._clean_code_response(text)
+        
+        # Verify we have actual code
+        if not cleaned_code or cleaned_code.isspace():
+            return
+        
+        # Create a cursor and preserve selection/position
+        cursor = self.codeEditor.textCursor()
+        position = cursor.position()
+        
+        # Begin editing block for undo
+        cursor.beginEditBlock()
+        cursor.select(QTextCursor.Document)
+        cursor.insertText(cleaned_code)
+        cursor.endEditBlock()
+        
+        # Restore cursor position if possible
+        if position < len(cleaned_code):
+            cursor.setPosition(position)
+        self.codeEditor.setTextCursor(cursor)
+        
+        # Setup syntax highlighting
+        self.codeEditor._setup_syntax_highlighting(self.currentFilePath)
+        
+        # Automatically save the file
+        self.saveFile()
+        
+        dialog.accept()
+
+    def _format_ai_response(self, response: str, title: str) -> str:
+        """Format AI response with proper styling."""
+        # Only wrap code responses in code blocks for display
+        if title in ["Documentation", "Generated Code", "Custom Command"]:
+            file_type = self.currentFilePath.split('.')[-1] if self.currentFilePath else 'cpp'
+            return f"```{file_type}\n{self._clean_code_response(response)}\n```"
+        return response
 
     def _show_ai_response(self, response: str, title: str):
-        """Show AI response in a custom dialog with scrollable content"""
+        """Show AI response with enhanced styling."""
         dialog = QDialog(self)
-        dialog.setWindowTitle(title)
-        dialog.setMinimumSize(800, 600)  # Larger default size
+        dialog.setWindowTitle(f"AI Assistant - {title}")
+        dialog.setMinimumSize(900, 650)
         dialog.setStyleSheet(AI_DIALOG_STYLE)
 
+        # Main layout with zero margins for full-bleed design
         layout = QVBoxLayout(dialog)
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(15)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
 
-        # Create scroll area with custom styling
+        # Scroll area setup
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
-        scroll_area.setFrameShape(QFrame.NoFrame)  # Remove frame border
+        scroll_area.setFrameShape(QFrame.NoFrame)
 
-        # Create content widget with proper styling
+        # Content widget with proper margins
         content_widget = QWidget()
         content_layout = QVBoxLayout(content_widget)
         content_layout.setContentsMargins(0, 0, 0, 0)
+        content_layout.setSpacing(0)
 
-        # Create label with styled text
-        content_label = QLabel(response)
-        content_label.setWordWrap(True)
+        # Format content and add to layout
+        formatted_response = self._format_ai_response(response, title)
+        html_content = markdown(
+            formatted_response,
+            extensions=['fenced_code', 'codehilite', 'tables']
+        )
+        
+        # Add syntax highlighting CSS
+        formatter = HtmlFormatter(style='monokai')
+        css = formatter.get_style_defs('.codehilite')
+        html_content = f"<style>{css}</style>{html_content}"
+
+        # Create and setup content label
+        content_label = QLabel(html_content)
+        content_label.setTextFormat(Qt.RichText)
         content_label.setTextInteractionFlags(
             Qt.TextSelectableByMouse | 
             Qt.TextSelectableByKeyboard
         )
-        content_label.setFont(QFont('Segoe UI', 12))
         content_layout.addWidget(content_label)
 
+        # Set content in scroll area
         scroll_area.setWidget(content_widget)
         layout.addWidget(scroll_area)
 
-        # Create button container
+        # Button container with styling
         button_container = QWidget()
+        button_container.setObjectName("button_container")
         button_layout = QHBoxLayout(button_container)
-        button_layout.setContentsMargins(0, 0, 0, 0)
-        button_layout.setSpacing(10)
-        button_layout.addStretch()  # Push buttons to the right
+        button_layout.setContentsMargins(20, 15, 20, 15)
+        button_layout.addStretch()
 
         # Add buttons
-        ok_button = QPushButton("OK")
-        ok_button.setDefault(True)
+        ok_button = QPushButton("Close")
+        ok_button.setObjectName("cancel_button")
         ok_button.clicked.connect(dialog.accept)
         button_layout.addWidget(ok_button)
 
-        if title in ["Documentation", "Custom Command"]:
+        # Add apply button for code-returning functions
+        if title in ["Documentation", "Generated Code", "Custom Command"]:
             apply_button = QPushButton("Apply Changes")
-            apply_button.clicked.connect(lambda: self._apply_changes(response))
+            apply_button.setObjectName("apply_button")
+            apply_button.setDefault(True)
+            apply_button.clicked.connect(
+                lambda: self._apply_changes(response, dialog)
+            )
             button_layout.addWidget(apply_button)
 
         layout.addWidget(button_container)
         
         dialog.exec()
 
-    def _apply_changes(self, text):
-        """Apply changes without closing dialog"""
-        self.codeEditor.setPlainText(text)
-
     def _process_ai_request(self, action, title):
         """Process AI request with loading state"""
-        for btn in self.ai_buttons.values():
-            btn.setEnabled(False)
+        self.ai_panel.set_enabled(False)  # Use ai_panel's method instead of direct button access
         
         async def process_request():
             try:
@@ -347,39 +410,101 @@ class EditorWidget(QWidget):
             except Exception as e:
                 self._show_ai_response(f"Error: {str(e)}", "Error")
             finally:
-                for btn in self.ai_buttons.values():
-                    btn.setEnabled(True)
+                self.ai_panel.set_enabled(True)  # Re-enable through ai_panel
 
         task = asyncio.create_task(process_request())
         return task
 
+    async def _process_explanation(self, action: str, code: str = None):
+        """Handle explanation-type AI requests."""
+        if code is None:
+            code = self.getCode()
+        await self._process_ai_request(
+            lambda c: self.editor_ai.process_explanation(action, c),
+            self.ai_actions[action][0]
+        )
+
+    async def _process_code(self, action: str, code: str = None, **kwargs):
+        """Handle code-modification AI requests."""
+        if code is None:
+            code = self.getCode()
+        await self._process_ai_request(
+            lambda c: self.editor_ai.process_code(action, c, **kwargs),
+            self.ai_actions[action][0]
+        )
+
+    # Simplified action methods
     @asyncSlot()
-    async def _explain_code(self):
-        if not self.editor_ai.model:
-            self._show_ai_response("AI service not available. Please check your API key configuration.", "Error")
-            return
-        await self._process_ai_request(self.editor_ai.explain_code, "Code Explanation")
+    async def _analysis_code(self, code=None):
+        await self._process_explanation('analysis', code)
 
     @asyncSlot()
-    async def _fix_code(self):
-        await self._process_ai_request(self.editor_ai.fix_code, "Code Fixes")
+    async def _find_issues(self, code=None):
+        await self._process_explanation('issues', code)
 
     @asyncSlot()
-    async def _optimize_code(self):
-        await self._process_ai_request(self.editor_ai.optimize_code, "Code Optimizations")
+    async def _get_tips(self, code=None):
+        await self._process_explanation('tips', code)
 
     @asyncSlot()
-    async def _document_code(self):
-        await self._process_ai_request(self.editor_ai.document_code, "Documentation")
+    async def _document_code(self, code=None):
+        await self._process_code('document', code)
+
+    @asyncSlot()
+    async def _generate_code(self, code=None):
+        await self._process_code('generate', code, 
+                               type=self.currentFilePath or "generator.cpp")
 
     def _setup_file_handling(self):
         self.currentFilePath = None
         self.setupShortcuts()
+        QShortcut(QKeySequence("Ctrl+I"), self).activated.connect(self._openFilePicker)
 
     def setupShortcuts(self):
         # Bind shortcuts to saveFile/saveFileAs directly
         QShortcut(QKeySequence.Save, self).activated.connect(self.saveFile)
         QShortcut(QKeySequence.SaveAs, self).activated.connect(self.saveFileAs)
+
+    def _handle_file_button(self, button_name):
+        # Update active button state
+        if self.current_button:
+            self.current_button.setProperty("isActive", False)
+            self.current_button.style().unpolish(self.current_button)
+            self.current_button.style().polish(self.current_button)
+        
+        clicked_button = self.file_buttons[button_name]
+        clicked_button.setProperty("isActive", True)
+        clicked_button.style().unpolish(clicked_button)
+        clicked_button.style().polish(clicked_button)
+        self.current_button = clicked_button
+
+        file_map = {
+            'Generator': 'generator.cpp',
+            'Correct Code': 'correct.cpp',
+            'Test Code': 'test.cpp'
+        }
+        
+        file_path = os.path.join(self.workspace_dir, file_map[button_name])
+        
+        # Create file if it doesn't exist
+        if not os.path.exists(file_path):
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.write('// Add your code here\n')
+        
+        # Load file content
+        content = FileOperations.load_file(file_path, self)
+        if content is not None:
+            self.editor.currentFilePath = file_path
+            self.editor.codeEditor.setPlainText(content)
+            self.editor.codeEditor._setup_syntax_highlighting(file_path)
+
+    def _openFilePicker(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, "Insert File Content", "", "All Files (*)")
+        if file_path:
+            content = FileOperations.load_file(file_path, self)
+            if content is not None:
+                # Overwrite current file's content without changing currentFilePath
+                self.codeEditor.setPlainText(content)
 
     def saveFile(self):
         """Save to current path or prompt for new path if none exists"""

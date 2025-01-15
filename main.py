@@ -6,11 +6,16 @@ from PySide6.QtGui import QIcon
 from views.main_window import MainWindow
 import qasync
 import asyncio
+from absl import logging as absl_logging
 
 def main():
+    # Initialize absl logging before anything else
+    absl_logging.use_absl_handler()
+    absl_logging.set_verbosity(absl_logging.WARNING)
+    
     # Set attributes before creating QApplication
     QApplication.setAttribute(Qt.AA_UseDesktopOpenGL)
-    QApplication.setAttribute(Qt.AA_ShareOpenGLContexts)  # Required for WebEngine
+    QApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
     
     app = QApplication(sys.argv)
     
