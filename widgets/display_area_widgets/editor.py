@@ -99,8 +99,7 @@ class CodeEditor(QPlainTextEdit):
         if dy:
             self.lineNumberArea.scroll(0, dy)
         else:
-            self.lineNumberArea.update(
-                            0, rect.y(), self.lineNumberArea.width(), rect.height())
+            self.lineNumberArea.update(0, rect.y(), self.lineNumberArea.width(), rect.height())
         if rect.contains(self.viewport().rect()):
             self.updateLineNumberAreaWidth(0)
 
@@ -252,7 +251,11 @@ class EditorWidget(QWidget):
             'custom': ('Custom Command', self._process_code)
         }
 
-    # Remove _connect_ai_buttons method since we're using signals now
+        self.codeEditor.document().modificationChanged.connect(self._handle_modification_changed)
+
+    def _handle_modification_changed(self, modified):
+        if not modified:  # Document returned to unmodified state
+            self.filePathChanged.emit()
 
     def _handle_custom_command(self, command: str, code: str = None):
         """Handle custom AI command"""
@@ -524,7 +527,7 @@ class EditorWidget(QWidget):
     def _save_to_path(self, path):
         """Internal method to save file and update editor state"""
         if FileOperations.save_file(path, self.getCode(), self):
-            self.codeEditor.document().setModified(False)
+            self.codeEditor.document().setModified(False)  # This will trigger modificationChanged
             self.codeEditor._setup_syntax_highlighting(path)
             return True
         return False

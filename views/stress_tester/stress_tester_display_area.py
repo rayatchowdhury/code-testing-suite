@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QSplitter, QHBoxLayout, QPushButton
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QSplitter, QHBoxLayout, QPushButton, QMessageBox
 from PySide6.QtCore import Qt, Signal
 import os
 
@@ -66,17 +66,43 @@ class StressTesterDisplay(QWidget):
             btn.setStyleSheet(f"""
                 QPushButton {{
                     background-color: {MATERIAL_COLORS['surface_variant']};
-                    border: none;
-                    border-radius: 6px;
+                    border: 1px solid {MATERIAL_COLORS['outline_variant']};
+                    border-radius: 8px;
                     color: {MATERIAL_COLORS['on_surface']};
                     padding: 8px 16px;
                     font-weight: 500;
+                    font-size: 13px;
                 }}
+                
                 QPushButton:hover {{
-                    background-color: {MATERIAL_COLORS['primary_container']};
+                    background-color: {MATERIAL_COLORS['surface_bright']};
+                    border-color: {MATERIAL_COLORS['outline']};
                 }}
+                
                 QPushButton[isActive="true"] {{
+                    background-color: {MATERIAL_COLORS['primary_container']};
+                    border: 1px solid {MATERIAL_COLORS['primary']};
+                    color: {MATERIAL_COLORS['on_primary_container']};
+                    font-weight: 600;
+                }}
+                
+                QPushButton[isActive="true"]:hover {{
                     background-color: {MATERIAL_COLORS['primary']};
+                    color: {MATERIAL_COLORS['on_primary']};
+                }}
+                
+                QPushButton[isActive="true"][hasUnsavedChanges="true"] {{
+                    background-color: {MATERIAL_COLORS['primary_container']};
+                    border: 2px solid {MATERIAL_COLORS['error']};
+                    border-radius: 8px;
+                    color: {MATERIAL_COLORS['on_primary']};
+                    font-weight: 600;
+                    padding: 7px 15px;  /* Adjust padding to account for thicker border */
+                }}
+                
+                QPushButton[isActive="true"][hasUnsavedChanges="true"]:hover {{
+                    background-color: {MATERIAL_COLORS['primary']};
+                    border-color: {MATERIAL_COLORS['error']};
                     color: {MATERIAL_COLORS['on_primary']};
                 }}
             """)
@@ -122,11 +148,35 @@ class StressTesterDisplay(QWidget):
         for name, btn in self.file_buttons.items():
             btn.clicked.connect(lambda checked, n=name: self._handle_file_button(n))
         self.console.compile_run_btn.clicked.connect(self.compile_and_run_code)
+        self.editor.codeEditor.document().modificationChanged.connect(self._handle_text_changed)
+        self.editor.filePathChanged.connect(self.handle_file_saved)
 
+    def _handle_text_changed(self, modified):
+        if self.current_button:
+            self.current_button.setProperty("hasUnsavedChanges", modified)
+            self.current_button.style().unpolish(self.current_button)
+            self.current_button.style().polish(self.current_button)
+    
     def _handle_file_button(self, button_name):
+        # Check if current file has unsaved changes
+        if self.current_button and self.current_button.property("hasUnsavedChanges"):
+            reply = QMessageBox.question(
+                self, 
+                "Unsaved Changes",
+                f"Do you want to save changes to {self.current_button.text()}?",
+                QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel
+            )
+            
+            if reply == QMessageBox.Save:
+                if not self.editor.saveFile():
+                    return  # If save was cancelled or failed
+            elif reply == QMessageBox.Cancel:
+                return
+        
         # Update active button state
         if self.current_button:
             self.current_button.setProperty("isActive", False)
+            self.current_button.setProperty("hasUnsavedChanges", False)
             self.current_button.style().unpolish(self.current_button)
             self.current_button.style().polish(self.current_button)
         
@@ -156,8 +206,28 @@ class StressTesterDisplay(QWidget):
         self.editor.currentFilePath = file_path
         self.editor.codeEditor.setPlainText(content)
         self.editor.codeEditor._setup_syntax_highlighting(file_path)
+        
+        # Reset unsaved changes state after loading file
+        clicked_button.setProperty("hasUnsavedChanges", False)
+        clicked_button.style().unpolish(clicked_button)
+        clicked_button.style().polish(clicked_button)
 
     def compile_and_run_code(self):
+        # Check for unsaved changes before compiling
+        if self.current_button and self.current_button.property("hasUnsavedChanges"):
+            reply = QMessageBox.question(
+                self,
+                "Unsaved Changes",
+                f"Do you want to save changes before compiling?",
+                QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel
+            )
+            
+            if reply == QMessageBox.Save:
+                if not self.editor.saveFile():
+                    return
+            elif reply == QMessageBox.Cancel:
+                return
+
         if not self.editor.currentFilePath:
             return
 
@@ -169,3 +239,10 @@ class StressTesterDisplay(QWidget):
         
         self.compiler_runner.finished.connect(on_complete)
         self.compiler_runner.compile_and_run_code(self.editor.currentFilePath)
+
+    def handle_file_saved(self):
+        print("File saved - updating button state")  # Debug print
+        if self.current_button:
+            self.current_button.setProperty("hasUnsavedChanges", False)
+            self.current_button.style().unpolish(self.current_button)
+            self.current_button.style().polish(self.current_button)

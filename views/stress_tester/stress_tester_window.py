@@ -1,6 +1,6 @@
 from views.base_window import SidebarWindowBase
 from widgets.sidebar import Sidebar
-from PySide6.QtWidgets import QPushButton
+from PySide6.QtWidgets import QPushButton, QMessageBox
 from PySide6.QtGui import QFont
 from views.stress_tester.stress_tester_display_area import StressTesterDisplay
 from views.stress_tester.test_count_slider import TestCountSlider
@@ -50,6 +50,24 @@ class StressTesterWindow(SidebarWindowBase):
 
     def handle_action_button(self, button_text):
         if button_text == 'Compile':
+            # Check all files for unsaved changes
+            for btn_name, btn in self.display_area.file_buttons.items():
+                if btn.property("hasUnsavedChanges"):
+                    reply = QMessageBox.question(
+                        self,
+                        "Unsaved Changes",
+                        f"Do you want to save changes to {btn_name}?",
+                        QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel
+                    )
+                    
+                    if reply == QMessageBox.Save:
+                        # Switch to this file
+                        self.display_area._handle_file_button(btn_name)
+                        if not self.display_area.editor.saveFile():
+                            return
+                    elif reply == QMessageBox.Cancel:
+                        return
+
             self.stresser.compile_all()
         elif button_text == 'Run':
             test_count = self.test_count_slider.value()

@@ -32,6 +32,7 @@ MATERIAL_COLORS = {
     'accent': '#F72585',
     'error': '#FF6B6B',
     'error_container': '#420101',
+    'on_error_container': '#FFB6B6',  # Add this line - light red color for text on error background
     
     'outline': '#3F3F3F',
     'outline_variant': '#2C2C2C',

@@ -19,6 +19,7 @@
 # the display area will show as per the button clicked
 
 from views.base_window import SidebarWindowBase
+from PyQt5.QtWidgets import QMessageBox
 from widgets.sidebar import Sidebar
 from views.tle_tester.tle_tester_display_area import TLETesterDisplay
 from views.tle_tester.time_limit_slider import TimeLimitSlider
@@ -61,11 +62,28 @@ class TLETesterWindow(SidebarWindowBase):
 
     def handle_action_button(self, button_text):
         if button_text == 'Compile':
+            # Check all files for unsaved changes
+            for btn_name, btn in self.display_area.file_buttons.items():
+                if btn.property("hasUnsavedChanges"):
+                    reply = QMessageBox.question(
+                        self,
+                        "Unsaved Changes",
+                        f"Do you want to save changes to {btn_name}?",
+                        QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel
+                    )
+                    
+                    if reply == QMessageBox.Save:
+                        # Switch to this file
+                        self.display_area._handle_file_button(btn_name)
+                        if not self.display_area.editor.saveFile():
+                            return
+                    elif reply == QMessageBox.Cancel:
+                        return
+
             self.tle_runner.compile_all()
         elif button_text == 'Run':
             time_limit = self.time_limit_slider.value()
             self.tle_runner.run_tle_test(time_limit)
-        pass
 
     def handle_button_click(self, button_text):
         if button_text == 'Help Center':
