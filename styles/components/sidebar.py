@@ -33,18 +33,20 @@ QLabel#section_title {{
 QLabel#sidebar_title {{
     color: {COLORS['text_light']};
     background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1,
-                             stop: 0 rgba(30, 30, 30, 0.98),
-                             stop: 0.03 rgba(30, 30, 30, 0.98),
+                             stop: 0 rgba(27, 27, 30, 0.98),
+                             stop: 0.03 rgba(27, 27, 30, 0.98),
                              stop: 0.5 rgba(135, 20, 65, 0.8),
-                             stop: 0.6 rgba(30, 30, 30, 0.6),
-                             stop: 1 rgba(30, 30, 30, 0.98));
+                             stop: 0.6 rgba(27, 27, 30, 0.6),
+                             stop: 1 rgba(27, 27, 30, 0.98));
     border: 2px solid {COLORS['primary']}44;
     border-radius: 12px;
     margin: 8px 12px;
     padding: 20px 16px;
     font-size: 21px;
-    font-weight: 600;
-    font-family: 'Segoe UI', system-ui;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    font-family: 'Segoe UI Semibold', 'Segoe UI', system-ui;
+    text-transform: capitalize;
 }}
 
 QPushButton#sidebar_button {{
@@ -208,5 +210,4 @@ QPushButton:hover {{
 
 QPushButton:pressed {{
     background-color: rgba(255, 255, 255, 0.2);
-}}
-"""
+}}"""
