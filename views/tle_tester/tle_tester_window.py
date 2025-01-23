@@ -1,25 +1,5 @@
-#this is the main window for the tle tester application
-#it contains the two sections: sidebar and display area
-#sidebar contains 6 sections:
-# 1. edit code section  
-# ---edit generator code
-# ---edit test code
-# 2. tle options section
-# ---here you can set the number of tests to run
-# ---set the time limit for each test
-# 3. compile section
-# ---compile the code
-# 4. run section
-# ---run the stress test, if a test takes longer than the time limit, it'll be stopped
-# 5. results section
-# ---goes to the results window
-# 6. back button
-# ---goes back to the main menu
-#
-# the display area will show as per the button clicked
-
 from views.base_window import SidebarWindowBase
-from PyQt5.QtWidgets import QMessageBox
+from PySide6.QtWidgets import QMessageBox
 from widgets.sidebar import Sidebar
 from views.tle_tester.tle_tester_display_area import TLETesterDisplay
 from views.tle_tester.time_limit_slider import TimeLimitSlider
