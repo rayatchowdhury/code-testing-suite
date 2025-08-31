@@ -58,7 +58,9 @@
       "edits": ["Create constants/paths.py with PROJECT_ROOT, ICONS_DIR, APP_ICON constants", "Replace hardcoded 'resources/icons/app_icon.png' with constants.APP_ICON"],
       "tests": ["Manual application startup test"],
       "risk": "low",
-      "rollback": "Revert to hardcoded paths in original files"
+      "rollback": "Revert to hardcoded paths in original files",
+      "status": "COMPLETED",
+      "commit_hash": "eac0f49"
     },
     {
       "step_id": "S-03",
@@ -67,7 +69,9 @@
       "edits": ["Create pytest.ini with testpaths=tests, python_files=test_*.py", "Create empty tests/ directory structure"],
       "tests": ["python -m pytest --collect-only"],
       "risk": "low", 
-      "rollback": "Remove test configuration files"
+      "rollback": "Remove test configuration files",
+      "status": "COMPLETED",
+      "commit_hash": "2dcf066"
     },
     {
       "step_id": "C-01",
