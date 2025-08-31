@@ -4,7 +4,6 @@ import os
 
 from widgets.display_area_widgets.editor import EditorWidget
 from widgets.display_area_widgets.console import ConsoleOutput
-from widgets.display_area_widgets.ai_panel import AIPanel
 from tools.tle_compiler_runner import TLECompilerRunner
 from styles.style import MATERIAL_COLORS
 from styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE
@@ -121,8 +120,8 @@ class TLETesterDisplay(QWidget):
         content_layout.addWidget(button_panel)
         content_layout.addWidget(self.editor)
 
-        # Initialize AI panel with tle type
-        self.ai_panel = self.editor.ai_panel
+        # Initialize AI panel with tle type (lazy loading)
+        self.ai_panel = self.editor.get_ai_panel()
         self.ai_panel.set_panel_type("tle")
 
         # Add inner panel to outer panel

@@ -1,9 +1,7 @@
 import sys
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import Qt
-from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtGui import QIcon
-from views.main_window import MainWindow
 import qasync
 import asyncio
 from absl import logging as absl_logging
@@ -26,6 +24,8 @@ def main():
     loop = qasync.QEventLoop(app)
     asyncio.set_event_loop(loop)
     
+    # Lazy import MainWindow to reduce startup time
+    from views.main_window import MainWindow
     window = MainWindow()
     window.show()
     

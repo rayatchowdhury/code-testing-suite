@@ -8,21 +8,66 @@ import os
 import asyncio
 import qasync
 from qasync import asyncSlot, QEventLoop
-from markdown import markdown
-from pygments import highlight
-from pygments.formatters import HtmlFormatter
-from pygments.lexers import get_lexer_by_name
 
-from .syntaxhighlighter import (CPPSyntaxHighlighter, PythonSyntaxHighlighter, 
-                               JavaSyntaxHighlighter)
 from styles.constants.editor_colors import EDITOR_COLORS
 from styles.constants.colors import MATERIAL_COLORS
 from styles.components.editor import (EDITOR_WIDGET_STYLE, get_editor_style,
                                     AI_DIALOG_STYLE)
 from styles.components.ai_panel import AI_PANEL_STYLE
 from utils.file_operations import FileOperations
-from tools.editor_ai import EditorAI
-from .ai_panel import AIPanel
+
+# Lazy imports for heavy components
+_markdown = None
+_pygments_highlight = None
+_pygments_formatter = None
+_pygments_lexer = None
+_syntax_highlighters = None
+_editor_ai = None
+_ai_panel = None
+
+def _import_markdown():
+    global _markdown
+    if _markdown is None:
+        from markdown import markdown
+        _markdown = markdown
+    return _markdown
+
+def _import_pygments():
+    global _pygments_highlight, _pygments_formatter, _pygments_lexer
+    if _pygments_highlight is None:
+        from pygments import highlight
+        from pygments.formatters import HtmlFormatter
+        from pygments.lexers import get_lexer_by_name
+        _pygments_highlight = highlight
+        _pygments_formatter = HtmlFormatter
+        _pygments_lexer = get_lexer_by_name
+    return _pygments_highlight, _pygments_formatter, _pygments_lexer
+
+def _import_syntax_highlighters():
+    global _syntax_highlighters
+    if _syntax_highlighters is None:
+        from .syntaxhighlighter import (CPPSyntaxHighlighter, PythonSyntaxHighlighter, 
+                                       JavaSyntaxHighlighter)
+        _syntax_highlighters = {
+            'cpp': CPPSyntaxHighlighter,
+            'python': PythonSyntaxHighlighter,
+            'java': JavaSyntaxHighlighter
+        }
+    return _syntax_highlighters
+
+def _import_editor_ai():
+    global _editor_ai
+    if _editor_ai is None:
+        from tools.editor_ai import EditorAI
+        _editor_ai = EditorAI
+    return _editor_ai
+
+def _import_ai_panel():
+    global _ai_panel
+    if _ai_panel is None:
+        from .ai_panel import AIPanel
+        _ai_panel = AIPanel
+    return _ai_panel
 
 class CodeEditor(QPlainTextEdit):
     def __init__(self):
@@ -58,12 +103,14 @@ class CodeEditor(QPlainTextEdit):
         if not file_path:
             return
 
+        # Lazy load syntax highlighters
+        highlighters = _import_syntax_highlighters()
         highlighter_map = {
-            'cpp': CPPSyntaxHighlighter,
-            'h': CPPSyntaxHighlighter,
-            'hpp': CPPSyntaxHighlighter,
-            'py': PythonSyntaxHighlighter,
-            'java': JavaSyntaxHighlighter
+            'cpp': highlighters['cpp'],
+            'h': highlighters['cpp'],
+            'hpp': highlighters['cpp'],
+            'py': highlighters['python'],
+            'java': highlighters['java']
         }
         
         ext = file_path.lower().split('.')[-1]
@@ -216,7 +263,7 @@ class EditorWidget(QWidget):
         super().__init__()
         self.setObjectName("editor_widget")
         self.setStyleSheet(EDITOR_WIDGET_STYLE)
-        self.editor_ai = EditorAI()
+        self.editor_ai = None  # Lazy load when needed
         self._setup_ui()
         self._setup_file_handling()
         
@@ -231,15 +278,9 @@ class EditorWidget(QWidget):
         self.codeEditor = CodeEditor()
         layout.addWidget(self.codeEditor)
 
-        # Create and add AI panel with connections to editor functions
-        self.ai_panel = AIPanel(panel_type="editor", parent=self)
-        self.ai_panel.analysisRequested.connect(self._analysis_code)
-        self.ai_panel.issuesRequested.connect(self._find_issues)  # Changed from fix to issues
-        self.ai_panel.tipsRequested.connect(self._get_tips)   # Changed from optimize to tips
-        self.ai_panel.documentRequested.connect(self._document_code)
-        self.ai_panel.generateRequested.connect(self._generate_code)
-        self.ai_panel.customCommandRequested.connect(self._handle_custom_command)
-        layout.addWidget(self.ai_panel)
+        # Create and add AI panel with connections to editor functions (lazy load)
+        self.ai_panel = None
+        self._ai_panel_initialized = False
 
         # Map AI actions to methods
         self.ai_actions = {
@@ -252,6 +293,40 @@ class EditorWidget(QWidget):
         }
 
         self.codeEditor.document().modificationChanged.connect(self._handle_modification_changed)
+
+    def _init_ai_panel(self):
+        """Initialize AI panel when first needed"""
+        if not self._ai_panel_initialized:
+            ai_panel_class = _import_ai_panel()
+            self.ai_panel = ai_panel_class(panel_type="editor", parent=self)
+            self.ai_panel.analysisRequested.connect(self._analysis_code)
+            self.ai_panel.issuesRequested.connect(self._find_issues)
+            self.ai_panel.tipsRequested.connect(self._get_tips)
+            self.ai_panel.documentRequested.connect(self._document_code)
+            self.ai_panel.generateRequested.connect(self._generate_code)
+            self.ai_panel.customCommandRequested.connect(self._handle_custom_command)
+            self.layout().addWidget(self.ai_panel)
+            self._ai_panel_initialized = True
+
+    def _get_editor_ai(self):
+        """Get EditorAI instance, creating if necessary"""
+        if self.editor_ai is None:
+            editor_ai_class = _import_editor_ai()
+            self.editor_ai = editor_ai_class()
+        return self.editor_ai
+
+    def get_ai_panel(self):
+        """Get AI panel, initializing if necessary"""
+        if not self._ai_panel_initialized:
+            self._init_ai_panel()
+        return self.ai_panel
+
+    def _get_editor_ai(self):
+        """Get EditorAI instance, creating it if needed"""
+        if self.editor_ai is None:
+            editor_ai_class = _import_editor_ai()
+            self.editor_ai = editor_ai_class()
+        return self.editor_ai
 
     def _handle_modification_changed(self, modified):
         if not modified:  # Document returned to unmodified state
@@ -349,13 +424,18 @@ class EditorWidget(QWidget):
 
         # Format content and add to layout
         formatted_response = self._format_ai_response(response, title)
-        html_content = markdown(
+        
+        # Lazy load markdown and pygments
+        markdown_func = _import_markdown()
+        highlight, formatter_class, lexer = _import_pygments()
+        
+        html_content = markdown_func(
             formatted_response,
             extensions=['fenced_code', 'codehilite', 'tables']
         )
         
         # Add syntax highlighting CSS
-        formatter = HtmlFormatter(style='monokai')
+        formatter = formatter_class(style='monokai')
         css = formatter.get_style_defs('.codehilite')
         html_content = f"<style>{css}</style>{html_content}"
 
@@ -422,8 +502,9 @@ class EditorWidget(QWidget):
         """Handle explanation-type AI requests."""
         if code is None:
             code = self.getCode()
+        editor_ai = self._get_editor_ai()
         await self._process_ai_request(
-            lambda c: self.editor_ai.process_explanation(action, c),
+            lambda c: editor_ai.process_explanation(action, c),
             self.ai_actions[action][0]
         )
 
@@ -431,30 +512,36 @@ class EditorWidget(QWidget):
         """Handle code-modification AI requests."""
         if code is None:
             code = self.getCode()
+        editor_ai = self._get_editor_ai()
         await self._process_ai_request(
-            lambda c: self.editor_ai.process_code(action, c, **kwargs),
+            lambda c: editor_ai.process_code(action, c, **kwargs),
             self.ai_actions[action][0]
         )
 
     # Simplified action methods
     @asyncSlot()
     async def _analysis_code(self, code=None):
+        self._init_ai_panel()  # Ensure AI panel is initialized
         await self._process_explanation('analysis', code)
 
     @asyncSlot()
     async def _find_issues(self, code=None):
+        self._init_ai_panel()  # Ensure AI panel is initialized
         await self._process_explanation('issues', code)
 
     @asyncSlot()
     async def _get_tips(self, code=None):
+        self._init_ai_panel()  # Ensure AI panel is initialized
         await self._process_explanation('tips', code)
 
     @asyncSlot()
     async def _document_code(self, code=None):
+        self._init_ai_panel()  # Ensure AI panel is initialized
         await self._process_code('document', code)
 
     @asyncSlot()
     async def _generate_code(self, code=None):
+        self._init_ai_panel()  # Ensure AI panel is initialized
         await self._process_code('generate', code, 
                                type=self.currentFilePath or "generator.cpp")
 

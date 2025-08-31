@@ -121,8 +121,8 @@ class StressTesterDisplay(QWidget):
         content_layout.addWidget(button_panel)
         content_layout.addWidget(self.editor)
 
-        # Initialize AI panel with stress type
-        self.ai_panel = self.editor.ai_panel
+        # Initialize AI panel with stress type (lazy loading)
+        self.ai_panel = self.editor.get_ai_panel()
         self.ai_panel.set_panel_type("stress")
 
         # Add inner panel to outer panel

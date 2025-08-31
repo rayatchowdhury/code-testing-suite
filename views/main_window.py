@@ -12,17 +12,11 @@ from PySide6.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QSplitter, QPus
 from PySide6.QtGui import QFont
 from PySide6.QtCore import Qt, QUrl, Signal, QTimer
 from PySide6.QtWebEngineWidgets import QWebEngineView
-import markdown2
 import os
 from widgets.sidebar import Sidebar
 from widgets.display_area import DisplayArea
-from views.code_editor.code_editor_window import CodeEditorWindow
-from views.stress_tester.stress_tester_window import StressTesterWindow
-from views.tle_tester.tle_tester_window import TLETesterWindow
-from views.help_center.help_center_window import HelpCenterWindow
 from views.base_window import SidebarWindowBase
-from styles.style import WEBVIEW_STYLE  # Add this import
-from views.config.config_view import ConfigView  # Add at top with other imports
+from styles.style import WEBVIEW_STYLE
 
 
 class MainWindowContent(SidebarWindowBase):
@@ -56,21 +50,13 @@ class MainWindowContent(SidebarWindowBase):
         # Setup horizontal footer buttons
         self.sidebar.setup_horizontal_footer_buttons(exit_btn, options_btn)
 
-        # Create display area with web view
+        # Create display area with lazy-loaded web view
         self.display_area = DisplayArea()
-        self.web_view = QWebEngineView()
-        self.web_view.setStyleSheet(WEBVIEW_STYLE)  # Add this line
+        self.web_view = None
+        self._web_view_initialized = False
         
-        # Load HTML directly instead of converting markdown
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        html_path = os.path.join(current_dir, 'main_window.html')
-        base_url = QUrl.fromLocalFile(current_dir + "/")
-        
-        with open(html_path, 'r', encoding='utf-8') as f:
-            html_content = f.read()
-        
-        self.web_view.setHtml(html_content, baseUrl=base_url)
-        self.display_area.layout.addWidget(self.web_view)
+        # Initialize web view in background to improve startup time
+        QTimer.singleShot(0, self._init_web_view)
 
         # Setup splitter
         self.setup_splitter(self.sidebar, self.display_area)
@@ -81,6 +67,24 @@ class MainWindowContent(SidebarWindowBase):
         # Connect signals
         self.sidebar.button_clicked.connect(self.handle_button_click)
 
+    def _init_web_view(self):
+        """Initialize web view asynchronously"""
+        if not self._web_view_initialized:
+            self.web_view = QWebEngineView()
+            self.web_view.setStyleSheet(WEBVIEW_STYLE)
+            
+            # Load HTML directly instead of converting markdown
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            html_path = os.path.join(current_dir, 'main_window.html')
+            base_url = QUrl.fromLocalFile(current_dir + "/")
+            
+            with open(html_path, 'r', encoding='utf-8') as f:
+                html_content = f.read()
+            
+            self.web_view.setHtml(html_content, baseUrl=base_url)
+            self.display_area.layout.addWidget(self.web_view)
+            self._web_view_initialized = True
+
     def handle_exit(self):
         """Handle exit button click"""
         if self.parent:
@@ -90,6 +94,7 @@ class MainWindowContent(SidebarWindowBase):
         if button_text == 'Exit':
             self.parent.close()
         elif button_text == 'Options':
+            from views.config.config_view import ConfigView
             config_dialog = ConfigView(self)
             config_dialog.exec()
         elif button_text in ['Code Editor', 'Stress Tester', 'TLE Tester', 'Help Center']:
@@ -122,6 +127,7 @@ class MainWindow(QMainWindow):
             current = self.window_manager.get_current_window()
             
             # If current window is code editor, check for unsaved changes
+            from views.code_editor.code_editor_window import CodeEditorWindow
             if current and isinstance(current, CodeEditorWindow):
                 if current.editor_display.has_editor:
                     # Check for any unsaved changes

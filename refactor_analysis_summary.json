@@ -1,0 +1,191 @@
+{
+  "summary": "Python-based PySide6 desktop application with 464 Python files. Main issues: circular dependencies (views↔utils), no test infrastructure, hard-coded configuration, large files (470+ lines), and duplicated tester code patterns.",
+  
+  "top_issues": [
+    {
+      "id": "I1",
+      "type": "circular_dependency", 
+      "location": ["views/main_window.py", "utils/window_manager.py"],
+      "severity": "High",
+      "description": "Circular import between MainWindow and WindowManager prevents proper testing and creates tight coupling. Line 113: 'from utils.window_manager import WindowManager' and Line 21: 'from views.main_window import MainWindowContent'"
+    },
+    {
+      "id": "I2", 
+      "type": "missing_tests",
+      "location": ["entire_project"],
+      "severity": "Critical",
+      "description": "No test infrastructure exists. No tests/ directory, no pytest configuration, no CI/CD pipeline. Makes refactoring extremely risky."
+    },
+    {
+      "id": "I3",
+      "type": "hard_coded_config",
+      "location": ["main.py", "views/config/config_view.py"],
+      "severity": "Medium", 
+      "description": "Hard-coded resource paths like 'resources/icons/app_icon.png' reduce deployment flexibility and create maintenance burden."
+    },
+    {
+      "id": "I4",
+      "type": "large_files",
+      "location": ["views/config/config_view.py", "views/config/styles.py"],
+      "severity": "Medium",
+      "description": "Single files with 470+ lines violate single responsibility principle. config_view.py has 470 lines, styles.py has 341 lines."
+    },
+    {
+      "id": "I5",
+      "type": "duplicated_code", 
+      "location": ["views/stress_tester/", "views/tle_tester/"],
+      "severity": "Medium",
+      "description": "Similar window patterns and structures between stress tester and TLE tester modules indicate code duplication opportunities."
+    }
+  ],
+
+  "playbook": [
+    {
+      "step_id": "S-01",
+      "title": "Add .gitignore file",
+      "files": [".gitignore"],
+      "edits": ["Create .gitignore with Python, IDE, and OS exclusions including __pycache__/, *.pyc, .venv/, .vscode/"],
+      "tests": ["git status to verify excluded files"],
+      "risk": "low",
+      "rollback": "Delete .gitignore file",
+      "status": "COMPLETED",
+      "commit_hash": "fc79009"
+    },
+    {
+      "step_id": "S-02", 
+      "title": "Extract resource path constants",
+      "files": ["constants/paths.py", "main.py", "views/config/config_view.py"],
+      "edits": ["Create constants/paths.py with PROJECT_ROOT, ICONS_DIR, APP_ICON constants", "Replace hardcoded 'resources/icons/app_icon.png' with constants.APP_ICON"],
+      "tests": ["Manual application startup test"],
+      "risk": "low",
+      "rollback": "Revert to hardcoded paths in original files"
+    },
+    {
+      "step_id": "S-03",
+      "title": "Setup pytest framework", 
+      "files": ["pytest.ini", "tests/__init__.py", "conftest.py"],
+      "edits": ["Create pytest.ini with testpaths=tests, python_files=test_*.py", "Create empty tests/ directory structure"],
+      "tests": ["python -m pytest --collect-only"],
+      "risk": "low", 
+      "rollback": "Remove test configuration files"
+    },
+    {
+      "step_id": "C-01",
+      "title": "Break circular dependency using factory pattern",
+      "files": ["utils/window_factory.py", "utils/window_manager.py"], 
+      "edits": ["Create WindowFactory class with create_window() static method", "Replace direct imports in window_manager with factory calls"],
+      "tests": ["Manual window navigation testing", "python -c 'import utils.window_manager'"],
+      "risk": "high",
+      "rollback": "Revert to direct imports in window_manager.py"
+    },
+    {
+      "step_id": "C-02",
+      "title": "Split large configuration file",
+      "files": ["views/config/ui_builder.py", "views/config/validation_handler.py", "views/config/config_view.py"],
+      "edits": ["Extract UI building logic to ui_builder.py", "Extract validation logic to validation_handler.py", "Refactor config_view.py to use extracted modules"],
+      "tests": ["Configuration dialog functionality test"],
+      "risk": "medium", 
+      "rollback": "Merge extracted files back into config_view.py"
+    },
+    {
+      "step_id": "T-01",
+      "title": "Add unit tests for utils modules",
+      "files": ["tests/test_utils/test_ai_config.py", "tests/test_utils/test_window_manager.py"],
+      "edits": ["Create unit tests for AIConfig class methods", "Create unit tests for WindowManager functionality", "Add test fixtures and mocks"],
+      "tests": ["python -m pytest tests/test_utils/"],
+      "risk": "low",
+      "rollback": "Remove test files"
+    }
+  ],
+
+  "tests_plan": {
+    "how_to_run": "pip install -r requirements.txt && python -m pytest",
+    "missing_tests": [
+      {
+        "path": "tests/test_utils/",
+        "reason": "No unit tests for utility modules (ai_config, window_manager, file_operations)"
+      },
+      {
+        "path": "tests/test_integration/", 
+        "reason": "No integration tests for window navigation and configuration persistence"
+      },
+      {
+        "path": "tests/test_views/",
+        "reason": "No tests for UI components and user interactions"
+      }
+    ],
+    "ci_setup": "GitHub Actions workflow with Python 3.9-3.11 matrix, pytest + coverage, pylint linting"
+  },
+
+  "cycles": [
+    ["views.main_window", "utils.window_manager", "views.main_window"]
+  ],
+
+  "backlog": [
+    {
+      "ticket": "T1",
+      "summary": "Add .gitignore file",
+      "priority": "high"
+    },
+    {
+      "ticket": "T2", 
+      "summary": "Extract resource path constants",
+      "priority": "high"
+    },
+    {
+      "ticket": "T3",
+      "summary": "Setup pytest framework",
+      "priority": "high"
+    },
+    {
+      "ticket": "T4",
+      "summary": "Break circular dependencies", 
+      "priority": "high"
+    },
+    {
+      "ticket": "T5",
+      "summary": "Split large configuration file",
+      "priority": "medium"
+    },
+    {
+      "ticket": "T6",
+      "summary": "Add unit tests for utils",
+      "priority": "high"
+    },
+    {
+      "ticket": "T7",
+      "summary": "Consolidate tester code duplication", 
+      "priority": "medium"
+    },
+    {
+      "ticket": "T8",
+      "summary": "Add integration tests",
+      "priority": "medium"
+    },
+    {
+      "ticket": "T9",
+      "summary": "Setup CI/CD pipeline",
+      "priority": "medium"
+    },
+    {
+      "ticket": "T10",
+      "summary": "Add type hints",
+      "priority": "low"
+    }
+  ],
+
+  "analysis_notes": {
+    "total_python_files": 464,
+    "largest_files": [
+      {"file": "views/config/config_view.py", "lines": 470},
+      {"file": "views/config/styles.py", "lines": 341}
+    ],
+    "tools_unavailable": ["pylint", "pytest", "PySide6"],
+    "commands_used": [
+      "Get-ChildItem -Recurse -Include '*.py'",
+      "grep -r 'import.*window_manager'", 
+      "Test-Path '.gitignore'",
+      "Get-Content file | Measure-Object -Line"
+    ]
+  }
+}
