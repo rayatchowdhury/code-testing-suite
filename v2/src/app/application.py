@@ -18,6 +18,7 @@ from typing import Optional
 from app.dependency_injection import get_container, register_services
 from infrastructure.configuration.config_service import ConfigService
 from infrastructure.file_system.file_service import FileService
+from infrastructure.theming.theme_service import ThemeService
 
 class Application:
     """
@@ -61,9 +62,24 @@ class Application:
             # Test file service
             print(f"\n📁 File Service Ready: {type(self._file_service).__name__}")
             
+            # Test theme service
+            theme_service = self.container.get(ThemeService)
+            print(f"\n🎨 Theme Service Ready: {theme_service.get_theme_mode().value}")
+            print(f"  Primary Color: {theme_service.get_color('primary')}")
+            print(f"  Background: {theme_service.get_color('background')}")
+            
             # Test AI readiness
             is_ready, message = self._config_service.is_ai_ready()
             print(f"\n🤖 AI Status: {message}")
+            
+            # Test configuration adapter (without Qt)
+            print(f"\n⚙️ Configuration Adapter:")
+            try:
+                from presentation.adapters.config_view_adapter import ConfigurationViewAdapter
+                adapter = ConfigurationViewAdapter(self._config_service, theme_service)
+                print("  ✅ Adapter created successfully (without Qt)")
+            except RuntimeError as e:
+                print(f"  ⚠️ {e} (expected - demonstrates clean separation)")
             
             print("\n✨ v2 Architecture validation complete!")
             

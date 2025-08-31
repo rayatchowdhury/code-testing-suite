@@ -85,12 +85,14 @@ def register_services():
     from infrastructure.compilation.compiler_service import BasicCompilationService
     from infrastructure.configuration.config_service import ConfigService
     from infrastructure.file_system.file_service import FileService
+    from infrastructure.theming.theme_service import ThemeService
     
     container = get_container()
     
     # Register infrastructure services
     container.register_singleton(ConfigService, ConfigService)
     container.register_singleton(FileService, FileService)
+    container.register_singleton(ThemeService, ThemeService)
     container.register_singleton(CompilationService, BasicCompilationService)
     
     print("✅ v2 services registered in DI container")
