@@ -1,9 +1,8 @@
-# TODO: Migrate main application entry point from v1/main.py
+# Code Testing Suite v2 - Clean Architecture Entry Point
 """
 Application Entry Point for v2
 
-This will be migrated from v1/main.py once the basic infrastructure is in place.
-For now, this provides a minimal entry point structure.
+Clean architecture entry point with dependency injection and proper service separation.
 """
 import sys
 from pathlib import Path
@@ -14,9 +13,31 @@ sys.path.insert(0, str(src_path))
 
 def main():
     """Main application entry point"""
-    print("Code Testing Suite v2.0.0-alpha")
-    print("Infrastructure setup complete!")
-    print("TODO: Implement full application bootstrap")
+    try:
+        from app.application import create_application
+        
+        print("=" * 50)
+        print("Code Testing Suite v2.0.0-alpha")
+        print("Clean Architecture Implementation")
+        print("=" * 50)
+        
+        # Create and run application
+        app = create_application()
+        success = app.run_console_mode()
+        
+        if success:
+            print("\n🎉 v2 architecture is working correctly!")
+        else:
+            print("\n❌ v2 architecture validation failed")
+            sys.exit(1)
+            
+        app.shutdown()
+        
+    except Exception as e:
+        print(f"\n💥 Fatal error: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()
