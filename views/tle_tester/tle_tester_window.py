@@ -74,3 +74,8 @@ class TLETesterWindow(SidebarWindowBase):
 
     def handle_time_limit_changed(self, value):
         print(f"Time limit changed to: {value} ms")
+
+    def refresh_ai_panels(self):
+        """Refresh AI panel visibility based on current configuration"""
+        if hasattr(self.display_area, 'ai_panel'):
+            self.display_area.ai_panel.refresh_visibility()

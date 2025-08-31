@@ -60,7 +60,7 @@ class ConfigManager:
         required_keys = {
             'cpp_version': str,
             'workspace_folder': str,
-            'gemini_api_key': str,
+            'ai_settings': dict,  # Changed from gemini_api_key
             'editor_settings': dict
         }
         
@@ -69,6 +69,21 @@ class ConfigManager:
                 errors.append(f"Missing required key: {key}")
             elif not isinstance(config[key], expected_type):
                 errors.append(f"Invalid type for {key}: expected {expected_type.__name__}")
+        
+        if 'ai_settings' in config:
+            ai_settings = config['ai_settings']
+            required_ai_settings = {
+                'use_ai_panel': bool,
+                'gemini_api_key': str
+            }
+            
+            for key, expected_type in required_ai_settings.items():
+                if key not in ai_settings:
+                    errors.append(f"Missing AI setting: {key}")
+                elif not isinstance(ai_settings[key], expected_type):
+                    errors.append(f"Invalid type for AI setting {key}")
+            
+            # Note: We don't require a valid API key, just the correct structure
         
         if 'editor_settings' in config:
             editor_settings = config['editor_settings']
@@ -95,7 +110,10 @@ class ConfigManager:
         return {
             'cpp_version': 'c++17',
             'workspace_folder': '',
-            'gemini_api_key': '',
+            'ai_settings': {  # Changed from gemini_api_key
+                'use_ai_panel': False,
+                'gemini_api_key': ''
+            },
             'editor_settings': {
                 'autosave': True,
                 'autosave_interval': 5,

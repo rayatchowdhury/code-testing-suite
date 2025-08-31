@@ -282,7 +282,7 @@ class EditorAI:
 
             genai.configure(api_key=api_key)
             self.model = genai.GenerativeModel(
-                model_name='gemini-pro',
+                model_name='gemini-2.0-flash',
                 generation_config=self.MODEL_CONFIG,
                 safety_settings=self.SAFETY_SETTINGS
             )

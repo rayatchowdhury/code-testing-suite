@@ -86,3 +86,8 @@ class StressTesterWindow(SidebarWindowBase):
         # Handle the slider value change
         print(f"Test count changed to: {value}")
         # You can store this value or use it in your stress testing logic
+
+    def refresh_ai_panels(self):
+        """Refresh AI panel visibility based on current configuration"""
+        if hasattr(self.display_area, 'ai_panel'):
+            self.display_area.ai_panel.refresh_visibility()

@@ -2,6 +2,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
                               QLineEdit, QLabel, QFrame, QSizePolicy)
 from PySide6.QtCore import Qt, Signal
 from styles.components import AI_PANEL_STYLE, CUSTOM_COMMAND_STYLE
+from utils.ai_config import AIConfig
 import asyncio
 import os
 
@@ -52,8 +53,19 @@ class AIPanel(QWidget):
         super().__init__(parent)
         self.panel_type = panel_type
         self.setObjectName("ai_panel")
-        self.setStyleSheet(AI_PANEL_STYLE)  # Add stylesheet here
-        self._setup_ui()
+        self.setStyleSheet(AI_PANEL_STYLE)
+        
+        # Check if AI panel should be shown
+        self.refresh_visibility()
+
+    def refresh_visibility(self):
+        """Refresh panel visibility based on current AI configuration"""
+        if AIConfig.should_show_ai_panel():
+            if not hasattr(self, 'layout') or self.layout() is None:
+                self._setup_ui()
+            self.show()
+        else:
+            self.hide()
 
     def set_panel_type(self, panel_type):
         """Update panel type and recreate buttons"""
@@ -180,3 +192,35 @@ class AIPanel(QWidget):
                 btn.clicked.connect(
                     lambda checked, s=signal, c=code: s.emit(c)
                 )
+
+    def refresh_from_config(self):
+        """Refresh AI panel visibility based on current configuration"""
+        should_show = AIConfig.should_show_ai_panel()
+        
+        if should_show and self.isHidden():
+            # Show panel and setup UI if needed
+            if not hasattr(self, 'action_buttons'):
+                self._setup_ui()
+            self.show()
+        elif not should_show and self.isVisible():
+            # Hide panel
+            self.hide()
+            
+        # Update status if visible
+        if self.isVisible():
+            self._update_ai_status()
+    
+    def _update_ai_status(self):
+        """Update AI status display"""
+        is_ready, message = AIConfig.is_ai_ready()
+        
+        # You could add a status indicator here if needed
+        # For now, just update tooltips
+        if hasattr(self, 'action_buttons'):
+            for btn in self.action_buttons.values():
+                if is_ready:
+                    btn.setEnabled(True)
+                    btn.setToolTip(btn.toolTip().split('\n')[0])  # Keep original tooltip
+                else:
+                    btn.setEnabled(False)
+                    btn.setToolTip(f"{btn.toolTip().split('\n')[0]}\n⚠️ {message}")

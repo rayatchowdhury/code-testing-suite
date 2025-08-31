@@ -78,26 +78,22 @@ class CodeEditorDisplay(QWidget):
         self.console = ConsoleOutput()
         self.console.setMinimumWidth(200)
         
-        # Add panels to splitter
+        # Add panels to splitter (back to 2-panel layout)
         self.splitter.addWidget(outer_panel)
-        self.splitter.addWidget(self.console)  # Add console directly
+        self.splitter.addWidget(self.console)
 
         # Configure splitter
         self.splitter.setCollapsible(0, False)  # Left panel (editor) not collapsible
         self.splitter.setCollapsible(1, True)   # Right panel (console) collapsible
         
-        # Set initial sizes using ratio (approximately 73% to 27%)
-        total_width = self.width() or 1100  # fallback width if widget not sized yet
-        self.splitter.setSizes([600, 250])
+        # Set initial sizes (editor: 70%, console: 30%)
+        self.splitter.setSizes([700, 300])
 
         # Add splitter to main layout
         main_layout.addWidget(self.splitter)
 
         # Initialize compiler
         self.compiler_runner = CompilerRunner(self.console)
-
-        # Initialize AI panel with editor type
-        self.ai_panel = AIPanel(panel_type="editor")
 
     def _create_tab_widget(self):
         tab_widget = QTabWidget()

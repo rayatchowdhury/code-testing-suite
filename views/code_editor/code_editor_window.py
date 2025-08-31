@@ -64,6 +64,14 @@ class CodeEditorWindow(SidebarWindowBase):
         if hasattr(self.editor_display, 'compiler_runner'):
             self.editor_display.compiler_runner.stop_execution()
 
+    def refresh_ai_panels(self):
+        """Refresh AI panel visibility based on current configuration"""
+        # Refresh AI panels in all editor tabs
+        for i in range(self.editor_display.tab_widget.count()):
+            tab = self.editor_display.tab_widget.widget(i)
+            if tab and hasattr(tab.editor, 'ai_panel'):
+                tab.editor.ai_panel.refresh_visibility()
+
     def can_close(self):
         """Check if any tab has unsaved changes"""
         if not self.editor_display.has_editor:

@@ -80,4 +80,11 @@ class SidebarWindowBase(QWidget):
                 if not self.parent.window_manager.go_back():
                     self.parent.window_manager.show_window('main')
         elif button_text == 'Options':
-            ConfigView(self).exec()
+            config_dialog = ConfigView(self)
+            config_dialog.configSaved.connect(self._on_config_changed)
+            config_dialog.exec()
+
+    def _on_config_changed(self, config):
+        """Handle configuration changes - refresh AI panels"""
+        if hasattr(self, 'refresh_ai_panels'):
+            self.refresh_ai_panels()
