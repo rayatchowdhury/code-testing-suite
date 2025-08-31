@@ -5,8 +5,7 @@ import logging
 from google.api_core import retry_async
 from absl import logging as absl_logging
 from typing import Optional, Tuple
-
-CONFIG_DIR = os.path.join(os.path.expanduser('~'), '.code_testing_suite')
+from constants import USER_DATA_DIR
 
 class EditorAI:
     """AI-powered code editor assistant using Google's Gemini API."""
@@ -293,11 +292,11 @@ class EditorAI:
     def _load_api_key(self) -> Optional[str]:
         """Load API key from config."""
         try:
-            if not os.path.exists(CONFIG_DIR):
-                os.makedirs(CONFIG_DIR, exist_ok=True)
+            if not os.path.exists(USER_DATA_DIR):
+                os.makedirs(USER_DATA_DIR, exist_ok=True)
                 return None
 
-            config_path = os.path.join(CONFIG_DIR, 'config.json')
+            config_path = os.path.join(USER_DATA_DIR, 'config.json')
             with open(config_path, 'r') as f:
                 config = json.load(f)
             return config.get('gemini_api_key')

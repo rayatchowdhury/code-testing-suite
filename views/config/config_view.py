@@ -13,6 +13,7 @@ from .error_dialog import ErrorDialog
 from .styles import CONFIG_DIALOG_STYLE
 from styles.constants.colors import MATERIAL_COLORS
 from utils.api_validator import APIValidator
+from constants import SETTINGS_ICON
 
 
 class ConfigView(QDialog):
@@ -24,10 +25,8 @@ class ConfigView(QDialog):
         super().__init__(parent)
 
         # Window setup matching original app dialogs
-        base_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-        icon_path = os.path.join(base_path, "resources", "icons", "settings.png")
-        if os.path.exists(icon_path):
-            self.setWindowIcon(QIcon(icon_path))
+        if os.path.exists(SETTINGS_ICON):
+            self.setWindowIcon(QIcon(SETTINGS_ICON))
 
         self.setWindowTitle("⚙️ Configuration")
         self.setFixedSize(700, 750)  # Original app sizing

@@ -2,9 +2,10 @@ import json
 import os
 import os.path
 from .config_exceptions import *
+from constants import USER_DATA_DIR, CONFIG_FILE
 
 class ConfigManager:
-    CONFIG_DIR = os.path.join(os.path.expanduser('~'), '.code_testing_suite')
+    CONFIG_DIR = USER_DATA_DIR
     
     def __init__(self, config_file='config.json'):
         self.config_file = os.path.join(self.CONFIG_DIR, config_file)

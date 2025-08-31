@@ -7,12 +7,13 @@ Provides centralized access to AI settings and validation.
 import os
 import json
 from typing import Tuple, Optional
+from constants import USER_DATA_DIR, CONFIG_FILE
 
 class AIConfig:
     """Utility class for managing AI configuration across the application"""
     
-    CONFIG_DIR = os.path.join(os.path.expanduser('~'), '.code_testing_suite')
-    CONFIG_FILE = os.path.join(CONFIG_DIR, 'config.json')
+    CONFIG_DIR = USER_DATA_DIR
+    CONFIG_FILE = CONFIG_FILE
     
     @classmethod
     def is_ai_enabled(cls) -> bool:

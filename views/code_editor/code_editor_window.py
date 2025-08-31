@@ -8,6 +8,7 @@ import os
 from PySide6.QtCore import QTimer
 from utils.file_operations import FileOperations
 import json
+from constants import EDITOR_STATE_FILE
 
 class CodeEditorWindow(SidebarWindowBase):
     def __init__(self, parent=None):
@@ -44,7 +45,7 @@ class CodeEditorWindow(SidebarWindowBase):
         self.setup_splitter(self.sidebar, self.editor_display)
 
         # Load previous session files
-        self.state_file = os.path.join(os.path.expanduser('~'), '.code_testing_suite', 'editor_state.json')
+        self.state_file = EDITOR_STATE_FILE
         self.load_editor_state()
 
         # Connect signals

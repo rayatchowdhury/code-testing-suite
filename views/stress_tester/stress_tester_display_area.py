@@ -8,13 +8,14 @@ from widgets.display_area_widgets.ai_panel import AIPanel
 from tools.stress_compiler_runner import StressCompilerRunner
 from styles.style import MATERIAL_COLORS
 from styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE
+from constants import WORKSPACE_DIR
 
 class StressTesterDisplay(QWidget):
     filePathChanged = Signal()
     
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.workspace_dir = os.path.join(os.path.expanduser('~'), '.code_testing_suite', 'workspace')
+        self.workspace_dir = WORKSPACE_DIR
         os.makedirs(self.workspace_dir, exist_ok=True)
         self._setup_ui()
         self._connect_signals()

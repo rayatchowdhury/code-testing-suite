@@ -5,6 +5,7 @@ from PySide6.QtGui import QIcon
 import qasync
 import asyncio
 from absl import logging as absl_logging
+from constants import APP_ICON
 
 def main():
     # Initialize absl logging before anything else
@@ -18,7 +19,7 @@ def main():
     app = QApplication(sys.argv)
     
     # Set application icon
-    app.setWindowIcon(QIcon("resources/icons/app_icon.png"))
+    app.setWindowIcon(QIcon(APP_ICON))
     
     # Create event loop
     loop = qasync.QEventLoop(app)
