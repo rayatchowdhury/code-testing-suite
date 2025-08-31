@@ -82,10 +82,12 @@ def register_services():
     TODO: This will be called during application startup to wire all dependencies.
     """
     from domain.services.compilation_service import CompilationService
+    from domain.views.view_factory import StatusViewFactory
     from infrastructure.compilation.compiler_service import BasicCompilationService
     from infrastructure.configuration.config_service import ConfigService
     from infrastructure.file_system.file_service import FileService
     from infrastructure.theming.theme_service import ThemeService
+    from presentation.adapters.status_view_factory import MockStatusViewFactory
     
     container = get_container()
     
@@ -93,6 +95,15 @@ def register_services():
     container.register_singleton(ConfigService, ConfigService)
     container.register_singleton(FileService, FileService)
     container.register_singleton(ThemeService, ThemeService)
-    container.register_singleton(CompilationService, BasicCompilationService)
+    
+    # Register view factory (mock for now, Qt version when GUI is ready)
+    container.register_singleton(StatusViewFactory, MockStatusViewFactory)
+    
+    # Register compilation service with status view factory dependency
+    def create_compilation_service():
+        factory = container.get(StatusViewFactory)
+        return BasicCompilationService(factory)
+    
+    container.register_factory(CompilationService, create_compilation_service)
     
     print("✅ v2 services registered in DI container")

@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import AsyncIterator, List
 from domain.models.compilation import CompilationResult, CompilationStatus
 from domain.services.compilation_service import CompilationService, CompilationObserver
+from domain.views.view_factory import StatusViewFactory
 
 class BasicCompilationService:
     """
@@ -20,9 +21,10 @@ class BasicCompilationService:
     without the PySide6 QProcess dependencies for now.
     """
     
-    def __init__(self):
+    def __init__(self, status_view_factory=None):
         self._observers: List[CompilationObserver] = []
         self._is_cancelled = False
+        self._status_view_factory = status_view_factory
     
     def add_observer(self, observer: CompilationObserver) -> None:
         """Add compilation observer"""
