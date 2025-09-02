@@ -80,7 +80,9 @@
       "edits": ["Create WindowFactory class with create_window() static method", "Replace direct imports in window_manager with factory calls"],
       "tests": ["Manual window navigation testing", "python -c 'import utils.window_manager'"],
       "risk": "high",
-      "rollback": "Revert to direct imports in window_manager.py"
+      "rollback": "Revert to direct imports in window_manager.py",
+      "status": "COMPLETED",
+      "commit_hash": "88db513"
     },
     {
       "step_id": "C-02",
