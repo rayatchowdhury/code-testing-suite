@@ -16,6 +16,14 @@ class WindowFactory:
     
     # Registry of window creators - populated lazily to avoid imports
     _window_creators = {}
+    _registered = False
+    
+    @classmethod
+    def _ensure_registered(cls):
+        """Ensure default creators are registered."""
+        if not cls._registered:
+            cls._register_default_creators()
+            cls._registered = True
     
     @classmethod
     def register_window_creator(cls, window_name: str, creator_func):
@@ -40,8 +48,7 @@ class WindowFactory:
         Returns:
             Window instance or None if window type not found
         """
-        if window_name not in cls._window_creators:
-            cls._register_default_creators()
+        cls._ensure_registered()
         
         creator = cls._window_creators.get(window_name)
         if creator:
@@ -66,8 +73,7 @@ class WindowFactory:
         Returns:
             Window class or None if not found
         """
-        if window_name not in cls._window_creators:
-            cls._register_default_creators()
+        cls._ensure_registered()
             
         creator = cls._window_creators.get(window_name)
         if creator:
@@ -110,6 +116,7 @@ class WindowFactory:
             'tle_tester': _create_tle_tester,
             'help_center': _create_help_center
         })
+        cls._registered = True
     
     @classmethod
     def list_available_windows(cls) -> list:
@@ -119,11 +126,11 @@ class WindowFactory:
         Returns:
             List of window type names
         """
-        if not cls._window_creators:
-            cls._register_default_creators()
+        cls._ensure_registered()
         return list(cls._window_creators.keys())
     
     @classmethod
     def clear_registry(cls):
         """Clear the window creator registry. Useful for testing."""
         cls._window_creators.clear()
+        cls._registered = False

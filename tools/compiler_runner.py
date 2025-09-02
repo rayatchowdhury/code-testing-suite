@@ -172,14 +172,19 @@ class CompilerWorker(QObject):
             self.process.waitForFinished()  # Wait for process to actually terminate
         self.process = None
 
-    def _handle_process_exit(self):
+    def _handle_process_exit(self, exit_code=None, exit_status=None):
         if not self.process:
             return
             
-        exit_code = self.process.exitCode()
+        # Get exit info from process if not provided (normal operation)
+        if exit_code is None:
+            exit_code = self.process.exitCode()
+        if exit_status is None:
+            exit_status = self.process.exitStatus()
+        
         basename = os.path.basename(self.current_file)
         
-        if exit_code != 0 or self.process.exitStatus() == QProcess.CrashExit:
+        if exit_code != 0 or exit_status == QProcess.CrashExit:
             if not hasattr(self, '_error_emitted') or not self._error_emitted:
                 self._handle_error(f"Program terminated with error code {exit_code}", basename)
         else:

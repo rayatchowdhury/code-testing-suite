@@ -46,10 +46,15 @@ class Sidebar(QWidget):
         header_layout = QVBoxLayout(self.header)
         header_layout.setContentsMargins(0, 0, 0, 0)
         header_layout.setSpacing(0)
+        
+        # Add title widget for compatibility with tests
+        self.windowTitleWidget = None
         if title:
             title_label = QLabel(title)
             title_label.setObjectName("sidebar_title")
             header_layout.addWidget(title_label)
+            self.windowTitleWidget = title_label
+        
         main_layout.addWidget(self.header)
 
         # Add divider after header

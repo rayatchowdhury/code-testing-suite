@@ -365,3 +365,76 @@ class EditorAI:
             )
 
         return await self._get_ai_response(self.CODE_BASE_PROMPT + "\n\n" + prompt)
+
+    # Additional methods expected by tests
+    def configure(self):
+        """Configure the AI system."""
+        self._setup_ai()
+    
+    def _load_config(self):
+        """Load configuration from file."""
+        try:
+            if not os.path.exists(USER_DATA_DIR):
+                return {}
+            
+            config_path = os.path.join(USER_DATA_DIR, 'config.json')
+            if not os.path.exists(config_path):
+                return {}
+                
+            with open(config_path, 'r') as f:
+                return json.load(f)
+        except Exception as e:
+            logging.error(f"Config load error: {e}")
+            return {}
+    
+    def _get_api_key(self):
+        """Get API key from config."""
+        return self._load_api_key()
+    
+    def is_ai_enabled(self):
+        """Check if AI is enabled and configured."""
+        return self.model is not None
+    
+    async def analyze_code(self, code):
+        """Analyze code and provide insights."""
+        if not self.is_ai_enabled():
+            return {"error": "AI not configured", "content": ""}
+        
+        try:
+            result = await self.process_explanation('analysis', code)
+            return {"error": None, "content": result or ""}
+        except Exception as e:
+            return {"error": str(e), "content": ""}
+    
+    async def fix_issues(self, code):
+        """Fix issues in the provided code."""
+        if not self.is_ai_enabled():
+            return {"error": "AI not configured", "content": ""}
+        
+        try:
+            result = await self.process_code('fix', code)
+            return {"error": None, "content": result or ""}
+        except Exception as e:
+            return {"error": str(e), "content": ""}
+    
+    async def optimize_code(self, code):
+        """Optimize the provided code."""
+        if not self.is_ai_enabled():
+            return {"error": "AI not configured", "content": ""}
+        
+        try:
+            result = await self.process_code('optimize', code)
+            return {"error": None, "content": result or ""}
+        except Exception as e:
+            return {"error": str(e), "content": ""}
+    
+    async def document_code(self, code):
+        """Add documentation to the provided code."""
+        if not self.is_ai_enabled():
+            return {"error": "AI not configured", "content": ""}
+        
+        try:
+            result = await self.process_code('document', code)
+            return {"error": None, "content": result or ""}
+        except Exception as e:
+            return {"error": str(e), "content": ""}

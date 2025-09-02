@@ -18,6 +18,11 @@ class WindowManager(QStackedWidget):
                 if not window:
                     return False
                 
+                # Validate window is a QWidget
+                if not isinstance(window, QWidget):
+                    print(f"Error: Created window '{window_name}' is not a QWidget")
+                    return False
+                
                 self.windows[window_name] = window
                 self.addWidget(window)
             
@@ -34,7 +39,8 @@ class WindowManager(QStackedWidget):
             self.current_window = window_name
             return True
             
-        except RuntimeError:
+        except Exception as e:
+            print(f"Error showing window '{window_name}': {e}")
             return False
 
     def go_back(self):

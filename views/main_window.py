@@ -92,7 +92,11 @@ class MainWindowContent(SidebarWindowBase):
 
     def handle_button_click(self, button_text):
         if button_text == 'Exit':
-            self.parent.close()
+            if self.parent:
+                self.parent.close()
+            else:
+                import sys
+                sys.exit()
         elif button_text == 'Options':
             from views.config.config_view import ConfigView
             config_dialog = ConfigView(self)
@@ -100,7 +104,10 @@ class MainWindowContent(SidebarWindowBase):
         elif button_text in ['Code Editor', 'Stress Tester', 'TLE Tester', 'Help Center']:
             # Convert button text to window name
             window_name = button_text.lower().replace(' ', '_')
-            self.parent.window_manager.show_window(window_name)
+            if self.parent and hasattr(self.parent, 'window_manager'):
+                self.parent.window_manager.show_window(window_name)
+            else:
+                print(f"Cannot navigate to {window_name}: No window manager available")
 
 
 class MainWindow(QMainWindow):
