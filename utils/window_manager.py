@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QWidget, QStackedWidget
 from PySide6.QtCore import Qt, QTimer
+from utils.window_factory import WindowFactory
 
 class WindowManager(QStackedWidget):
     def __init__(self, parent=None):
@@ -7,47 +8,16 @@ class WindowManager(QStackedWidget):
         self.windows = {}
         self.current_window = None
         self.window_history = []  # Add navigation history
-        
-        # Lazy loading - import only when needed
-        self.window_classes = {
-            'main': lambda: self._import_main_window(),
-            'code_editor': lambda: self._import_code_editor(),
-            'stress_tester': lambda: self._import_stress_tester(),
-            'tle_tester': lambda: self._import_tle_tester(),
-            'help_center': lambda: self._import_help_center()
-        }
-
-    def _import_main_window(self):
-        from views.main_window import MainWindowContent
-        return MainWindowContent
-
-    def _import_code_editor(self):
-        from views.code_editor.code_editor_window import CodeEditorWindow
-        return CodeEditorWindow
-
-    def _import_stress_tester(self):
-        from views.stress_tester.stress_tester_window import StressTesterWindow
-        return StressTesterWindow
-
-    def _import_tle_tester(self):
-        from views.tle_tester.tle_tester_window import TLETesterWindow
-        return TLETesterWindow
-
-    def _import_help_center(self):
-        from views.help_center.help_center_window import HelpCenterWindow
-        return HelpCenterWindow
 
     def show_window(self, window_name, **kwargs):
         """Show a window, create if doesn't exist"""
         try:
             if window_name not in self.windows:
-                window_class_loader = self.window_classes.get(window_name)
-                if not window_class_loader:
+                # Use factory to create window instead of direct imports
+                window = WindowFactory.create_window(window_name, self.parent())
+                if not window:
                     return False
                 
-                # Lazy load the window class
-                window_class = window_class_loader()
-                window = window_class(self.parent())
                 self.windows[window_name] = window
                 self.addWidget(window)
             
