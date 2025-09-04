@@ -1,7 +1,7 @@
 import json
 import os
 import os.path
-from .config_exceptions import *
+from ..config_exceptions import *
 from constants import USER_DATA_DIR, CONFIG_FILE
 
 class ConfigManager:
@@ -75,7 +75,8 @@ class ConfigManager:
             ai_settings = config['ai_settings']
             required_ai_settings = {
                 'use_ai_panel': bool,
-                'gemini_api_key': str
+                'gemini_api_key': str,
+                'preferred_model': str
             }
             
             for key, expected_type in required_ai_settings.items():
@@ -113,7 +114,8 @@ class ConfigManager:
             'workspace_folder': '',
             'ai_settings': {  # Changed from gemini_api_key
                 'use_ai_panel': False,
-                'gemini_api_key': ''
+                'gemini_api_key': '',
+                'preferred_model': ''
             },
             'editor_settings': {
                 'autosave': True,

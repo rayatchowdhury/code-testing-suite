@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
 from PySide6.QtWidgets import (QDialog, QVBoxLayout, QLabel, QProgressBar, 
                               QPushButton, QTextEdit, QHBoxLayout, QWidget,
                               QScrollArea, QFrame, QSizePolicy, QApplication)  # Import QApplication here
 from PySide6.QtCore import Qt, Signal, Slot, QThread
 from styles.style import MATERIAL_COLORS
+from styles.constants.status_colors import ERROR_COLOR_HEX
 
 class StressTestStatusWindow(QDialog):
     def __init__(self, parent=None):
@@ -150,7 +152,7 @@ class StressTestStatusWindow(QDialog):
             self.history_widget.hide()
             # Show failure details
             self.status_label.setText(f"Test {test_number} Failed ✗")
-            self.status_label.setStyleSheet(f"color: #ff4444; font-weight: bold;")
+            self.status_label.setStyleSheet(f"color: {ERROR_COLOR_HEX}; font-weight: bold;")
             self.input_text.setText(input_text or "No input available")
             self.correct_output.setText(correct_output or "No correct output available")
             self.test_output.setText(test_output or "No test output available")
@@ -192,7 +194,7 @@ class StressTestStatusWindow(QDialog):
         layout.setContentsMargins(4, 4, 4, 4)
         
         status = "✓" if passed else "✗"
-        color = MATERIAL_COLORS['primary'] if passed else "#ff4444"
+        color = MATERIAL_COLORS['primary'] if passed else ERROR_COLOR_HEX
         
         label = QLabel(f"Test {test_number}: {status}")
         label.setStyleSheet(f"color: {color}; font-weight: bold;")

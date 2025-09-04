@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from views.base_window import SidebarWindowBase
 from PySide6.QtWidgets import QMessageBox
 from widgets.sidebar import Sidebar
@@ -64,6 +65,10 @@ class TLETesterWindow(SidebarWindowBase):
         elif button_text == 'Run':
             time_limit = self.time_limit_slider.value()
             self.tle_runner.run_tle_test(time_limit)
+        elif button_text == 'Results':
+            # Navigate to results window
+            if self.can_close():
+                self.parent.window_manager.show_window('results')
 
     def handle_button_click(self, button_text):
         if button_text == 'Help Center':

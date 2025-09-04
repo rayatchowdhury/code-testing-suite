@@ -21,6 +21,9 @@ pathlib>=1.0.1
 psutil>=5.9.0
 pytest>=7.3.1
 
+# Database support (SQLite is included with Python)
+# No additional packages needed for SQLite3
+
 # Development tools (optional)
 black>=23.3.0  # code formatting
 pylint>=2.17.0  # code analysis

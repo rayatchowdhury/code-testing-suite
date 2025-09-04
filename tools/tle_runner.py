@@ -6,6 +6,9 @@ from views.tle_tester.tle_test_status_window import TLETestStatusWindow
 import subprocess
 import threading
 import time
+from database import DatabaseManager, TestResult
+from datetime import datetime
+import json
 
 class TLETestWorker(QObject):
     testStarted = Signal(str)  # test name
@@ -18,6 +21,7 @@ class TLETestWorker(QObject):
         self.executables = executables
         self.time_limit = time_limit
         self.is_running = True
+        self.test_results = []  # Store detailed test results
 
     def run_tests(self):
         """Run TLE tests"""
@@ -56,6 +60,34 @@ class TLETestWorker(QObject):
                     passed = False
                     all_passed = False
                 
+                # Store test result with detailed information
+                test_result = {
+                    'test_name': 'Test Solution',
+                    'passed': passed,
+                    'execution_time': execution_time,
+                    'time_limit': self.time_limit,
+                    'timestamp': datetime.now().isoformat(),
+                    'timed_out': not passed,
+                    'performance_ratio': execution_time / self.time_limit if self.time_limit > 0 else 0
+                }
+                
+                # Read input and output files for analysis
+                try:
+                    input_file = os.path.join(self.workspace_dir, "input.txt")
+                    output_file = os.path.join(self.workspace_dir, "output.txt")
+                    
+                    if os.path.exists(input_file):
+                        with open(input_file, 'r') as f:
+                            test_result['input'] = f.read()
+                    
+                    if os.path.exists(output_file):
+                        with open(output_file, 'r') as f:
+                            test_result['output'] = f.read()
+                except Exception as e:
+                    test_result['file_read_error'] = str(e)
+                
+                self.test_results.append(test_result)
+                
                 self.testCompleted.emit("Test Solution", passed, execution_time)
 
         except Exception as e:
@@ -87,6 +119,7 @@ class TLERunner(QObject):
             'test': os.path.join(workspace_dir, 'test.exe')
         }
         self.current_process = None
+        self.db_manager = DatabaseManager()  # Add database manager
 
     def compile_all(self):
         """Compile all files"""
@@ -151,6 +184,9 @@ class TLERunner(QObject):
 
     def run_tle_test(self, time_limit):
         """Start TLE testing using QThread and worker"""
+        self.time_limit = time_limit  # Store for database saving
+        self.test_start_time = datetime.now()  # Track start time
+        
         self.status_window = TLETestStatusWindow()
         self.status_window.show()
 
@@ -163,6 +199,9 @@ class TLERunner(QObject):
         self.worker.testStarted.connect(self.status_window.show_test_running)
         self.worker.testCompleted.connect(self.status_window.show_test_complete)
         self.worker.allTestsCompleted.connect(self.status_window.show_all_passed)
+        
+        # Connect to our database saving method
+        self.worker.allTestsCompleted.connect(self._save_test_results)
 
         # Start worker when thread starts
         self.thread.started.connect(self.worker.run_tests)
@@ -172,6 +211,68 @@ class TLERunner(QObject):
 
         # Start the thread
         self.thread.start()
+    
+    def _save_test_results(self, all_passed):
+        """Save TLE test results to database"""
+        if not hasattr(self, 'worker') or not hasattr(self.worker, 'test_results'):
+            return
+        
+        # Calculate statistics
+        total_time = (datetime.now() - self.test_start_time).total_seconds()
+        passed_tests = sum(1 for result in self.worker.test_results if result.get('passed', False))
+        failed_tests = len(self.worker.test_results) - passed_tests
+        
+        # Get the test file path
+        test_file_path = self.files.get('test', '')
+        
+        # Create files snapshot
+        files_snapshot = DatabaseManager.create_files_snapshot(self.workspace_dir)
+        
+        # Compile analysis for TLE tests
+        tle_analysis = {
+            'time_limit': getattr(self, 'time_limit', 0),
+            'test_details': [],
+            'performance_summary': {
+                'fastest_test': None,
+                'slowest_test': None,
+                'average_time': 0
+            }
+        }
+        
+        execution_times = []
+        for result in self.worker.test_results:
+            if 'execution_time' in result:
+                execution_times.append(result['execution_time'])
+        
+        if execution_times:
+            tle_analysis['performance_summary']['average_time'] = sum(execution_times) / len(execution_times)
+            tle_analysis['performance_summary']['fastest_test'] = min(execution_times)
+            tle_analysis['performance_summary']['slowest_test'] = max(execution_times)
+        
+        # Create test result object
+        result = TestResult(
+            test_type="tle",
+            file_path=test_file_path,
+            test_count=len(self.worker.test_results),
+            passed_tests=passed_tests,
+            failed_tests=failed_tests,
+            total_time=total_time,
+            timestamp=datetime.now().isoformat(),
+            test_details=json.dumps(self.worker.test_results),
+            project_name=os.path.basename(self.workspace_dir),
+            files_snapshot=json.dumps(files_snapshot.__dict__),
+            mismatch_analysis=json.dumps(tle_analysis)
+        )
+        
+        # Save to database
+        try:
+            result_id = self.db_manager.save_test_result(result)
+            if result_id > 0:
+                print(f"TLE test results saved to database with ID: {result_id}")
+            else:
+                print("Failed to save TLE test results to database")
+        except Exception as e:
+            print(f"Error saving TLE test results: {e}")
 
     def stop(self):
         """Stop any running processes"""

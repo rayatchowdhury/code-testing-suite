@@ -9,10 +9,15 @@ from PySide6.QtCore import QTimer
 from utils.file_operations import FileOperations
 import json
 from constants import EDITOR_STATE_FILE
+from database import DatabaseManager, Session
+from datetime import datetime
 
 class CodeEditorWindow(SidebarWindowBase):
     def __init__(self, parent=None):
         super().__init__(parent)
+
+        # Initialize database manager for session management
+        self.db_manager = DatabaseManager()
 
         # Create sidebar
         self.sidebar = Sidebar("Code Editor")
@@ -71,7 +76,10 @@ class CodeEditorWindow(SidebarWindowBase):
         for i in range(self.editor_display.tab_widget.count()):
             tab = self.editor_display.tab_widget.widget(i)
             if tab and hasattr(tab.editor, 'ai_panel'):
-                tab.editor.ai_panel.refresh_visibility()
+                # Get the AI panel (this will initialize it if needed)
+                ai_panel = tab.editor.get_ai_panel()
+                if ai_panel:
+                    ai_panel.refresh_visibility()
 
     def can_close(self):
         """Check if any tab has unsaved changes"""
@@ -218,20 +226,44 @@ class CodeEditorWindow(SidebarWindowBase):
         self.editor_display.updateTabTitle(self.editor_display.tab_widget.count() - 1)
 
     def save_editor_state(self):
-        """Save the state of opened files"""
+        """Save the state of opened files to both JSON and database"""
+        # Save to traditional JSON file for backwards compatibility
         os.makedirs(os.path.dirname(self.state_file), exist_ok=True)
         
         state = {
             'open_files': []
         }
         
+        open_files = []
+        current_file = None
+        
         for i in range(self.editor_display.tab_widget.count()):
             tab = self.editor_display.tab_widget.widget(i)
             if tab and tab.editor.currentFilePath:
                 state['open_files'].append(tab.editor.currentFilePath)
+                open_files.append(tab.editor.currentFilePath)
+                
+                # Track the current active file
+                if i == self.editor_display.tab_widget.currentIndex():
+                    current_file = tab.editor.currentFilePath
         
+        # Save to JSON file
         with open(self.state_file, 'w') as f:
             json.dump(state, f)
+        
+        # Save to database
+        if open_files:
+            session = Session(
+                session_name=f"Editor Session {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+                open_files=json.dumps(open_files),
+                active_file=current_file or "",
+                timestamp=datetime.now().isoformat(),
+                project_name="Code Editor"
+            )
+            try:
+                self.db_manager.save_session(session)
+            except Exception as e:
+                print(f"Error saving session to database: {e}")
 
     def load_editor_state(self):
         """Load previously opened files"""

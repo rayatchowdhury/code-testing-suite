@@ -1,21 +1,21 @@
-// C++ program to sort an array using Bubble Sort
-
 #include <algorithm>
 #include <iostream>
+#include <vector>
 
-// Function to sort an array using Bubble Sort
-void bubbleSort(int arr[], int n)
+/**
+ * @brief Sorts a vector using the Bubble Sort algorithm.
+ * @param arr The vector of integers to be sorted.
+ */
+void bubbleSort(std::vector<int>& arr)
 {
-    // Iterate over the array n-1 times
+    int n = arr.size();
     for (int i = 0; i < n - 1; i++)
     {
-        // Iterate over the unsorted part of the array
         for (int j = 0; j < n - i - 1; j++)
         {
-            // If the current element is greater than the next element, swap them
             if (arr[j] > arr[j + 1])
             {
-                std::swap(arr[j], arr[j + 1]);
+                std::swap(arr[j], arr[j + 1]); // Swap elements
             }
         }
     }
@@ -24,20 +24,19 @@ void bubbleSort(int arr[], int n)
 int main()
 {
     int n;
-    std::cout << "Enter the size of the array: ";
+    std::cout << "Enter the size of the vector: ";
     std::cin >> n;
 
-    int arr[n];
-    std::cout << "Enter the elements of the array: ";
+    std::vector<int> arr(n);
+    std::cout << "Enter the elements of the vector: ";
     for (int i = 0; i < n; i++)
     {
         std::cin >> arr[i];
     }
 
-    // Sort the array using Bubble Sort
-    bubbleSort(arr, n);
+    bubbleSort(arr); // Sort the vector
 
-    std::cout << "Sorted array: ";
+    std::cout << "Sorted vector: ";
     for (int i = 0; i < n; i++)
     {
         std::cout << arr[i] << " ";

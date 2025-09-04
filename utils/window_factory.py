@@ -108,13 +108,18 @@ class WindowFactory:
             from views.help_center.help_center_window import HelpCenterWindow
             return HelpCenterWindow
         
+        def _create_results():
+            from views.results.results_window import ResultsWindow
+            return ResultsWindow
+        
         # Register all default window creators
         cls._window_creators.update({
             'main': _create_main_window,
             'code_editor': _create_code_editor,
             'stress_tester': _create_stress_tester,
             'tle_tester': _create_tle_tester,
-            'help_center': _create_help_center
+            'help_center': _create_help_center,
+            'results': _create_results
         })
         cls._registered = True
     

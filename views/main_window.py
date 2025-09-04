@@ -30,7 +30,7 @@ class MainWindowContent(SidebarWindowBase):
         
         # Add navigation buttons to content section
         main_section = self.sidebar.add_section("Navigation")
-        for button_text in ['Code Editor', 'Stress Tester', 'TLE Tester']:
+        for button_text in ['Code Editor', 'Stress Tester', 'TLE Tester', 'Results']:
             self.sidebar.add_button(button_text, main_section)
         
         # Add footer items with Help Center
@@ -98,10 +98,10 @@ class MainWindowContent(SidebarWindowBase):
                 import sys
                 sys.exit()
         elif button_text == 'Options':
-            from views.config.config_view import ConfigView
+            from config import ConfigView
             config_dialog = ConfigView(self)
             config_dialog.exec()
-        elif button_text in ['Code Editor', 'Stress Tester', 'TLE Tester', 'Help Center']:
+        elif button_text in ['Code Editor', 'Stress Tester', 'TLE Tester', 'Results', 'Help Center']:
             # Convert button text to window name
             window_name = button_text.lower().replace(' ', '_')
             if self.parent and hasattr(self.parent, 'window_manager'):
@@ -174,6 +174,12 @@ class MainWindow(QMainWindow):
             
             # Accept the event and cleanup
             event.accept()
+            
+            # Use centralized cleanup
+            from utils.logging_config import LoggingConfig
+            LoggingConfig.manual_cleanup()
+            
+            # Cleanup window manager
             QTimer.singleShot(0, self.window_manager.cleanup_all)
             
         except RuntimeError:

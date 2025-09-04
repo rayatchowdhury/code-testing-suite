@@ -1,22 +1,10 @@
 from PySide6.QtGui import QSyntaxHighlighter, QTextCharFormat, QBrush, QColor
 from PySide6.QtCore import Qt, QRegularExpression
 import re
+from styles.components.syntax_highlighting import SYNTAX_HIGHLIGHTING_COLORS
 
-# Modern color scheme
-STYLES = {
-    'keyword': '#ff6c6c',
-    'class': '#66d9ef',
-    'function': '#a6e22e',
-    'operator': '#f92672',
-    'brace': '#ffffff',
-    'string': '#e6db74',
-    'number': '#ae81ff',
-    'comment': '#75715e',
-    'preprocessor': '#a6e22e',
-    'namespace': '#66d9ef',
-    'std_class': '#66d9ef',
-    'constant': '#ae81ff'
-}
+# Use centralized color scheme
+STYLES = SYNTAX_HIGHLIGHTING_COLORS
 
 class CPPSyntaxHighlighter(QSyntaxHighlighter):
     def __init__(self, document):

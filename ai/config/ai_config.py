@@ -79,3 +79,21 @@ class AIConfig:
             return f"⚠️ AI Panel Enabled - {message}"
         else:
             return "🔒 AI Panel Disabled"
+
+    @classmethod
+    def refresh_ai_model(cls) -> Tuple[bool, str]:
+        """
+        Refresh the AI model by recreating the EditorAI instance
+        Returns: (success, message)
+        """
+        try:
+            from ai.core.editor_ai import EditorAI
+            # Force a new instance to be created with fresh model discovery
+            ai = EditorAI()
+            if ai.model:
+                model_name = ai.get_current_model_name()
+                return True, f"AI model refreshed successfully: {model_name}"
+            else:
+                return False, "Failed to initialize AI model after refresh"
+        except Exception as e:
+            return False, f"Error refreshing AI model: {str(e)}"

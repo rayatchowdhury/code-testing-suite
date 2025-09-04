@@ -58,7 +58,7 @@ def _import_syntax_highlighters():
 def _import_editor_ai():
     global _editor_ai
     if _editor_ai is None:
-        from tools.editor_ai import EditorAI
+        from ai.core.editor_ai import EditorAI
         _editor_ai = EditorAI
     return _editor_ai
 
@@ -307,6 +307,8 @@ class EditorWidget(QWidget):
             self.ai_panel.customCommandRequested.connect(self._handle_custom_command)
             self.layout().addWidget(self.ai_panel)
             self._ai_panel_initialized = True
+            # Force layout update
+            self.update()
 
     def _get_editor_ai(self):
         """Get EditorAI instance, creating if necessary"""

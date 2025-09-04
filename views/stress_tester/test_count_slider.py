@@ -1,4 +1,6 @@
 
+# -*- coding: utf-8 -*-
+
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QSlider, QHBoxLayout
 from PySide6.QtCore import Qt, Signal
 from styles.style import MATERIAL_COLORS

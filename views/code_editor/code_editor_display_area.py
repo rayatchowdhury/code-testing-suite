@@ -124,6 +124,9 @@ class CodeEditorDisplay(QWidget):
         index = self.tab_widget.addTab(new_tab, title)
         self.tab_widget.setCurrentWidget(new_tab)
         
+        # Initialize AI panel if enabled
+        ai_panel = new_tab.editor.get_ai_panel()
+        
         # Combine signal connections
         editor = new_tab.editor
         doc = editor.codeEditor.document()

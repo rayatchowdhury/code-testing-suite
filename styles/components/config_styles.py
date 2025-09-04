@@ -339,4 +339,63 @@ CONFIG_DIALOG_STYLE = f"""
                    stop:1 rgba(255, 255, 255, 0.1));
         border: 1px solid {MATERIAL_COLORS['primary']};
     }}
+    
+    /* Database Management Button Styles */
+    QPushButton#secondary_button {{
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                   stop:0 rgba(255, 255, 255, 0.08),
+                   stop:1 rgba(255, 255, 255, 0.04));
+        color: {MATERIAL_COLORS['on_surface']};
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 13px;
+    }}
+    
+    QPushButton#secondary_button:hover {{
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                   stop:0 {MATERIAL_COLORS['primary']}40,
+                   stop:1 {MATERIAL_COLORS['primary']}20);
+        border: 1px solid {MATERIAL_COLORS['primary']};
+    }}
+    
+    QPushButton#danger_button {{
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                   stop:0 {MATERIAL_COLORS['error']}80,
+                   stop:1 {MATERIAL_COLORS['error']}60);
+        color: white;
+        border: 1px solid {MATERIAL_COLORS['error']};
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 13px;
+    }}
+    
+    QPushButton#danger_button:hover {{
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                   stop:0 {MATERIAL_COLORS['error']},
+                   stop:1 {MATERIAL_COLORS['error']}90);
+        border: 1px solid {MATERIAL_COLORS['error']};
+    }}
+    
+    QLabel#info_label {{
+        color: {MATERIAL_COLORS['on_surface_variant']};
+        font-size: 13px;
+        font-style: italic;
+        padding: 8px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 6px;
+    }}
+    
+    QLabel#warning_label {{
+        color: {MATERIAL_COLORS['error']};
+        font-size: 12px;
+        font-weight: 500;
+        padding: 6px;
+        background: rgba(244, 67, 54, 0.1);
+        border: 1px solid rgba(244, 67, 54, 0.3);
+        border-radius: 6px;
+    }}
 """ + SCROLLBAR_STYLE

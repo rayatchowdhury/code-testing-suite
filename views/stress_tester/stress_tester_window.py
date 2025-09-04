@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from views.base_window import SidebarWindowBase
 from widgets.sidebar import Sidebar
 from PySide6.QtWidgets import QPushButton, QMessageBox
@@ -72,8 +73,10 @@ class StressTesterWindow(SidebarWindowBase):
         elif button_text == 'Run':
             test_count = self.test_count_slider.value()
             self.stresser.run_stress_test(test_count)
-        # Add your action button handling logic here
-        pass
+        elif button_text == 'Results':
+            # Navigate to results window
+            if self.can_close():
+                self.parent.window_manager.show_window('results')
 
     def handle_button_click(self, button_text):
         if (button_text == 'Help Center'):

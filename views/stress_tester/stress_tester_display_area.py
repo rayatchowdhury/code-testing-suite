@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QSplitter, QHBoxLayout, QPushButton, QMessageBox
 from PySide6.QtCore import Qt, Signal
 import os
@@ -197,11 +198,11 @@ class StressTesterDisplay(QWidget):
         
         # Create file if it doesn't exist
         if not os.path.exists(file_path):
-            with open(file_path, 'w') as f:
+            with open(file_path, 'w', encoding='utf-8') as f:
                 f.write('// Add your code here\n')
         
         # Load file content
-        with open(file_path, 'r') as f:
+        with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
             
         self.editor.currentFilePath = file_path

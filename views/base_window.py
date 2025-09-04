@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QSplitter, QPushButton
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
-from views.config.config_view import ConfigView
+from config import ConfigView
 from widgets.sidebar import Sidebar  # Add this import
 from widgets.display_area import DisplayArea  # Add this import
 from styles.style import SPLITTER_STYLE  # Add this import

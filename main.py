@@ -4,14 +4,13 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
 import qasync
 import asyncio
-from absl import logging as absl_logging
 from constants import APP_ICON
 
+# Initialize logging configuration early (handles all third-party noise)
+from utils.logging_config import LoggingConfig
+LoggingConfig.initialize()
+
 def main():
-    # Initialize absl logging before anything else
-    absl_logging.use_absl_handler()
-    absl_logging.set_verbosity(absl_logging.WARNING)
-    
     # Set attributes before creating QApplication
     QApplication.setAttribute(Qt.AA_UseDesktopOpenGL)
     QApplication.setAttribute(Qt.AA_ShareOpenGLContexts)

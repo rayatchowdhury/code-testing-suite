@@ -3,6 +3,12 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QPushButton, QSpacerItem,
                                QSpinBox, QSlider, QHBoxLayout)
 from PySide6.QtCore import Qt, Signal
 from styles import SIDEBAR_STYLE, SIDEBAR_BUTTON_STYLE, SCROLLBAR_STYLE
+from styles.components.sidebar_dividers import (
+    SIDEBAR_DIVIDER_CONTAINER_STYLE, SIDEBAR_DIVIDER_SPACE_STYLE, 
+    SIDEBAR_MAIN_DIVIDER_STYLE, SIDEBAR_FOOTER_CONTAINER_STYLE,
+    SIDEBAR_FOOTER_SPACE_STYLE, SIDEBAR_FOOTER_DIVIDER_STYLE,
+    SIDEBAR_VERTICAL_FOOTER_DIVIDER_STYLE
+)
 
 
 class SidebarSection(QFrame):
@@ -99,7 +105,7 @@ class Sidebar(QWidget):
         """Add a visually appealing horizontal divider line with padding."""
         # Create container for the divider section with background
         container = QWidget()
-        container.setStyleSheet("background-color: #1b1b1e;")
+        container.setStyleSheet(SIDEBAR_DIVIDER_CONTAINER_STYLE)
         container_layout = QVBoxLayout(container)
         container_layout.setContentsMargins(0, 0, 0, 0)
         container_layout.setSpacing(0)
@@ -107,30 +113,19 @@ class Sidebar(QWidget):
         # Add top spacing
         top_space = QWidget()
         top_space.setFixedHeight(10)
-        top_space.setStyleSheet("background-color: #1b1b1e;")
+        top_space.setStyleSheet(SIDEBAR_DIVIDER_SPACE_STYLE)
         container_layout.addWidget(top_space)
 
         # Create a widget to serve as the divider
         line_widget = QWidget()
         line_widget.setFixedHeight(3)
-        line_widget.setStyleSheet("""
-            background: qlineargradient(
-                spread: pad,
-                x1: 0, y1: 0, x2: 1, y2: 0,
-                stop: 0 rgba(247, 37, 133, 0.6),
-                stop: 0.5 rgba(144, 12, 63, 0.8),
-                stop: 1 rgba(88, 24, 69, 0.6)
-            );
-            border-radius: 1px;
-            margin-left: 10px;
-            margin-right: 10px;
-        """)
+        line_widget.setStyleSheet(SIDEBAR_MAIN_DIVIDER_STYLE)
         container_layout.addWidget(line_widget)
 
         # Add bottom spacing
         bottom_space = QWidget()
         bottom_space.setFixedHeight(10)
-        bottom_space.setStyleSheet("background-color: #1b1b1e;")
+        bottom_space.setStyleSheet(SIDEBAR_DIVIDER_SPACE_STYLE)
         container_layout.addWidget(bottom_space)
 
         layout.addWidget(container)
@@ -140,7 +135,7 @@ class Sidebar(QWidget):
         """Add a divider in the footer with the same style as the main divider"""
         # Create container for the footer divider section
         container = QWidget()
-        container.setStyleSheet("background-color: #1e1e1e;")
+        container.setStyleSheet(SIDEBAR_FOOTER_CONTAINER_STYLE)
         container_layout = QVBoxLayout(container)
         container_layout.setContentsMargins(0, 0, 0, 0)
         container_layout.setSpacing(0)
@@ -148,30 +143,19 @@ class Sidebar(QWidget):
         # Add top spacing
         top_space = QWidget()
         top_space.setFixedHeight(1)
-        top_space.setStyleSheet("background-color: #1e1e1e;")
+        top_space.setStyleSheet(SIDEBAR_FOOTER_SPACE_STYLE)
         container_layout.addWidget(top_space)
 
         # Create a widget to serve as the divider
         line_widget = QWidget()
         line_widget.setFixedHeight(1)
-        line_widget.setStyleSheet("""
-           background: qlineargradient(
-            spread: pad,
-            x1: 0, y1: 0, x2: 1, y2: 0,
-            stop: 0 rgba(96, 125, 139, 0.6),
-            stop: 0.5 rgba(69, 90, 100, 0.8),
-            stop: 1 rgba(38, 50, 56, 0.6)
-           );
-           border-radius: 1px;
-           margin-left: 10px;
-           margin-right: 10px;
-        """)
+        line_widget.setStyleSheet(SIDEBAR_FOOTER_DIVIDER_STYLE)
         container_layout.addWidget(line_widget)
 
         # Add bottom spacing
         bottom_space = QWidget()
         bottom_space.setFixedHeight(2)
-        bottom_space.setStyleSheet("background-color: #1e1e1e;")
+        bottom_space.setStyleSheet(SIDEBAR_FOOTER_SPACE_STYLE)
         container_layout.addWidget(bottom_space)
 
         self.footer.layout().addWidget(container)
@@ -183,15 +167,7 @@ class Sidebar(QWidget):
         line_widget.setFixedWidth(1)
         line_widget.setMinimumHeight(30)  # Match button height
         # Apply a gradient background for a modern look
-        line_widget.setStyleSheet("""
-           background: qlineargradient(
-            spread: pad,
-            x1: 0, y1: 0, x2: 0, y2: 1,
-            stop: 0 rgba(96, 125, 139, 0.6),
-            stop: 0.5 rgba(69, 90, 100, 0.8),
-            stop: 1 rgba(38, 50, 56, 0.6)
-           );
-        """)
+        line_widget.setStyleSheet(SIDEBAR_VERTICAL_FOOTER_DIVIDER_STYLE)
         return line_widget
 
     def setup_horizontal_footer_buttons(self, left_btn, right_btn):

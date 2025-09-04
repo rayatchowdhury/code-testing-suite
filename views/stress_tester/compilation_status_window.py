@@ -1,7 +1,10 @@
 
+# -*- coding: utf-8 -*-
+
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QProgressBar, QPushButton
 from PySide6.QtCore import Qt
 from styles.style import MATERIAL_COLORS
+from styles.constants.status_colors import ERROR_COLOR_HEX
 
 class CompilationStatusWindow(QDialog):
     def __init__(self, parent=None):
@@ -82,4 +85,4 @@ class CompilationStatusWindow(QDialog):
             if success:
                 self.status_label.setStyleSheet(f"color: {MATERIAL_COLORS['primary']};")
             else:
-                self.status_label.setStyleSheet("color: #ff4444;")
+                self.status_label.setStyleSheet(f"color: {ERROR_COLOR_HEX};")

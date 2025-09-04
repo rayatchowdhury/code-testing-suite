@@ -1,10 +1,11 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton, 
                               QLineEdit, QLabel, QFrame, QSizePolicy)
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, Signal, QTimer
 from styles.components import AI_PANEL_STYLE, CUSTOM_COMMAND_STYLE
-from utils.ai_config import AIConfig
+from ai.config.ai_config import AIConfig
 import asyncio
 import os
+import threading
 
 class AIActionButton(QPushButton):
     def __init__(self, text, parent=None):
@@ -57,6 +58,26 @@ class AIPanel(QWidget):
         
         # Check if AI panel should be shown
         self.refresh_visibility()
+        
+        # Initialize AI in background if panel is visible
+        if AIConfig.should_show_ai_panel():
+            self._initialize_ai_background()
+
+    def _initialize_ai_background(self):
+        """Initialize AI model in background thread for faster first prompt"""
+        def background_init():
+            try:
+                from ai.core.editor_ai import EditorAI
+                # Create and initialize EditorAI instance
+                ai = EditorAI()
+                # This will trigger model initialization and caching
+                ai.configure()
+            except Exception as e:
+                print(f"Background AI initialization failed: {e}")
+        
+        # Start background initialization
+        init_thread = threading.Thread(target=background_init, daemon=True)
+        init_thread.start()
 
     def refresh_visibility(self):
         """Refresh panel visibility based on current AI configuration"""
@@ -64,6 +85,8 @@ class AIPanel(QWidget):
             if not hasattr(self, 'layout') or self.layout() is None:
                 self._setup_ui()
             self.show()
+            # Initialize AI when panel becomes visible
+            self._initialize_ai_background()
         else:
             self.hide()
 
@@ -145,8 +168,6 @@ class AIPanel(QWidget):
 
     def _connect_signals(self):
         """Connect button signals with proper code context"""
-        current_code = self.parent().getCode() if self.parent() else ""
-        
         # Connect button signals
         signal_map = {
             'analysis': self.analysisRequested,
@@ -160,13 +181,29 @@ class AIPanel(QWidget):
         for action, btn in self.action_buttons.items():
             if action in signal_map:
                 btn.clicked.connect(
-                    lambda checked, s=signal_map[action], c=current_code: s.emit(c)
+                    lambda checked, s=signal_map[action]: self._emit_with_current_code(s)
                 )
 
         # Connect custom command signal
         self.custom_command.commandSubmitted.connect(
-            lambda cmd: self.customCommandRequested.emit(cmd, current_code)
+            lambda cmd: self._emit_custom_command_with_current_code(cmd)
         )
+    
+    def _emit_with_current_code(self, signal):
+        """Emit a signal with the current code from parent"""
+        try:
+            current_code = self.parent().getCode() if self.parent() and hasattr(self.parent(), 'getCode') else ""
+        except (AttributeError, RuntimeError):
+            current_code = ""
+        signal.emit(current_code)
+    
+    def _emit_custom_command_with_current_code(self, command):
+        """Emit custom command signal with current code"""
+        try:
+            current_code = self.parent().getCode() if self.parent() and hasattr(self.parent(), 'getCode') else ""
+        except (AttributeError, RuntimeError):
+            current_code = ""
+        self.customCommandRequested.emit(command, current_code)
 
     def set_enabled(self, enabled):
         """Enable or disable all AI actions"""

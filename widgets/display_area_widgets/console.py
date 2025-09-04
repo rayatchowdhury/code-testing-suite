@@ -3,6 +3,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QPlainTextEdit, QLabel,
 from PySide6.QtCore import Qt, Signal, QTimer
 from PySide6.QtGui import QKeyEvent, QTextCharFormat, QColor, QTextCursor
 from styles import CONSOLE_STYLE, MATERIAL_COLORS
+from styles.components.console_colors import CONSOLE_COLORS
 
 class ConsoleOutput(QWidget):
     inputSubmitted = Signal(str)
@@ -108,25 +109,14 @@ class ConsoleOutput(QWidget):
 
     def setup_text_formats(self):
         """Setup different text formats for console output"""
-        colors = {
-            'default': MATERIAL_COLORS['text_primary'],
-            'success': '#4CAF50',    # Green
-            'error': '#FF5252',      # Red
-            'info': '#2196F3',       # Blue
-            'warning': '#FFC107',    # Amber
-            'input': '#E040FB',      # Purple
-            'prompt': '#FF4081',     # Pink
-            'filename': '#FFA726',   # Orange
-            'executable': '#26C6DA',  # Cyan
-        }
-        
+        # Use centralized console colors
         self.formats = {
             format_type: self._create_format(color)
-            for format_type, color in colors.items()
+            for format_type, color in CONSOLE_COLORS.items()
         }
 
         # Create fallback format
-        self.fallback_format = self._create_format(colors['default'])
+        self.fallback_format = self._create_format(CONSOLE_COLORS['default'])
 
     def _create_format(self, color):
         fmt = QTextCharFormat()

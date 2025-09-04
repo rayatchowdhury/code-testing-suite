@@ -4,6 +4,7 @@ from PySide6.QtWidgets import (QDialog, QVBoxLayout, QLabel, QProgressBar,
                               QScrollArea, QFrame, QSizePolicy)
 from PySide6.QtCore import Qt, Signal, Slot
 from styles.style import MATERIAL_COLORS
+from styles.constants.status_colors import ERROR_COLOR_HEX
 
 class TLETestStatusWindow(QDialog):
     def __init__(self, parent=None):
@@ -127,7 +128,7 @@ class TLETestStatusWindow(QDialog):
     def show_test_complete(self, test_name, passed, input_text="", output="", time_taken=0.0):
         """Show completed test result"""
         status = "Passed" if passed else "Time Limit Exceeded"
-        color = MATERIAL_COLORS['primary'] if passed else "#ff4444"
+        color = MATERIAL_COLORS['primary'] if passed else ERROR_COLOR_HEX
         
         self.status_label.setText(f"{test_name} {status}")
         self.status_label.setStyleSheet(f"color: {color}; font-weight: bold;")
@@ -169,7 +170,7 @@ class TLETestStatusWindow(QDialog):
         layout.setContentsMargins(4, 4, 4, 4)
         
         status = "✓" if passed else "✗ TLE"
-        color = MATERIAL_COLORS['primary'] if passed else "#ff4444"
+        color = MATERIAL_COLORS['primary'] if passed else ERROR_COLOR_HEX
         
         label = QLabel(f"{test_name}: {status} ({time_taken:.2f}s)")
         label.setStyleSheet(f"color: {color}; font-weight: bold;")
