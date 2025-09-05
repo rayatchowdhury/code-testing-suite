@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QWidget, QStackedWidget
 from PySide6.QtCore import Qt, QTimer
-from utils.window_factory import WindowFactory
+from ..utils.window_factory import WindowFactory
 
 class WindowManager(QStackedWidget):
     def __init__(self, parent=None):

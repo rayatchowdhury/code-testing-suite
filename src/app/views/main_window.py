@@ -13,10 +13,10 @@ from PySide6.QtGui import QFont
 from PySide6.QtCore import Qt, QUrl, Signal, QTimer
 from PySide6.QtWebEngineWidgets import QWebEngineView
 import os
-from widgets.sidebar import Sidebar
-from widgets.display_area import DisplayArea
-from views.base_window import SidebarWindowBase
-from styles.style import WEBVIEW_STYLE
+from ..widgets.sidebar import Sidebar
+from ..widgets.display_area import DisplayArea
+from .base_window import SidebarWindowBase
+from ..styles.style import WEBVIEW_STYLE
 
 
 class MainWindowContent(SidebarWindowBase):
@@ -98,7 +98,7 @@ class MainWindowContent(SidebarWindowBase):
                 import sys
                 sys.exit()
         elif button_text == 'Options':
-            from config import ConfigView
+            from ..config import ConfigView
             config_dialog = ConfigView(self)
             config_dialog.exec()
         elif button_text in ['Code Editor', 'Stress Tester', 'TLE Tester', 'Results', 'Help Center']:
@@ -117,7 +117,7 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(1100, 700)  # Increased from 1000 to 1150
         
         # Create window manager and set as central widget
-        from utils.window_manager import WindowManager
+        from ..utils.window_manager import WindowManager
         self.window_manager = WindowManager(self)
         self.setCentralWidget(self.window_manager)
         
@@ -134,7 +134,7 @@ class MainWindow(QMainWindow):
             current = self.window_manager.get_current_window()
             
             # If current window is code editor, check for unsaved changes
-            from views.code_editor.code_editor_window import CodeEditorWindow
+            from ..views.code_editor.code_editor_window import CodeEditorWindow
             if current and isinstance(current, CodeEditorWindow):
                 if current.editor_display.has_editor:
                     # Check for any unsaved changes
@@ -176,7 +176,7 @@ class MainWindow(QMainWindow):
             event.accept()
             
             # Use centralized cleanup
-            from utils.logging_config import LoggingConfig
+            from ..utils.logging_config import LoggingConfig
             LoggingConfig.manual_cleanup()
             
             # Cleanup window manager

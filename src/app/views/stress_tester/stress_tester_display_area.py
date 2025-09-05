@@ -3,18 +3,18 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QSplitter, QHBoxLayout, QPus
 from PySide6.QtCore import Qt, Signal
 import os
 
-from widgets.display_area_widgets.editor import EditorWidget
-from widgets.display_area_widgets.console import ConsoleOutput
-from widgets.display_area_widgets.ai_panel import AIPanel
-from tools.stress_compiler_runner import StressCompilerRunner
-from styles.style import MATERIAL_COLORS
-from styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE
-from styles.components.stress_tester import (
+from ...widgets.display_area_widgets.editor import EditorWidget
+from ...widgets.display_area_widgets.console import ConsoleOutput
+from ...widgets.display_area_widgets.ai_panel import AIPanel
+from ...tools.stress_compiler_runner import StressCompilerRunner
+from ...styles.style import MATERIAL_COLORS
+from ...styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE
+from ...styles.components.stress_tester import (
     STRESS_TESTER_BUTTON_PANEL_STYLE,
     FILE_BUTTON_STYLE,
     STRESS_CONTENT_PANEL_STYLE
 )
-from constants import WORKSPACE_DIR
+from ...constants import WORKSPACE_DIR
 
 class StressTesterDisplay(QWidget):
     filePathChanged = Signal()

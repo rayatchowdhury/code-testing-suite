@@ -4,13 +4,13 @@ from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtCore import Qt, Signal, QUrl
 import os
 
-from widgets.display_area_widgets.editor import EditorWidget
-from widgets.display_area_widgets.console import ConsoleOutput 
-from widgets.display_area_widgets.ai_panel import AIPanel
-from tools.compiler_runner import CompilerRunner
-from styles.style import MATERIAL_COLORS
-from styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE
-from styles.components.editor import get_tab_style
+from ...widgets.display_area_widgets.editor import EditorWidget
+from ...widgets.display_area_widgets.console import ConsoleOutput 
+from ...widgets.display_area_widgets.ai_panel import AIPanel
+from ...tools.compiler_runner import CompilerRunner
+from ...styles.style import MATERIAL_COLORS
+from ...styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE
+from ...styles.components.editor import get_tab_style
 
 class EditorTab(QWidget):
     def __init__(self):

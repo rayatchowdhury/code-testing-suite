@@ -1,4 +1,4 @@
-from tools.compiler_runner import CompilerRunner
+from ..tools.compiler_runner import CompilerRunner
 from PySide6.QtCore import QObject, Signal
 import logging
 
@@ -16,7 +16,7 @@ class StressCompilerRunner(CompilerRunner):
         """Compile and run code for stress testing"""
         logger.debug(f"Starting stress test compilation for {filepath}")
         super().compile_and_run_code(filepath)
-from tools.compiler_runner import CompilerRunner
+from ..tools.compiler_runner import CompilerRunner
 from PySide6.QtCore import QObject, Signal
 import logging
 

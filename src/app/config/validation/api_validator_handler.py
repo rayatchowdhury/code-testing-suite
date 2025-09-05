@@ -3,13 +3,13 @@
 from PySide6.QtWidgets import QLineEdit, QMessageBox, QInputDialog
 from PySide6.QtCore import QThread, Signal
 
-from styles.constants.colors import MATERIAL_COLORS
-from styles.components.config_ui import (
+from ...styles.constants.colors import MATERIAL_COLORS
+from ...styles.components.config_ui import (
     get_error_status_style, 
     get_neutral_status_style,
     get_success_status_style
 )
-from utils.api_validator import APIValidator
+from ...utils.api_validator import APIValidator
 from ..ui.error_dialog import ErrorDialog
 import re
 

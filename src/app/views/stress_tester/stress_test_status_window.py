@@ -3,9 +3,9 @@ from PySide6.QtWidgets import (QDialog, QVBoxLayout, QLabel, QProgressBar,
                               QPushButton, QTextEdit, QHBoxLayout, QWidget,
                               QScrollArea, QFrame, QSizePolicy, QApplication)  # Import QApplication here
 from PySide6.QtCore import Qt, Signal, Slot, QThread
-from styles.style import MATERIAL_COLORS
-from styles.constants.status_colors import ERROR_COLOR_HEX
-from styles.components.stress_tester import (
+from ...styles.style import MATERIAL_COLORS
+from ...styles.constants.status_colors import ERROR_COLOR_HEX
+from ...styles.components.stress_tester import (
     STRESS_TEST_STATUS_DIALOG_STYLE,
     get_running_status_style,
     get_error_status_style,

@@ -3,8 +3,8 @@
 from PySide6.QtWidgets import QMessageBox
 
 from ..config_exceptions import ConfigError
-from styles.constants.colors import MATERIAL_COLORS
-from styles.components.config_ui import (
+from ...styles.constants.colors import MATERIAL_COLORS
+from ...styles.components.config_ui import (
     SUCCESS_MESSAGE_STYLE, 
     INFO_MESSAGE_STYLE,
     get_success_status_style

@@ -8,10 +8,10 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIcon
 import os
 
-from styles.components.config_styles import CONFIG_DIALOG_STYLE
-from styles.components.config_ui import CONFIG_DIALOG_TITLE_STYLE
-from styles.constants.colors import MATERIAL_COLORS
-from constants import SETTINGS_ICON
+from ...styles.components.config_styles import CONFIG_DIALOG_STYLE
+from ...styles.components.config_ui import CONFIG_DIALOG_TITLE_STYLE
+from ...styles.constants.colors import MATERIAL_COLORS
+from ...constants import SETTINGS_ICON
 
 
 class ConfigView(QDialog):
@@ -35,7 +35,7 @@ class ConfigView(QDialog):
 
         # Lazy imports to improve startup performance
         from ..management.config_manager import ConfigManager
-        from database.database_manager import DatabaseManager
+        from ...database.database_manager import DatabaseManager
         from .section_builders import SectionBuilder
         from ..validation.api_validator_handler import APIValidatorHandler
         from ..management.database_operations import DatabaseOperations

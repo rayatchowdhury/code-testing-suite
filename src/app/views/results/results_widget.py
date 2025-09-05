@@ -7,17 +7,17 @@ from PySide6.QtGui import QFont
 import json
 from datetime import datetime, timedelta
 
-from database import DatabaseManager, TestResult
-from styles.style import MATERIAL_COLORS
-from styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE
-from styles.components.results import (
+from ...database import DatabaseManager, TestResult
+from ...styles.style import MATERIAL_COLORS
+from ...styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE
+from ...styles.components.results import (
     RESULTS_COMBO_STYLE, RESULTS_BUTTON_STYLE, RESULTS_TAB_WIDGET_STYLE,
     RESULTS_TABLE_STYLE, RESULTS_TABLE_SMALL_STYLE, RESULTS_TEXT_EDIT_STYLE,
     RESULTS_PROGRESS_BAR_STYLE, RESULTS_FILTERS_PANEL_STYLE, RESULTS_CARD_STYLE,
     RESULTS_LABEL_TITLE_STYLE, RESULTS_LABEL_FILTER_STYLE, RESULTS_LABEL_STAT_STYLE,
     RESULTS_LABEL_DETAILS_STYLE
 )
-from views.results.detailed_results_widget import DetailedResultsWidget
+from ...views.results.detailed_results_widget import DetailedResultsWidget
 
 class TestResultsWidget(QWidget):
     """Widget to display test results from database"""

@@ -89,27 +89,27 @@ class WindowFactory:
         """Register default window creators with lazy imports."""
         
         def _create_main_window():
-            from views.main_window import MainWindowContent
+            from ..views.main_window import MainWindowContent
             return MainWindowContent
         
         def _create_code_editor():
-            from views.code_editor.code_editor_window import CodeEditorWindow
+            from ..views.code_editor.code_editor_window import CodeEditorWindow
             return CodeEditorWindow
         
         def _create_stress_tester():
-            from views.stress_tester.stress_tester_window import StressTesterWindow
+            from ..views.stress_tester.stress_tester_window import StressTesterWindow
             return StressTesterWindow
         
         def _create_tle_tester():
-            from views.tle_tester.tle_tester_window import TLETesterWindow
+            from ..views.tle_tester.tle_tester_window import TLETesterWindow
             return TLETesterWindow
         
         def _create_help_center():
-            from views.help_center.help_center_window import HelpCenterWindow
+            from ..views.help_center.help_center_window import HelpCenterWindow
             return HelpCenterWindow
         
         def _create_results():
-            from views.results.results_window import ResultsWindow
+            from ..views.results.results_window import ResultsWindow
             return ResultsWindow
         
         # Register all default window creators

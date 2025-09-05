@@ -1,8 +1,8 @@
 """
 Common inline style helpers for frequently used style combinations
 """
-from styles.constants.colors import MATERIAL_COLORS
-from styles.constants.status_colors import ERROR_COLOR_HEX, FONT_WEIGHTS, FONT_SIZES
+from ...styles.constants.colors import MATERIAL_COLORS
+from ...styles.constants.status_colors import ERROR_COLOR_HEX, FONT_WEIGHTS, FONT_SIZES
 
 # Common error label styles
 ERROR_LABEL_STYLE = f"color: {MATERIAL_COLORS['error']};"

@@ -6,8 +6,8 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
 
-from styles.constants.colors import MATERIAL_COLORS
-from styles.components.config_ui import ERROR_DIALOG_STYLE
+from ...styles.constants.colors import MATERIAL_COLORS
+from ...styles.components.config_ui import ERROR_DIALOG_STYLE
 
 
 class ErrorDialog(QDialog):

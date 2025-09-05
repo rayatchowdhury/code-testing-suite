@@ -7,12 +7,12 @@ from PySide6.QtGui import QFont, QTextCharFormat, QTextCursor, QColor
 import json
 from datetime import datetime
 
-from styles.components.results import (
+from ...styles.components.results import (
     RESULTS_TEXT_EDIT_STYLE, RESULTS_CARD_STYLE, RESULTS_LABEL_TITLE_STYLE,
     RESULTS_LABEL_DETAILS_STYLE, RESULTS_TABLE_SMALL_STYLE, RESULTS_BUTTON_STYLE
 )
-from styles.style import MATERIAL_COLORS
-from styles.helpers.inline_styles import (ERROR_LABEL_BOLD_STYLE, ERROR_TITLE_STYLE, 
+from ...styles.style import MATERIAL_COLORS
+from ...styles.helpers.inline_styles import (ERROR_LABEL_BOLD_STYLE, ERROR_TITLE_STYLE, 
                                            build_status_style, get_status_label_style)
 
 class TestCaseDetailWidget(QWidget):

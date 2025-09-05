@@ -2,8 +2,8 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QPushButton, QSpacerItem,
                                QSizePolicy, QLabel, QFrame, QScrollArea, QComboBox,
                                QSpinBox, QSlider, QHBoxLayout)
 from PySide6.QtCore import Qt, Signal
-from styles import SIDEBAR_STYLE, SIDEBAR_BUTTON_STYLE, SCROLLBAR_STYLE
-from styles.components.sidebar_dividers import (
+from ..styles import SIDEBAR_STYLE, SIDEBAR_BUTTON_STYLE, SCROLLBAR_STYLE
+from ..styles.components.sidebar_dividers import (
     SIDEBAR_DIVIDER_CONTAINER_STYLE, SIDEBAR_DIVIDER_SPACE_STYLE, 
     SIDEBAR_MAIN_DIVIDER_STYLE, SIDEBAR_FOOTER_CONTAINER_STYLE,
     SIDEBAR_FOOTER_SPACE_STYLE, SIDEBAR_FOOTER_DIVIDER_STYLE,

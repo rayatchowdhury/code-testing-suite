@@ -11,7 +11,7 @@ import threading
 import time
 import re
 from typing import Optional, List
-from utils.logging_config import LoggingConfig
+from ...utils.logging_config import LoggingConfig
 
 # Ensure logging is configured
 LoggingConfig.initialize()

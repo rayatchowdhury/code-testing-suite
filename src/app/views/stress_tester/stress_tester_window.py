@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-from views.base_window import SidebarWindowBase
-from widgets.sidebar import Sidebar
+from ...views.base_window import SidebarWindowBase
+from ...widgets.sidebar import Sidebar
 from PySide6.QtWidgets import QPushButton, QMessageBox
 from PySide6.QtGui import QFont
-from views.stress_tester.stress_tester_display_area import StressTesterDisplay
-from views.stress_tester.test_count_slider import TestCountSlider
-from tools.stresser import Stresser
+from ...views.stress_tester.stress_tester_display_area import StressTesterDisplay
+from ...views.stress_tester.test_count_slider import TestCountSlider
+from ...tools.stresser import Stresser
 
 class StressTesterWindow(SidebarWindowBase):
     def __init__(self, parent=None):

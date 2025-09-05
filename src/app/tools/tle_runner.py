@@ -1,12 +1,12 @@
 
 import os
 from PySide6.QtCore import QObject, Signal, QProcess, QThread
-from views.stress_tester.compilation_status_window import CompilationStatusWindow
-from views.tle_tester.tle_test_status_window import TLETestStatusWindow
+from ..views.stress_tester.compilation_status_window import CompilationStatusWindow
+from ..views.tle_tester.tle_test_status_window import TLETestStatusWindow
 import subprocess
 import threading
 import time
-from database import DatabaseManager, TestResult
+from ..database import DatabaseManager, TestResult
 from datetime import datetime
 import json
 

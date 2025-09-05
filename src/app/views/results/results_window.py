@@ -1,7 +1,7 @@
-from views.base_window import SidebarWindowBase
-from widgets.sidebar import Sidebar
+from ...views.base_window import SidebarWindowBase
+from ...widgets.sidebar import Sidebar
 from PySide6.QtWidgets import QPushButton, QVBoxLayout, QWidget
-from views.results.results_widget import TestResultsWidget
+from ...views.results.results_widget import TestResultsWidget
 
 class ResultsWindow(SidebarWindowBase):
     """Window to display test results and analytics"""

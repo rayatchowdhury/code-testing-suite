@@ -3,8 +3,8 @@
 
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QSlider, QHBoxLayout
 from PySide6.QtCore import Qt, Signal
-from styles.style import MATERIAL_COLORS
-from styles.components.stress_tester import (
+from ...styles.style import MATERIAL_COLORS
+from ...styles.components.stress_tester import (
     TEST_COUNT_SLIDER_STYLE,
     TEST_COUNT_VALUE_LABEL_STYLE
 )

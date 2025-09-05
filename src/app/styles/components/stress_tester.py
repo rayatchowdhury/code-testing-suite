@@ -2,8 +2,8 @@
 Styles for the Stress Tester View Components
 """
 
-from styles.style import MATERIAL_COLORS
-from styles.constants.status_colors import ERROR_COLOR_HEX
+from ...styles.style import MATERIAL_COLORS
+from ...styles.constants.status_colors import ERROR_COLOR_HEX
 
 # Stress Test Status Window Styles
 STRESS_TEST_STATUS_DIALOG_STYLE = f"""

@@ -3,9 +3,9 @@ from PySide6.QtWidgets import (QDialog, QVBoxLayout, QLabel, QProgressBar,
                               QPushButton, QTextEdit, QHBoxLayout, QWidget,
                               QScrollArea, QFrame, QSizePolicy)
 from PySide6.QtCore import Qt, Signal, Slot
-from styles.style import MATERIAL_COLORS
-from styles.constants.status_colors import ERROR_COLOR_HEX
-from styles.components.tle_tester import (
+from ...styles.style import MATERIAL_COLORS
+from ...styles.constants.status_colors import ERROR_COLOR_HEX
+from ...styles.components.tle_tester import (
     TLE_TEST_STATUS_WINDOW_STYLE,
     TLE_STATUS_LABEL_STYLE,
     TLE_TIME_LABEL_STYLE,

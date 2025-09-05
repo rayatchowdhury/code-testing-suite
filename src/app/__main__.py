@@ -39,7 +39,7 @@ def setup_logging():
             LoggingConfig.initialize()
         except ImportError:
             try:
-                from utils.logging_config import LoggingConfig
+                from .utils.logging_config import LoggingConfig
                 LoggingConfig.initialize()
             except ImportError:
                 # Fallback to basic logging
@@ -61,22 +61,18 @@ def get_app_icon():
     return None  # No icon found
 
 def create_main_window():
-    """Create main window with import fallbacks"""
-    # Try multiple import paths for MainWindow
-    import_paths = [
-        "src.app.views.main_window",
-        "app.views.main_window", 
-        "views.main_window"
-    ]
-    
-    for import_path in import_paths:
+    """Create main window using src structure"""
+    try:
+        # Use relative import within src.app package
+        from .views.main_window import MainWindow
+        return MainWindow()
+    except ImportError as e:
+        # If relative import fails, try absolute import
         try:
-            module = __import__(import_path, fromlist=['MainWindow'])
-            return module.MainWindow()
+            from src.app.views.main_window import MainWindow
+            return MainWindow()
         except ImportError:
-            continue
-    
-    raise ImportError("Could not import MainWindow from any known location")
+            raise ImportError(f"Could not import MainWindow: {e}")
 
 def main():
     """Main application entry point with comprehensive error handling"""

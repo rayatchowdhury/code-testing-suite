@@ -3,17 +3,17 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QSplitter, QHBoxLayout, QPus
 from PySide6.QtCore import Qt, Signal
 import os
 
-from widgets.display_area_widgets.editor import EditorWidget
-from widgets.display_area_widgets.console import ConsoleOutput
-from tools.tle_compiler_runner import TLECompilerRunner
-from styles.style import MATERIAL_COLORS
-from styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE
-from styles.components.tle_tester import (
+from ...widgets.display_area_widgets.editor import EditorWidget
+from ...widgets.display_area_widgets.console import ConsoleOutput
+from ...tools.tle_compiler_runner import TLECompilerRunner
+from ...styles.style import MATERIAL_COLORS
+from ...styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE
+from ...styles.components.tle_tester import (
     TLE_BUTTON_PANEL_STYLE,
     TLE_FILE_BUTTON_STYLE, 
     TLE_CONTENT_PANEL_STYLE
 )
-from constants import WORKSPACE_DIR
+from ...constants import WORKSPACE_DIR
 
 class TLETesterDisplay(QWidget):
     filePathChanged = Signal()

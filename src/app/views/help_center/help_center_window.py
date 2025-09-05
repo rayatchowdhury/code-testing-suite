@@ -8,9 +8,9 @@
 # - Author description
 # - Back button - goes back to the main window
 
-from views.base_window import SidebarWindowBase
-from widgets.sidebar import Sidebar
-from widgets.display_area import DisplayArea
+from ...views.base_window import SidebarWindowBase
+from ...widgets.sidebar import Sidebar
+from ...widgets.display_area import DisplayArea
 from PySide6.QtWidgets import QPushButton
 from PySide6.QtGui import QFont
 from PySide6.QtWebEngineWidgets import QWebEngineView

@@ -58,7 +58,7 @@ def _cleanup_ai_resources():
         
         # Try to import and cleanup EditorAI instances
         try:
-            from ai.core.editor_ai import EditorAI
+            from ..ai.core.editor_ai import EditorAI
             for obj in gc.get_objects():
                 if isinstance(obj, EditorAI):
                     try:

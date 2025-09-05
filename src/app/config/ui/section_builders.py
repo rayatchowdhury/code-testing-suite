@@ -6,8 +6,8 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt
 
-from styles.constants.colors import MATERIAL_COLORS
-from styles.components.config_ui import SECTION_INFO_LABEL_STYLE
+from ...styles.constants.colors import MATERIAL_COLORS
+from ...styles.components.config_ui import SECTION_INFO_LABEL_STYLE
 
 
 class SectionBuilder:

@@ -9,12 +9,12 @@ import asyncio
 import qasync
 from qasync import asyncSlot, QEventLoop
 
-from styles.constants.editor_colors import EDITOR_COLORS
-from styles.constants.colors import MATERIAL_COLORS
-from styles.components.editor import (EDITOR_WIDGET_STYLE, get_editor_style,
+from ...styles.constants.editor_colors import EDITOR_COLORS
+from ...styles.constants.colors import MATERIAL_COLORS
+from ...styles.components.editor import (EDITOR_WIDGET_STYLE, get_editor_style,
                                     AI_DIALOG_STYLE)
-from styles.components.ai_panel import AI_PANEL_STYLE
-from utils.file_operations import FileOperations
+from ...styles.components.ai_panel import AI_PANEL_STYLE
+from ...utils.file_operations import FileOperations
 
 # Lazy imports for heavy components
 _markdown = None
@@ -58,7 +58,7 @@ def _import_syntax_highlighters():
 def _import_editor_ai():
     global _editor_ai
     if _editor_ai is None:
-        from ai.core.editor_ai import EditorAI
+        from ...ai.core.editor_ai import EditorAI
         _editor_ai = EditorAI
     return _editor_ai
 

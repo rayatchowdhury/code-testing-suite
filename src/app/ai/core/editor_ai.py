@@ -11,8 +11,8 @@ import logging
 from typing import Optional
 from google.api_core import retry_async
 
-from constants import USER_DATA_DIR
-from utils.logging_config import LoggingConfig
+from ...constants import USER_DATA_DIR
+from ...utils.logging_config import LoggingConfig
 from ..models.model_manager import ModelManager
 from ..templates.prompt_templates import PromptTemplates
 

@@ -7,7 +7,7 @@ Provides centralized access to AI settings and validation.
 import os
 import json
 from typing import Tuple, Optional
-from constants import USER_DATA_DIR, CONFIG_FILE
+from ...constants import USER_DATA_DIR, CONFIG_FILE
 
 class AIConfig:
     """Utility class for managing AI configuration across the application"""
@@ -87,7 +87,7 @@ class AIConfig:
         Returns: (success, message)
         """
         try:
-            from ai.core.editor_ai import EditorAI
+            from ...ai.core.editor_ai import EditorAI
             # Force a new instance to be created with fresh model discovery
             ai = EditorAI()
             if ai.model:

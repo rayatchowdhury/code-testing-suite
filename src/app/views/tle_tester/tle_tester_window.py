@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-from views.base_window import SidebarWindowBase
+from ...views.base_window import SidebarWindowBase
 from PySide6.QtWidgets import QMessageBox
-from widgets.sidebar import Sidebar
-from views.tle_tester.tle_tester_display_area import TLETesterDisplay
-from views.tle_tester.time_limit_slider import TimeLimitSlider
-from tools.tle_runner import TLERunner
+from ...widgets.sidebar import Sidebar
+from ...views.tle_tester.tle_tester_display_area import TLETesterDisplay
+from ...views.tle_tester.time_limit_slider import TimeLimitSlider
+from ...tools.tle_runner import TLERunner
 
 class TLETesterWindow(SidebarWindowBase):
     def __init__(self, parent=None):
