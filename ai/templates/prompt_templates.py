@@ -169,17 +169,61 @@ class PromptTemplates:
         },
         'generator': {
             'instruction': """
-            Create a test case generator using generator.h
-            Add clear parameter configuration guides.
+            Create a C++ test case generator based on the provided code/problem.
+            
+            TASK: Generate ONE random test case that matches the input pattern from the code.
+            Analyze the code structure to understand input format, even if no explicit problem statement exists.
+            
+            CRITICAL: Return ONLY the generator.cpp code - NO solutions, NO explanations, NO markdown blocks.
             """,
             'guidelines': """
-            1. Include "generator.h"
-            2. Add configuration constants with:
-               - Purpose and valid ranges
-               - Effect on output
-               - Special combinations
-            3. Generate all data randomly
-            4. No user input needed
+            GENERATOR REQUIREMENTS:
+            1. #include "generator.h" at the top
+            2. Write main() function that generates ONE test case to stdout
+            3. Use generator.h functions for all randomization
+            4. Add only minimal necessary comments
+            5. Must compile and run as-is
+            
+            ANALYZE THE CODE FOR INPUT PATTERNS:
+            - cin >> n, cin >> arr[i] → Array input
+            - cin >> s → String input  
+            - cin >> t followed by t test cases → Multiple test cases
+            - cin >> n >> m → Grid/graph dimensions
+            - Vector/array operations → Determine data types
+            - Nested loops → Matrix or graph structures
+            - String operations → Character constraints
+            
+            COMMON COMPETITIVE PROGRAMMING PATTERNS:
+            - Single array: n, then n integers
+            - Graph: n vertices, m edges, then m pairs
+            - Matrix: n×m, then n rows of m elements
+            - String problems: length n, then string of length n
+            - Multiple queries: q, then q query lines
+            - Tree: n nodes, then n-1 edges
+            
+            INFER FROM CODE STRUCTURE:
+            - If you see vector<int> → use rvector<int>
+            - If you see string → use rstring  
+            - If you see graph/adjacency → use Graph or Tree
+            - If you see coordinates → use points
+            - If you see sorting/permutation → use permutation
+            - If you see multiple test cases → generate T, then T cases
+            
+            GENERATOR.H QUICK REFERENCE:
+            - random<int>(l, r) - random integer in [l,r]
+            - rvector<int>(n, l, r) - vector of n random ints
+            - rstring(len, charset) - random string
+            - permutation(n) - random permutation of 1..n
+            - Tree<int>(n) - random tree with n vertices
+            - Graph<int>(n, m) - random graph n vertices, m edges
+            - points(n, xl, xr, yl, yr) - n random 2D points
+            - All have .print() method
+            
+            REALISTIC CONSTRAINTS:
+            - Arrays: 1-100 or 1-1000 elements typically
+            - Strings: 1-50 or 1-100 length typically  
+            - Numbers: reasonable ranges like 1-10^6
+            - Multiple test cases: 1-10 typically
             
             Library Documentation:
             {docs}
@@ -205,7 +249,10 @@ class PromptTemplates:
         """Get a formatted code modification prompt."""
         if action == 'generate':
             file_type = kwargs.get('type', 'solution')
-            if file_type.lower().endswith('generator.cpp'):
+            # Check if this is a generator file request
+            if (file_type.lower().endswith('generator.cpp') or 
+                file_type.lower().endswith('generator') or
+                'generator' in file_type.lower()):
                 template = cls.CODE_TEMPLATES['generator']
                 docs = kwargs.get('docs', '')
                 return cls.CODE_BASE.format(
