@@ -1,59 +1,67 @@
 
-from PySide6.QtCore import QObject, Signal, QProcess, QThread
+from tools.compiler_runner import CompilerRunner
+from PySide6.QtCore import QObject, Signal
+import logging
 
-class TLECompilerRunner(QObject):
+logger = logging.getLogger(__name__)
+
+class TLECompilerRunner(CompilerRunner):
+    """Specialized compiler runner for TLE testing"""
+    
+    # Additional signals specific to TLE testing
     compilationStarted = Signal()
     compilationFinished = Signal(bool)  # True if successful
     outputAvailable = Signal(str, str)  # message, type
-    finished = Signal()
 
-    def __init__(self, console):
-        super().__init__()
-        self.console = console
-        self.process = None
+    def __init__(self, console_output):
+        # Initialize the base compiler runner (which already handles threading)
+        super().__init__(console_output)
+        
+        # Connect additional signals for TLE-specific behavior
+        if self.worker:
+            self.worker.output.connect(self._handle_output_for_tle)
+            self.worker.error.connect(self._handle_error_for_tle)
+        
+        logger.debug("TLECompilerRunner initialized")
 
-    def compile_and_run_code(self, file_path):
-        """Compile and run a single cpp file"""
-        self.compilationStarted.emit()
-        self.console.clear()
-        self.console.append("Compiling...\n", "info")
-        
-        self.process = QProcess()
-        self.process.setProcessChannelMode(QProcess.MergedChannels)
-        
-        # Connect signals
-        self.process.finished.connect(self._handle_compilation_finished)
-        self.process.readyReadStandardOutput.connect(
-            lambda: self._handle_output(self.process.readAllStandardOutput().data().decode())
-        )
-        self.process.readyReadStandardError.connect(
-            lambda: self._handle_output(self.process.readAllStandardError().data().decode(), "error")
-        )
-        
-        # Start compilation
-        output_path = file_path.replace('.cpp', '.exe')
-        self.process.start('g++', [file_path, '-o', output_path])
-
-    def _handle_compilation_finished(self, exit_code, exit_status):
-        """Handle compilation completion"""
-        success = exit_code == 0
-        self.compilationFinished.emit(success)
-        
-        if success:
-            self.console.append("Compilation successful!\n", "success")
+    def _handle_output_for_tle(self, output_data):
+        """Handle output with TLE-specific signals"""
+        if isinstance(output_data, tuple) and len(output_data) == 2:
+            text, format_type = output_data
         else:
-            self.console.append("Compilation failed!\n", "error")
-        
-        self.finished.emit()
+            text, format_type = str(output_data), 'default'
+            
+        # Emit TLE-specific signal
+        self.outputAvailable.emit(text, format_type)
 
-    def _handle_output(self, output, output_type="info"):
-        """Handle process output"""
-        if output:
-            self.outputAvailable.emit(output, output_type)
-            self.console.append(output, output_type)
+    def _handle_error_for_tle(self, error_data):
+        """Handle error with TLE-specific signals"""
+        if isinstance(error_data, tuple) and len(error_data) == 2:
+            text, format_type = error_data
+        else:
+            text, format_type = str(error_data), 'error'
+            
+        # Emit TLE-specific signal
+        self.outputAvailable.emit(text, format_type)
+
+    def compile_and_run_code(self, filepath):
+        """Compile and run code for TLE testing"""
+        logger.debug(f"Starting TLE test compilation for {filepath}")
+        
+        # Emit TLE-specific signal
+        self.compilationStarted.emit()
+        
+        # Connect to finished signal to emit compilation result
+        def on_finished():
+            # Assume success if we get here without errors
+            self.compilationFinished.emit(True)
+            self.finished.disconnect(on_finished)
+        
+        self.finished.connect(on_finished)
+        
+        # Use base class method
+        super().compile_and_run_code(filepath)
 
     def stop(self):
-        """Stop any running process"""
-        if self.process and self.process.state() == QProcess.Running:
-            self.process.kill()
-            self.process.waitForFinished()
+        """Stop any running process (alias for compatibility)"""
+        self.stop_execution()

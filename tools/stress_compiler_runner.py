@@ -1,59 +1,36 @@
-from tools.compiler_runner import CompilerRunner, CompilerWorker
-from PySide6.QtCore import QThread, Signal, QObject
+from tools.compiler_runner import CompilerRunner
+from PySide6.QtCore import QObject, Signal
+import logging
 
-class StressCompilerWorker(CompilerWorker):
-    def __init__(self):
-        super().__init__()
-        # Additional setup for stress testing if needed
-        pass
+logger = logging.getLogger(__name__)
 
 class StressCompilerRunner(CompilerRunner):
+    """Specialized compiler runner for stress testing"""
+    
     def __init__(self, console_output):
+        # Initialize the base compiler runner (which already handles threading)
         super().__init__(console_output)
-        
-        # Create thread
-        self.thread = QThread()
-        
-        # Move worker to thread
-        self.worker.moveToThread(self.thread)
-        
-        # Connect thread signals
-        self.thread.started.connect(self._on_thread_start)
-        self.worker.finished.connect(self.thread.quit)
-        self.thread.finished.connect(self._cleanup)
+        logger.debug("StressCompilerRunner initialized")
 
     def compile_and_run_code(self, filepath):
-        """Start compilation and execution in separate thread"""
-        if not filepath:
-            if self.console:
-                self.console.displayOutput("Error: No file to compile\n", 'error')
-            return
-        
-        self.stop_execution()
-        if self.console:
-            try:
-                self.console.clear()
-                self.console.setInputEnabled(True)
-            except AttributeError as e:
-                print(f"Warning: Console operation failed - {str(e)}")
-        
-        # Store filepath for thread
-        self.pending_filepath = filepath
-        # Start thread
-        self.thread.start()
+        """Compile and run code for stress testing"""
+        logger.debug(f"Starting stress test compilation for {filepath}")
+        super().compile_and_run_code(filepath)
+from tools.compiler_runner import CompilerRunner
+from PySide6.QtCore import QObject, Signal
+import logging
 
-    def _on_thread_start(self):
-        """Called when thread starts"""
-        self.worker.compile_and_run(self.pending_filepath)
+logger = logging.getLogger(__name__)
 
-    def stop_execution(self):
-        """Stop execution and thread safely"""
-        super().stop_execution()
-        if self.thread.isRunning():
-            self.thread.quit()
-            self.thread.wait()
+class StressCompilerRunner(CompilerRunner):
+    """Specialized compiler runner for stress testing"""
+    
+    def __init__(self, console_output):
+        # Initialize the base compiler runner (which already handles threading)
+        super().__init__(console_output)
+        logger.debug("StressCompilerRunner initialized")
 
-    def _cleanup(self):
-        """Clean up resources safely"""
-        super()._cleanup()
-        # Additional thread cleanup if needed
+    def compile_and_run_code(self, filepath):
+        """Compile and run code for stress testing"""
+        logger.debug(f"Starting stress test compilation for {filepath}")
+        super().compile_and_run_code(filepath)
