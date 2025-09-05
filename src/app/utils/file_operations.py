@@ -1,4 +1,7 @@
 import os
+from pathlib import Path
+from typing import Optional, Union, Dict
+
 from PySide6.QtWidgets import QFileDialog, QMessageBox
 import shutil
 import stat
@@ -21,10 +24,10 @@ class FileOperations:
     }
 
     @staticmethod
-    def save_file(filepath, content, parent=None):
+    def save_file(filepath: Union[str, Path], content: str, parent=None) -> bool:
+        """Save content to file with proper error handling."""
         try:
-            with open(filepath, 'w', encoding='utf-8') as file:
-                file.write(content)
+            Path(filepath).write_text(content, encoding='utf-8')
             return True
         except Exception as e:
             if parent:
@@ -65,6 +68,7 @@ class FileOperations:
 
     @staticmethod
     def open_file(parent):
+        """Open file dialog and read selected file."""
         try:
             file_name, _ = QFileDialog.getOpenFileName(
                 parent,
@@ -73,31 +77,31 @@ class FileOperations:
                 FileOperations.FILE_FILTERS
             )
             
-            if file_name and os.path.exists(file_name):
-                try:
-                    with open(file_name, 'r', encoding='utf-8') as file:
-                        return file_name, file.read()
-                except UnicodeDecodeError:
-                    # Try alternative encodings if UTF-8 fails
+            if file_name:
+                file_path = Path(file_name)
+                if file_path.exists():
                     try:
-                        with open(file_name, 'r', encoding='latin-1') as file:
-                            return file_name, file.read()
+                        # Try UTF-8 first, then fallback to latin-1
+                        return str(file_path), file_path.read_text(encoding='utf-8')
+                    except UnicodeDecodeError:
+                        try:
+                            return str(file_path), file_path.read_text(encoding='latin-1')
+                        except Exception as e:
+                            QMessageBox.critical(parent, "Error", f"Could not decode file: {str(e)}")
                     except Exception as e:
-                        QMessageBox.critical(parent, "Error", f"Could not decode file: {str(e)}")
-                except Exception as e:
-                    QMessageBox.critical(parent, "Error", f"Could not read file: {str(e)}")
-            elif file_name:  # File was selected but doesn't exist
-                QMessageBox.critical(parent, "Error", "File not found")
+                        QMessageBox.critical(parent, "Error", f"Could not read file: {str(e)}")
+                else:
+                    QMessageBox.critical(parent, "Error", "File not found")
         except Exception as e:
             QMessageBox.critical(parent, "Error", f"Error opening file: {str(e)}")
         
         return None, None
 
     @staticmethod
-    def load_file(file_path, parent=None):
+    def load_file(file_path: Union[str, Path], parent=None) -> Optional[str]:
+        """Load file content with error handling."""
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                return f.read()
+            return Path(file_path).read_text(encoding='utf-8')
         except Exception as e:
             # Log or display an error message as needed
             return None

@@ -5,7 +5,22 @@ This package contains all application constants including paths,
 configuration defaults, and other shared values.
 """
 
-from .paths import *
+from .paths import (
+    PROJECT_ROOT,
+    RESOURCES_DIR,
+    ICONS_DIR,
+    README_DIR,
+    CONFIG_FILE,
+    USER_DATA_DIR,
+    WORKSPACE_DIR,
+    EDITOR_STATE_FILE,
+    TEMPLATES_DIR,
+    DOCS_DIR,
+    APP_ICON,
+    SETTINGS_ICON,
+    CHECK_ICON,
+    LOGO_ICON
+)
 
 __all__ = [
     # Path constants

@@ -201,7 +201,7 @@ class StressTesterDisplay(QWidget):
         self.compiler_runner.compile_and_run_code(self.editor.currentFilePath)
 
     def handle_file_saved(self):
-        print("File saved - updating button state")  # Debug print
+        # Update button state when file is saved
         if self.current_button:
             self.current_button.setProperty("hasUnsavedChanges", False)
             self.current_button.style().unpolish(self.current_button)

@@ -22,7 +22,7 @@ class AIConfig:
             config = cls._load_config()
             ai_settings = config.get('ai_settings', {})
             return ai_settings.get('use_ai_panel', False)
-        except:
+        except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
             return False
     
     @classmethod
@@ -33,7 +33,7 @@ class AIConfig:
             ai_settings = config.get('ai_settings', {})
             key = ai_settings.get('gemini_api_key', '')
             return key if key else None
-        except:
+        except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
             return None
     
     @classmethod

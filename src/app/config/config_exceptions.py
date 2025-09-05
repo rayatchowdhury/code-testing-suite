@@ -47,3 +47,10 @@ class ConfigSaveError(ConfigError):
     
     def __init__(self, message):
         super().__init__(f"Failed to save config: {message}")
+
+
+class ConfigMissingError(ConfigError):
+    """Raised when required configuration keys are missing."""
+    
+    def __init__(self, message):
+        super().__init__(f"Missing configuration: {message}")
