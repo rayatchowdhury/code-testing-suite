@@ -2,7 +2,6 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
                               QLineEdit, QLabel, QFrame, QSizePolicy)
 from PySide6.QtCore import Qt, Signal, QTimer
 from styles.components import AI_PANEL_STYLE, CUSTOM_COMMAND_STYLE
-from ai.config.ai_config import AIConfig
 import asyncio
 import os
 import threading
@@ -60,7 +59,7 @@ class AIPanel(QWidget):
         self.refresh_visibility()
         
         # Initialize AI in background if panel is visible
-        if AIConfig.should_show_ai_panel():
+        if self._should_show_ai_panel():
             self._initialize_ai_background()
 
     def _initialize_ai_background(self):
@@ -81,7 +80,7 @@ class AIPanel(QWidget):
 
     def refresh_visibility(self):
         """Refresh panel visibility based on current AI configuration"""
-        if AIConfig.should_show_ai_panel():
+        if self._should_show_ai_panel():
             if not hasattr(self, 'layout') or self.layout() is None:
                 self._setup_ui()
             self.show()
@@ -232,7 +231,7 @@ class AIPanel(QWidget):
 
     def refresh_from_config(self):
         """Refresh AI panel visibility based on current configuration"""
-        should_show = AIConfig.should_show_ai_panel()
+        should_show = self._should_show_ai_panel()
         
         if should_show and self.isHidden():
             # Show panel and setup UI if needed
@@ -249,7 +248,7 @@ class AIPanel(QWidget):
     
     def _update_ai_status(self):
         """Update AI status display"""
-        is_ready, message = AIConfig.is_ai_ready()
+        is_ready, message = self._is_ai_ready()
         
         # You could add a status indicator here if needed
         # For now, just update tooltips
@@ -261,3 +260,19 @@ class AIPanel(QWidget):
                 else:
                     btn.setEnabled(False)
                     btn.setToolTip(f"{btn.toolTip().split('\n')[0]}\n⚠️ {message}")
+
+    def _should_show_ai_panel(self):
+        """Lazy import AIConfig to check if AI panel should be shown"""
+        try:
+            from ai.config.ai_config import AIConfig
+            return AIConfig.should_show_ai_panel()
+        except Exception:
+            return False
+    
+    def _is_ai_ready(self):
+        """Lazy import AIConfig to check if AI is ready"""
+        try:
+            from ai.config.ai_config import AIConfig
+            return AIConfig.is_ai_ready()
+        except Exception:
+            return False, "AI configuration not available"

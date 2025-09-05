@@ -9,14 +9,14 @@ from PySide6.QtCore import QTimer
 from utils.file_operations import FileOperations
 import json
 from constants import EDITOR_STATE_FILE
-from database import DatabaseManager, Session
 from datetime import datetime
 
 class CodeEditorWindow(SidebarWindowBase):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        # Initialize database manager for session management
+        # Lazy import for database manager for session management
+        from database import DatabaseManager
         self.db_manager = DatabaseManager()
 
         # Create sidebar
@@ -253,6 +253,8 @@ class CodeEditorWindow(SidebarWindowBase):
         
         # Save to database
         if open_files:
+            # Lazy import
+            from database import Session
             session = Session(
                 session_name=f"Editor Session {datetime.now().strftime('%Y-%m-%d %H:%M')}",
                 open_files=json.dumps(open_files),

@@ -4,6 +4,11 @@ from PySide6.QtWidgets import QMessageBox
 
 from ..config_exceptions import ConfigError
 from styles.constants.colors import MATERIAL_COLORS
+from styles.components.config_ui import (
+    SUCCESS_MESSAGE_STYLE, 
+    INFO_MESSAGE_STYLE,
+    get_success_status_style
+)
 
 
 class ConfigPersistence:
@@ -44,7 +49,7 @@ class ConfigPersistence:
             # Assume previously validated keys are still valid
             self.parent.is_key_valid = True
             self.parent.status_label.setText("✓")
-            self.parent.status_label.setStyleSheet(f"color: {MATERIAL_COLORS['primary']}")
+            self.parent.status_label.setStyleSheet(get_success_status_style())
             self.parent.status_label.setToolTip("Previously validated API key")
             self.parent.use_ai_checkbox.setEnabled(True)
         else:
@@ -99,23 +104,7 @@ class ConfigPersistence:
             success_msg.setIcon(QMessageBox.Information)
             success_msg.setWindowTitle("Success")
             success_msg.setText("Configuration saved successfully!")
-            success_msg.setStyleSheet("""
-                QMessageBox {
-                    background: #1e1e1e;
-                    color: white;
-                }
-                QMessageBox QPushButton {
-                    background: #0096C7;
-                    color: white;
-                    border: none;
-                    padding: 8px 16px;
-                    border-radius: 6px;
-                    font-weight: 600;
-                }
-                QMessageBox QPushButton:hover {
-                    background: #023E8A;
-                }
-            """)
+            success_msg.setStyleSheet(SUCCESS_MESSAGE_STYLE)
             success_msg.exec()
             
             self.parent.accept()
@@ -145,23 +134,7 @@ class ConfigPersistence:
                 info_msg.setIcon(QMessageBox.Information)
                 info_msg.setWindowTitle("Reset Complete")
                 info_msg.setText("All settings have been reset to defaults.")
-                info_msg.setStyleSheet("""
-                    QMessageBox {
-                        background: #1e1e1e;
-                        color: white;
-                    }
-                    QMessageBox QPushButton {
-                        background: #0096C7;
-                        color: white;
-                        border: none;
-                        padding: 8px 16px;
-                        border-radius: 6px;
-                        font-weight: 600;
-                    }
-                    QMessageBox QPushButton:hover {
-                        background: #023E8A;
-                    }
-                """)
+                info_msg.setStyleSheet(INFO_MESSAGE_STYLE)
                 info_msg.exec()
                 
             except Exception as e:

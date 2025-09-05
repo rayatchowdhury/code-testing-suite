@@ -7,6 +7,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
 
 from styles.constants.colors import MATERIAL_COLORS
+from styles.components.config_ui import ERROR_DIALOG_STYLE
 
 
 class ErrorDialog(QDialog):
@@ -86,62 +87,7 @@ class ErrorDialog(QDialog):
 
     def _setup_styles(self):
         """Apply styling to the dialog."""
-        self.setStyleSheet(f"""
-            QDialog {{
-                background: {MATERIAL_COLORS['surface']};
-                border: 1px solid {MATERIAL_COLORS['outline']};
-                border-radius: 8px;
-            }}
-            
-            QLabel#error_title {{
-                color: {MATERIAL_COLORS['error']};
-                margin-bottom: 8px;
-            }}
-            
-            QLabel#error_message {{
-                color: {MATERIAL_COLORS['on_surface']};
-                line-height: 1.4;
-            }}
-            
-            QLabel#error_details_label {{
-                color: {MATERIAL_COLORS['on_surface']};
-                margin-top: 8px;
-                margin-bottom: 4px;
-            }}
-            
-            QFrame#error_separator {{
-                color: {MATERIAL_COLORS['outline']};
-                margin: 8px 0;
-            }}
-            
-            QTextEdit#error_details {{
-                background: {MATERIAL_COLORS['surface_variant']};
-                border: 1px solid {MATERIAL_COLORS['outline']};
-                border-radius: 4px;
-                color: {MATERIAL_COLORS['on_surface']};
-                padding: 8px;
-                font-family: 'Consolas', 'Courier New', monospace;
-            }}
-            
-            QPushButton#error_ok_button {{
-                background: {MATERIAL_COLORS['primary']};
-                border: none;
-                border-radius: 4px;
-                color: {MATERIAL_COLORS['on_primary']};
-                padding: 8px 24px;
-                font-weight: 600;
-                min-width: 80px;
-            }}
-            
-            QPushButton#error_ok_button:hover {{
-                background: {MATERIAL_COLORS['primary_container']};
-                color: {MATERIAL_COLORS['on_primary_container']};
-            }}
-            
-            QPushButton#error_ok_button:pressed {{
-                background: {MATERIAL_COLORS['primary_variant'] if 'primary_variant' in MATERIAL_COLORS else MATERIAL_COLORS['primary']};
-            }}
-        """)
+        self.setStyleSheet(ERROR_DIALOG_STYLE)
 
     @staticmethod
     def show_error(title, message, details=None, parent=None):

@@ -5,6 +5,15 @@ from PySide6.QtWidgets import (QDialog, QVBoxLayout, QLabel, QProgressBar,
 from PySide6.QtCore import Qt, Signal, Slot
 from styles.style import MATERIAL_COLORS
 from styles.constants.status_colors import ERROR_COLOR_HEX
+from styles.components.tle_tester import (
+    TLE_TEST_STATUS_WINDOW_STYLE,
+    TLE_STATUS_LABEL_STYLE,
+    TLE_TIME_LABEL_STYLE,
+    TLE_HISTORY_FRAME_STYLE,
+    get_status_label_style,
+    get_passed_status_style,
+    get_failed_status_style
+)
 
 class TLETestStatusWindow(QDialog):
     def __init__(self, parent=None):
@@ -23,7 +32,7 @@ class TLETestStatusWindow(QDialog):
         
         # Status section
         self.status_label = QLabel("Preparing Test...")
-        self.status_label.setStyleSheet(f"color: {MATERIAL_COLORS['on_surface']}; font-weight: bold;")
+        self.status_label.setStyleSheet(TLE_STATUS_LABEL_STYLE)
         
         # Current test section
         self.current_test_widget = QWidget()
@@ -44,7 +53,7 @@ class TLETestStatusWindow(QDialog):
         
         # Time taken section
         self.time_label = QLabel("Time taken: 0.0s")
-        self.time_label.setStyleSheet(f"color: {MATERIAL_COLORS['primary']}; font-weight: bold;")
+        self.time_label.setStyleSheet(TLE_TIME_LABEL_STYLE)
         
         # History section
         self.history_widget = QWidget()
@@ -77,39 +86,7 @@ class TLETestStatusWindow(QDialog):
         layout.addWidget(self.close_button, alignment=Qt.AlignRight)
 
     def _setup_styles(self):
-        self.setStyleSheet(f"""
-            QDialog {{
-                background: {MATERIAL_COLORS['surface']};
-                border: 1px solid {MATERIAL_COLORS['outline']};
-                border-radius: 8px;
-            }}
-            QLabel {{
-                color: {MATERIAL_COLORS['on_surface']};
-                font-weight: bold;
-            }}
-            QScrollArea {{
-                border: 1px solid {MATERIAL_COLORS['outline']};
-                border-radius: 4px;
-                background: {MATERIAL_COLORS['surface']};
-            }}
-            QTextEdit {{
-                background-color: {MATERIAL_COLORS['surface_variant']};
-                border: 1px solid {MATERIAL_COLORS['outline']};
-                border-radius: 4px;
-                color: {MATERIAL_COLORS['on_surface']};
-                padding: 8px;
-            }}
-            QPushButton {{
-                background: {MATERIAL_COLORS['primary']};
-                border: none;
-                border-radius: 4px;
-                color: {MATERIAL_COLORS['on_primary']};
-                padding: 8px 16px;
-            }}
-            QPushButton:hover {{
-                background: {MATERIAL_COLORS['primary_container']};
-            }}
-        """)
+        self.setStyleSheet(TLE_TEST_STATUS_WINDOW_STYLE)
 
     @Slot(str)
     def show_test_running(self, test_name):
@@ -131,12 +108,12 @@ class TLETestStatusWindow(QDialog):
         color = MATERIAL_COLORS['primary'] if passed else ERROR_COLOR_HEX
         
         self.status_label.setText(f"{test_name} {status}")
-        self.status_label.setStyleSheet(f"color: {color}; font-weight: bold;")
+        self.status_label.setStyleSheet(get_status_label_style(color))
         
         self.input_text.setText(input_text or "No input available")
         self.output_text.setText(output or "No output available")
         self.time_label.setText(f"Time taken: {time_taken:.2f}s")
-        self.time_label.setStyleSheet(f"color: {color}; font-weight: bold;")
+        self.time_label.setStyleSheet(get_status_label_style(color))
         
         self._add_to_history(test_name, passed, time_taken)
         if passed:
@@ -148,7 +125,7 @@ class TLETestStatusWindow(QDialog):
         """Show final state after all tests"""
         if all_passed:
             self.status_label.setText("All Tests Passed Within Time Limit! ✓")
-            self.status_label.setStyleSheet(f"color: {MATERIAL_COLORS['primary']}; font-weight: bold;")
+            self.status_label.setStyleSheet(get_passed_status_style())
             self.history_widget.show()
             self.current_test_widget.hide()
         else:
@@ -158,13 +135,7 @@ class TLETestStatusWindow(QDialog):
     def _add_to_history(self, test_name, passed, time_taken):
         """Add test result to history"""
         result = QFrame()
-        result.setStyleSheet(f"""
-            QFrame {{
-                background: {MATERIAL_COLORS['surface_variant']};
-                border-radius: 4px;
-                padding: 4px 8px;
-            }}
-        """)
+        result.setStyleSheet(TLE_HISTORY_FRAME_STYLE)
         
         layout = QHBoxLayout(result)
         layout.setContentsMargins(4, 4, 4, 4)
@@ -173,7 +144,7 @@ class TLETestStatusWindow(QDialog):
         color = MATERIAL_COLORS['primary'] if passed else ERROR_COLOR_HEX
         
         label = QLabel(f"{test_name}: {status} ({time_taken:.2f}s)")
-        label.setStyleSheet(f"color: {color}; font-weight: bold;")
+        label.setStyleSheet(get_status_label_style(color))
         layout.addWidget(label)
         
         self.history_layout.insertWidget(0, result)  # Add newest at top

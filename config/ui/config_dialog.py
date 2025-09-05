@@ -8,17 +8,10 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIcon
 import os
 
-from ..management.config_manager import ConfigManager
-from .error_dialog import ErrorDialog
 from styles.components.config_styles import CONFIG_DIALOG_STYLE
+from styles.components.config_ui import CONFIG_DIALOG_TITLE_STYLE
 from styles.constants.colors import MATERIAL_COLORS
-from database.database_manager import DatabaseManager
 from constants import SETTINGS_ICON
-
-from .section_builders import SectionBuilder
-from ..validation.api_validator_handler import APIValidatorHandler
-from ..management.database_operations import DatabaseOperations
-from ..management.config_persistence import ConfigPersistence
 
 
 class ConfigView(QDialog):
@@ -39,6 +32,14 @@ class ConfigView(QDialog):
 
         # Apply original styling
         self.setStyleSheet(CONFIG_DIALOG_STYLE)
+
+        # Lazy imports to improve startup performance
+        from ..management.config_manager import ConfigManager
+        from database.database_manager import DatabaseManager
+        from .section_builders import SectionBuilder
+        from ..validation.api_validator_handler import APIValidatorHandler
+        from ..management.database_operations import DatabaseOperations
+        from ..management.config_persistence import ConfigPersistence
 
         # Initialize modules
         self.config_manager = ConfigManager()
@@ -63,14 +64,7 @@ class ConfigView(QDialog):
 
         # Title section
         title_section = QLabel("⚙️ Configurations")
-        title_section.setStyleSheet(f"""
-            font-size: 18px; 
-            color: {MATERIAL_COLORS['primary']}; 
-            font-weight: 600;
-            font-family: 'Segoe UI', system-ui;
-            margin: 8px 0;
-            text-align: center;
-        """)
+        title_section.setStyleSheet(CONFIG_DIALOG_TITLE_STYLE)
         title_section.setFixedHeight(35)
         title_section.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(title_section)
@@ -134,5 +128,7 @@ class ConfigView(QDialog):
 
     def show_error(self, title, message, details=None):
         """Show error dialog"""
+        # Lazy import
+        from .error_dialog import ErrorDialog
         dialog = ErrorDialog(title, message, details, self)
         dialog.exec()

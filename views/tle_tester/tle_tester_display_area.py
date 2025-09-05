@@ -8,6 +8,11 @@ from widgets.display_area_widgets.console import ConsoleOutput
 from tools.tle_compiler_runner import TLECompilerRunner
 from styles.style import MATERIAL_COLORS
 from styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE
+from styles.components.tle_tester import (
+    TLE_BUTTON_PANEL_STYLE,
+    TLE_FILE_BUTTON_STYLE, 
+    TLE_CONTENT_PANEL_STYLE
+)
 from constants import WORKSPACE_DIR
 
 class TLETesterDisplay(QWidget):
@@ -45,12 +50,7 @@ class TLETesterDisplay(QWidget):
 
         # Create button panel with background
         button_panel = QWidget()
-        button_panel.setStyleSheet(f"""
-            QWidget {{
-                background-color: {MATERIAL_COLORS['surface_dim']};
-                border-bottom: 1px solid {MATERIAL_COLORS['outline']};
-            }}
-        """)
+        button_panel.setStyleSheet(TLE_BUTTON_PANEL_STYLE)
         button_layout = QHBoxLayout(button_panel)
         button_layout.setContentsMargins(8, 8, 8, 8)
         button_layout.setSpacing(8)
@@ -64,49 +64,7 @@ class TLETesterDisplay(QWidget):
             btn = QPushButton(name)
             btn.setMinimumHeight(36)
             btn.setProperty("isActive", False)
-            btn.setStyleSheet(f"""
-                QPushButton {{
-                    background-color: {MATERIAL_COLORS['surface_variant']};
-                    border: 1px solid {MATERIAL_COLORS['outline_variant']};
-                    border-radius: 8px;
-                    color: {MATERIAL_COLORS['on_surface']};
-                    padding: 8px 16px;
-                    font-weight: 500;
-                    font-size: 13px;
-                }}
-                
-                QPushButton:hover {{
-                    background-color: {MATERIAL_COLORS['surface_bright']};
-                    border-color: {MATERIAL_COLORS['outline']};
-                }}
-                
-                QPushButton[isActive="true"] {{
-                    background-color: {MATERIAL_COLORS['primary_container']};
-                    border: 1px solid {MATERIAL_COLORS['primary']};
-                    color: {MATERIAL_COLORS['on_primary_container']};
-                    font-weight: 600;
-                }}
-                
-                QPushButton[isActive="true"]:hover {{
-                    background-color: {MATERIAL_COLORS['primary']};
-                    color: {MATERIAL_COLORS['on_primary']};
-                }}
-                
-                QPushButton[isActive="true"][hasUnsavedChanges="true"] {{
-                    background-color: {MATERIAL_COLORS['primary_container']};
-                    border: 2px solid {MATERIAL_COLORS['error']};
-                    border-radius: 8px;
-                    color: {MATERIAL_COLORS['on_primary']};
-                    font-weight: 600;
-                    padding: 7px 15px;  /* Adjust padding to account for thicker border */
-                }}
-                
-                QPushButton[isActive="true"][hasUnsavedChanges="true"]:hover {{
-                    background-color: {MATERIAL_COLORS['primary']};
-                    border-color: {MATERIAL_COLORS['error']};
-                    color: {MATERIAL_COLORS['on_primary']};
-                }}
-            """)
+            btn.setStyleSheet(TLE_FILE_BUTTON_STYLE)
             self.file_buttons[name] = btn
             button_layout.addWidget(btn)
 
@@ -115,7 +73,7 @@ class TLETesterDisplay(QWidget):
         
         # Create inner panel for content
         content_panel = QWidget()
-        content_panel.setStyleSheet(f"background-color: {MATERIAL_COLORS['surface']};")
+        content_panel.setStyleSheet(TLE_CONTENT_PANEL_STYLE)
         content_layout = QVBoxLayout(content_panel)
         content_layout.setContentsMargins(0, 0, 0, 0)
         content_layout.setSpacing(0)

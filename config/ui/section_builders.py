@@ -7,6 +7,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt
 
 from styles.constants.colors import MATERIAL_COLORS
+from styles.components.config_ui import SECTION_INFO_LABEL_STYLE
 
 
 class SectionBuilder:
@@ -169,7 +170,7 @@ class SectionBuilder:
 
         # Info label
         info_label = QLabel("💡 Enable AI Panel to access code assistance features. Valid API key required. Custom model names override auto-selection.")
-        info_label.setStyleSheet(f"color: {MATERIAL_COLORS['on_surface_variant']}; font-size: 12px;")
+        info_label.setStyleSheet(SECTION_INFO_LABEL_STYLE)
         info_label.setWordWrap(True)
         layout.addWidget(info_label)
 

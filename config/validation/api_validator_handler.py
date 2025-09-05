@@ -4,9 +4,13 @@ from PySide6.QtWidgets import QLineEdit, QMessageBox, QInputDialog
 from PySide6.QtCore import QThread, Signal
 
 from styles.constants.colors import MATERIAL_COLORS
+from styles.components.config_ui import (
+    get_error_status_style, 
+    get_neutral_status_style,
+    get_success_status_style
+)
 from utils.api_validator import APIValidator
 from ..ui.error_dialog import ErrorDialog
-import google.generativeai as genai
 import re
 
 
@@ -22,6 +26,9 @@ class ModelDiscoveryThread(QThread):
     
     def run(self):
         try:
+            # Lazy import to avoid slow startup
+            import google.generativeai as genai
+            
             genai.configure(api_key=self.api_key)
             models = []
             for model in genai.list_models():
@@ -96,12 +103,12 @@ class APIValidatorHandler:
         format_ok, format_msg = APIValidator.quick_format_check(text)
         if not format_ok:
             self.parent.status_label.setText("⚠")
-            self.parent.status_label.setStyleSheet(f"color: {MATERIAL_COLORS['error']}")
+            self.parent.status_label.setStyleSheet(get_error_status_style())
             self.parent.status_label.setToolTip(format_msg)
             return
         
         self.parent.status_label.setText("⏳")
-        self.parent.status_label.setStyleSheet(f"color: {MATERIAL_COLORS['on_surface_variant']}")
+        self.parent.status_label.setStyleSheet(get_neutral_status_style())
         self.parent.status_label.setToolTip("Validating...")
         
         # Start validation using APIValidator
@@ -113,12 +120,12 @@ class APIValidatorHandler:
         
         if is_valid:
             self.parent.status_label.setText("✓")
-            self.parent.status_label.setStyleSheet(f"color: {MATERIAL_COLORS['primary']}")
+            self.parent.status_label.setStyleSheet(get_success_status_style())
             self.parent.status_label.setToolTip("API key validated successfully")
             self.parent.use_ai_checkbox.setEnabled(True)
         else:
             self.parent.status_label.setText("✗")
-            self.parent.status_label.setStyleSheet(f"color: {MATERIAL_COLORS['error']}")
+            self.parent.status_label.setStyleSheet(get_error_status_style())
             self.parent.status_label.setToolTip(f"Validation failed: {message}")
             self.parent.use_ai_checkbox.setEnabled(False)
             if self.parent.use_ai_checkbox.isChecked():

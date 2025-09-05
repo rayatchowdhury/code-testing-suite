@@ -6,8 +6,7 @@ This module provides AI-powered code assistance using Google's Gemini API.
 It includes model management, prompt templates, and response processing.
 """
 
-from .core.editor_ai import EditorAI
-from .models.model_manager import ModelManager
-from .templates.prompt_templates import PromptTemplates
+# Remove heavy imports from package level to improve startup time
+# Modules are imported on-demand when accessed
 
 __all__ = ['EditorAI', 'ModelManager', 'PromptTemplates']
