@@ -1,41 +1,33 @@
+#!/usr/bin/env python3
+"""
+Legacy entry point for Code Testing Suite.
+
+This script provides backward compatibility during migration.
+It delegates to the new src/app structure while maintaining
+the old interface.
+
+Usage: python main.py
+"""
+
 import sys
-import os
-# Set Qt API before any Qt imports
-os.environ['QT_API'] = 'pyside6'
+from pathlib import Path
 
-from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QIcon
-import qasync
-import asyncio
-from constants import APP_ICON
-
-# Initialize logging configuration early (handles all third-party noise)
-from utils.logging_config import LoggingConfig
-LoggingConfig.initialize()
+# Add src to Python path
+src_path = Path(__file__).parent / "src"
+if str(src_path) not in sys.path:
+    sys.path.insert(0, str(src_path))
 
 def main():
-    # Set attributes before creating QApplication
-    QApplication.setAttribute(Qt.AA_UseDesktopOpenGL)
-    QApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
-    
-    app = QApplication(sys.argv)
-    
-    # Set application icon
-    app.setWindowIcon(QIcon(APP_ICON))
-    
-    # Create event loop
-    loop = qasync.QEventLoop(app)
-    asyncio.set_event_loop(loop)
-    
-    # Lazy import MainWindow to reduce startup time
-    from views.main_window import MainWindow
-    window = MainWindow()
-    window.show()
-    
-    # Run the event loop
-    with loop:
-        loop.run_forever()
+    """Delegate to the new entry point"""
+    try:
+        # Import and run the new main
+        from app.__main__ import main as app_main
+        app_main()
+    except ImportError as e:
+        print(f"❌ Failed to start application: {e}")
+        print("The application structure may be incomplete.")
+        print("Try running: python -m src.app")
+        sys.exit(1)
 
-if __name__ == '__main__': 
+if __name__ == '__main__':
     main()

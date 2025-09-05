@@ -1,0 +1,20 @@
+"""
+Code Testing Suite - PySide6 Desktop Application
+
+A comprehensive code editor with AI integration, stress testing,
+and time-limit testing capabilities.
+"""
+
+__version__ = "1.0.0"
+__author__ = "Code Testing Suite Team"
+
+# Lazy imports - only import when accessed
+def get_main_window():
+    """Lazy import of MainWindow"""
+    from .views.main_window import MainWindow
+    return MainWindow
+
+def get_window_manager():
+    """Lazy import of WindowManager"""
+    from .utils.window_manager import WindowManager
+    return WindowManager

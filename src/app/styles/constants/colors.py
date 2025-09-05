@@ -1,0 +1,54 @@
+# Modern Pantone-inspired color palette
+COLORS = {
+    'primary': '#0096C7',
+    'primary_dark': '#023E8A',
+    'secondary': '#ffb600',
+    'accent': '#F72585',
+    'accent_2':'aaaaaa',
+    'background': '#1e1e1e',
+    'surface': '#242426',
+    'sidebar': '#1e1e1e',
+    'text_primary': '#FFFFFF',
+    'text_secondary': '#B3B3B3',
+    'text_light': '#FFFFFF',
+    'border': '#333333',
+    'hover': '#2A2A2D',
+    'pressed': '#323235'
+}
+
+MATERIAL_COLORS = {
+    'background': '#1B1B1E',
+    'surface': '#242426',
+    'surface_dim': '#1F1F21',
+    'surface_variant': '#2A2A2D',
+    'surface_bright': '#2F2F33',
+    
+    'primary': '#0096C7',
+    'primary_dark': '#023E8A',
+    'primary_darker': '#012E52',
+    'primary_container': '#004B63',
+    
+    'secondary': '#FFB703',
+    'accent': '#F72585',
+    'error': '#FF6B6B',
+    'error_container': '#420101',
+    'on_error_container': '#FFB6B6',  # Add this line - light red color for text on error background
+    
+    'outline': '#3F3F3F',
+    'outline_variant': '#2C2C2C',
+    'border': '#333333',
+    
+    'text_primary': '#FFFFFF',
+    'text_secondary': '#B3B3B3',
+    'text_disabled': '#666666',
+    
+    'on_primary': '#FFFFFF',
+    'on_primary_container': '#FFFFFF',
+    'on_surface': '#FFFFFF',
+    'on_surface_variant': '#B3B3B3',
+    'on_surface_dim': '#999999',
+    'on_surface_disabled': '#666666',
+    
+    'button_hover': '#2A2A2D',
+    'tab_height': '36px'
+}
