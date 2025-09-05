@@ -1,0 +1,16 @@
+{
+  "imports": {
+    "main": 0.2031284999975469,
+    "views.main_window": 0.0483412000030512,
+    "widgets.sidebar": 0.0012787000014213845,
+    "utils.window_manager": 0.0016378000000258908,
+    "database.database_manager": 0.014861700008623302,
+    "ai.core.editor_ai": 1.1504972999973688
+  },
+  "memory": {
+    "initial_memory_mb": 93.859375,
+    "final_memory_mb": 93.859375,
+    "memory_used_mb": 0.0
+  },
+  "timestamp": 1757112365.8778758
+}
