@@ -21,7 +21,7 @@ def main():
     """Delegate to the new entry point"""
     try:
         # Import and run the new main
-        from app.__main__ import main as app_main
+        from src.app.__main__ import main as app_main
         app_main()
     except ImportError as e:
         print(f"❌ Failed to start application: {e}")

@@ -169,7 +169,6 @@ class TestCaseDetailWidget(QWidget):
             # Handle different data types for mismatch_analysis
             if isinstance(mismatch_data, str):
                 try:
-                    import json
                     mismatch_data = json.loads(mismatch_data)
                 except (json.JSONDecodeError, TypeError):
                     mismatch_data = {}

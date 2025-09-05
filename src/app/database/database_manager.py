@@ -556,7 +556,6 @@ class DatabaseManager:
             newest_session = result[1] if result[1] else "No data"
             
             # Get database file size
-            import os
             db_size = 0
             if os.path.exists(self.db_path):
                 db_size = os.path.getsize(self.db_path)

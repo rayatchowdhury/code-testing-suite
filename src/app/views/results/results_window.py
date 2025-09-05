@@ -62,13 +62,12 @@ class ResultsWindow(SidebarWindowBase):
     
     def export_results(self):
         """Export results to CSV or JSON"""
-        # TODO: Implement export functionality
+        # NOTE: Export functionality planned for future release
         from PySide6.QtWidgets import QMessageBox
         QMessageBox.information(self, "Export", "Export functionality coming soon!")
     
     def clear_old_data(self):
         """Clear old data from database"""
-        from PySide6.QtWidgets import QMessageBox
         reply = QMessageBox.question(
             self, 
             "Clear Old Data", 

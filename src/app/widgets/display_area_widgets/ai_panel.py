@@ -272,7 +272,6 @@ class AIPanel(QWidget):
     def _is_ai_ready(self):
         """Lazy import AIConfig to check if AI is ready"""
         try:
-            from ...ai.config.ai_config import AIConfig
             return AIConfig.is_ai_ready()
         except Exception:
             return False, "AI configuration not available"

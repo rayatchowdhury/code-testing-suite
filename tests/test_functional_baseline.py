@@ -80,7 +80,7 @@ class TestCoreServicesBaseline:
     
     def test_database_manager(self):
         """Test database manager"""
-        from app.database.database_manager import DatabaseManager
+        from src.app.database.database_manager import DatabaseManager
         db = DatabaseManager()
         assert db is not None
 
@@ -93,9 +93,9 @@ class TestPerformanceBaseline:
         
         # Import core modules
         import main
-        from app.views import main_window
-        from app.widgets import sidebar
-        from app.utils import window_manager
+        from src.app.views import main_window
+        from src.app.widgets import sidebar
+        from src.app.utils import window_manager
         
         end_time = time.time()
         import_time = end_time - start_time
