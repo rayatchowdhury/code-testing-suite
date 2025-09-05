@@ -5,6 +5,14 @@ from PySide6.QtWidgets import (QDialog, QVBoxLayout, QLabel, QProgressBar,
 from PySide6.QtCore import Qt, Signal, Slot, QThread
 from styles.style import MATERIAL_COLORS
 from styles.constants.status_colors import ERROR_COLOR_HEX
+from styles.components.stress_tester import (
+    STRESS_TEST_STATUS_DIALOG_STYLE,
+    get_running_status_style,
+    get_error_status_style,
+    get_success_status_style,
+    HISTORY_ITEM_STYLE,
+    get_history_label_style
+)
 
 class StressTestStatusWindow(QDialog):
     def __init__(self, parent=None):
@@ -82,49 +90,7 @@ class StressTestStatusWindow(QDialog):
         self.current_test_widget.hide()
 
     def _setup_styles(self):
-        self.setStyleSheet(f"""
-            QDialog {{
-                background: {MATERIAL_COLORS['surface']};
-                border: 1px solid {MATERIAL_COLORS['outline']};
-                border-radius: 8px;
-            }}
-            QLabel {{
-                color: {MATERIAL_COLORS['on_surface']};
-                font-weight: bold;
-            }}
-            QProgressBar {{
-                border: none;
-                background: {MATERIAL_COLORS['surface_variant']};
-                height: 6px;
-                border-radius: 3px;
-            }}
-            QProgressBar::chunk {{
-                background: {MATERIAL_COLORS['primary']};
-                border-radius: 3px;
-            }}
-            QScrollArea {{
-                border: 1px solid {MATERIAL_COLORS['outline']};
-                border-radius: 4px;
-                background: {MATERIAL_COLORS['surface']};
-            }}
-            QTextEdit {{
-                background-color: {MATERIAL_COLORS['surface_variant']};
-                border: 1px solid {MATERIAL_COLORS['outline']};
-                border-radius: 4px;
-                color: {MATERIAL_COLORS['on_surface']};
-                padding: 8px;
-            }}
-            QPushButton {{
-                background: {MATERIAL_COLORS['primary']};
-                border: none;
-                border-radius: 4px;
-                color: {MATERIAL_COLORS['on_primary']};
-                padding: 8px 16px;
-            }}
-            QPushButton:hover {{
-                background: {MATERIAL_COLORS['primary_container']};
-            }}
-        """)
+        self.setStyleSheet(STRESS_TEST_STATUS_DIALOG_STYLE)
 
     @Slot(int, int)
     def show_test_running(self, current, total):
@@ -136,7 +102,7 @@ class StressTestStatusWindow(QDialog):
         self.progress_bar.setMaximum(total)
         self.progress_bar.setValue(current)
         self.status_label.setText(f"Running Test {current}/{total}...")
-        self.status_label.setStyleSheet(f"color: {MATERIAL_COLORS['on_surface']}; font-weight: bold;")
+        self.status_label.setStyleSheet(get_running_status_style())
         
         # Clear previous results
         for widget in [self.input_text, self.correct_output, self.test_output]:
@@ -152,7 +118,7 @@ class StressTestStatusWindow(QDialog):
             self.history_widget.hide()
             # Show failure details
             self.status_label.setText(f"Test {test_number} Failed ✗")
-            self.status_label.setStyleSheet(f"color: {ERROR_COLOR_HEX}; font-weight: bold;")
+            self.status_label.setStyleSheet(get_error_status_style())
             self.input_text.setText(input_text or "No input available")
             self.correct_output.setText(correct_output or "No correct output available")
             self.test_output.setText(test_output or "No test output available")
@@ -161,7 +127,7 @@ class StressTestStatusWindow(QDialog):
             # Add passing test to history and show it
             self._add_to_history(test_number, passed)
             self.status_label.setText(f"Test {test_number} Passed ✓")
-            self.status_label.setStyleSheet(f"color: {MATERIAL_COLORS['primary']}; font-weight: bold;")
+            self.status_label.setStyleSheet(get_success_status_style())
             self.current_test_widget.hide()
             self.history_widget.show()
 
@@ -170,7 +136,7 @@ class StressTestStatusWindow(QDialog):
         """Show final state after all tests"""
         if all_passed:
             self.status_label.setText("All Tests Passed! ✓")
-            self.status_label.setStyleSheet(f"color: {MATERIAL_COLORS['primary']}; font-weight: bold;")
+            self.status_label.setStyleSheet(get_success_status_style())
             self.history_widget.show()
             self.current_test_widget.hide()
         else:
@@ -182,22 +148,15 @@ class StressTestStatusWindow(QDialog):
     def _add_to_history(self, test_number, passed):
         """Add test result to history"""
         result = QFrame()
-        result.setStyleSheet(f"""
-            QFrame {{
-                background: {MATERIAL_COLORS['surface_variant']};
-                border-radius: 4px;
-                padding: 4px 8px;
-            }}
-        """)
+        result.setStyleSheet(HISTORY_ITEM_STYLE)
         
         layout = QHBoxLayout(result)
         layout.setContentsMargins(4, 4, 4, 4)
         
         status = "✓" if passed else "✗"
-        color = MATERIAL_COLORS['primary'] if passed else ERROR_COLOR_HEX
         
         label = QLabel(f"Test {test_number}: {status}")
-        label.setStyleSheet(f"color: {color}; font-weight: bold;")
+        label.setStyleSheet(get_history_label_style(passed))
         layout.addWidget(label)
         
         self.history_layout.insertWidget(0, result)  # Add newest at top
