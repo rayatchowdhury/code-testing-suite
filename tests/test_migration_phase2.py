@@ -29,7 +29,7 @@ class TestPhase2Migration:
     def test_entry_points_importable(self):
         """Test that entry points can be imported"""
         try:
-            from app.__main__ import main
+            from src.app.__main__ import main
             assert callable(main)
         except ImportError:
             pytest.fail("Cannot import main entry point")
@@ -37,16 +37,16 @@ class TestPhase2Migration:
     def test_core_modules_importable(self):
         """Test that core modules can be imported from new locations"""
         try:
-            from app.constants import paths
-            from app.views import main_window
-            from app.styles import style
-            from app.utils import window_manager
+            from src.app.constants import paths
+            from src.app.views import main_window
+            from src.app.styles import style
+            from src.app.utils import window_manager
         except ImportError as e:
             pytest.fail(f"Core module import failed: {e}")
     
     def test_resources_accessible(self):
         """Test that resources are accessible from new location"""
-        from app.constants.paths import RESOURCES_DIR, ICONS_DIR
+        from src.app.constants.paths import RESOURCES_DIR, ICONS_DIR
         
         assert Path(RESOURCES_DIR).exists(), "Resources directory not found"
         assert Path(ICONS_DIR).exists(), "Icons directory not found"
@@ -55,9 +55,9 @@ class TestPhase2Migration:
         """Test that cross-module imports work in new structure"""
         try:
             # Test that views can import widgets
-            from app.views.main_window import MainWindow
+            from src.app.views.main_window import MainWindow
             # Test that widgets can import styles
-            from app.widgets.sidebar import Sidebar
+            from src.app.widgets.sidebar import Sidebar
             # Test successful instantiation
             sidebar = Sidebar("Test")
             assert sidebar is not None
@@ -73,9 +73,9 @@ class TestPerformanceRegression:
         
         start_time = time.perf_counter()
         try:
-            from app import __main__
-            from app.views import main_window
-            from app.styles import style
+            from src.app import __main__
+            from src.app.views import main_window
+            from src.app.styles import style
         except ImportError:
             pytest.skip("Imports not working - performance test skipped")
         

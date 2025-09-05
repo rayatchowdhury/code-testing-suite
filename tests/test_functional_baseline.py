@@ -9,6 +9,11 @@ import sys
 import time
 from pathlib import Path
 
+# Add src to Python path for testing
+src_path = Path(__file__).parent.parent / "src"
+if str(src_path) not in sys.path:
+    sys.path.insert(0, str(src_path))
+
 class TestApplicationBaseline:
     """Test core application functionality"""
     
@@ -23,13 +28,13 @@ class TestApplicationBaseline:
     
     def test_window_manager_creation(self):
         """Test that window manager can be instantiated"""
-        from utils.window_manager import WindowManager
+        from src.app.utils.window_manager import WindowManager
         wm = WindowManager()
         assert wm is not None
     
     def test_main_window_creation(self, qapp):
         """Test that main window can be created"""
-        from views.main_window import MainWindow
+        from src.app.views.main_window import MainWindow
         window = MainWindow()
         assert window is not None
         window.close()
@@ -39,14 +44,14 @@ class TestUIComponentBaseline:
     
     def test_sidebar_creation(self, qapp):
         """Test sidebar widget creation"""
-        from widgets.sidebar import Sidebar
+        from src.app.widgets.sidebar import Sidebar
         sidebar = Sidebar("Test")
         assert sidebar is not None
         assert sidebar.objectName() == "sidebar"
     
     def test_display_area_creation(self, qapp):
         """Test display area widget creation"""
-        from widgets.display_area import DisplayArea
+        from src.app.widgets.display_area import DisplayArea
         display = DisplayArea()
         assert display is not None
         assert display.objectName() == "display_area"
@@ -57,7 +62,7 @@ class TestStyleSystemBaseline:
     def test_styles_import(self):
         """Test that style modules can be imported"""
         try:
-            from styles.style import SIDEBAR_STYLE, WEBVIEW_STYLE, DISPLAY_AREA_STYLE
+            from src.app.styles.style import SIDEBAR_STYLE, WEBVIEW_STYLE, DISPLAY_AREA_STYLE
             assert isinstance(SIDEBAR_STYLE, str)
             assert isinstance(WEBVIEW_STYLE, str) 
             assert isinstance(DISPLAY_AREA_STYLE, str)
@@ -69,13 +74,13 @@ class TestCoreServicesBaseline:
     
     def test_config_manager(self):
         """Test configuration manager"""
-        from config.management.config_manager import ConfigManager
+        from src.app.config.management.config_manager import ConfigManager
         config = ConfigManager()
         assert config is not None
     
     def test_database_manager(self):
         """Test database manager"""
-        from database.database_manager import DatabaseManager
+        from app.database.database_manager import DatabaseManager
         db = DatabaseManager()
         assert db is not None
 
@@ -88,9 +93,9 @@ class TestPerformanceBaseline:
         
         # Import core modules
         import main
-        from views import main_window
-        from widgets import sidebar
-        from utils import window_manager
+        from app.views import main_window
+        from app.widgets import sidebar
+        from app.utils import window_manager
         
         end_time = time.time()
         import_time = end_time - start_time
@@ -103,7 +108,7 @@ class TestPerformanceBaseline:
         start_time = time.time()
         
         try:
-            from views.main_window import MainWindow
+            from src.app.views.main_window import MainWindow
             window = MainWindow()
             window.close()
         except Exception as e:
