@@ -28,8 +28,14 @@ _ai_panel = None
 def _import_markdown():
     global _markdown
     if _markdown is None:
-        from markdown import markdown
-        _markdown = markdown
+        try:
+            from markdown import markdown
+            _markdown = markdown
+        except ImportError:
+            # Fallback: return plain text function if markdown not available
+            def plain_text_fallback(text, **kwargs):
+                return f"<pre>{text}</pre>"
+            _markdown = plain_text_fallback
     return _markdown
 
 def _import_pygments():
@@ -258,6 +264,8 @@ class LineNumberArea(QWidget):
 
 class EditorWidget(QWidget):
     filePathChanged = Signal()
+    fileSaved = Signal()
+    textChanged = Signal(bool)  # bool indicates if document is modified
 
     def __init__(self):
         super().__init__()
@@ -331,6 +339,7 @@ class EditorWidget(QWidget):
         return self.editor_ai
 
     def _handle_modification_changed(self, modified):
+        self.textChanged.emit(modified)  # Emit textChanged signal
         if not modified:  # Document returned to unmodified state
             self.filePathChanged.emit()
 
@@ -488,7 +497,7 @@ class EditorWidget(QWidget):
         async def process_request():
             try:
                 code = self.getCode()
-                response = await action(code)
+                response = action(code)  # Remove await - EditorAI methods return strings
                 if not response:
                     response = "AI service not available. Please check your API key configuration."
                 self._show_ai_response(response, title)
@@ -590,6 +599,19 @@ class EditorWidget(QWidget):
             self.editor.codeEditor.setPlainText(content)
             self.editor.codeEditor._setup_syntax_highlighting(file_path)
 
+    def openFile(self, file_path):
+        """Open a file and load its content"""
+        if os.path.exists(file_path):
+            content = FileOperations.load_file(file_path, self)
+            if content is not None:
+                self.codeEditor.setPlainText(content)
+                self.currentFilePath = file_path
+                self.codeEditor.document().setModified(False)
+                self.codeEditor._setup_syntax_highlighting(file_path)
+                self.filePathChanged.emit()
+                return True
+        return False
+
     def _openFilePicker(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Insert File Content", "", "All Files (*)")
         if file_path:
@@ -618,6 +640,7 @@ class EditorWidget(QWidget):
         if FileOperations.save_file(path, self.getCode(), self):
             self.codeEditor.document().setModified(False)  # This will trigger modificationChanged
             self.codeEditor._setup_syntax_highlighting(path)
+            self.fileSaved.emit()  # Emit signal when file is saved
             return True
         return False
 

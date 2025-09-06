@@ -262,16 +262,17 @@ class AIPanel(QWidget):
                     btn.setToolTip(f"{btn.toolTip().split('\n')[0]}\n⚠️ {message}")
 
     def _should_show_ai_panel(self):
-        """Lazy import AIConfig to check if AI panel should be shown"""
+        """Lazy import gemini client to check if AI panel should be shown"""
         try:
-            from ...ai.config.ai_config import AIConfig
-            return AIConfig.should_show_ai_panel()
+            from ...ai.gemini_client import should_show_ai_panel
+            return should_show_ai_panel()
         except Exception:
             return False
     
     def _is_ai_ready(self):
-        """Lazy import AIConfig to check if AI is ready"""
+        """Lazy import gemini client to check if AI is ready"""
         try:
-            return AIConfig.is_ai_ready()
+            from ...ai.gemini_client import is_ai_ready
+            return is_ai_ready()
         except Exception:
             return False, "AI configuration not available"

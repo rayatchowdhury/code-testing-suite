@@ -20,10 +20,13 @@ MATERIAL_COLORS = {
     'background': '#1B1B1E',
     'surface': '#242426',
     'surface_dim': '#1F1F21',
+    'surface_light': '#2F2F33',
     'surface_variant': '#2A2A2D',
     'surface_bright': '#2F2F33',
+    'surface_container_lowest': '#1E1E20',
     
     'primary': '#0096C7',
+    'primary_light': '#40A9D4',
     'primary_dark': '#023E8A',
     'primary_darker': '#012E52',
     'primary_container': '#004B63',

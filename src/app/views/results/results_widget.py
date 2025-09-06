@@ -216,11 +216,11 @@ class TestResultsWidget(QWidget):
         breakdown_title.setStyleSheet(RESULTS_LABEL_TITLE_STYLE)
         breakdown_layout.addWidget(breakdown_title)
         
-        self.stress_tests_label = QLabel("Stress Tests: 0")
-        self.tle_tests_label = QLabel("TLE Tests: 0")
+        self.compare_tests_label = QLabel("Compare Tests: 0")
+        self.benchmark_tests_label = QLabel("Benchmark Tests: 0")
         
         # Style breakdown labels
-        for label in [self.stress_tests_label, self.tle_tests_label]:
+        for label in [self.compare_tests_label, self.benchmark_tests_label]:
             label.setStyleSheet(RESULTS_LABEL_STAT_STYLE)
             breakdown_layout.addWidget(label)
         
@@ -385,8 +385,8 @@ class TestResultsWidget(QWidget):
             self.success_rate_label.setText("Success Rate: 0%")
             self.avg_time_label.setText("Average Time: 0s")
             self.success_progress.setValue(0)
-            self.stress_tests_label.setText("Stress Tests: 0")
-            self.tle_tests_label.setText("TLE Tests: 0")
+            self.compare_tests_label.setText("Compare Tests: 0")
+            self.benchmark_tests_label.setText("Benchmark Tests: 0")
             return
         
         # Calculate statistics
@@ -397,16 +397,16 @@ class TestResultsWidget(QWidget):
         
         success_rate = (total_passed / total_attempted * 100) if total_attempted > 0 else 0
         
-        stress_count = sum(1 for r in results if r.test_type == "stress")
-        tle_count = sum(1 for r in results if r.test_type == "tle")
+        compare_count = sum(1 for r in results if r.test_type == "compare")
+        benchmark_count = sum(1 for r in results if r.test_type == "benchmark")
         
         # Update labels
         self.total_tests_label.setText(f"Total Tests: {total_tests}")
         self.success_rate_label.setText(f"Success Rate: {success_rate:.1f}%")
         self.avg_time_label.setText(f"Average Time: {avg_time:.2f}s")
         self.success_progress.setValue(int(success_rate))
-        self.stress_tests_label.setText(f"Stress Tests: {stress_count}")
-        self.tle_tests_label.setText(f"TLE Tests: {tle_count}")
+        self.compare_tests_label.setText(f"Compare Tests: {compare_count}")
+        self.benchmark_tests_label.setText(f"Benchmark Tests: {benchmark_count}")
         
         # Update recent activity table
         self._update_recent_activity(results[:10])  # Show last 10

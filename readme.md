@@ -43,7 +43,7 @@ A powerful desktop application designed to streamline your coding workflow with 
 </td>
 <td width="50%" align="center">
 
-### 🔄 Stress Tester
+### 🔄 Comparator
 
 - Custom test cases
 - Automated testing
@@ -55,7 +55,7 @@ A powerful desktop application designed to streamline your coding workflow with 
 <tr>
 <td width="50%" align="center">
 
-### ⏱️ TLE Tester
+### ⏱️ Benchmarker
 
 - Time limit testing
 - Memory usage tracking
@@ -112,8 +112,8 @@ A powerful desktop application designed to streamline your coding workflow with 
 ### ✏️ Code Editor
 <img src="resources/readme/editor_window.png" alt="Code Editor" width="800px">
 
-### 🔄 Stress Testing
-<img src="resources/readme/stress_window.png" alt="Stress Tester" width="800px">
+### 🔄 Comparison Testing
+<img src="resources/readme/stress_window.png" alt="Comparison Tester" width="800px">
 
 ### 📊 Results View
 <img src="resources/readme/results.png" alt="Results" width="800px">

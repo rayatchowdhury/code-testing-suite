@@ -1,23 +1,29 @@
-# Qt dependencies
-PySide6>=6.5.0
-PySide6-Essentials>=6.5.0
-PySide6-AddOns>=6.5.0
+# Core Qt GUI framework
+PySide6>=6.9.0
+PySide6-Essentials>=6.9.0
+PySide6-Addons>=6.9.0
 
-# Async support
-qasync>=0.23.0
-asyncio>=3.4.3
+# Async Qt integration
+qasync>=0.28.0
 
-# For AI features
-google-generativeai>=0.3.0
-aiohttp>=3.8.0
+# AI integration (includes its own HTTP client)
+google-generativeai>=0.8.0
 
-# Code parsing and highlighting
-Pygments>=2.15.0
+# Code syntax highlighting
+Pygments>=2.19.0
 
-# File operations and utilities
-pathlib>=1.0.1
+# Markdown rendering for AI responses
+markdown>=3.4.0
 
-# For running tests and benchmarking
-psutil>=5.9.0
-pytest>=7.3.1
+# System monitoring and performance
+psutil>=7.0.0
+
+# Testing framework
+pytest>=8.4.0
+pytest-qt>=4.5.0
+
+# Dependencies for google-generativeai that were removed but needed
+pyparsing>=3.0.0
+tqdm>=4.60.0
+typing-inspection>=0.4.0
 

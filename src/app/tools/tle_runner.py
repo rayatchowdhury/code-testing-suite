@@ -1,8 +1,8 @@
 
 import os
 from PySide6.QtCore import QObject, Signal, QProcess, QThread
-from ..views.stress_tester.compilation_status_window import CompilationStatusWindow
-from ..views.tle_tester.tle_test_status_window import TLETestStatusWindow
+from ..views.comparator.compilation_status_window import CompilationStatusWindow
+from ..views.benchmarker.benchmark_status_window import BenchmarkStatusWindow
 import subprocess
 import threading
 import time
@@ -187,7 +187,7 @@ class TLERunner(QObject):
         self.time_limit = time_limit  # Store for database saving
         self.test_start_time = datetime.now()  # Track start time
         
-        self.status_window = TLETestStatusWindow()
+        self.status_window = BenchmarkStatusWindow()
         self.status_window.show()
 
         # Create worker and thread

@@ -2,8 +2,8 @@
 #it contains the two sections: sidebar and display area
 #sidebar contains the following buttons:
 # - Introduction
-# - Stress Testing
-# - TLE Testing
+# - Comparison
+# - Benchmarking
 # - FAQ
 # - Author description
 # - Back button - goes back to the main window
@@ -28,8 +28,9 @@ class HelpCenterWindow(SidebarWindowBase):
         topics = [
             'Introduction',
             'Code Editor Guide',
-            'Stress Testing Guide', 
-            'TLE Testing Guide',
+            'Comparison Guide', 
+            'Benchmarking Guide',
+            'Validation Guide',
             'Configuration',
             'About'
         ]

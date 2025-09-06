@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validation Guide</title>
+    <link rel="stylesheet" href="../../../styles/html.css">
+    <style>
+        .validation-level {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+            margin: 2px;
+        }
+        
+        .level-1 { background: #4CAF50; }
+        .level-2 { background: #8BC34A; }
+        .level-3 { background: #FFC107; color: #333; }
+        .level-4 { background: #FF9800; }
+        .level-5 { background: #F44336; }
+        
+        .issue-type {
+            border-left: 4px solid #2196F3;
+            padding-left: 12px;
+            margin: 8px 0;
+        }
+        
+        .issue-type.error { border-left-color: #F44336; }
+        .issue-type.warning { border-left-color: #FF9800; }
+        .issue-type.info { border-left-color: #2196F3; }
+        
+        .code-example {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 12px;
+            margin: 8px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .good { border-left: 4px solid #4CAF50; }
+        .bad { border-left: 4px solid #F44336; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 Code Validation Guide</h1>
+            <p>Learn how to use the validation tool to ensure code quality and consistency</p>
+        </header>
+
+        <section id="overview">
+            <h2>📋 Overview</h2>
+            <p>The Code Validator helps you maintain high-quality code by checking for:</p>
+            <ul>
+                <li><strong>Syntax errors</strong> - Code that won't compile</li>
+                <li><strong>Style issues</strong> - Formatting and naming conventions</li>
+                <li><strong>Code quality</strong> - Best practices and maintainability</li>
+                <li><strong>Security issues</strong> - Potential vulnerabilities</li>
+                <li><strong>Performance warnings</strong> - Optimization opportunities</li>
+            </ul>
+        </section>
+
+        <section id="getting-started">
+            <h2>🚀 Getting Started</h2>
+            
+            <div class="step">
+                <h3>Step 1: Open the Validator</h3>
+                <p>Click the <strong>"Validate"</strong> button in the main navigation to open the validation tool.</p>
+            </div>
+
+            <div class="step">
+                <h3>Step 2: Load Your Code</h3>
+                <p>Use the file buttons to switch between different files:</p>
+                <ul>
+                    <li><strong>Main Code</strong> - Your primary source code</li>
+                    <li><strong>Test Cases</strong> - Input/output test cases</li>
+                    <li><strong>Style Guide</strong> - Custom validation rules</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <h3>Step 3: Set Strictness Level</h3>
+                <p>Use the validation strictness slider to control how thoroughly your code is analyzed:</p>
+                <div class="validation-levels">
+                    <span class="validation-level level-1">1 - Lenient</span>
+                    <span class="validation-level level-2">2 - Relaxed</span>
+                    <span class="validation-level level-3">3 - Medium</span>
+                    <span class="validation-level level-4">4 - Strict</span>
+                    <span class="validation-level level-5">5 - Very Strict</span>
+                </div>
+            </div>
+
+            <div class="step">
+                <h3>Step 4: Run Validation</h3>
+                <p>Click the validation button to analyze your code and receive detailed feedback.</p>
+            </div>
+        </section>
+
+        <section id="strictness-levels">
+            <h2>⚙️ Strictness Levels</h2>
+            
+            <div class="level-detail">
+                <h3><span class="validation-level level-1">Level 1</span> Lenient</h3>
+                <ul>
+                    <li>Basic syntax checking</li>
+                    <li>Major style violations only</li>
+                    <li>Critical security issues</li>
+                </ul>
+            </div>
+
+            <div class="level-detail">
+                <h3><span class="validation-level level-2">Level 2</span> Relaxed</h3>
+                <ul>
+                    <li>Enhanced syntax validation</li>
+                    <li>Common style issues</li>
+                    <li>TODO comment detection</li>
+                    <li>Tab/space consistency</li>
+                </ul>
+            </div>
+
+            <div class="level-detail">
+                <h3><span class="validation-level level-3">Level 3</span> Medium (Default)</h3>
+                <ul>
+                    <li>Comprehensive style checking</li>
+                    <li>Code quality analysis</li>
+                    <li>Security vulnerability scanning</li>
+                    <li>Performance warning detection</li>
+                    <li>Magic number detection</li>
+                </ul>
+            </div>
+
+            <div class="level-detail">
+                <h3><span class="validation-level level-4">Level 4</span> Strict</h3>
+                <ul>
+                    <li>All Level 3 checks</li>
+                    <li>Documentation requirements</li>
+                    <li>Stricter line length limits</li>
+                    <li>Unused include detection</li>
+                    <li>Function comment requirements</li>
+                </ul>
+            </div>
+
+            <div class="level-detail">
+                <h3><span class="validation-level level-5">Level 5</span> Very Strict</h3>
+                <ul>
+                    <li>All previous checks</li>
+                    <li>Extreme formatting standards</li>
+                    <li>Maximum code quality enforcement</li>
+                    <li>Enterprise-level requirements</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="scoring">
+            <h2>📊 Scoring System</h2>
+            <p>The validator provides an overall score based on the issues found:</p>
+            
+            <ul>
+                <li><strong>90-100</strong>: Excellent code quality 🟢</li>
+                <li><strong>75-89</strong>: Good code quality 🟡</li>
+                <li><strong>60-74</strong>: Fair code quality 🟠</li>
+                <li><strong>40-59</strong>: Poor code quality 🔴</li>
+                <li><strong>0-39</strong>: Failing code quality ❌</li>
+            </ul>
+
+            <p><strong>Score Deductions:</strong></p>
+            <ul>
+                <li>Syntax errors: -50 points</li>
+                <li>Error issues: -3 points each</li>
+                <li>Warning issues: -2 points each</li>
+                <li>Info issues: -1 point each</li>
+            </ul>
+        </section>
+
+        <section id="tips">
+            <h2>💡 Pro Tips</h2>
+            
+            <div class="tip">
+                <h3>🎯 Start with Lower Strictness</h3>
+                <p>Begin with level 2-3 strictness and gradually increase as you improve your code quality.</p>
+            </div>
+
+            <div class="tip">
+                <h3>🔄 Iterative Improvement</h3>
+                <p>Run validation multiple times, fixing issues progressively to achieve higher scores.</p>
+            </div>
+
+            <div class="tip">
+                <h3>📚 Learn from Issues</h3>
+                <p>Each issue includes educational information about why it matters and how to fix it.</p>
+            </div>
+
+            <div class="tip">
+                <h3>🎨 Customize Your Style</h3>
+                <p>Define your own coding standards in the Style Guide file to match your preferences.</p>
+            </div>
+        </section>
+
+        <footer>
+            <p>For more help, check out the other guides or contact support.</p>
+        </footer>
+    </div>
+</body>
+</html>

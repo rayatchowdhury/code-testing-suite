@@ -1,7 +1,7 @@
 import os
 from PySide6.QtCore import QObject, Signal, QProcess, QThread
-from ..views.stress_tester.compilation_status_window import CompilationStatusWindow
-from ..views.stress_tester.stress_test_status_window import StressTestStatusWindow
+from ..views.comparator.compilation_status_window import CompilationStatusWindow
+from ..views.comparator.compare_status_window import CompareStatusWindow
 import subprocess
 import threading
 from PySide6.QtCore import QObject, Signal, Slot
@@ -206,7 +206,7 @@ class Stresser(QObject):
         self.test_count = test_count  # Store for database saving
         self.test_start_time = datetime.now()  # Track start time
         
-        self.status_window = StressTestStatusWindow()
+        self.status_window = CompareStatusWindow()
         self.status_window.show()
 
         # Create the worker and thread

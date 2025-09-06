@@ -9,7 +9,7 @@ class ResultsWindow(SidebarWindowBase):
     def __init__(self, parent=None):
         super().__init__(parent)
         
-        self.sidebar = Sidebar("Test Results & Analytics")
+        self.sidebar = Sidebar("Results & Analytics")
         
         # Actions section
         action_section = self.sidebar.add_section("Actions")

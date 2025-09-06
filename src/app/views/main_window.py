@@ -1,9 +1,15 @@
 # this is the main window of the application
 # it contains the two sections: sidebar and display area
-# sidebar contains the following buttons:
+# sidebar contains the following sections and buttons:
+# Editor section:
 # - Code Editor
-# - Stress Tester
-# - TLE Tester
+# Tests section:
+# - Compare
+# - Validate  
+# - Benchmark
+# History section:
+# - Results
+# Footer:
 # - Help Center
 # - Exit
 # display area will show description of the application
@@ -28,10 +34,20 @@ class MainWindowContent(SidebarWindowBase):
         # Create sidebar
         self.sidebar = Sidebar("Code Testing Suite")
         
-        # Add navigation buttons to content section
-        main_section = self.sidebar.add_section("Navigation")
-        for button_text in ['Code Editor', 'Stress Tester', 'TLE Tester', 'Results']:
-            self.sidebar.add_button(button_text, main_section)
+        # Add navigation buttons organized in sections
+        
+        # Editor section
+        editor_section = self.sidebar.add_section("Editor")
+        self.sidebar.add_button('Code Editor', editor_section)
+        
+        # Tests section
+        tests_section = self.sidebar.add_section("Tests")
+        for button_text in ['Compare', 'Validate', 'Benchmark']:
+            self.sidebar.add_button(button_text, tests_section)
+            
+        # History section
+        history_section = self.sidebar.add_section("History")
+        self.sidebar.add_button('Results', history_section)
         
         # Add footer items with Help Center
         self.sidebar.add_help_button()
@@ -101,9 +117,14 @@ class MainWindowContent(SidebarWindowBase):
             from ..config import ConfigView
             config_dialog = ConfigView(self)
             config_dialog.exec()
-        elif button_text in ['Code Editor', 'Stress Tester', 'TLE Tester', 'Results', 'Help Center']:
+        elif button_text in ['Code Editor', 'Compare', 'Benchmark', 'Validate', 'Results', 'Help Center']:
             # Convert button text to window name
-            window_name = button_text.lower().replace(' ', '_')
+            window_mapping = {
+                'Compare': 'comparator',
+                'Benchmark': 'benchmarker',
+                'Validate': 'validator'
+            }
+            window_name = window_mapping.get(button_text, button_text.lower().replace(' ', '_'))
             if self.parent and hasattr(self.parent, 'window_manager'):
                 self.parent.window_manager.show_window(window_name)
             else:

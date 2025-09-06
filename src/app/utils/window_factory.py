@@ -96,13 +96,17 @@ class WindowFactory:
             from ..views.code_editor.code_editor_window import CodeEditorWindow
             return CodeEditorWindow
         
-        def _create_stress_tester():
-            from ..views.stress_tester.stress_tester_window import StressTesterWindow
-            return StressTesterWindow
+        def _create_comparator():
+            from ..views.comparator.comparator_window import ComparatorWindow
+            return ComparatorWindow
         
-        def _create_tle_tester():
-            from ..views.tle_tester.tle_tester_window import TLETesterWindow
-            return TLETesterWindow
+        def _create_benchmarker():
+            from ..views.benchmarker.benchmarker_window import BenchmarkerWindow
+            return BenchmarkerWindow
+        
+        def _create_validator():
+            from ..views.validator.validator_window import ValidatorWindow
+            return ValidatorWindow
         
         def _create_help_center():
             from ..views.help_center.help_center_window import HelpCenterWindow
@@ -116,8 +120,9 @@ class WindowFactory:
         cls._window_creators.update({
             'main': _create_main_window,
             'code_editor': _create_code_editor,
-            'stress_tester': _create_stress_tester,
-            'tle_tester': _create_tle_tester,
+            'comparator': _create_comparator,
+            'benchmarker': _create_benchmarker,
+            'validator': _create_validator,
             'help_center': _create_help_center,
             'results': _create_results
         })
