@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from src.app.presentation.views.base_window import SidebarWindowBase
 from PySide6.QtWidgets import QMessageBox
-from src.app.widgets.sidebar import Sidebar
+from src.app.presentation.widgets.sidebar import Sidebar
 from src.app.presentation.views.benchmarker.benchmarker_display_area import BenchmarkerDisplay
 from src.app.presentation.views.benchmarker.time_limit_slider import TimeLimitSlider
 # Lazy import to avoid circular dependency

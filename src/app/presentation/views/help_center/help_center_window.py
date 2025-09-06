@@ -9,8 +9,8 @@
 # - Back button - goes back to the main window
 
 from src.app.presentation.views.base_window import SidebarWindowBase
-from src.app.widgets.sidebar import Sidebar
-from src.app.widgets.display_area import DisplayArea
+from src.app.presentation.widgets.sidebar import Sidebar
+from src.app.presentation.widgets.display_area import DisplayArea
 from PySide6.QtWidgets import QPushButton
 from PySide6.QtGui import QFont
 from PySide6.QtWebEngineWidgets import QWebEngineView

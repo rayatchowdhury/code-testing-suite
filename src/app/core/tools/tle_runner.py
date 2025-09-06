@@ -6,7 +6,7 @@ from src.app.presentation.views.benchmarker.benchmark_status_window import Bench
 import subprocess
 import threading
 import time
-from src.app.database import DatabaseManager, TestResult
+from src.app.persistence.database import DatabaseManager, TestResult
 from datetime import datetime
 import json
 

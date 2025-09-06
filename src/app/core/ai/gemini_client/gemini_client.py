@@ -24,7 +24,7 @@ class GeminiAI:
         """Initialize with path to config JSON file."""
         # Import CONFIG_FILE from constants, fallback if not available
         try:
-            from src.app.constants import CONFIG_FILE
+            from src.app.shared.constants import CONFIG_FILE
             self.config_file = config_file_path or CONFIG_FILE
         except ImportError:
             self.config_file = config_file_path

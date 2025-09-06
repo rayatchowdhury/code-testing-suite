@@ -26,8 +26,8 @@ class SidebarWindowBase(QWidget):
     def init_sidebar(self, title):
         """Initialize sidebar with title and common features"""
         # Import here to avoid circular imports
-        from src.app.widgets.sidebar import Sidebar
-        from src.app.widgets.display_area import DisplayArea
+        from src.app.presentation.widgets.sidebar import Sidebar
+        from src.app.presentation.widgets.display_area import DisplayArea
         
         self.sidebar = Sidebar(title)
         self.display_area = DisplayArea()

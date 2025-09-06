@@ -16,7 +16,7 @@ from src.app.core.config.core.exceptions import (
     ConfigSaveError,
     ConfigMissingError
 )
-from src.app.constants import USER_DATA_DIR, CONFIG_FILE
+from src.app.shared.constants import USER_DATA_DIR, CONFIG_FILE
 from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
 from src.app.presentation.styles.components.config_ui import (
     SUCCESS_MESSAGE_STYLE, 

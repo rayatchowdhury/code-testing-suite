@@ -4,9 +4,9 @@ from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtCore import Qt, Signal, QUrl
 import os
 
-from src.app.widgets.display_area_widgets.editor import EditorWidget
-from src.app.widgets.display_area_widgets.console import ConsoleOutput 
-from src.app.widgets.display_area_widgets.ai_panel import AIPanel
+from src.app.presentation.widgets.display_area_widgets.editor import EditorWidget
+from src.app.presentation.widgets.display_area_widgets.console import ConsoleOutput 
+from src.app.presentation.widgets.display_area_widgets.ai_panel import AIPanel
 from src.app.core.tools.compiler_runner import CompilerRunner
 from src.app.presentation.styles.style import MATERIAL_COLORS
 from src.app.presentation.styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE

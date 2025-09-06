@@ -31,15 +31,15 @@ os.environ['QT_API'] = 'pyside6'
 def setup_logging():
     """Initialize logging configuration early"""
     try:
-        from src.app.utils.logging_config import LoggingConfig
+        from src.app.shared.utils.logging_config import LoggingConfig
         LoggingConfig.initialize()
     except ImportError:
         try:
-            from src.app.utils.logging_config import LoggingConfig
+            from src.app.shared.utils.logging_config import LoggingConfig
             LoggingConfig.initialize()
         except ImportError:
             try:
-                from src.app.utils.logging_config import LoggingConfig
+                from src.app.shared.utils.logging_config import LoggingConfig
                 LoggingConfig.initialize()
             except ImportError:
                 # Fallback to basic logging

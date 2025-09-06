@@ -1,14 +1,14 @@
 from PySide6.QtWidgets import QFileDialog, QMessageBox, QPushButton
 from PySide6.QtGui import QFont, QCloseEvent
-from src.app.widgets.sidebar import Sidebar
+from src.app.presentation.widgets.sidebar import Sidebar
 from src.app.presentation.views.base_window import SidebarWindowBase
 from src.app.presentation.views.code_editor.code_editor_display_area import CodeEditorDisplay
 from src.app.core.tools.compiler_runner import CompilerRunner
 import os
 from PySide6.QtCore import QTimer
-from src.app.utils.file_operations import FileOperations
+from src.app.shared.utils.file_operations import FileOperations
 import json
-from src.app.constants import EDITOR_STATE_FILE
+from src.app.shared.constants import EDITOR_STATE_FILE
 from datetime import datetime
 
 class CodeEditorWindow(SidebarWindowBase):
@@ -16,7 +16,7 @@ class CodeEditorWindow(SidebarWindowBase):
         super().__init__(parent)
 
         # Lazy import for database manager for session management
-        from src.app.database import DatabaseManager
+        from src.app.persistence.database import DatabaseManager
         self.db_manager = DatabaseManager()
 
         # Create sidebar
@@ -254,7 +254,7 @@ class CodeEditorWindow(SidebarWindowBase):
         # Save to database
         if open_files:
             # Lazy import
-            from src.app.database import Session
+            from src.app.persistence.database import Session
             session = Session(
                 session_name=f"Editor Session {datetime.now().strftime('%Y-%m-%d %H:%M')}",
                 open_files=json.dumps(open_files),

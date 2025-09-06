@@ -5,7 +5,7 @@ from src.app.presentation.views.comparator.compare_status_window import CompareS
 import subprocess
 import threading
 from PySide6.QtCore import QObject, Signal, Slot
-from src.app.database import DatabaseManager, TestResult
+from src.app.persistence.database import DatabaseManager, TestResult
 import time
 from datetime import datetime
 import json

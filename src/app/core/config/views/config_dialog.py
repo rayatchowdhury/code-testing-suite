@@ -14,7 +14,7 @@ from src.app.presentation.styles.components.config_ui import (
     CONFIG_DIALOG_TITLE_STYLE, SECTION_INFO_LABEL_STYLE
 )
 from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
-from src.app.constants import SETTINGS_ICON
+from src.app.shared.constants import SETTINGS_ICON
 
 
 class ErrorDialog(QDialog):
@@ -125,7 +125,7 @@ class ConfigView(QDialog):
 
         # Initialize modules with updated imports (Phase 3)
         from src.app.core.config.core import ConfigManager, ConfigPersistence
-        from src.app.database.database_manager import DatabaseManager
+        from src.app.persistence import DatabaseManager
         from src.app.core.config.gemini import GeminiConfig
         from src.app.core.config.database import DatabaseOperations
 

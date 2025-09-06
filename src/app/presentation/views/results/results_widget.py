@@ -7,7 +7,7 @@ from PySide6.QtGui import QFont
 import json
 from datetime import datetime, timedelta
 
-from src.app.database import DatabaseManager, TestResult
+from src.app.persistence.database import DatabaseManager, TestResult
 from src.app.presentation.styles.style import MATERIAL_COLORS
 from src.app.presentation.styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE
 from src.app.presentation.styles.components.results import (

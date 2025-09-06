@@ -1,5 +1,5 @@
 from src.app.presentation.views.base_window import SidebarWindowBase
-from src.app.widgets.sidebar import Sidebar
+from src.app.presentation.widgets.sidebar import Sidebar
 from PySide6.QtWidgets import QPushButton, QVBoxLayout, QWidget, QMessageBox
 from src.app.presentation.views.results.results_widget import TestResultsWidget
 

@@ -47,7 +47,7 @@ def initialize_ai(config_file: str = None) -> bool:
     
     # Try to initialize with default config
     try:
-        from src.app.constants import CONFIG_FILE
+        from src.app.shared.constants import CONFIG_FILE
         return initialize_gemini(CONFIG_FILE)
     except Exception:
         return False

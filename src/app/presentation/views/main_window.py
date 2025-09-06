@@ -19,8 +19,8 @@ from PySide6.QtGui import QFont
 from PySide6.QtCore import Qt, QUrl, Signal, QTimer
 from PySide6.QtWebEngineWidgets import QWebEngineView
 import os
-from src.app.widgets.sidebar import Sidebar
-from src.app.widgets.display_area import DisplayArea
+from src.app.presentation.widgets.sidebar import Sidebar
+from src.app.presentation.widgets.display_area import DisplayArea
 from src.app.presentation.views.base_window import SidebarWindowBase
 from src.app.presentation.styles.style import WEBVIEW_STYLE
 
@@ -138,7 +138,7 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(1100, 700)  # Increased from 1000 to 1150
         
         # Create window manager and set as central widget
-        from src.app.utils.window_manager import WindowManager
+        from src.app.shared.utils.window_manager import WindowManager
         self.window_manager = WindowManager(self)
         self.setCentralWidget(self.window_manager)
         
@@ -197,7 +197,7 @@ class MainWindow(QMainWindow):
             event.accept()
             
             # Use centralized cleanup
-            from src.app.utils.logging_config import LoggingConfig
+            from src.app.shared.utils.logging_config import LoggingConfig
             LoggingConfig.manual_cleanup()
             
             # Cleanup window manager
