@@ -1,5 +1,5 @@
 
-from ..tools.compiler_runner import CompilerRunner
+from src.app.tools.compiler_runner import CompilerRunner
 from PySide6.QtCore import QObject, Signal
 import logging
 

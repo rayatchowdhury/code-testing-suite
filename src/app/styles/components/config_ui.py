@@ -2,7 +2,7 @@
 Config UI component styles
 """
 
-from ..style import MATERIAL_COLORS
+from src.app.styles.style import MATERIAL_COLORS
 
 # Error Dialog Styles
 ERROR_DIALOG_STYLE = f"""

@@ -1,5 +1,5 @@
-from .constants import COLORS, MATERIAL_COLORS
-from .components import (
+from src.app.styles.constants import COLORS, MATERIAL_COLORS
+from src.app.styles.components import (
     SCROLLBAR_STYLE,
     SIDEBAR_STYLE,
     SIDEBAR_BUTTON_STYLE,

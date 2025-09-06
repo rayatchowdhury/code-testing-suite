@@ -35,11 +35,11 @@ def setup_logging():
         LoggingConfig.initialize()
     except ImportError:
         try:
-            from app.utils.logging_config import LoggingConfig
+            from src.app.utils.logging_config import LoggingConfig
             LoggingConfig.initialize()
         except ImportError:
             try:
-                from .utils.logging_config import LoggingConfig
+                from src.app.utils.logging_config import LoggingConfig
                 LoggingConfig.initialize()
             except ImportError:
                 # Fallback to basic logging
@@ -64,7 +64,7 @@ def create_main_window():
     """Create main window using src structure"""
     try:
         # Use relative import within src.app package
-        from .views.main_window import MainWindow
+        from src.app.views.main_window import MainWindow
         return MainWindow()
     except ImportError as e:
         # If relative import fails, try absolute import

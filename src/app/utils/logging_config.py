@@ -78,7 +78,7 @@ class LoggingConfig:
             import gc
             # Try to cleanup EditorAI instances
             try:
-                from ..ai.core.editor_ai import EditorAI
+                from src.app.ai.core.editor_ai import EditorAI
                 for obj in gc.get_objects():
                     if isinstance(obj, EditorAI):
                         try:

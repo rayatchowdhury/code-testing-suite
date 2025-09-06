@@ -1,4 +1,4 @@
-from ..constants.colors import MATERIAL_COLORS
+from src.app.styles.constants.colors import MATERIAL_COLORS
 
 # Base gradient and color variables for reuse
 PANEL_GRADIENT = f"""

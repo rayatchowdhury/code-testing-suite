@@ -1,5 +1,5 @@
-from ..constants.colors import COLORS
-from .scrollbar import SCROLLBAR_STYLE
+from src.app.styles.constants.colors import COLORS
+from src.app.styles.components.scrollbar import SCROLLBAR_STYLE
 
 SIDEBAR_STYLE = f"""
 QWidget {{

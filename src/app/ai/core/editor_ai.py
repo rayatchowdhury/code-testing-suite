@@ -9,10 +9,10 @@ import os
 import logging
 from typing import Optional
 
-from ...constants import USER_DATA_DIR, CONFIG_FILE
-from ...utils.logging_config import LoggingConfig
-from ..gemini_client import get_gemini_client, is_gemini_available, initialize_gemini
-from ..templates.prompt_templates import PromptTemplates
+from src.app.constants import USER_DATA_DIR, CONFIG_FILE
+from src.app.utils.logging_config import LoggingConfig
+from src.app.ai.gemini_client import get_gemini_client, is_gemini_available, initialize_gemini
+from src.app.ai.templates.prompt_templates import PromptTemplates
 
 # Ensure logging is configured
 LoggingConfig.initialize()

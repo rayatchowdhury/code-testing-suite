@@ -1,7 +1,7 @@
 """
 Sidebar specific styles including dividers and gradients
 """
-from ...styles.constants.colors import MATERIAL_COLORS
+from src.app.styles.constants.colors import MATERIAL_COLORS
 
 # Sidebar divider container styles
 SIDEBAR_DIVIDER_CONTAINER_STYLE = "background-color: #1b1b1e;"

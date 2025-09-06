@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QSlider, QHBoxLayout
 from PySide6.QtCore import Qt, Signal
-from ...styles.style import MATERIAL_COLORS
-from ...styles.components.test_view_styles import TEST_VIEW_SLIDER_STYLE, TEST_VIEW_SLIDER_VALUE_LABEL_STYLE
+from src.app.styles.style import MATERIAL_COLORS
+from src.app.styles.components.test_view_styles import TEST_VIEW_SLIDER_STYLE, TEST_VIEW_SLIDER_VALUE_LABEL_STYLE
 
 class TimeLimitSlider(QWidget):
     valueChanged = Signal(int)  # Changed to int for milliseconds

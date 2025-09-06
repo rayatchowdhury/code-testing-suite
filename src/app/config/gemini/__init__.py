@@ -7,7 +7,7 @@ This module handles all Gemini AI-related configuration:
 - UI components for Gemini settings
 """
 
-from .gemini_handler import GeminiConfig, GeminiConfigUI, GeminiModelDiscoveryThread
+from src.app.config.gemini.gemini_handler import GeminiConfig, GeminiConfigUI, GeminiModelDiscoveryThread
 
 __all__ = [
     'GeminiConfig', 

@@ -3,18 +3,18 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QSplitter, QHBoxLayout, QPus
 from PySide6.QtCore import Qt, Signal
 import os
 
-from ...widgets.display_area_widgets.editor import EditorWidget
-from ...widgets.display_area_widgets.console import ConsoleOutput
-from ...widgets.display_area_widgets.ai_panel import AIPanel
-from ...tools.stress_compiler_runner import StressCompilerRunner
-from ...styles.style import MATERIAL_COLORS
-from ...styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE
-from ...styles.components.test_view_styles import (
+from src.app.widgets.display_area_widgets.editor import EditorWidget
+from src.app.widgets.display_area_widgets.console import ConsoleOutput
+from src.app.widgets.display_area_widgets.ai_panel import AIPanel
+from src.app.tools.stress_compiler_runner import StressCompilerRunner
+from src.app.styles.style import MATERIAL_COLORS
+from src.app.styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE
+from src.app.styles.components.test_view_styles import (
     TEST_VIEW_BUTTON_PANEL_STYLE,
     TEST_VIEW_FILE_BUTTON_STYLE,
     TEST_VIEW_CONTENT_PANEL_STYLE
 )
-from ...constants import WORKSPACE_DIR
+from src.app.constants import WORKSPACE_DIR
 
 class ComparatorDisplay(QWidget):
     filePathChanged = Signal()

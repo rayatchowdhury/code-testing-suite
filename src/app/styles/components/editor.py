@@ -1,5 +1,5 @@
-from ..constants.colors import MATERIAL_COLORS
-from ..constants.editor_colors import EDITOR_COLORS
+from src.app.styles.constants.colors import MATERIAL_COLORS
+from src.app.styles.constants.editor_colors import EDITOR_COLORS
 
 AI_DIALOG_STYLE = f"""
     QDialog {{

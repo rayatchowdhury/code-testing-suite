@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-from ...views.base_window import SidebarWindowBase
-from ...widgets.sidebar import Sidebar
+from src.app.views.base_window import SidebarWindowBase
+from src.app.widgets.sidebar import Sidebar
 from PySide6.QtWidgets import QPushButton, QMessageBox
 from PySide6.QtGui import QFont
-from ...views.validator.validator_display_area import ValidatorDisplay
-from ...views.validator.test_count_slider import TestCountSlider
-from ...tools.validator import Validator
+from src.app.views.validator.validator_display_area import ValidatorDisplay
+from src.app.views.validator.test_count_slider import TestCountSlider
+from src.app.tools.validator import Validator
 
 class ValidatorWindow(SidebarWindowBase):
     def __init__(self, parent=None):

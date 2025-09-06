@@ -5,7 +5,7 @@ import difflib
 from datetime import datetime
 from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass, field
-from ..constants import USER_DATA_DIR
+from src.app.constants import USER_DATA_DIR
 
 @dataclass
 class TestCaseResult:

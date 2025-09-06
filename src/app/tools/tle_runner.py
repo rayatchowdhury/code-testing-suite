@@ -1,12 +1,12 @@
 
 import os
 from PySide6.QtCore import QObject, Signal, QProcess, QThread
-from ..views.comparator.compilation_status_window import CompilationStatusWindow
-from ..views.benchmarker.benchmark_status_window import BenchmarkStatusWindow
+from src.app.views.comparator.compilation_status_window import CompilationStatusWindow
+from src.app.views.benchmarker.benchmark_status_window import BenchmarkStatusWindow
 import subprocess
 import threading
 import time
-from ..database import DatabaseManager, TestResult
+from src.app.database import DatabaseManager, TestResult
 from datetime import datetime
 import json
 

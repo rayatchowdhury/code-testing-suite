@@ -18,7 +18,7 @@ from PySide6.QtCore import QThread, Signal
 from PySide6.QtWidgets import QComboBox, QLineEdit
 
 # Import CONFIG_FILE constant
-from ...constants import CONFIG_FILE
+from src.app.constants import CONFIG_FILE
 
 
 class GeminiModelDiscoveryThread(QThread):

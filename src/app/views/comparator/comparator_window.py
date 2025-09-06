@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-from ...views.base_window import SidebarWindowBase
-from ...widgets.sidebar import Sidebar
+from src.app.views.base_window import SidebarWindowBase
+from src.app.widgets.sidebar import Sidebar
 from PySide6.QtWidgets import QPushButton, QMessageBox
 from PySide6.QtGui import QFont
-from ...views.comparator.comparator_display_area import ComparatorDisplay
-from ...views.comparator.test_count_slider import TestCountSlider
-from ...tools.stresser import Stresser
+from src.app.views.comparator.comparator_display_area import ComparatorDisplay
+from src.app.views.comparator.test_count_slider import TestCountSlider
+from src.app.tools.stresser import Stresser
 
 class ComparatorWindow(SidebarWindowBase):
     def __init__(self, parent=None):

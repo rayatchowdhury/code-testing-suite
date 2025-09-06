@@ -1,18 +1,18 @@
-from .scrollbar import SCROLLBAR_STYLE
-from .sidebar import SIDEBAR_STYLE, SIDEBAR_BUTTON_STYLE
-from .splitter import SPLITTER_STYLE
-from .console import CONSOLE_STYLE
-from .editor import (EDITOR_WIDGET_STYLE, get_editor_style, 
+from src.app.styles.components.scrollbar import SCROLLBAR_STYLE
+from src.app.styles.components.sidebar import SIDEBAR_STYLE, SIDEBAR_BUTTON_STYLE
+from src.app.styles.components.splitter import SPLITTER_STYLE
+from src.app.styles.components.console import CONSOLE_STYLE
+from src.app.styles.components.editor import (EDITOR_WIDGET_STYLE, get_editor_style, 
                     get_tab_style, AI_DIALOG_STYLE)
-from .ai_panel import AI_PANEL_STYLE, CUSTOM_COMMAND_STYLE
-from .results import (
+from src.app.styles.components.ai_panel import AI_PANEL_STYLE, CUSTOM_COMMAND_STYLE
+from src.app.styles.components.results import (
     RESULTS_COMBO_STYLE, RESULTS_BUTTON_STYLE, RESULTS_TAB_WIDGET_STYLE,
     RESULTS_TABLE_STYLE, RESULTS_TABLE_SMALL_STYLE, RESULTS_TEXT_EDIT_STYLE,
     RESULTS_PROGRESS_BAR_STYLE, RESULTS_FILTERS_PANEL_STYLE, RESULTS_CARD_STYLE,
     RESULTS_LABEL_TITLE_STYLE, RESULTS_LABEL_FILTER_STYLE, RESULTS_LABEL_STAT_STYLE,
     RESULTS_LABEL_DETAILS_STYLE
 )
-from .test_view_styles import (
+from src.app.styles.components.test_view_styles import (
     TEST_VIEW_BUTTON_PANEL_STYLE,
     TEST_VIEW_FILE_BUTTON_STYLE,
     TEST_VIEW_CONTENT_PANEL_STYLE,
@@ -36,7 +36,7 @@ from .test_view_styles import (
     get_passed_status_style,
     get_failed_status_style
 )
-from .config_ui import (
+from src.app.styles.components.config_ui import (
     ERROR_DIALOG_STYLE,
     CONFIG_DIALOG_TITLE_STYLE, 
     SUCCESS_MESSAGE_STYLE,

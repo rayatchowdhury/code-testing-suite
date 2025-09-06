@@ -1,5 +1,5 @@
-from ...styles.constants.colors import MATERIAL_COLORS
-from ...styles.components.scrollbar import SCROLLBAR_STYLE
+from src.app.styles.constants.colors import MATERIAL_COLORS
+from src.app.styles.components.scrollbar import SCROLLBAR_STYLE
 
 CONFIG_DIALOG_STYLE = f"""
     QDialog {{

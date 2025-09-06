@@ -7,7 +7,7 @@ from typing import Dict, Any, Optional
 
 from PySide6.QtWidgets import QMessageBox
 
-from .exceptions import (
+from src.app.config.core.exceptions import (
     ConfigError,
     ConfigPermissionError,
     ConfigFormatError,
@@ -16,9 +16,9 @@ from .exceptions import (
     ConfigSaveError,
     ConfigMissingError
 )
-from ...constants import USER_DATA_DIR, CONFIG_FILE
-from ...styles.constants.colors import MATERIAL_COLORS
-from ...styles.components.config_ui import (
+from src.app.constants import USER_DATA_DIR, CONFIG_FILE
+from src.app.styles.constants.colors import MATERIAL_COLORS
+from src.app.styles.components.config_ui import (
     SUCCESS_MESSAGE_STYLE, 
     INFO_MESSAGE_STYLE,
     get_success_status_style

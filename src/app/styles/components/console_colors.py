@@ -1,7 +1,7 @@
 """
 Console color definitions for different types of output
 """
-from ...styles.constants.colors import MATERIAL_COLORS
+from src.app.styles.constants.colors import MATERIAL_COLORS
 
 # Console output color scheme
 CONSOLE_COLORS = {

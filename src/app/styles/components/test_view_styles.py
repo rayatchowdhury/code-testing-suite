@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 # Shared styles for test views (comparator, benchmarker, validator)
-from ..style import MATERIAL_COLORS
-from ..constants.status_colors import ERROR_COLOR_HEX
+from src.app.styles.style import MATERIAL_COLORS
+from src.app.styles.constants.status_colors import ERROR_COLOR_HEX
 
 TEST_VIEW_BUTTON_PANEL_STYLE = f"""
 QWidget {{

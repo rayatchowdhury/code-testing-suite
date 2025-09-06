@@ -3,9 +3,9 @@
 
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QProgressBar, QPushButton
 from PySide6.QtCore import Qt
-from ...styles.style import MATERIAL_COLORS
-from ...styles.constants.status_colors import ERROR_COLOR_HEX
-from ...styles.components.test_view_styles import (
+from src.app.styles.style import MATERIAL_COLORS
+from src.app.styles.constants.status_colors import ERROR_COLOR_HEX
+from src.app.styles.components.test_view_styles import (
     TEST_VIEW_COMPILATION_STATUS_DIALOG_STYLE,
     TEST_VIEW_COMPILATION_STATUS_LABEL_STYLE,
     TEST_VIEW_COMPILATION_PROGRESS_BAR_STYLE,

@@ -13,7 +13,7 @@ Public API:
 """
 
 # Core AI Client
-from .gemini_client import (
+from src.app.ai.gemini_client import (
     GeminiAI,
     get_gemini_client,
     initialize_gemini,
@@ -28,10 +28,10 @@ from .gemini_client import (
 )
 
 # EditorAI Processing
-from .core.editor_ai import EditorAI
+from src.app.ai.core.editor_ai import EditorAI
 
 # Template System
-from .templates.prompt_templates import PromptTemplates
+from src.app.ai.templates.prompt_templates import PromptTemplates
 
 
 # Public API Functions
@@ -47,7 +47,7 @@ def initialize_ai(config_file: str = None) -> bool:
     
     # Try to initialize with default config
     try:
-        from ..constants import CONFIG_FILE
+        from src.app.constants import CONFIG_FILE
         return initialize_gemini(CONFIG_FILE)
     except Exception:
         return False

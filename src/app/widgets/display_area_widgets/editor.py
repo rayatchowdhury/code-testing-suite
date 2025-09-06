@@ -9,12 +9,12 @@ import asyncio
 import qasync
 from qasync import asyncSlot, QEventLoop
 
-from ...styles.constants.editor_colors import EDITOR_COLORS
-from ...styles.constants.colors import MATERIAL_COLORS
-from ...styles.components.editor import (EDITOR_WIDGET_STYLE, get_editor_style,
+from src.app.styles.constants.editor_colors import EDITOR_COLORS
+from src.app.styles.constants.colors import MATERIAL_COLORS
+from src.app.styles.components.editor import (EDITOR_WIDGET_STYLE, get_editor_style,
                                     AI_DIALOG_STYLE)
-from ...styles.components.ai_panel import AI_PANEL_STYLE
-from ...utils.file_operations import FileOperations
+from src.app.styles.components.ai_panel import AI_PANEL_STYLE
+from src.app.utils.file_operations import FileOperations
 
 # Lazy imports for heavy components
 _markdown = None
@@ -52,7 +52,7 @@ def _import_pygments():
 def _import_syntax_highlighters():
     global _syntax_highlighters
     if _syntax_highlighters is None:
-        from .syntaxhighlighter import (CPPSyntaxHighlighter, PythonSyntaxHighlighter, 
+        from src.app.widgets.display_area_widgets.syntaxhighlighter import (CPPSyntaxHighlighter, PythonSyntaxHighlighter, 
                                        JavaSyntaxHighlighter)
         _syntax_highlighters = {
             'cpp': CPPSyntaxHighlighter,
@@ -64,14 +64,14 @@ def _import_syntax_highlighters():
 def _import_editor_ai():
     global _editor_ai
     if _editor_ai is None:
-        from ...ai.core.editor_ai import EditorAI
+        from src.app.ai.core.editor_ai import EditorAI
         _editor_ai = EditorAI
     return _editor_ai
 
 def _import_ai_panel():
     global _ai_panel
     if _ai_panel is None:
-        from .ai_panel import AIPanel
+        from src.app.widgets.display_area_widgets.ai_panel import AIPanel
         _ai_panel = AIPanel
     return _ai_panel
 

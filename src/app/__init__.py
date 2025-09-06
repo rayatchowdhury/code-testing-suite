@@ -11,10 +11,10 @@ __author__ = "Code Testing Suite Team"
 # Lazy imports - only import when accessed
 def get_main_window():
     """Lazy import of MainWindow"""
-    from .views.main_window import MainWindow
+    from src.app.views.main_window import MainWindow
     return MainWindow
 
 def get_window_manager():
     """Lazy import of WindowManager"""
-    from .utils.window_manager import WindowManager
+    from src.app.utils.window_manager import WindowManager
     return WindowManager

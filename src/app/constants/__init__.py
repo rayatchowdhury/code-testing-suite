@@ -5,7 +5,7 @@ This package contains all application constants including paths,
 configuration defaults, and other shared values.
 """
 
-from .paths import (
+from src.app.constants.paths import (
     PROJECT_ROOT,
     SRC_ROOT,
     RESOURCES_DIR,

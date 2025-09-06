@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-from ...views.base_window import SidebarWindowBase
+from src.app.views.base_window import SidebarWindowBase
 from PySide6.QtWidgets import QMessageBox
-from ...widgets.sidebar import Sidebar
-from ...views.benchmarker.benchmarker_display_area import BenchmarkerDisplay
-from ...views.benchmarker.time_limit_slider import TimeLimitSlider
-from ...tools.tle_runner import TLERunner
+from src.app.widgets.sidebar import Sidebar
+from src.app.views.benchmarker.benchmarker_display_area import BenchmarkerDisplay
+from src.app.views.benchmarker.time_limit_slider import TimeLimitSlider
+from src.app.tools.tle_runner import TLERunner
 
 class BenchmarkerWindow(SidebarWindowBase):
     def __init__(self, parent=None):

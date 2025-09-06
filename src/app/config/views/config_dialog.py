@@ -9,12 +9,12 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIcon, QFont
 
-from ...styles.components.config_styles import CONFIG_DIALOG_STYLE
-from ...styles.components.config_ui import (
+from src.app.styles.components.config_styles import CONFIG_DIALOG_STYLE
+from src.app.styles.components.config_ui import (
     CONFIG_DIALOG_TITLE_STYLE, SECTION_INFO_LABEL_STYLE
 )
-from ...styles.constants.colors import MATERIAL_COLORS
-from ...constants import SETTINGS_ICON
+from src.app.styles.constants.colors import MATERIAL_COLORS
+from src.app.constants import SETTINGS_ICON
 
 
 class ErrorDialog(QDialog):
@@ -94,7 +94,7 @@ class ErrorDialog(QDialog):
 
     def _setup_styles(self):
         """Apply styling to the dialog."""
-        from ...styles.components.config_ui import ERROR_DIALOG_STYLE
+        from src.app.styles.components.config_ui import ERROR_DIALOG_STYLE
         self.setStyleSheet(ERROR_DIALOG_STYLE)
 
     @staticmethod
@@ -124,10 +124,10 @@ class ConfigView(QDialog):
         self.setStyleSheet(CONFIG_DIALOG_STYLE)
 
         # Initialize modules with updated imports (Phase 3)
-        from ..core import ConfigManager, ConfigPersistence
-        from ...database.database_manager import DatabaseManager
-        from ..gemini import GeminiConfig
-        from ..database import DatabaseOperations
+        from src.app.config.core import ConfigManager, ConfigPersistence
+        from src.app.database.database_manager import DatabaseManager
+        from src.app.config.gemini import GeminiConfig
+        from src.app.config.database import DatabaseOperations
 
         # Initialize components
         self.config_manager = ConfigManager()

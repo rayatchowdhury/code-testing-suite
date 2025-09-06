@@ -3,6 +3,6 @@
 Template management module.
 """
 
-from .prompt_templates import PromptTemplates
+from src.app.ai.templates.prompt_templates import PromptTemplates
 
 __all__ = ['PromptTemplates']

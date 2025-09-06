@@ -6,7 +6,7 @@ This module contains UI components for configuration management:
 - Error dialogs and user feedback
 """
 
-from .config_dialog import ConfigView, ErrorDialog
+from src.app.config.views.config_dialog import ConfigView, ErrorDialog
 
 __all__ = [
     'ConfigView', 
