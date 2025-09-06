@@ -64,12 +64,12 @@ def create_main_window():
     """Create main window using src structure"""
     try:
         # Use relative import within src.app package
-        from src.app.views.main_window import MainWindow
+        from src.app.presentation.views.main_window import MainWindow
         return MainWindow()
     except ImportError as e:
         # If relative import fails, try absolute import
         try:
-            from src.app.views.main_window import MainWindow
+            from src.app.presentation.views.main_window import MainWindow
             return MainWindow()
         except ImportError:
             raise ImportError(f"Could not import MainWindow: {e}")

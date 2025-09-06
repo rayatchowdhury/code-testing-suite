@@ -2,8 +2,8 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QPlainTextEdit, QLabel,
                               QPushButton, QScrollBar, QSizePolicy)
 from PySide6.QtCore import Qt, Signal, QTimer
 from PySide6.QtGui import QKeyEvent, QTextCharFormat, QColor, QTextCursor
-from src.app.styles import CONSOLE_STYLE, MATERIAL_COLORS
-from src.app.styles.components.console_colors import CONSOLE_COLORS
+from src.app.presentation.styles import CONSOLE_STYLE, MATERIAL_COLORS
+from src.app.presentation.styles.components.console_colors import CONSOLE_COLORS
 
 class ConsoleOutput(QWidget):
     inputSubmitted = Signal(str)

@@ -9,11 +9,11 @@ import asyncio
 import qasync
 from qasync import asyncSlot, QEventLoop
 
-from src.app.styles.constants.editor_colors import EDITOR_COLORS
-from src.app.styles.constants.colors import MATERIAL_COLORS
-from src.app.styles.components.editor import (EDITOR_WIDGET_STYLE, get_editor_style,
+from src.app.presentation.styles.constants.editor_colors import EDITOR_COLORS
+from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
+from src.app.presentation.styles.components.editor import (EDITOR_WIDGET_STYLE, get_editor_style,
                                     AI_DIALOG_STYLE)
-from src.app.styles.components.ai_panel import AI_PANEL_STYLE
+from src.app.presentation.styles.components.ai_panel import AI_PANEL_STYLE
 from src.app.utils.file_operations import FileOperations
 
 # Lazy imports for heavy components
@@ -52,7 +52,7 @@ def _import_pygments():
 def _import_syntax_highlighters():
     global _syntax_highlighters
     if _syntax_highlighters is None:
-        from src.app.widgets.display_area_widgets.syntaxhighlighter import (CPPSyntaxHighlighter, PythonSyntaxHighlighter, 
+        from src.app.presentation.styles.syntaxhighlighter import (CPPSyntaxHighlighter, PythonSyntaxHighlighter, 
                                        JavaSyntaxHighlighter)
         _syntax_highlighters = {
             'cpp': CPPSyntaxHighlighter,

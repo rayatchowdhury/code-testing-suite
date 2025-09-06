@@ -1,7 +1,7 @@
 import os
 from PySide6.QtCore import QObject, Signal, QProcess, QThread
-from src.app.views.comparator.compilation_status_window import CompilationStatusWindow
-from src.app.views.comparator.compare_status_window import CompareStatusWindow
+from src.app.presentation.views.comparator.compilation_status_window import CompilationStatusWindow
+from src.app.presentation.views.comparator.compare_status_window import CompareStatusWindow
 import subprocess
 import threading
 from PySide6.QtCore import QObject, Signal, Slot

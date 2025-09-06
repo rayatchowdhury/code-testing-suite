@@ -9,11 +9,11 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIcon, QFont
 
-from src.app.styles.components.config_styles import CONFIG_DIALOG_STYLE
-from src.app.styles.components.config_ui import (
+from src.app.presentation.styles.components.config_styles import CONFIG_DIALOG_STYLE
+from src.app.presentation.styles.components.config_ui import (
     CONFIG_DIALOG_TITLE_STYLE, SECTION_INFO_LABEL_STYLE
 )
-from src.app.styles.constants.colors import MATERIAL_COLORS
+from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
 from src.app.constants import SETTINGS_ICON
 
 
@@ -94,7 +94,7 @@ class ErrorDialog(QDialog):
 
     def _setup_styles(self):
         """Apply styling to the dialog."""
-        from src.app.styles.components.config_ui import ERROR_DIALOG_STYLE
+        from src.app.presentation.styles.components.config_ui import ERROR_DIALOG_STYLE
         self.setStyleSheet(ERROR_DIALOG_STYLE)
 
     @staticmethod

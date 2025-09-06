@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton, 
                               QLineEdit, QLabel, QFrame, QSizePolicy)
 from PySide6.QtCore import Qt, Signal, QTimer
-from src.app.styles.components import AI_PANEL_STYLE, CUSTOM_COMMAND_STYLE
+from src.app.presentation.styles.components import AI_PANEL_STYLE, CUSTOM_COMMAND_STYLE
 import asyncio
 import os
 import threading
