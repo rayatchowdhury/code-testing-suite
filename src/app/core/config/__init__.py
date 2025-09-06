@@ -4,14 +4,14 @@ Structured configuration management with organized subdirectories (Phase 3).
 """
 
 # Phase 3: Imports from organized subdirectories
-from src.app.config.core import (
+from src.app.core.config.core import (
     ConfigManager, ConfigPersistence,
     ConfigError, ConfigPermissionError, ConfigFormatError,
     ConfigValidationError, ConfigLoadError, ConfigSaveError, ConfigMissingError
 )
-from src.app.config.views import ConfigView, ErrorDialog
-from src.app.config.database import DatabaseOperations
-from src.app.config.gemini import GeminiConfig, GeminiConfigUI, GeminiModelDiscoveryThread
+from src.app.core.config.views import ConfigView, ErrorDialog
+from src.app.core.config.database import DatabaseOperations
+from src.app.core.config.gemini import GeminiConfig, GeminiConfigUI, GeminiModelDiscoveryThread
 
 __all__ = [
     # Core configuration management

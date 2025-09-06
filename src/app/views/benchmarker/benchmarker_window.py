@@ -4,7 +4,7 @@ from PySide6.QtWidgets import QMessageBox
 from src.app.widgets.sidebar import Sidebar
 from src.app.views.benchmarker.benchmarker_display_area import BenchmarkerDisplay
 from src.app.views.benchmarker.time_limit_slider import TimeLimitSlider
-from src.app.tools.tle_runner import TLERunner
+from src.app.core.tools.tle_runner import TLERunner
 
 class BenchmarkerWindow(SidebarWindowBase):
     def __init__(self, parent=None):

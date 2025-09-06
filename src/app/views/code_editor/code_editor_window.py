@@ -3,7 +3,7 @@ from PySide6.QtGui import QFont, QCloseEvent
 from src.app.widgets.sidebar import Sidebar
 from src.app.views.base_window import SidebarWindowBase
 from src.app.views.code_editor.code_editor_display_area import CodeEditorDisplay
-from src.app.tools.compiler_runner import CompilerRunner
+from src.app.core.tools.compiler_runner import CompilerRunner
 import os
 from PySide6.QtCore import QTimer
 from src.app.utils.file_operations import FileOperations

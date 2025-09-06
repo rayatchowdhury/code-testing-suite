@@ -66,7 +66,7 @@ class AIPanel(QWidget):
         """Initialize AI model in background thread for faster first prompt"""
         def background_init():
             try:
-                from src.app.ai.core.editor_ai import EditorAI
+                from src.app.core.ai.core.editor_ai import EditorAI
                 # Create and initialize EditorAI instance
                 ai = EditorAI()
                 # This will trigger model initialization and caching
@@ -264,7 +264,7 @@ class AIPanel(QWidget):
     def _should_show_ai_panel(self):
         """Lazy import gemini client to check if AI panel should be shown"""
         try:
-            from src.app.ai.gemini_client import should_show_ai_panel
+            from src.app.core.ai.gemini_client import should_show_ai_panel
             return should_show_ai_panel()
         except Exception:
             return False
@@ -272,7 +272,7 @@ class AIPanel(QWidget):
     def _is_ai_ready(self):
         """Lazy import gemini client to check if AI is ready"""
         try:
-            from src.app.ai.gemini_client import is_ai_ready
+            from src.app.core.ai.gemini_client import is_ai_ready
             return is_ai_ready()
         except Exception:
             return False, "AI configuration not available"

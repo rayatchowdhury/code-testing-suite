@@ -64,7 +64,7 @@ def _import_syntax_highlighters():
 def _import_editor_ai():
     global _editor_ai
     if _editor_ai is None:
-        from src.app.ai.core.editor_ai import EditorAI
+        from src.app.core.ai.core.editor_ai import EditorAI
         _editor_ai = EditorAI
     return _editor_ai
 

@@ -7,7 +7,7 @@ from typing import Dict, Any, Optional
 
 from PySide6.QtWidgets import QMessageBox
 
-from src.app.config.core.exceptions import (
+from src.app.core.config.core.exceptions import (
     ConfigError,
     ConfigPermissionError,
     ConfigFormatError,

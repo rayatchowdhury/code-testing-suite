@@ -114,7 +114,7 @@ class MainWindowContent(SidebarWindowBase):
                 import sys
                 sys.exit()
         elif button_text == 'Options':
-            from src.app.config import ConfigView
+            from src.app.core.config import ConfigView
             config_dialog = ConfigView(self)
             config_dialog.exec()
         elif button_text in ['Code Editor', 'Compare', 'Benchmark', 'Validate', 'Results', 'Help Center']:

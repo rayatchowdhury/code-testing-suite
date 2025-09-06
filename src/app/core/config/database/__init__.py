@@ -6,7 +6,7 @@ This module handles database-related configuration operations:
 - User confirmation dialogs for database operations
 """
 
-from src.app.config.database.database_operations import DatabaseOperations
+from src.app.core.config.database.database_operations import DatabaseOperations
 
 __all__ = [
     'DatabaseOperations'

@@ -7,7 +7,7 @@ import os
 from src.app.widgets.display_area_widgets.editor import EditorWidget
 from src.app.widgets.display_area_widgets.console import ConsoleOutput 
 from src.app.widgets.display_area_widgets.ai_panel import AIPanel
-from src.app.tools.compiler_runner import CompilerRunner
+from src.app.core.tools.compiler_runner import CompilerRunner
 from src.app.styles.style import MATERIAL_COLORS
 from src.app.styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE
 from src.app.styles.components.editor import get_tab_style

@@ -13,7 +13,7 @@ Public API:
 """
 
 # Core AI Client
-from src.app.ai.gemini_client import (
+from src.app.core.ai.gemini_client import (
     GeminiAI,
     get_gemini_client,
     initialize_gemini,
@@ -28,10 +28,10 @@ from src.app.ai.gemini_client import (
 )
 
 # EditorAI Processing
-from src.app.ai.core.editor_ai import EditorAI
+from src.app.core.ai.core.editor_ai import EditorAI
 
 # Template System
-from src.app.ai.templates.prompt_templates import PromptTemplates
+from src.app.core.ai.templates.prompt_templates import PromptTemplates
 
 
 # Public API Functions

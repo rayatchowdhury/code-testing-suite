@@ -6,8 +6,8 @@ This module contains the fundamental configuration handling logic:
 - Core configuration management classes
 """
 
-from src.app.config.core.config_handler import ConfigManager, ConfigPersistence
-from src.app.config.core.exceptions import (
+from src.app.core.config.core.config_handler import ConfigManager, ConfigPersistence
+from src.app.core.config.core.exceptions import (
     ConfigError, ConfigPermissionError, ConfigFormatError,
     ConfigValidationError, ConfigLoadError, ConfigSaveError, ConfigMissingError
 )

@@ -5,7 +5,7 @@ from PySide6.QtWidgets import QPushButton, QMessageBox
 from PySide6.QtGui import QFont
 from src.app.views.validator.validator_display_area import ValidatorDisplay
 from src.app.views.validator.test_count_slider import TestCountSlider
-from src.app.tools.validator import Validator
+from src.app.core.tools.validator import Validator
 
 class ValidatorWindow(SidebarWindowBase):
     def __init__(self, parent=None):

@@ -124,10 +124,10 @@ class ConfigView(QDialog):
         self.setStyleSheet(CONFIG_DIALOG_STYLE)
 
         # Initialize modules with updated imports (Phase 3)
-        from src.app.config.core import ConfigManager, ConfigPersistence
+        from src.app.core.config.core import ConfigManager, ConfigPersistence
         from src.app.database.database_manager import DatabaseManager
-        from src.app.config.gemini import GeminiConfig
-        from src.app.config.database import DatabaseOperations
+        from src.app.core.config.gemini import GeminiConfig
+        from src.app.core.config.database import DatabaseOperations
 
         # Initialize components
         self.config_manager = ConfigManager()

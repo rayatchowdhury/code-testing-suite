@@ -82,7 +82,7 @@ class SidebarWindowBase(QWidget):
                     self.parent.window_manager.show_window('main')
         elif button_text == 'Options':
             # Lazy import to avoid slow startup
-            from src.app.config import ConfigView
+            from src.app.core.config import ConfigView
             config_dialog = ConfigView(self)
             config_dialog.configSaved.connect(self._on_config_changed)
             config_dialog.exec()

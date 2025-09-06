@@ -5,7 +5,7 @@ import os
 
 from src.app.widgets.display_area_widgets.editor import EditorWidget
 from src.app.widgets.display_area_widgets.console import ConsoleOutput
-from src.app.tools.tle_compiler_runner import TLECompilerRunner
+from src.app.core.tools.tle_compiler_runner import TLECompilerRunner
 from src.app.styles.style import MATERIAL_COLORS
 from src.app.styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE
 from src.app.styles.components.test_view_styles import (
