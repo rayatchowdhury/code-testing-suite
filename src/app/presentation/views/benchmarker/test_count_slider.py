@@ -1,6 +1,3 @@
-
-# -*- coding: utf-8 -*-
-
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QSlider, QHBoxLayout, QLineEdit
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIntValidator
@@ -16,23 +13,23 @@ class TestCountSlider(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(12, 4, 12, 4)  # Match sidebar button margins
+        layout.setContentsMargins(12, 4, 12, 4)  # Match sidebar button margins (4px 12px from button styles)
         
         # Slider and input container
         slider_container = QHBoxLayout()
         slider_container.setSpacing(0)  # No gap between slider and input
         slider_container.setContentsMargins(0, 0, 0, 0)  # Remove any additional margins
         
-        # Create slider
+        # Create slider - for benchmarker, smaller range makes more sense
         self.slider = QSlider(Qt.Horizontal)
         self.slider.setMinimum(1)
-        self.slider.setMaximum(500)  # Keep comparator's higher range
-        self.slider.setValue(10)
+        self.slider.setMaximum(100)  # Smaller range for performance tests
+        self.slider.setValue(5)      # Default to 5 tests
         self.slider.setStyleSheet(TEST_VIEW_SLIDER_STYLE)
         
         # Editable input field instead of just a label
-        self.value_input = QLineEdit("10")
-        self.value_input.setValidator(QIntValidator(1, 500))
+        self.value_input = QLineEdit("5")
+        self.value_input.setValidator(QIntValidator(1, 100))
         self.value_input.setFixedWidth(50)  # Compact width for numbers
         self.value_input.setAlignment(Qt.AlignCenter)
         
@@ -93,7 +90,7 @@ class TestCountSlider(QWidget):
         try:
             if text and text.isdigit():
                 value = int(text)
-                if 1 <= value <= 500:  # Valid range for comparator
+                if 1 <= value <= 100:  # Valid range
                     # Block signals to prevent recursive updates
                     self.slider.blockSignals(True)
                     self.slider.setValue(value)
@@ -107,6 +104,6 @@ class TestCountSlider(QWidget):
     
     def set_value(self, value):
         """Set the value programmatically"""
-        if 1 <= value <= 500:
+        if 1 <= value <= 100:
             self.slider.setValue(value)
             self.value_input.setText(str(value))

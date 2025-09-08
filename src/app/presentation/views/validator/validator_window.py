@@ -21,10 +21,15 @@ class ValidatorWindow(SidebarWindowBase):
         self.test_count_slider.valueChanged.connect(self.handle_test_count_changed)
         options_section.layout().addWidget(self.test_count_slider)
         
+        # Split actions into two sections
         action_section = self.sidebar.add_section("Actions")
-        for button_text in ['Compile', 'Run', 'Results']:
+        for button_text in ['Compile', 'Run']:
             btn = self.sidebar.add_button(button_text, action_section)
             btn.clicked.connect(lambda checked, text=button_text: self.handle_action_button(text))
+            
+        history_section = self.sidebar.add_section("History")
+        results_btn = self.sidebar.add_button('Results', history_section)
+        results_btn.clicked.connect(lambda checked: self.handle_action_button('Results'))
             
         self.sidebar.add_help_button()
         self.sidebar.add_footer_divider()

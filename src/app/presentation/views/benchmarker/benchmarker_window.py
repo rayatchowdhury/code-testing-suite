@@ -3,7 +3,8 @@ from src.app.presentation.views.base_window import SidebarWindowBase
 from PySide6.QtWidgets import QMessageBox
 from src.app.presentation.widgets.sidebar import Sidebar
 from src.app.presentation.views.benchmarker.benchmarker_display_area import BenchmarkerDisplay
-from src.app.presentation.views.benchmarker.time_limit_slider import TimeLimitSlider
+from src.app.presentation.views.benchmarker.test_count_slider import TestCountSlider
+from src.app.presentation.views.benchmarker.limits_input_widget import LimitsInputWidget
 # Lazy import to avoid circular dependency
 # from src.app.core.tools.tle_runner import TLERunner
 
@@ -13,16 +14,28 @@ class BenchmarkerWindow(SidebarWindowBase):
         
         self.sidebar = Sidebar("Benchmarker")
         
-        # Add time limit slider section (now in milliseconds)
-        options_section = self.sidebar.add_section("Time Limit (ms)")
-        self.time_limit_slider = TimeLimitSlider()
-        self.time_limit_slider.valueChanged.connect(self.handle_time_limit_changed)
-        options_section.layout().addWidget(self.time_limit_slider)
+        # Add resource limits input section with parallel time and memory inputs
+        limits_section = self.sidebar.add_section("Resource Limits")
+        self.limits_widget = LimitsInputWidget()
+        self.limits_widget.timeLimitChanged.connect(self.handle_time_limit_changed)
+        self.limits_widget.memoryLimitChanged.connect(self.handle_memory_limit_changed)
+        limits_section.layout().addWidget(self.limits_widget)
         
+        # Add test count slider section below resource limits
+        test_count_section = self.sidebar.add_section("Number of Tests")
+        self.test_count_slider = TestCountSlider()
+        self.test_count_slider.valueChanged.connect(self.handle_test_count_changed)
+        test_count_section.layout().addWidget(self.test_count_slider)
+        
+        # Split actions into two sections
         action_section = self.sidebar.add_section("Actions")
-        for button_text in ['Compile', 'Run', 'Results']:
+        for button_text in ['Compile', 'Run']:
             btn = self.sidebar.add_button(button_text, action_section)
             btn.clicked.connect(lambda checked, text=button_text: self.handle_action_button(text))
+            
+        history_section = self.sidebar.add_section("History") 
+        results_btn = self.sidebar.add_button('Results', history_section)
+        results_btn.clicked.connect(lambda checked: self.handle_action_button('Results'))
             
         self.sidebar.add_help_button()
         self.sidebar.add_footer_divider()
@@ -66,8 +79,10 @@ class BenchmarkerWindow(SidebarWindowBase):
 
             self.tle_runner.compile_all()
         elif button_text == 'Run':
-            time_limit = self.time_limit_slider.value()
-            self.tle_runner.run_tle_test(time_limit)
+            time_limit = self.limits_widget.get_time_limit()
+            memory_limit = self.limits_widget.get_memory_limit()
+            test_count = self.test_count_slider.value()
+            self.tle_runner.run_tle_test(time_limit, memory_limit, test_count)
         elif button_text == 'Results':
             # Navigate to results window
             if self.can_close():
@@ -82,6 +97,12 @@ class BenchmarkerWindow(SidebarWindowBase):
 
     def handle_time_limit_changed(self, value):
         print(f"Time limit changed to: {value} ms")
+
+    def handle_memory_limit_changed(self, value):
+        print(f"Memory limit changed to: {value} MB")
+    
+    def handle_test_count_changed(self, value):
+        print(f"Test count changed to: {value} tests")
 
     def refresh_ai_panels(self):
         """Refresh AI panel visibility based on current configuration"""
