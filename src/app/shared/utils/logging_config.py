@@ -12,9 +12,7 @@ import atexit
 
 # Suppress noisy environment early
 os.environ.update({
-    'GRPC_VERBOSITY': 'NONE',
-    'GRPC_TRACE': '',
-    'TF_CPP_MIN_LOG_LEVEL': '3'
+    'TF_CPP_MIN_LOG_LEVEL': '3'  # Keep for potential future ML libraries
 })
 
 class LoggingConfig:
@@ -36,13 +34,7 @@ class LoggingConfig:
         
         # Suppress noisy third-party loggers
         noisy_loggers = [
-            'google.generativeai',
-            'google.auth', 
-            'google.api_core.retry',
-            'urllib3.connectionpool',
-            'grpc',
-            'grpc._channel',
-            'grpc._common'
+            'urllib3.connectionpool'  # HTTP requests can be verbose
         ]
         
         for logger_name in noisy_loggers:

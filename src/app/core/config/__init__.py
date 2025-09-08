@@ -11,7 +11,7 @@ from src.app.core.config.core import (
 )
 from src.app.core.config.views import ConfigView, ErrorDialog
 from src.app.core.config.database import DatabaseOperations
-from src.app.core.config.gemini import GeminiConfig, GeminiConfigUI, GeminiModelDiscoveryThread
+from src.app.core.config.gemini import GeminiConfig, GeminiConfigUI
 
 __all__ = [
     # Core configuration management
@@ -21,7 +21,7 @@ __all__ = [
     # Database operations
     'DatabaseOperations',
     # Gemini AI configuration
-    'GeminiConfig', 'GeminiConfigUI', 'GeminiModelDiscoveryThread',
+    'GeminiConfig', 'GeminiConfigUI',
     # Exceptions
     'ConfigError', 'ConfigPermissionError', 'ConfigFormatError',
     'ConfigValidationError', 'ConfigLoadError', 'ConfigSaveError', 'ConfigMissingError'

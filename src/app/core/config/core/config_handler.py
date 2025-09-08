@@ -143,7 +143,7 @@ class ConfigManager:
             'gemini': {  # Standardized format (Phase 1)
                 'enabled': False,
                 'api_key': '',
-                'model': ''
+                'model': 'gemini-2.5-flash'  # Updated to 2.5 flash default
             },
             'editor_settings': {
                 'autosave': True,
@@ -205,8 +205,17 @@ class ConfigPersistence:
         
         self.parent.use_ai_checkbox.setChecked(enabled)
         
-        # Load preferred model
-        self.parent.model_input.setText(model)
+        # Load preferred model to combo box
+        if model and hasattr(self.parent, 'model_combo'):
+            self.parent.model_combo.setCurrentText(model)
+        elif hasattr(self.parent, 'model_combo'):
+            # Set default model if none configured
+            default_model = "gemini-2.5-flash"
+            self.parent.model_combo.setCurrentText(default_model)
+        
+        # Backward compatibility for code that expects model_input
+        if hasattr(self.parent, 'model_input'):
+            self.parent.model_input.setText(model)
         
         editor_settings = cfg.get("editor_settings", {}) if isinstance(cfg.get("editor_settings"), dict) else {}
         self.parent.font_size_spin.setValue(int(editor_settings.get("font_size", 13)))
@@ -228,7 +237,7 @@ class ConfigPersistence:
                 "gemini": {  # New standardized format
                     "enabled": self.parent.use_ai_checkbox.isChecked(),
                     "api_key": self.parent.key_input.text().strip(),
-                    "model": self.parent.model_input.text().strip()
+                    "model": self.parent.model_combo.currentText().strip() if hasattr(self.parent, 'model_combo') else self.parent.model_input.text().strip()
                 },
                 "editor_settings": {
                     # Preserve existing settings not shown in UI

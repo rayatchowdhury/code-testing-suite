@@ -29,22 +29,11 @@ if str(src_root) not in sys.path:
 os.environ['QT_API'] = 'pyside6'
 
 def setup_logging():
-    """Initialize logging configuration early"""
-    try:
-        from src.app.shared.utils.logging_config import LoggingConfig
-        LoggingConfig.initialize()
-    except ImportError:
-        try:
-            from src.app.shared.utils.logging_config import LoggingConfig
-            LoggingConfig.initialize()
-        except ImportError:
-            try:
-                from src.app.shared.utils.logging_config import LoggingConfig
-                LoggingConfig.initialize()
-            except ImportError:
-                # Fallback to basic logging
-                import logging
-                logging.basicConfig(level=logging.INFO)
+    """Initialize basic logging"""
+    import logging
+    logging.basicConfig(level=logging.WARNING)
+    # Suppress noisy HTTP logs
+    logging.getLogger('urllib3.connectionpool').setLevel(logging.ERROR)
 
 def get_app_icon():
     """Get application icon with multiple fallbacks"""
@@ -62,14 +51,28 @@ def get_app_icon():
 
 def create_main_window():
     """Create main window using src structure"""
+    # Debug: Force reload any modules for testing
+    import importlib
+    import sys
+    modules_to_reload = [
+        'src.app.presentation.views.qt_main_window_faithful',
+        'src.app.presentation.views.main_window'
+    ]
+    for module in modules_to_reload:
+        if module in sys.modules:
+            print(f"Reloading module: {module}")
+            importlib.reload(sys.modules[module])
+            
     try:
         # Use relative import within src.app package
         from src.app.presentation.views.main_window import MainWindow
+        print("Creating MainWindow from src.app.presentation.views.main_window")
         return MainWindow()
     except ImportError as e:
         # If relative import fails, try absolute import
         try:
             from src.app.presentation.views.main_window import MainWindow
+            print("Creating MainWindow from absolute import")
             return MainWindow()
         except ImportError:
             raise ImportError(f"Could not import MainWindow: {e}")

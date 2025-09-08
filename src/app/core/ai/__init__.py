@@ -19,12 +19,11 @@ from src.app.core.ai.gemini_client import (
     initialize_gemini,
     is_gemini_available,
     is_gemini_ready,
-    is_ai_enabled,
-    get_api_key,
-    get_selected_model,
+    get_ai_key,
+    get_ai_model,
     is_ai_ready,
     should_show_ai_panel,
-    get_ai_status_message
+    generate_ai_response
 )
 
 # EditorAI Processing
@@ -76,18 +75,19 @@ def check_ai_status() -> dict:
     return {
         "ready": is_ready,
         "message": message,
-        "enabled": is_ai_enabled(),
+        "enabled": should_show_ai_panel(),
         "available": is_ai_available(),
         "show_panel": should_show_ai_panel(),
-        "status_text": get_ai_status_message(),
-        "has_api_key": bool(get_api_key()),
-        "selected_model": get_selected_model()
+        "status_text": message,
+        "has_api_key": bool(get_ai_key()),
+        "selected_model": get_ai_model()
     }
 
 
 def get_ai_status() -> str:
     """Get user-friendly AI status message."""
-    return get_ai_status_message()
+    ready, message = is_ai_ready()
+    return message
 
 
 def get_prompt_templates() -> PromptTemplates:
@@ -132,10 +132,9 @@ __all__ = [
     # Status Functions
     'is_ai_ready',
     'should_show_ai_panel',
-    'is_ai_enabled',
-    'get_api_key',
-    'get_selected_model',
-    'get_ai_status_message',
+    'get_ai_key',
+    'get_ai_model',
+    'generate_ai_response',
     
     # Low-level Functions
     'get_gemini_client',

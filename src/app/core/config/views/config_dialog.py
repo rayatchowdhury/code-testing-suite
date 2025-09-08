@@ -349,25 +349,26 @@ class ConfigView(QDialog):
         model_label.setFixedWidth(120)
         model_layout.addWidget(model_label)
 
-        # Model input (allows manual entry or selection)
-        self.model_input = QLineEdit()
-        self.model_input.setPlaceholderText("e.g., gemini-1.5-flash (leave empty for auto-selection)")
-        self.model_input.setFixedHeight(28)
-        self.model_input.setToolTip("Specify a Gemini model name, or leave empty to auto-select the best available model")
-        model_layout.addWidget(self.model_input)
+        # Model dropdown with editable option
+        self.model_combo = QComboBox()
+        self.model_combo.setEditable(True)  # Allow custom text entry
+        self.model_combo.setFixedHeight(28)
         
-        # Discover models button
-        self.discover_btn = QPushButton("🔍")
-        self.discover_btn.setObjectName("small_button")
-        self.discover_btn.setFixedSize(32, 32)
-        self.discover_btn.clicked.connect(self.discover_models)
-        self.discover_btn.setToolTip("Discover available models")
-        model_layout.addWidget(self.discover_btn)
+        # Add only Gemini 2.5 models
+        available_models = self.gemini_config.get_available_models()
+        self.model_combo.addItems(available_models)
+        self.model_combo.setCurrentText(self.gemini_config.get_default_model())  # Set default
+        
+        self.model_combo.setToolTip("Select from available Gemini 2.5 models or enter a custom model name")
+        model_layout.addWidget(self.model_combo)
+        
+        # Keep reference for backward compatibility (some code might reference model_input)
+        self.model_input = self.model_combo.lineEdit()
 
         layout.addWidget(model_widget)
 
         # Info label
-        info_label = QLabel("💡 Enable AI Panel to access code assistance features. Valid API key required. Custom model names override auto-selection.")
+        info_label = QLabel("💡 Enable AI Panel to access code assistance features. Valid API key required. Choose from Gemini 2.5 models or enter a custom model name.")
         info_label.setStyleSheet(SECTION_INFO_LABEL_STYLE)
         info_label.setWordWrap(True)
         layout.addWidget(info_label)
@@ -515,41 +516,36 @@ class ConfigView(QDialog):
                 print(f"Validation error: {e}")
     
     def discover_models(self):
-        """Discover available Gemini models."""
-        api_key = self.key_input.text().strip()
-        if not api_key:
-            self.show_error("API Key Required", "Please enter a valid API key first.")
-            return
-            
-        # Use GeminiConfig for model discovery
-        thread = self.gemini_config.discover_models_async(api_key)
-        thread.models_discovered.connect(self._on_models_discovered)
-        thread.discovery_failed.connect(self._on_discovery_failed)
-        thread.finished.connect(self._on_discovery_finished)
-        thread.start()
+        """Legacy method - no longer needed with dropdown, but kept for compatibility."""
+        # Simply refresh dropdown with available models
+        current_model = self.model_combo.currentText().strip()
+        available_models = self.gemini_config.get_available_models()
         
-        self.discover_btn.setText("⏳")
-        self.discover_btn.setEnabled(False)
-        self.validation_thread = thread
+        self.model_combo.clear()
+        self.model_combo.addItems(available_models)
+        
+        # Restore selection if it was valid
+        if current_model in available_models:
+            self.model_combo.setCurrentText(current_model)
+        else:
+            self.model_combo.setCurrentText(self.gemini_config.get_default_model())
+        
+        self.show_success("Models Refreshed", f"Available Gemini 2.5 models loaded. Default: {self.gemini_config.get_default_model()}")
         
     def _on_models_discovered(self, models):
-        """Handle successful model discovery."""
-        if models:
-            # Auto-select the best model
-            preferred = self.gemini_config.get_preferred_model(models)
-            if preferred:
-                self.model_input.setText(preferred)
-            self.show_success("Models Discovered", f"Found {len(models)} models. Selected: {preferred}")
+        """Handle successful model discovery - DEPRECATED."""
+        # This method is no longer used but kept for compatibility
+        pass
         
     def _on_discovery_failed(self, error_msg):
-        """Handle model discovery failure."""
-        self.show_error("Model Discovery Failed", error_msg)
+        """Handle model discovery failure - DEPRECATED.""" 
+        # This method is no longer used but kept for compatibility
+        pass
         
     def _on_discovery_finished(self):
-        """Handle discovery completion."""
-        self.discover_btn.setText("🔍")
-        self.discover_btn.setEnabled(True)
-        self.validation_thread = None
+        """Handle discovery completion - DEPRECATED."""
+        # This method is no longer used but kept for compatibility
+        pass
 
     def _browse_workspace(self):
         """Browse for workspace folder."""

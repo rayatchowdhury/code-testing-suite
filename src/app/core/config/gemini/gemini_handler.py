@@ -1,9 +1,9 @@
 """
 Gemini Configuration Handler
 
-Single file to handle all Gemini API configuration:
+Simple file to handle Gemini API configuration:
 - API key validation
-- Model discovery and selection  
+- Model selection with sensible defaults
 - Configuration persistence
 - UI integration for config dialog
 """
@@ -14,59 +14,13 @@ import threading
 import time
 import logging
 from typing import Tuple, List, Optional
-from PySide6.QtCore import QThread, Signal
 from PySide6.QtWidgets import QComboBox, QLineEdit
 
 # Import CONFIG_FILE constant
 from src.app.shared.constants import CONFIG_FILE
 
 
-class GeminiModelDiscoveryThread(QThread):
-    """Thread for discovering available Gemini models."""
-    
-    models_discovered = Signal(list)  # List of model names
-    discovery_failed = Signal(str)    # Error message
-    
-    def __init__(self, api_key: str):
-        super().__init__()
-        self.api_key = api_key
-    
-    def run(self):
-        """Discover available models in background thread."""
-        try:
-            import google.generativeai as genai
-            genai.configure(api_key=self.api_key)
-            
-            models = []
-            for model in genai.list_models():
-                if ('generateContent' in model.supported_generation_methods and 
-                    model.name.startswith('models/gemini')):
-                    model_name = model.name.replace('models/', '')
-                    models.append(model_name)
-            
-            # Sort by preference: 1.5-flash (latest) -> 1.0-pro -> others
-            def model_priority(name):
-                priority = 0
-                if '1.5' in name:
-                    priority += 100
-                elif '1.0' in name:
-                    priority += 50
-                    
-                if 'flash' in name:
-                    priority += 20
-                elif 'pro' in name:
-                    priority += 10
-                    
-                if 'latest' in name:
-                    priority += 5
-                    
-                return priority
-            
-            models.sort(key=model_priority, reverse=True)
-            self.models_discovered.emit(models)
-            
-        except Exception as e:
-            self.discovery_failed.emit(f"Model discovery failed: {str(e)}")
+# Model discovery removed - using user input with sensible defaults
 
 
 class GeminiConfig:
@@ -105,34 +59,41 @@ class GeminiConfig:
         if not format_valid:
             return False, format_msg
             
-        # Network validation with timeout
+        # Network validation with timeout - simplified
         result = {"success": False, "message": "Validation failed", "completed": False}
         
         def validation_worker():
             try:
-                import google.generativeai as genai
-                genai.configure(api_key=api_key)
+                # Simple HTTP validation instead of using google library
+                import urllib.request
+                import json
                 
-                # Try to list models - will fail if key is invalid
-                list(genai.list_models())
+                # Test API endpoint
+                url = f"https://generativelanguage.googleapis.com/v1beta/models?key={api_key}"
+                req = urllib.request.Request(url, headers={'User-Agent': 'CodeTestingSuite/1.0'})
                 
-                result["success"] = True
-                result["message"] = "API key is valid"
+                with urllib.request.urlopen(req, timeout=10) as response:
+                    if response.status == 200:
+                        result["success"] = True
+                        result["message"] = "API key is valid"
+                    else:
+                        result["message"] = f"HTTP {response.status}"
+                
                 result["completed"] = True
                 
-            except Exception as e:
+            except urllib.error.HTTPError as e:
                 result["completed"] = True
-                error_msg = str(e).lower()
-                
-                if "invalid api key" in error_msg or "invalid argument" in error_msg:
+                if e.code == 403:
                     result["message"] = "Invalid API key"
-                elif "permission denied" in error_msg or "forbidden" in error_msg:
-                    result["message"] = "Permission denied"
-                elif "quota" in error_msg or "rate limit" in error_msg:
-                    result["message"] = "Quota exceeded (key is valid)"
+                elif e.code == 429:
+                    result["message"] = "Rate limit exceeded (key is valid)"
                     result["success"] = True
                 else:
-                    result["message"] = f"Validation error: {str(e)}"
+                    result["message"] = f"HTTP error {e.code}"
+                    
+            except Exception as e:
+                result["completed"] = True
+                result["message"] = f"Validation error: {str(e)}"
         
         # Run in thread with timeout
         worker_thread = threading.Thread(target=validation_worker, daemon=True)
@@ -147,56 +108,39 @@ class GeminiConfig:
             
         return result["success"], result["message"]
     
-    def discover_models_async(self, api_key: str) -> GeminiModelDiscoveryThread:
-        """Start async model discovery and return thread."""
-        thread = GeminiModelDiscoveryThread(api_key)
-        return thread
+    def get_default_model(self) -> str:
+        """Get the default model to use when none is specified."""
+        return "gemini-2.5-flash"  # Updated to 2.5 flash as requested
     
-    def get_preferred_model(self, available_models: List[str]) -> Optional[str]:
-        """Get the preferred model from available models using priority logic."""
-        if not available_models:
-            return None
-            
-        # Priority order: gemini-1.5-flash-latest -> gemini-1.5-pro -> gemini-1.0-pro-latest
-        priority_models = [
-            'gemini-1.5-flash-latest',
-            'gemini-1.5-flash', 
-            'gemini-1.5-pro-latest',
-            'gemini-1.5-pro',
-            'gemini-1.0-pro-latest',
-            'gemini-1.0-pro',
-            'gemini-pro'
+    def get_available_models(self) -> List[str]:
+        """Get list of available Gemini 2.5 models only."""
+        return [
+            "gemini-2.5-flash",      # Default selection
+            "gemini-2.5-pro", 
+            "gemini-2.5-flash-lite"
         ]
-        
-        # Find first available model from priority list
-        for preferred in priority_models:
-            if preferred in available_models:
-                return preferred
-                
-        # If none found, return first available
-        return available_models[0] if available_models else None
     
     def validate_model_selection(self, api_key: str, model_name: str) -> Tuple[bool, str]:
         """Validate that the selected model works with the API key."""
         if not model_name:
             return False, "No model selected"
             
-        try:
-            import google.generativeai as genai
-            genai.configure(api_key=api_key)
-            
-            # Try to create the model
-            model = genai.GenerativeModel(model_name)
-            
+        # For our direct HTTP approach, just check if it's in our supported list
+        available_models = self.get_available_models()
+        if model_name in available_models:
             return True, "Model is valid"
-            
-        except Exception as e:
-            return False, f"Model validation failed: {str(e)}"
+        else:
+            # Allow custom models
+            return True, f"Custom model: {model_name}"
     
-    def save_config(self, api_key: str, model_name: str, enabled: bool = True) -> bool:
+    def save_config(self, api_key: str, model_name: str = None, enabled: bool = True) -> bool:
         """Save configuration to JSON file."""
         if not self.config_file:
             return False
+            
+        # Use default model if none provided
+        if not model_name:
+            model_name = self.get_default_model()
             
         try:
             config_data = {
@@ -253,7 +197,7 @@ class GeminiConfig:
                 
             # Set default model if none specified
             if not model_name:
-                model_name = 'gemini-1.5-flash-latest'
+                model_name = self.get_default_model()
             
             # Save in new format
             return self.save_config(api_key, model_name, enabled)
@@ -283,16 +227,8 @@ class GeminiConfig:
             return None, None, False
     
     def get_fallback_models(self) -> List[str]:
-        """Get fallback model list when discovery fails."""
-        return [
-            'gemini-1.5-flash-latest',
-            'gemini-1.5-flash',
-            'gemini-1.5-pro-latest', 
-            'gemini-1.5-pro',
-            'gemini-1.0-pro-latest',
-            'gemini-1.0-pro',
-            'gemini-pro'
-        ]
+        """Get fallback model list when dropdown needs options."""
+        return self.get_available_models()
 
 
 class GeminiConfigUI:
@@ -300,15 +236,18 @@ class GeminiConfigUI:
     
     @staticmethod
     def setup_model_dropdown(combo_box: QComboBox, models: List[str], 
-                           preferred_model: Optional[str] = None):
-        """Setup the model selection dropdown."""
+                           selected_model: Optional[str] = None):
+        """Setup the model selection dropdown with available models."""
         combo_box.clear()
         combo_box.addItems(models)
         
-        # Select preferred model if available
-        if preferred_model and preferred_model in models:
-            index = models.index(preferred_model)
+        # Select the specified model if available
+        if selected_model and selected_model in models:
+            index = models.index(selected_model)
             combo_box.setCurrentIndex(index)
+        else:
+            # Select first item (default model) if no valid selection
+            combo_box.setCurrentIndex(0)
     
     @staticmethod
     def get_status_styles():

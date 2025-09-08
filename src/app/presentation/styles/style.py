@@ -19,14 +19,6 @@ QWidget#display_area {{
 }}
 """
 
-# Simplified WEBVIEW_STYLE
-WEBVIEW_STYLE = f"""
-QWebEngineView {{
-    background-color: {COLORS['background']};
-    border: none;
-}}
-""" + SCROLLBAR_STYLE
-
 # Export all styles
 __all__ = [
     'COLORS',
@@ -36,7 +28,6 @@ __all__ = [
     'SIDEBAR_BUTTON_STYLE',
     'SPLITTER_STYLE',
     'DISPLAY_AREA_STYLE',
-    'WEBVIEW_STYLE',
     'CONSOLE_STYLE',
     'EDITOR_WIDGET_STYLE',
     'get_tab_style',

@@ -13,9 +13,7 @@ from src.app.presentation.widgets.sidebar import Sidebar
 from src.app.presentation.widgets.display_area import DisplayArea
 from PySide6.QtWidgets import QPushButton
 from PySide6.QtGui import QFont
-from PySide6.QtWebEngineWidgets import QWebEngineView
-from PySide6.QtCore import QUrl
-import os
+from .help_document_factory import create_help_document
 
 class HelpCenterWindow(SidebarWindowBase):
     def __init__(self, parent=None):
@@ -42,11 +40,10 @@ class HelpCenterWindow(SidebarWindowBase):
         back_btn, options_btn = self.create_footer_buttons()
         self.sidebar.setup_horizontal_footer_buttons(back_btn, options_btn)
 
-        # Create display area with web view
+        # Create display area with document widget container
         self.display_area = DisplayArea()
-        self.web_view = QWebEngineView()
-        self.display_area.layout.addWidget(self.web_view)
-
+        self.current_document = None
+        
         # Setup splitter with sidebar and display area
         self.setup_splitter(self.sidebar, self.display_area)
         
@@ -54,37 +51,12 @@ class HelpCenterWindow(SidebarWindowBase):
         self.load_help_content('Introduction')
 
     def load_help_content(self, topic):
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        file_name = topic.lower().replace(' ', '_') + '.html'
-        html_path = os.path.join(current_dir, 'content', file_name)
+        """Load help content using Qt document widgets"""
+        # Clear existing content
+        if self.current_document:
+            self.display_area.layout.removeWidget(self.current_document)
+            self.current_document.deleteLater()
         
-        # Set base URL to the content directory so relative paths work correctly
-        content_dir = os.path.join(current_dir, 'content')
-        base_url = QUrl.fromLocalFile(content_dir + "/")
-        
-        try:
-            with open(html_path, 'r', encoding='utf-8') as f:
-                html_content = f.read()
-                
-            # No need to modify the HTML content - let relative paths work naturally
-            self.web_view.setHtml(html_content, baseUrl=base_url)
-        except FileNotFoundError:
-            error_html = f"""
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <link rel="stylesheet" href="../../../styles/html.css">
-            </head>
-            <body>
-                <div class="heading--large text-gradient">Content Not Found</div>
-                <section class="feature">
-                    <h3 class="heading">
-                        <span class="feature__icon">⚠️</span> 
-                        <span class="text-gradient">{topic}</span>
-                    </h3>
-                    <p>This help section is currently under development.</p>
-                </section>
-            </body>
-            </html>
-            """
-            self.web_view.setHtml(error_html, baseUrl=base_url)
+        # Create new document widget
+        self.current_document = create_help_document(topic)
+        self.display_area.layout.addWidget(self.current_document)

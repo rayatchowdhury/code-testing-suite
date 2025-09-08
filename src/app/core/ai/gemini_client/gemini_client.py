@@ -1,63 +1,65 @@
 """
-Enhanced Gemini AI Client with Configuration Management
+Simple Direct AI Client - No Dependencies
 
-Consolidated client that handles both configuration management and API interaction.
-Single source of truth for all AI functionality.
+Just needs: API key, model name, and prompt.
+Makes direct HTTP requests to AI service.
 """
 
 import json
 import logging
 import os
-from typing import Optional, Dict, Any, Tuple
+import hashlib
+import time
+import urllib.request
+import urllib.parse
 from pathlib import Path
+from typing import Dict, Any, Optional, Tuple, List
+from functools import lru_cache
 
+# Suppress urllib3 noise directly
+logging.getLogger('urllib3.connectionpool').setLevel(logging.ERROR)
 
 class GeminiAI:
     """
-    Unified Gemini AI client with configuration management.
-    
-    Handles both config reading and API interaction in one place.
-    Single source of truth for AI availability and functionality.
+    Simple direct AI client using HTTP requests.
+    Just needs: API key, model name, and prompt.
     """
     
-    def __init__(self, config_file_path: str = None):
-        """Initialize with path to config JSON file."""
-        # Import CONFIG_FILE from constants, fallback if not available
-        try:
-            from src.app.shared.constants import CONFIG_FILE
-            self.config_file = config_file_path or CONFIG_FILE
-        except ImportError:
-            self.config_file = config_file_path
-        self.model = None
-        self._is_configured = False
+    def __init__(self, config_file: str = None):
+        """Initialize simple AI client."""
         self._api_key = None
         self._model_name = None
         self._enabled = False
+        self._response_cache = {}
+        self._max_cache_size = 100
+        self._base_url = "https://generativelanguage.googleapis.com/v1beta/models"
         
-    def load_from_config(self) -> bool:
-        """Load and initialize from JSON config file."""
-        if not self._load_config_data():
-            return False
-            
-        if not self._enabled:
-            logging.info("Gemini AI is disabled in config")
-            return False
-            
-        if not self._api_key or not self._model_name:
-            logging.error("Missing API key or model in config")
-            return False
-            
-        return self._initialize_model()
-    
-    def _load_config_data(self) -> bool:
-        """Load configuration data from JSON file."""
-        if not self.config_file or not Path(self.config_file).exists():
-            logging.warning("No config file found")
-            return False
-            
+        # Load configuration
+        if config_file:
+            self.load_config(config_file)
+        else:
+            self._load_from_environment()
+
+    def _load_from_environment(self):
+        """Load configuration from environment variables."""
+        self._api_key = os.getenv('GEMINI_API_KEY')
+        self._model_name = os.getenv('GEMINI_MODEL', 'gemini-2.5-flash')
+        self._enabled = os.getenv('GEMINI_ENABLED', 'false').lower() == 'true'
+
+    def load_config(self, config_file: str):
+        """Load configuration from JSON file."""
         try:
-            with open(self.config_file, 'r', encoding='utf-8') as f:
+            if not os.path.exists(config_file):
+                logging.info("AI is disabled in config")
+                return
+                
+            with open(config_file, 'r', encoding='utf-8') as f:
                 config_data = json.load(f)
+            
+            # Handle both old and new config formats
+            self._api_key = None
+            self._model_name = None
+            self._enabled = False
             
             # Try new format first (gemini section)
             gemini_config = config_data.get("gemini", {})
@@ -65,133 +67,164 @@ class GeminiAI:
                 self._api_key = gemini_config.get("api_key")
                 self._model_name = gemini_config.get("model")
                 self._enabled = gemini_config.get("enabled", False)
-                return True
-            
-            # Fallback to old format (ai_settings section)
-            ai_settings = config_data.get('ai_settings', {})
-            if ai_settings:
-                self._api_key = ai_settings.get('gemini_api_key')
-                self._model_name = ai_settings.get('preferred_model', 'gemini-1.5-flash-latest')
-                self._enabled = ai_settings.get('use_ai_panel', False)
-                return True
+            else:
+                # Fall back to legacy format
+                ai_settings = config_data.get('ai_settings', {})
+                if ai_settings:
+                    self._api_key = ai_settings.get('gemini_api_key')
+                    self._model_name = ai_settings.get('preferred_model', 'gemini-2.5-flash')
+                    self._enabled = ai_settings.get('enabled', False)
                 
-            return False
-            
         except Exception as e:
-            logging.error(f"Failed to load config: {e}")
-            return False
-    
-    def _initialize_model(self) -> bool:
-        """Initialize the Google Generative AI model."""
-        try:
-            import google.generativeai as genai
-            genai.configure(api_key=self._api_key)
-            self.model = genai.GenerativeModel(self._model_name)
-            self._is_configured = True
-            logging.info(f"Gemini AI initialized: {self._model_name}")
-            return True
-            
-        except Exception as e:
-            logging.error(f"Failed to initialize model: {e}")
-            return False
-    
+            logging.error(f"Error loading config: {e}")
+            self._enabled = False
+
     def is_available(self) -> bool:
-        """Check if AI is available and configured."""
-        return self._is_configured and self.model is not None
-    
-    def is_enabled(self) -> bool:
-        """Check if AI is enabled in configuration."""
-        if not self._load_config_data():
-            return False
-        return self._enabled
-    
-    def get_api_key(self) -> Optional[str]:
-        """Get the configured API key."""
-        if not self._load_config_data():
-            return None
-        return self._api_key
-    
-    def get_model_name(self) -> Optional[str]:
-        """Get the configured model name."""
-        if not self._load_config_data():
-            return None
-        return self._model_name
-    
+        """Check if the AI service is available."""
+        return self._enabled and self._api_key is not None
+
     def is_ready(self) -> Tuple[bool, str]:
-        """
-        Check if AI is ready to use.
-        Returns: (is_ready, message)
-        """
-        if not self._load_config_data():
-            return False, "No configuration found"
-            
+        """Check if the AI service is ready with detailed status."""
         if not self._enabled:
-            return False, "AI Panel is disabled in settings"
-        
+            return False, "AI service is disabled"
         if not self._api_key:
-            return False, "No API key provided"
-        
-        if len(self._api_key) < 30:  # Basic validation
-            return False, "API key appears to be invalid"
-        
-        if not self._model_name:
-            return False, "No AI model selected"
-        
-        # Try to initialize if not already done
-        if not self.is_available():
-            if not self._initialize_model():
-                return False, "AI model initialization failed"
-        
-        return True, "AI is ready"
-    
-    def get_status_message(self) -> str:
-        """Get a user-friendly status message."""
-        is_ready, message = self.is_ready()
-        
-        if is_ready:
-            return "🤖 AI Assistant Ready"
-        elif self.is_enabled():
-            return f"⚠️ AI Panel Enabled - {message}"
-        else:
-            return "🔒 AI Panel Disabled"
-    
-    def generate_response(self, prompt: str) -> Optional[str]:
-        """Generate response using the configured model."""
-        if not self.is_available():
-            logging.warning("AI not available - check configuration")
-            return None
-            
+            return False, "API key is not configured"
+        return True, "AI service is ready"
+
+    @lru_cache(maxsize=128)
+    def _get_cache_key(self, prompt: str, **kwargs) -> str:
+        """Generate cache key for response caching."""
+        content = f"{prompt}:{json.dumps(kwargs, sort_keys=True)}"
+        return hashlib.md5(content.encode()).hexdigest()
+
+    def _manage_cache(self):
+        """Simple LRU cache management."""
+        if len(self._response_cache) > self._max_cache_size:
+            # Remove oldest 20% of entries
+            to_remove = len(self._response_cache) // 5
+            oldest_keys = list(self._response_cache.keys())[:to_remove]
+            for key in oldest_keys:
+                del self._response_cache[key]
+
+    def _make_api_request(self, prompt: str) -> str:
+        """Make direct HTTP request to AI API."""
         try:
-            response = self.model.generate_content(prompt)
-            return response.text
+            # Build request URL
+            url = f"{self._base_url}/{self._model_name}:generateContent?key={self._api_key}"
+            
+            # Build request data
+            data = {
+                "contents": [{
+                    "parts": [{"text": prompt}]
+                }],
+                "generationConfig": {
+                    "temperature": 0.1,
+                    "topP": 0.8,
+                    "topK": 40,
+                    "maxOutputTokens": 2048,
+                    "responseMimeType": "text/plain"
+                },
+                "safetySettings": [
+                    {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+                    {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+                    {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+                    {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"}
+                ]
+            }
+            
+            # Make request
+            json_data = json.dumps(data).encode('utf-8')
+            req = urllib.request.Request(
+                url,
+                data=json_data,
+                headers={
+                    'Content-Type': 'application/json',
+                    'User-Agent': 'CodeTestingSuite/1.0'
+                }
+            )
+            
+            with urllib.request.urlopen(req, timeout=30) as response:
+                result = json.loads(response.read().decode('utf-8'))
+                
+                # Extract text from response
+                if 'candidates' in result and result['candidates']:
+                    candidate = result['candidates'][0]
+                    if 'content' in candidate and 'parts' in candidate['content']:
+                        parts = candidate['content']['parts']
+                        if parts and 'text' in parts[0]:
+                            return parts[0]['text'].strip()
+                
+                return "❌ Empty response from AI service."
+                
+        except urllib.error.HTTPError as e:
+            error_msg = e.read().decode('utf-8') if e.fp else str(e)
+            logging.error(f"HTTP error: {e.code} - {error_msg}")
+            
+            if e.code == 400:
+                return "❌ Invalid request. Please check your input."
+            elif e.code == 403:
+                return "❌ Invalid API key or access denied."
+            elif e.code == 429:
+                return "❌ Too many requests. Please try again later."
+            else:
+                return f"❌ API error ({e.code}): Please try again."
+                
+        except urllib.error.URLError as e:
+            logging.error(f"Connection error: {e}")
+            return "❌ Connection error. Please check your internet connection."
             
         except Exception as e:
-            logging.error(f"Failed to generate response: {e}")
-            return None
-    
-    def get_model_info(self) -> Dict[str, Any]:
-        """Get information about the current model."""
-        return {
-            "model_name": self._model_name or 'Unknown',
-            "is_configured": self._is_configured,
-            "is_enabled": self._enabled,
-            "has_api_key": bool(self._api_key),
-            "config_file": self.config_file
-        }
-    
-    def refresh_config(self) -> bool:
-        """Refresh configuration from file."""
-        self._is_configured = False
-        self.model = None
-        return self.load_from_config()
+            error_msg = str(e)
+            logging.error(f"API error: {error_msg}")
+            return f"❌ Error: {error_msg}"
+
+    def generate_response(self, prompt: str, **kwargs) -> str:
+        """Generate AI response with caching."""
+        if not self.is_available():
+            return "❌ AI service is not available."
+        
+        # Check cache first
+        cache_key = self._get_cache_key(prompt, **kwargs)
+        if cache_key in self._response_cache:
+            return self._response_cache[cache_key]
+        
+        start_time = time.time()
+        result = self._make_api_request(prompt)
+        
+        # Cache the response if successful
+        if not result.startswith("❌"):
+            self._response_cache[cache_key] = result
+            self._manage_cache()
+            
+            # Log performance
+            duration = time.time() - start_time
+            logging.info(f"AI response generated in {duration:.2f}s")
+        
+        return result
+
+    def cleanup(self):
+        """Cleanup resources."""
+        try:
+            if hasattr(self, '_response_cache'):
+                self._response_cache.clear()
+        except Exception as e:
+            logging.error(f"Cleanup error: {e}")
 
 
-# Global instance for easy access
+# Global client management
 _gemini_client = None
 
 def get_gemini_client(config_file: str = None) -> GeminiAI:
-    """Get or create global Gemini client instance."""
+    """Get or create global AI client instance."""
     global _gemini_client
+    
+    # If no config file provided, try to use the default one
+    if config_file is None:
+        try:
+            from src.app.shared.constants import CONFIG_FILE
+            config_file = CONFIG_FILE
+        except ImportError:
+            pass
     
     if _gemini_client is None:
         _gemini_client = GeminiAI(config_file)
@@ -199,46 +232,46 @@ def get_gemini_client(config_file: str = None) -> GeminiAI:
     return _gemini_client
 
 def initialize_gemini(config_file: str) -> bool:
-    """Initialize global Gemini client from config file."""
+    """Initialize global AI client from config file."""
     client = get_gemini_client(config_file)
-    return client.load_from_config()
+    return client.is_available()
 
 def is_gemini_available() -> bool:
-    """Check if global Gemini client is available."""
+    """Check if global AI client is available."""
     return _gemini_client is not None and _gemini_client.is_available()
 
 def is_gemini_ready() -> Tuple[bool, str]:
-    """Check if global Gemini client is ready."""
+    """Check if global AI client is ready."""
     if _gemini_client is None:
-        return False, "AI not initialized"
+        return False, "AI client not initialized"
     return _gemini_client.is_ready()
 
-# Backward compatibility aliases for AIConfig methods
-def is_ai_enabled() -> bool:
-    """Check if AI panel is enabled in configuration."""
+def get_ai_key():
+    """Get the API key if available."""
     client = get_gemini_client()
-    return client.is_enabled()
+    return getattr(client, '_api_key', None)
 
-def get_api_key() -> Optional[str]:
-    """Get the Gemini API key if available."""
+def get_ai_key_info():
+    """Get the API key if available."""
     client = get_gemini_client()
-    return client.get_api_key()
+    return getattr(client, '_api_key', None)
 
-def get_selected_model() -> Optional[str]:
-    """Get the selected Gemini model if available."""
+def get_ai_model():
+    """Get the selected model if available."""
     client = get_gemini_client()
-    return client.get_model_name()
+    return getattr(client, '_model_name', None)
 
-def is_ai_ready() -> Tuple[bool, str]:
-    """Check if AI is ready to use."""
+def should_show_ai_panel():
+    """Check if AI panel should be shown."""
     client = get_gemini_client()
-    return client.is_ready()
+    return getattr(client, '_enabled', False)
 
-def should_show_ai_panel() -> bool:
-    """Check if AI panel should be shown in UI."""
-    return is_ai_enabled()
+def is_ai_ready():
+    """Check if AI is ready for use."""
+    ready, _ = is_gemini_ready()
+    return ready
 
-def get_ai_status_message() -> str:
-    """Get a user-friendly status message about AI configuration."""
+def generate_ai_response(prompt: str, **kwargs) -> str:
+    """Generate AI response using global client."""
     client = get_gemini_client()
-    return client.get_status_message()
+    return client.generate_response(prompt, **kwargs)

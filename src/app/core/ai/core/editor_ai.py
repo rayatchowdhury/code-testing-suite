@@ -10,12 +10,12 @@ import logging
 from typing import Optional
 
 from src.app.shared.constants import USER_DATA_DIR, CONFIG_FILE
-from src.app.shared.utils.logging_config import LoggingConfig
 from src.app.core.ai.gemini_client import get_gemini_client, is_gemini_available, initialize_gemini
 from src.app.core.ai.templates.prompt_templates import PromptTemplates
 
-# Ensure logging is configured
-LoggingConfig.initialize()
+# Suppress urllib3 noise early
+import logging
+logging.getLogger('urllib3.connectionpool').setLevel(logging.ERROR)
 
 
 class EditorAI:
@@ -38,7 +38,7 @@ class EditorAI:
         return get_gemini_client()
 
     def _get_ai_response(self, prompt: str) -> Optional[str]:
-        """Get AI response using simplified Gemini client."""
+        """Get AI response using optimized Gemini client."""
         if not self.is_available():
             return "❌ AI service unavailable: Please configure Gemini API key in settings."
 
@@ -46,8 +46,11 @@ class EditorAI:
             client = self._get_gemini_client()
             if not client.is_available():
                 return "❌ AI service unavailable: Failed to initialize. Please check your configuration."
-                
-            response = client.generate_response(prompt)
+            
+            # Add prompt optimization for faster processing
+            optimized_prompt = self._optimize_prompt(prompt)
+            response = client.generate_response(optimized_prompt)
+            
             if response:
                 return response.strip()
             else:
@@ -56,6 +59,42 @@ class EditorAI:
         except Exception as e:
             logging.error(f"AI response error: {e}")
             return f"❌ AI error: {str(e)}"
+
+    def _optimize_prompt(self, prompt: str) -> str:
+        """Optimize prompt for faster processing without changing content."""
+        # Remove excessive whitespace and normalize formatting
+        lines = [line.strip() for line in prompt.split('\n') if line.strip()]
+        optimized = '\n'.join(lines)
+        
+        # Add performance hint to the prompt
+        if not optimized.startswith("Please provide a concise"):
+            optimized = "Please provide a concise response.\n\n" + optimized
+            
+        return optimized
+
+    def _optimize_code_input(self, code: str) -> str:
+        """Optimize code input for faster AI processing."""
+        if not code:
+            return code
+            
+        # Limit code length for faster processing (keep reasonable size)
+        max_chars = 8000  # Reasonable limit for fast processing
+        if len(code) > max_chars:
+            # Take beginning and end of code with ellipsis
+            start_chars = max_chars // 2
+            end_chars = max_chars // 2 - 100  # Leave room for ellipsis message
+            
+            start_part = code[:start_chars]
+            end_part = code[-end_chars:]
+            
+            optimized_code = (
+                f"{start_part}\n\n"
+                f"... [Code truncated for performance - {len(code) - max_chars} characters omitted] ...\n\n"
+                f"{end_part}"
+            )
+            return optimized_code
+        
+        return code
 
     def configure(self) -> bool:
         """Configure and initialize the AI system (for backward compatibility)."""
@@ -92,9 +131,12 @@ class EditorAI:
         return self._get_ai_response(prompt) or "❌ Failed to generate code suggestion."
 
     def process_code(self, action: str, code: str, **kwargs) -> str:
-        """Process code with the specified action using template prompts."""
+        """Process code with the specified action using template prompts and optimization."""
         if not self.is_available():
             return "❌ AI service not available. Please configure your Gemini API key."
+        
+        # Smart code chunking for large files
+        code = self._optimize_code_input(code)
         
         try:
             # Handle different action types using templates

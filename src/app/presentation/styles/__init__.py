@@ -17,7 +17,6 @@ from src.app.presentation.styles.components.sidebar_dividers import (
 from src.app.presentation.styles.constants.status_colors import ERROR_COLOR_HEX, STATUS_COLORS, TEST_STATUS_COLORS
 from src.app.presentation.styles.style import (
     DISPLAY_AREA_STYLE,
-    WEBVIEW_STYLE,
     get_tab_style
 )
 
@@ -36,7 +35,6 @@ __all__ = [
     'SIDEBAR_BUTTON_STYLE',
     'SPLITTER_STYLE',
     'DISPLAY_AREA_STYLE',
-    'WEBVIEW_STYLE',
     'CONSOLE_STYLE',
     'get_tab_style',
     'CPPSyntaxHighlighter',

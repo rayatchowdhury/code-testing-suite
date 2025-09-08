@@ -1,7 +1,6 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QSplitter, QHBoxLayout, 
                               QTabWidget, QPushButton, QMessageBox)
-from PySide6.QtWebEngineWidgets import QWebEngineView
-from PySide6.QtCore import Qt, Signal, QUrl
+from PySide6.QtCore import Qt, Signal
 import os
 
 from src.app.presentation.widgets.display_area_widgets.editor import EditorWidget
@@ -25,10 +24,11 @@ class CodeEditorDisplay(QWidget):
     
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.has_editor = False
+        self.has_editor = True  # Always show editor, no welcome screen
         self._setup_ui()
         self._connect_signals()
-        self.show_welcome_screen()
+        # Start with one empty tab
+        self.add_new_tab("Untitled")
 
     def _setup_ui(self):
         main_layout = QHBoxLayout(self)
@@ -59,16 +59,10 @@ class CodeEditorDisplay(QWidget):
         left_layout.setContentsMargins(0, 0, 0, 0)
         left_layout.setSpacing(0)
 
-        # Create welcome screen web view
-        self.welcome_view = QWebEngineView()
-        self.welcome_view.setStyleSheet("background: transparent;")
-        
-        # Initialize but don't show tab widget yet
+        # Create tab widget (always visible now)
         self.tab_widget = self._create_tab_widget()
-        self.tab_widget.hide()
 
-        # Modify left panel to stack welcome view and tab widget
-        left_layout.addWidget(self.welcome_view)
+        # Add tab widget to left panel
         left_layout.addWidget(self.tab_widget)
 
         # Add inner panel to outer panel
@@ -116,10 +110,7 @@ class CodeEditorDisplay(QWidget):
         return get_tab_style()
 
     def add_new_tab(self, title="Untitled"):
-        """Add a new editor tab and show editor"""
-        if not self.has_editor:
-            self.show_editor()
-            
+        """Add a new editor tab"""
         new_tab = EditorTab()
         index = self.tab_widget.addTab(new_tab, title)
         self.tab_widget.setCurrentWidget(new_tab)
@@ -195,7 +186,8 @@ class CodeEditorDisplay(QWidget):
         """Handle tab removal and UI updates"""
         self.tab_widget.removeTab(index)
         if self.tab_widget.count() == 0:
-            self.show_welcome_screen()
+            # Always keep at least one empty tab
+            self.add_new_tab("Untitled")
         self.filePathChanged.emit()
         
     @property
@@ -222,17 +214,11 @@ class CodeEditorDisplay(QWidget):
 
     def save_editor_state(self):
         """Save the state of opened files"""
-        if not self.has_editor:
-            return  # Don't save state if welcome screen is showing
-            
-        # Rest of save_editor_state implementation should be restored here
-        # ...existing save_editor_state code...
+        # Save state implementation can be added here if needed
+        pass
 
     def getCurrentEditor(self):
         """Get the current editor widget with safety checks"""
-        if not self.has_editor:
-            return None
-            
         current_tab = self.tab_widget.currentWidget()
         if not current_tab or not hasattr(current_tab, 'editor'):
             return None
@@ -241,9 +227,6 @@ class CodeEditorDisplay(QWidget):
 
     def isCurrentFileModified(self):
         """Check if current file has unsaved changes"""
-        if not self.has_editor:
-            return False
-            
         editor = self.getCurrentEditor()
         if not editor:
             return False
@@ -251,22 +234,3 @@ class CodeEditorDisplay(QWidget):
         # Consider both document modifications and new unsaved files
         return (editor.codeEditor.document().isModified() or 
                 (not editor.currentFilePath and editor.codeEditor.toPlainText().strip()))
-
-    def show_welcome_screen(self):
-        """Show the welcome screen and hide editor"""
-        self.has_editor = False
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        welcome_path = os.path.join(current_dir, 'editor_welcome.html')
-        self.welcome_view.setUrl(QUrl.fromLocalFile(welcome_path))
-        self.welcome_view.show()
-        self.tab_widget.hide()
-        self.console.compile_run_btn.setEnabled(False)
-        self.new_tab_button.hide()
-
-    def show_editor(self):
-        """Show the editor and hide welcome screen"""
-        self.has_editor = True
-        self.welcome_view.hide()
-        self.tab_widget.show()
-        self.console.compile_run_btn.setEnabled(True)
-        self.new_tab_button.show()

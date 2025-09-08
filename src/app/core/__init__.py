@@ -28,7 +28,6 @@ from src.app.core.config import (
     DatabaseOperations,
     GeminiConfig,
     GeminiConfigUI,
-    GeminiModelDiscoveryThread,
 )
 
 # Tools Module exports

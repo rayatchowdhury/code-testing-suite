@@ -58,25 +58,14 @@ class AIPanel(QWidget):
         # Check if AI panel should be shown
         self.refresh_visibility()
         
-        # Initialize AI in background if panel is visible
-        if self._should_show_ai_panel():
-            self._initialize_ai_background()
+        # Remove background AI initialization to avoid threading issues
+        # AI will be initialized on first use instead
 
     def _initialize_ai_background(self):
-        """Initialize AI model in background thread for faster first prompt"""
-        def background_init():
-            try:
-                from src.app.core.ai.core.editor_ai import EditorAI
-                # Create and initialize EditorAI instance
-                ai = EditorAI()
-                # This will trigger model initialization and caching
-                ai.configure()
-            except Exception as e:
-                print(f"Background AI initialization failed: {e}")
-        
-        # Start background initialization
-        init_thread = threading.Thread(target=background_init, daemon=True)
-        init_thread.start()
+        """Initialize AI model - simplified without threading."""
+        # Removed background threading to fix AI threading issues
+        # AI is now initialized lazily on first use
+        pass
 
     def refresh_visibility(self):
         """Refresh panel visibility based on current AI configuration"""
@@ -84,8 +73,7 @@ class AIPanel(QWidget):
             if not hasattr(self, 'layout') or self.layout() is None:
                 self._setup_ui()
             self.show()
-            # Initialize AI when panel becomes visible
-            self._initialize_ai_background()
+            # Removed background AI initialization to avoid threading issues
         else:
             self.hide()
 

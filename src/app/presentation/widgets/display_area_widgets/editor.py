@@ -3,7 +3,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QPlainTextEdit, QLineEdit,
                               QMessageBox, QDialog, QScrollArea, QLabel, QFrame)
 from PySide6.QtGui import (QFont, QColor, QPainter, QTextFormat, QTextCursor, 
                           QKeySequence, QShortcut)
-from PySide6.QtCore import Qt, QRect, QSize, QTimer, Signal, QObject
+from PySide6.QtCore import Qt, QRect, QSize, QTimer, Signal, QObject, QThread
 import os
 import asyncio
 import qasync
@@ -74,6 +74,64 @@ def _import_ai_panel():
         from src.app.presentation.widgets.display_area_widgets.ai_panel import AIPanel
         _ai_panel = AIPanel
     return _ai_panel
+
+
+class AIWorkerThread(QThread):
+    """Thread for processing AI requests without blocking the UI."""
+    
+    # Signals to communicate with main thread
+    responseReady = Signal(str, str)  # response, title
+    errorOccurred = Signal(str, str)  # error_message, title
+    
+    def __init__(self, action, code, title, **kwargs):
+        super().__init__()
+        self.action = action
+        self.code = code
+        self.title = title
+        self.kwargs = kwargs
+        
+    def run(self):
+        """Run AI processing in background thread."""
+        try:
+            # Import EditorAI in the thread to avoid issues
+            from src.app.core.ai.core.editor_ai import EditorAI
+            editor_ai = EditorAI()
+            
+            # Process the AI request
+            if hasattr(self.action, '__call__'):
+                # Action is a callable (lambda function)
+                response = self.action(self.code)
+            else:
+                # Action is a string method name
+                if self.action == 'analysis':
+                    response = editor_ai.explain_code(self.code)
+                elif self.action == 'issues':
+                    response = editor_ai.debug_code(self.code)
+                elif self.action == 'tips':
+                    response = editor_ai.suggest_optimizations(self.code)
+                elif self.action == 'document':
+                    response = editor_ai.generate_documentation(self.code)
+                else:
+                    # Generic process_code call
+                    response = editor_ai.process_code(self.action, self.code, **self.kwargs)
+            
+            if not response:
+                response = "AI service not available. Please check your API key configuration."
+                
+            self.responseReady.emit(response, self.title)
+            
+        except ImportError as e:
+            self.errorOccurred.emit(f"AI module import failed: {str(e)}", "Import Error")
+        except ConnectionError as e:
+            self.errorOccurred.emit(f"Network connection failed: {str(e)}", "Connection Error")
+        except TimeoutError as e:
+            self.errorOccurred.emit(f"Request timed out: {str(e)}", "Timeout Error")
+        except Exception as e:
+            # Log full error details for debugging
+            import traceback
+            error_details = traceback.format_exc()
+            self.errorOccurred.emit(f"AI processing failed: {str(e)}\n\nDetails:\n{error_details}", "Error")
+
 
 class CodeEditor(QPlainTextEdit):
     def __init__(self):
@@ -272,10 +330,24 @@ class EditorWidget(QWidget):
         self.setObjectName("editor_widget")
         self.setStyleSheet(EDITOR_WIDGET_STYLE)
         self.editor_ai = None  # Lazy load when needed
+        self.ai_worker = None  # Keep track of AI worker thread
         self._setup_ui()
         self._setup_file_handling()
         
         # Remove _connect_ai_buttons() call from here
+
+    def closeEvent(self, event):
+        """Handle widget cleanup when closing."""
+        self._cleanup_ai_worker()
+        super().closeEvent(event)
+        
+    def _cleanup_ai_worker(self):
+        """Clean up AI worker thread if running."""
+        if hasattr(self, 'ai_worker') and self.ai_worker is not None:
+            if self.ai_worker.isRunning():
+                self.ai_worker.quit()
+                self.ai_worker.wait()  # Wait for thread to finish
+            self.ai_worker = None
 
     def _setup_ui(self):
         layout = QVBoxLayout(self)
@@ -491,70 +563,91 @@ class EditorWidget(QWidget):
         dialog.exec()
 
     def _process_ai_request(self, action, title):
-        """Process AI request with loading state"""
-        self.ai_panel.set_enabled(False)  # Use ai_panel's method instead of direct button access
+        """Process AI request with loading state using background thread"""
+        # Ensure AI panel exists and disable it during processing
+        if hasattr(self, 'ai_panel') and self.ai_panel is not None:
+            self.ai_panel.set_enabled(False)
         
-        async def process_request():
-            try:
-                code = self.getCode()
-                response = action(code)  # Remove await - EditorAI methods return strings
-                if not response:
-                    response = "AI service not available. Please check your API key configuration."
-                self._show_ai_response(response, title)
-            except Exception as e:
-                self._show_ai_response(f"Error: {str(e)}", "Error")
-            finally:
-                self.ai_panel.set_enabled(True)  # Re-enable through ai_panel
+        # Get current code and optimize it for faster processing
+        code = self.getCode()
+        
+        # Show immediate feedback to user
+        if hasattr(self, 'ai_panel') and self.ai_panel is not None:
+            # Could add a progress indicator here if needed
+            pass
+        
+        # Clean up any existing worker thread first
+        self._cleanup_ai_worker()
+        
+        # Create and start worker thread
+        self.ai_worker = AIWorkerThread(action, code, title)
+        self.ai_worker.responseReady.connect(self._on_ai_response_ready)
+        self.ai_worker.errorOccurred.connect(self._on_ai_error)
+        self.ai_worker.finished.connect(self._on_ai_finished)
+        self.ai_worker.start()
+    
+    def _on_ai_response_ready(self, response: str, title: str):
+        """Handle successful AI response"""
+        self._show_ai_response(response, title)
+        
+    def _on_ai_error(self, error_message: str, title: str):
+        """Handle AI error"""
+        self._show_ai_response(error_message, title)
+        
+    def _on_ai_finished(self):
+        """Handle AI thread completion"""
+        # Re-enable AI panel
+        if hasattr(self, 'ai_panel') and self.ai_panel is not None:
+            self.ai_panel.set_enabled(True)
+        # Clean up thread reference safely
+        if hasattr(self, 'ai_worker') and self.ai_worker is not None:
+            self.ai_worker.deleteLater()
+            self.ai_worker = None
 
-        task = asyncio.create_task(process_request())
-        return task
-
-    async def _process_explanation(self, action: str, code: str = None):
+    def _process_explanation(self, action: str, code: str = None):
         """Handle explanation-type AI requests."""
         if code is None:
             code = self.getCode()
-        editor_ai = self._get_editor_ai()
-        await self._process_ai_request(
-            lambda c: editor_ai.process_explanation(action, c),
-            self.ai_actions[action][0]
-        )
+        # Use string action name for the worker thread
+        self._process_ai_request(action, self.ai_actions[action][0])
 
-    async def _process_code(self, action: str, code: str = None, **kwargs):
+    def _process_code(self, action: str, code: str = None, **kwargs):
         """Handle code-modification AI requests."""
         if code is None:
             code = self.getCode()
-        editor_ai = self._get_editor_ai()
-        await self._process_ai_request(
-            lambda c: editor_ai.process_code(action, c, **kwargs),
-            self.ai_actions[action][0]
-        )
+        
+        # Create a lambda that captures the kwargs for the worker thread
+        action_lambda = lambda c: self._get_editor_ai().process_code(action, c, **kwargs)
+        self._process_ai_request(action_lambda, self.ai_actions[action][0])
 
     # Simplified action methods
-    @asyncSlot()
-    async def _analysis_code(self, code=None):
+    def _analysis_code(self, code=None):
         self._init_ai_panel()  # Ensure AI panel is initialized
-        await self._process_explanation('analysis', code)
+        self._process_explanation('analysis', code)
 
-    @asyncSlot()
-    async def _find_issues(self, code=None):
+    def _find_issues(self, code=None):
         self._init_ai_panel()  # Ensure AI panel is initialized
-        await self._process_explanation('issues', code)
+        self._process_explanation('issues', code)
 
-    @asyncSlot()
-    async def _get_tips(self, code=None):
+    def _get_tips(self, code=None):
         self._init_ai_panel()  # Ensure AI panel is initialized
-        await self._process_explanation('tips', code)
+        self._process_explanation('tips', code)
 
-    @asyncSlot()
-    async def _document_code(self, code=None):
+    def _document_code(self, code=None):
         self._init_ai_panel()  # Ensure AI panel is initialized
-        await self._process_code('document', code)
+        self._process_code('document', code)
 
-    @asyncSlot()
-    async def _generate_code(self, code=None):
+    def _generate_code(self, code=None):
         self._init_ai_panel()  # Ensure AI panel is initialized
-        await self._process_code('generate', code, 
+        self._process_code('generate', code, 
                                type=self.currentFilePath or "generator.cpp")
+
+    def _custom_ai_command(self, command: str, code: str = None):
+        """Handle custom AI command."""
+        self._init_ai_panel()  # Ensure AI panel is initialized
+        if code is None:
+            code = self.getCode()
+        self._process_code('custom', code, command=command)
 
     def _setup_file_handling(self):
         self.currentFilePath = None
