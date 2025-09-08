@@ -37,3 +37,122 @@ warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false  # Gradually enable
 ignore_missing_imports = true
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "code-testing-suite"
+version = "1.0.0"
+description = "Professional Code Testing and Validation Suite"
+authors = [
+    {name = "Code Testing Suite Team", email = "team@codetestingsuite.com"}
+]
+license = {text = "MIT"}
+readme = "readme.md"
+requires-python = ">=3.9"
+keywords = ["code-testing", "validation", "stress-testing", "gui", "qt"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: X11 Applications :: Qt",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Software Development :: Quality Assurance",
+]
+
+dependencies = [
+    "PySide6>=6.9.0",
+    "PySide6-Essentials>=6.9.0", 
+    "PySide6-Addons>=6.9.0",
+    "qasync>=0.28.0",
+    "Pygments>=2.19.0",
+    "markdown>=3.4.0",
+    "psutil>=7.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.4.0",
+    "pytest-qt>=4.5.0",
+    "black>=24.0.0",
+    "isort>=5.12.0",
+    "mypy>=1.8.0",
+    "pylint>=3.0.0",
+]
+
+build = [
+    "nuitka>=2.4.8",
+    "ordered-set>=4.1.0",
+    "wheel>=0.44.0",
+    "pefile>=2024.8.26; sys_platform=='win32'",
+]
+
+[project.urls]
+Homepage = "https://github.com/rayatchowdhury/code-testing-suite"
+Repository = "https://github.com/rayatchowdhury/code-testing-suite.git"
+Issues = "https://github.com/rayatchowdhury/code-testing-suite/issues"
+Documentation = "https://github.com/rayatchowdhury/code-testing-suite#readme"
+
+[project.scripts]
+code-testing-suite = "src.app.__main__:main"
+
+[project.gui-scripts]
+code-testing-suite-gui = "src.app.__main__:main"
+
+[tool.nuitka]
+# Nuitka build configuration
+product-name = "Code Testing Suite"
+product-version = "1.0.0"
+file-description = "Professional Code Testing and Validation Suite"
+copyright = "© 2025 Code Testing Suite Team"
+
+# Performance settings
+jobs = 0  # Use all available cores
+lto = "yes"
+assume-yes-for-downloads = true
+
+# Output settings
+standalone = true
+onefile = true
+output-dir = "build"
+
+# Optimizations
+python-flag = ["O", "OO"]
+enable-plugin = [
+    "pyside6", 
+    "anti-bloat",
+    "data-files"
+]
+
+# Windows settings
+windows-console-mode = "disable"
+windows-icon-from-ico = "src/resources/icons/app_icon.png"
+
+# Inclusions
+include-package = [
+    "PySide6.QtCore",
+    "PySide6.QtGui", 
+    "PySide6.QtWidgets",
+    "qasync",
+    "pygments",
+    "markdown",
+    "psutil"
+]
+
+include-data-dir = "src/resources=resources"
+
+# Exclusions for smaller size
+nofollow-import-to = [
+    "tkinter",
+    "unittest", 
+    "pytest",
+    "setuptools",
+    "pip"
+]

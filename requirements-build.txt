@@ -1,0 +1,19 @@
+# Build requirements for Nuitka compilation
+# Install with: pip install -r requirements-build.txt
+
+# Core Nuitka compiler
+nuitka>=2.4.8
+
+# Enhanced Nuitka plugins and optimizations  
+ordered-set>=4.1.0
+wheel>=0.44.0
+
+# Windows-specific build tools (for Windows builds)
+pefile>=2024.8.26; sys_platform == "win32"
+
+# Optional: Advanced optimizations
+# zstandard>=0.23.0  # Better compression
+# upx>=4.0.0         # Executable packer (external tool)
+
+# Development tools for build validation
+psutil>=7.0.0        # System monitoring during build
