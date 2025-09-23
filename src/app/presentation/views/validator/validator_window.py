@@ -47,13 +47,9 @@ class ValidatorWindow(SidebarWindowBase):
         self.sidebar.button_clicked.connect(self.handle_button_click)
 
         # Lazy import to avoid circular dependency
-        from src.app.core.tools.validator import Validator
-        self.validator = Validator()
-        # Connect to console if it has displayOutput method
-        if hasattr(self.display_area.console, 'displayOutput'):
-            self.validator.validationComplete.connect(
-                lambda result: self.display_area.console.displayOutput(f"Validation completed: Score {result.get('overall_score', 0)}/100")
-            )
+        from src.app.core.tools.validator_runner import ValidatorRunner
+        self.validator_runner = ValidatorRunner(self.display_area.workspace_dir)
+        self.validator_runner.compilationOutput.connect(self.display_area.console.displayOutput)
 
     # Remove the handle_edit_button method since we no longer have edit buttons
 
@@ -81,26 +77,19 @@ class ValidatorWindow(SidebarWindowBase):
                     elif reply == QMessageBox.Cancel:
                         return
 
-            self.display_area.compile_and_run_code()
+            self.validator_runner.compile_all()
         elif button_text == 'Run':
-            test_count = self.test_count_slider.get_value()
-            self.run_validation(test_count)
+            test_count = self.test_count_slider.value()
+            self.validator_runner.run_validation_test(test_count)
         elif button_text == 'Results':
             # Navigate to results window
             if self.can_close():
                 self.parent.window_manager.show_window('results')
 
-    def run_validation(self, test_count):
-        """Run validation (renamed from validation_level to test_count to match pattern)"""
-        current_file = self.display_area.editor.currentFilePath
-        if current_file:
-            # Set validation strictness
-            self.validator.set_strictness(test_count)
-            
-            # Run validation
-            self.validator.validate_code(current_file)
-        else:
-            QMessageBox.warning(self, "No File", "Please load a file to validate first.")
+    def handle_test_count_changed(self, value):
+        # Handle the slider value change
+        print(f"Test count changed to: {value}")
+        # You can store this value or use it in your validation testing logic
 
     def handle_button_click(self, button_text):
         """Handle sidebar button clicks"""
@@ -109,12 +98,6 @@ class ValidatorWindow(SidebarWindowBase):
                 self.parent.window_manager.show_window('help_center')
         else:
             super().handle_button_click(button_text)
-
-    def handle_test_count_changed(self, value):
-        """Handle test count slider change (renamed to match comparator pattern)"""
-        if hasattr(self.validator, 'set_strictness'):
-            self.validator.set_strictness(value)
-        print(f"Test count (validation strictness) set to: {value}")
 
     def refresh_ai_panels(self):
         """Refresh AI panel visibility based on current configuration"""

@@ -228,6 +228,70 @@ class PromptTemplates:
             Library Documentation:
             {docs}
             """
+        },
+        'validator': {
+            'instruction': """
+            Create a minimal C++ validator that checks if test output is valid for given input.
+            
+            TASK: Write clean validator.cpp that reads input.txt and output.txt, validates correctness silently.
+            Analyze the code to understand what constitutes valid output.
+            
+            CRITICAL: Return ONLY clean validator.cpp code - NO explanations, NO debug prints, NO verbose comments.
+            """,
+            'guidelines': """
+            VALIDATOR RULES:
+            1. Use argc/argv for file paths: argv[1]=input.txt, argv[2]=output.txt
+            2. Exit codes: 0=invalid, 1=valid, 2=error
+            3. NO cout/cerr messages (silent validation)
+            4. Minimal comments only
+            5. Clean, concise code
+            
+            TEMPLATE STRUCTURE:
+            #include <iostream>
+            #include <fstream>
+            using namespace std;
+            
+            bool isValid(/* input variables */, /* output variables */) {
+                if (/* output according to input */)
+                    return true;
+                return false;
+            }
+            
+            int main(int argc, char* argv[]) {
+                if (argc < 3) return 2;
+                ifstream in(argv[1]), out(argv[2]);
+                if (!in || !out) return 2;
+                
+                // Read input variables
+                // Read output variables  
+                return isValid(/* pass variables */) ? 1 : 0;
+            }
+            
+            VALIDATION APPROACH:
+            - Create isValid() function with input and output parameters
+            - Read input variables from argv[1]
+            - Read output variables from argv[2] 
+            - Call isValid() with the variables
+            - Return 1 if valid, 0 if invalid, 2 if error
+            
+            STRUCTURE REQUIREMENTS:
+            - Separate validation logic in isValid() function
+            - Clean main() that handles I/O and calls isValid()
+            - Pass specific variables, not file streams to isValid()
+            
+            COMMON PATTERNS:
+            - Math: Check calculation correctness
+            - Arrays: Verify sorting/permutation properties
+            - Graphs: Validate paths/connectivity
+            - Strings: Check transformations
+            - Multiple solutions: Validate properties, not exact values
+            
+            KEEP IT SIMPLE:
+            - No debug output
+            - No verbose error messages
+            - Focus on core validation logic
+            - Minimal necessary code only
+            """
         }
     }
 
@@ -262,6 +326,14 @@ class PromptTemplates:
                 )
             else:
                 return f"{cls.CODE_BASE_PROMPT}\nCreate a {file_type} solution.\n\nCODE:\n{code}"
+        elif action == 'validator':
+            # Handle validator template directly
+            template = cls.CODE_TEMPLATES['validator']
+            return cls.CODE_BASE.format(
+                instruction=template['instruction'],
+                guidelines=template['guidelines'],
+                code=code
+            )
         else:
             template = cls.CODE_TEMPLATES.get(action)
             if not template:

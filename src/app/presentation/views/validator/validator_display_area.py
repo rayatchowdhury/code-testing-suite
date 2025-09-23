@@ -61,7 +61,7 @@ class ValidatorDisplay(QWidget):
         self.file_buttons = {}
         self.current_button = None  # Track active button
         
-        for name in ['Generator', 'Validator', 'Test Code']:
+        for name in ['Generator', 'Test Code', 'Validator Code']:
             btn = QPushButton(name)
             btn.setMinimumHeight(36)
             btn.setProperty("isActive", False)
@@ -132,8 +132,8 @@ class ValidatorDisplay(QWidget):
         # Map button names to file paths
         file_mapping = {
             'Generator': os.path.join(self.workspace_dir, 'generator.cpp'),
-            'Validator': os.path.join(self.workspace_dir, 'validator.cpp'),
-            'Test Code': os.path.join(self.workspace_dir, 'test.cpp')
+            'Test Code': os.path.join(self.workspace_dir, 'test.cpp'),
+            'Validator Code': os.path.join(self.workspace_dir, 'validator.cpp')
         }
         
         file_path = file_mapping[button_name]
@@ -151,26 +151,55 @@ class ValidatorDisplay(QWidget):
     def _get_default_content(self, button_name):
         if button_name == 'Generator':
             return '''#include <iostream>
-#include <vector>
-#include <algorithm>
+#include <random>
+#include <chrono>
 using namespace std;
 
 int main() {
-    // Your main code here
+    // Seed random number generator
+    mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
+    
+    // Generate random test case
+    // Example: generate random array
+    int n = uniform_int_distribution<int>(1, 10)(rng);
+    cout << n << endl;
+    
+    for (int i = 0; i < n; i++) {
+        int x = uniform_int_distribution<int>(1, 100)(rng);
+        cout << x << " ";
+    }
+    cout << endl;
     
     return 0;
 }'''
-        elif button_name == 'Validator':
+        elif button_name == 'Validator Code':
             return '''#include <iostream>
-#include <vector>
-#include <algorithm>
+#include <fstream>
 using namespace std;
 
-int main() {
-    // Your validation code here
-    // This should check if the output is correct
+bool isValid(/* input variables */, /* output variables */) {
+    // TODO: Add your validation logic here
+    if (/* output according to input */)
+        return true;
+    return false;
+}
+
+int main(int argc, char* argv[]) {
+    if (argc < 3) return 2;
     
-    return 0;
+    ifstream input(argv[1]);   // test input file
+    ifstream output(argv[2]);  // test output file
+    
+    if (!input || !output) return 2;
+    
+    // TODO: Read input variables
+    // int n; input >> n;
+    
+    // TODO: Read output variables  
+    // int result; output >> result;
+    
+    // Return 1 if valid, 0 if invalid, 2+ if error
+    return isValid(/* pass variables */) ? 1 : 0;
 }'''
         elif button_name == 'Test Code':
             return '''#include <iostream>
@@ -179,7 +208,14 @@ int main() {
 using namespace std;
 
 int main() {
-    // Your test code here
+    // Read input
+    // TODO: Read your input format here
+    
+    // Process and solve
+    // TODO: Implement your solution here
+    
+    // Output result
+    // TODO: Output your solution here
     
     return 0;
 }'''

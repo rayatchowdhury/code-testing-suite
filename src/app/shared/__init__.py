@@ -14,7 +14,6 @@ from .constants import *
 # Import all utils  
 from .utils import (
     FileOperations,
-    LoggingConfig,
     WindowFactory,
     WindowManager
 )
@@ -24,7 +23,6 @@ from .constants import __all__ as constants_all
 
 __all__ = constants_all + [
     'FileOperations',
-    'LoggingConfig',
     'WindowFactory', 
     'WindowManager'
 ]

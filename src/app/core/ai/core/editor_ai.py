@@ -158,6 +158,8 @@ class EditorAI:
                 if 'generator' in gen_type.lower():
                     docs = kwargs.get('docs', '')
                     prompt = PromptTemplates.get_code_prompt('generate', code, type=gen_type, docs=docs)
+                elif 'validator' in gen_type.lower():
+                    prompt = PromptTemplates.get_code_prompt('validator', code)
                 else:
                     requirements = kwargs.get('requirements', 'Generate code')
                     prompt = f"Generate code based on requirements: {requirements}\n\nReference code:\n{code}"

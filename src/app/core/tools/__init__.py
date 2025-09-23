@@ -10,6 +10,7 @@ from src.app.core.tools.validation_compiler_runner import ValidationCompilerRunn
 from src.app.core.tools.stress_compiler_runner import StressCompilerRunner
 from src.app.core.tools.tle_compiler_runner import TLECompilerRunner
 from src.app.core.tools.validator import Validator
+from src.app.core.tools.validator_runner import ValidatorRunner
 from src.app.core.tools.stresser import Stresser
 from src.app.core.tools.tle_runner import TLERunner
 
@@ -19,6 +20,7 @@ __all__ = [
     'StressCompilerRunner',
     'TLECompilerRunner',
     'Validator',
+    'ValidatorRunner',
     'Stresser',
     'TLERunner'
 ]
