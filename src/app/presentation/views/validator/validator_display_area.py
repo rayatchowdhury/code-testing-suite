@@ -6,7 +6,7 @@ import os
 from src.app.presentation.widgets.display_area_widgets.editor import EditorWidget
 from src.app.presentation.widgets.display_area_widgets.console import ConsoleOutput
 from src.app.presentation.widgets.display_area_widgets.ai_panel import AIPanel
-from src.app.core.tools.validation_compiler_runner import ValidationCompilerRunner
+from src.app.core.tools.validator_compiler_runner import ValidatorCompilerRunner
 from src.app.presentation.styles.style import MATERIAL_COLORS
 from src.app.presentation.styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE
 from src.app.presentation.styles.components.test_view_styles import (
@@ -29,7 +29,7 @@ class ValidatorDisplay(QWidget):
         self._handle_file_button('Generator')
 
         # Initialize threaded compiler instead of regular compiler
-        self.compiler_runner = ValidationCompilerRunner(self.console)
+        self.compiler_runner = ValidatorCompilerRunner(self.console)
 
     def _setup_ui(self):
         main_layout = QHBoxLayout(self)
@@ -108,6 +108,9 @@ class ValidatorDisplay(QWidget):
         # Connect file button clicks
         for btn_name, btn in self.file_buttons.items():
             btn.clicked.connect(lambda checked, name=btn_name: self._handle_file_button(name))
+        
+        # Connect console compile & run button
+        self.console.compile_run_btn.clicked.connect(self.compile_and_run_code)
         
         # Connect editor signals
         self.editor.fileSaved.connect(self.handle_file_saved)
@@ -238,6 +241,30 @@ int main() {
 
     def compile_and_run_code(self):
         """Compile and run the current code"""
+        # Check for unsaved changes before compiling
+        if self.current_button and self.current_button.property("hasUnsavedChanges"):
+            reply = QMessageBox.question(
+                self,
+                "Unsaved Changes",
+                f"Do you want to save changes before compiling?",
+                QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel
+            )
+            
+            if reply == QMessageBox.Save:
+                if not self.editor.saveFile():
+                    return
+            elif reply == QMessageBox.Cancel:
+                return
+
         current_file = self.editor.currentFilePath
-        if current_file and current_file.endswith('.cpp'):
-            self.compiler_runner.compile_and_run(current_file)
+        if not current_file:
+            return
+
+        self.console.compile_run_btn.setEnabled(False)
+        
+        def on_complete():
+            self.console.compile_run_btn.setEnabled(True)
+            self.compiler_runner.finished.disconnect(on_complete)
+        
+        self.compiler_runner.finished.connect(on_complete)
+        self.compiler_runner.compile_and_run_code(current_file)

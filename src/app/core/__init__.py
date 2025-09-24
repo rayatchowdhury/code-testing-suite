@@ -32,9 +32,8 @@ from src.app.core.config import (
 
 # Tools Module exports
 from src.app.core.tools.compiler_runner import CompilerRunner
-from src.app.core.tools.validation_compiler_runner import ValidationCompilerRunner
+from src.app.core.tools.validator_compiler_runner import ValidatorCompilerRunner
 from src.app.core.tools.stress_compiler_runner import StressCompilerRunner
 from src.app.core.tools.tle_compiler_runner import TLECompilerRunner
-from src.app.core.tools.validator import Validator
 from src.app.core.tools.stresser import Stresser
 from src.app.core.tools.tle_runner import TLERunner

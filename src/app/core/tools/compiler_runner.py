@@ -53,30 +53,67 @@ class CompilerWorker(QObject):
         """Helper method to emit formatted status messages"""
         self.output.emit((message + '\n' * newlines, format_type))
 
+    def _is_executable_up_to_date(self, source_file, executable_file):
+        """Check if executable is newer than source file"""
+        import os
+        
+        # If executable doesn't exist, need to compile
+        if not os.path.exists(executable_file):
+            return False
+        
+        # If source doesn't exist, can't compile
+        if not os.path.exists(source_file):
+            return False
+        
+        # Compare timestamps
+        try:
+            source_mtime = os.path.getmtime(source_file)
+            exe_mtime = os.path.getmtime(executable_file)
+            return exe_mtime > source_mtime  # Executable is newer than source
+        except OSError:
+            return False  # If we can't check timestamps, be safe and recompile
+
     def _handle_cpp(self, filepath):
-        """Handle C++ compilation and execution"""
+        """Handle C++ compilation and execution with optimizations"""
         basename = os.path.basename(filepath)
         exe_name = os.path.splitext(filepath)[0] + ('.exe' if os.name == 'nt' else '')
         exe_basename = os.path.basename(exe_name)
 
-        self._emit_status(f"Compiling {basename}...")
-        
-        # Create compile process in the current thread
-        compile_process = QProcess()
-        compile_process.setProgram('g++')
-        compile_process.setArguments([filepath, '-o', exe_name])
-        compile_process.start()
-        compile_process.waitForFinished(10000)  # 10 second timeout
-        compile_process.waitForFinished(10000)  # 10 second timeout
+        # Check if recompilation is needed
+        if self._is_executable_up_to_date(filepath, exe_name):
+            self._emit_status(f"✅ {exe_basename} is up-to-date, skipping compilation", 'success')
+        else:
+            self._emit_status(f"🔨 Compiling {basename} with optimizations...")
+            
+            # Create compile process with optimization flags
+            compile_process = QProcess()
+            compile_process.setProgram('g++')
+            
+            # Optimized compiler flags for better performance
+            optimized_args = [
+                filepath,
+                '-o', exe_name,
+                '-O2',           # Level 2 optimization
+                '-march=native', # Optimize for current CPU
+                '-mtune=native', # Tune for current CPU
+                '-pipe',         # Use pipes instead of temp files
+                '-std=c++17',    # Modern C++ standard
+                '-Wall',         # Enable warnings
+            ]
+            
+            compile_process.setArguments(optimized_args)
+            compile_process.start()
+            compile_process.waitForFinished(15000)  # 15 second timeout for optimized compilation
 
-        if compile_process.exitCode() != 0:
-            error_output = compile_process.readAllStandardError().data().decode()
-            self.error.emit((f"Compilation Error in {basename}:\n{error_output}\n", 'error'))
-            self.finished.emit()
-            return
+            if compile_process.exitCode() != 0:
+                error_output = compile_process.readAllStandardError().data().decode()
+                self.error.emit((f"Compilation Error in {basename}:\n{error_output}\n", 'error'))
+                self.finished.emit()
+                return
 
-        self._emit_status("Compilation successful!", 'success')
-        self._emit_status(f"Running program {exe_basename}...", 'info', 2)
+            self._emit_status("✅ Compilation successful with optimizations!", 'success')
+
+        self._emit_status(f"🚀 Running optimized program {exe_basename}...", 'info', 2)
         self._emit_status(f"----------------------------", 'info', 2)
         self._run_executable(exe_name)
 

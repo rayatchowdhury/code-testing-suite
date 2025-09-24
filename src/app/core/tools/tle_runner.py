@@ -10,13 +10,16 @@ import time
 from src.app.persistence.database import DatabaseManager, TestResult
 from datetime import datetime
 import json
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import multiprocessing
+import tempfile
 
 class TLETestWorker(QObject):
     testStarted = Signal(str, int, int)  # test name, current test, total tests
     testCompleted = Signal(str, int, bool, float, float, bool)  # test name, test number, passed, execution time, memory used, memory passed
     allTestsCompleted = Signal(bool)  # True if all passed
 
-    def __init__(self, workspace_dir, executables, time_limit, memory_limit, test_count=1):
+    def __init__(self, workspace_dir, executables, time_limit, memory_limit, test_count=1, max_workers=None):
         super().__init__()
         self.workspace_dir = workspace_dir
         self.executables = executables
@@ -25,153 +28,223 @@ class TLETestWorker(QObject):
         self.test_count = test_count
         self.is_running = True
         self.test_results = []  # Store detailed test results
+        # Use reasonable default for TLE testing (less workers due to memory monitoring overhead)
+        self.max_workers = max_workers or min(4, max(1, multiprocessing.cpu_count() - 1))
+        self._results_lock = threading.Lock()  # Thread-safe results access
 
     def run_tests(self):
-        """Run multiple TLE tests with memory monitoring"""
+        """Run TLE tests in parallel with memory and time monitoring"""
         all_passed = True
+        completed_tests = 0
         
-        for test_num in range(1, self.test_count + 1):
-            if not self.is_running:
-                break
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            # Submit all test jobs
+            future_to_test = {
+                executor.submit(self._run_single_tle_test, i): i 
+                for i in range(1, self.test_count + 1)
+            }
+            
+            # Process completed tests as they finish
+            for future in as_completed(future_to_test):
+                if not self.is_running:
+                    # Cancel remaining futures if stopped
+                    for f in future_to_test:
+                        f.cancel()
+                    break
                 
-            try:
-                # Run generator first
-                self.testStarted.emit(f"Test {test_num} - Generator", test_num, self.test_count)
-                start_time = time.time()
-                max_memory = 0
+                test_number = future_to_test[future]
+                completed_tests += 1
                 
-                # Generate unique input file for each test
-                input_file_path = os.path.join(self.workspace_dir, f"input_{test_num}.txt")
-                output_file_path = os.path.join(self.workspace_dir, f"output_{test_num}.txt")
-                
-                with open(input_file_path, "w") as input_file:
-                    generator_process = subprocess.Popen(
-                        [self.executables['generator']],
-                        stdout=input_file,
-                        creationflags=subprocess.CREATE_NO_WINDOW
-                    )
-                    
-                    # Monitor memory usage
-                    try:
-                        psutil_process = psutil.Process(generator_process.pid)
-                        while generator_process.poll() is None:
-                            try:
-                                memory_info = psutil_process.memory_info()
-                                current_memory_mb = memory_info.rss / (1024 * 1024)  # Convert to MB
-                                max_memory = max(max_memory, current_memory_mb)
-                                time.sleep(0.01)  # Check every 10ms
-                            except (psutil.NoSuchProcess, psutil.AccessDenied):
-                                break
-                    except (psutil.NoSuchProcess, psutil.AccessDenied):
-                        pass
-                    
-                    try:
-                        generator_process.wait(timeout=self.time_limit)
-                        gen_time = time.time() - start_time
-                        time_passed = gen_time <= self.time_limit
-                        memory_passed = max_memory <= self.memory_limit
-                        gen_passed = time_passed and memory_passed
+                try:
+                    test_result = future.result()
+                    if test_result:  # Check if test wasn't cancelled
+                        # Thread-safe result storage
+                        with self._results_lock:
+                            self.test_results.append(test_result)
                         
-                        if not gen_passed:
-                            all_passed = False
-                        
-                        self.testCompleted.emit(f"Test {test_num} - Generator", test_num, gen_passed, gen_time, max_memory, memory_passed)
-                        
-                        # If generator failed, skip test solution
-                        if not gen_passed:
-                            continue
-                            
-                    except subprocess.TimeoutExpired:
-                        generator_process.kill()
-                        gen_time = self.time_limit
-                        all_passed = False
-                        self.testCompleted.emit(f"Test {test_num} - Generator", test_num, False, gen_time, max_memory, max_memory <= self.memory_limit)
-                        continue
-                
-                # Run test solution with generated input
-                self.testStarted.emit(f"Test {test_num} - Solution", test_num, self.test_count)
-                start_time = time.time()
-                max_memory = 0
-                
-                with open(input_file_path, "r") as input_file:
-                    with open(output_file_path, "w") as output_file:
-                        test_process = subprocess.Popen(
-                            [self.executables['test']],
-                            stdin=input_file,
-                            stdout=output_file,
-                            creationflags=subprocess.CREATE_NO_WINDOW
+                        # Emit signals for UI updates
+                        self.testStarted.emit(f"Test {completed_tests}", completed_tests, self.test_count)
+                        self.testCompleted.emit(
+                            test_result['test_name'],
+                            test_result['test_number'],
+                            test_result['passed'],
+                            test_result['execution_time'],
+                            test_result['memory_used'],
+                            test_result['memory_passed']
                         )
                         
-                        # Monitor memory usage
-                        try:
-                            psutil_process = psutil.Process(test_process.pid)
-                            while test_process.poll() is None:
-                                try:
-                                    memory_info = psutil_process.memory_info()
-                                    current_memory_mb = memory_info.rss / (1024 * 1024)  # Convert to MB
-                                    max_memory = max(max_memory, current_memory_mb)
-                                    time.sleep(0.01)  # Check every 10ms
-                                except (psutil.NoSuchProcess, psutil.AccessDenied):
-                                    break
-                        except (psutil.NoSuchProcess, psutil.AccessDenied):
-                            pass
-                        
-                        try:
-                            test_process.wait(timeout=self.time_limit)
-                            execution_time = time.time() - start_time
-                            time_passed = execution_time <= self.time_limit
-                            memory_passed = max_memory <= self.memory_limit
-                            test_passed = time_passed and memory_passed
-                            
-                            if not test_passed:
-                                all_passed = False
-                                
-                        except subprocess.TimeoutExpired:
-                            test_process.kill()
-                            execution_time = self.time_limit
-                            test_passed = False
-                            memory_passed = max_memory <= self.memory_limit
-                            time_passed = False
+                        if not test_result['passed']:
                             all_passed = False
-                        
-                        # Store test result with detailed information
-                        test_result = {
-                            'test_name': f'Test {test_num} - Solution',
-                            'test_number': test_num,
-                            'passed': test_passed,
-                            'time_passed': time_passed if 'time_passed' in locals() else False,
-                            'memory_passed': memory_passed,
-                            'execution_time': execution_time,
-                            'memory_used': max_memory,
-                            'time_limit': self.time_limit,
-                            'memory_limit': self.memory_limit,
-                            'timestamp': datetime.now().isoformat(),
-                            'timed_out': execution_time >= self.time_limit,
-                            'memory_exceeded': max_memory > self.memory_limit,
-                            'performance_ratio': execution_time / self.time_limit if self.time_limit > 0 else 0,
-                            'memory_ratio': max_memory / self.memory_limit if self.memory_limit > 0 else 0
-                        }
-                        
-                        # Read input and output files for analysis
-                        try:
-                            if os.path.exists(input_file_path):
-                                with open(input_file_path, 'r') as f:
-                                    test_result['input'] = f.read()
                             
-                            if os.path.exists(output_file_path):
-                                with open(output_file_path, 'r') as f:
-                                    test_result['output'] = f.read()
-                        except Exception as e:
-                            test_result['file_read_error'] = str(e)
-                        
-                        self.test_results.append(test_result)
-                        self.testCompleted.emit(f"Test {test_num} - Solution", test_num, test_passed, execution_time, max_memory, memory_passed)
-
-            except Exception as e:
-                print(f"Error during TLE testing on test {test_num}: {str(e)}")
-                all_passed = False
+                except Exception as e:
+                    # Handle any unexpected errors
+                    error_result = self._create_tle_error_result(test_number, f"Execution error: {str(e)}")
+                    with self._results_lock:
+                        self.test_results.append(error_result)
+                    self.testCompleted.emit(
+                        f"Test {test_number} - Error",
+                        test_number,
+                        False,
+                        0.0,
+                        0.0,
+                        False
+                    )
+                    all_passed = False
 
         self.allTestsCompleted.emit(all_passed)
+
+    def _run_single_tle_test(self, test_number):
+        """Run a single TLE test with optimized I/O and memory monitoring"""
+        if not self.is_running:
+            return None
+            
+        try:
+            # Stage 1: Run generator with memory monitoring
+            generator_start = time.time()
+            max_generator_memory = 0
+            
+            generator_process = subprocess.Popen(
+                [self.executables['generator']],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                creationflags=subprocess.CREATE_NO_WINDOW,
+                text=True
+            )
+            
+            # Monitor generator memory usage
+            try:
+                psutil_process = psutil.Process(generator_process.pid)
+                while generator_process.poll() is None:
+                    try:
+                        memory_info = psutil_process.memory_info()
+                        current_memory_mb = memory_info.rss / (1024 * 1024)
+                        max_generator_memory = max(max_generator_memory, current_memory_mb)
+                        time.sleep(0.005)  # Check every 5ms for better precision
+                    except (psutil.NoSuchProcess, psutil.AccessDenied):
+                        break
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                pass
+            
+            try:
+                stdout, stderr = generator_process.communicate(timeout=self.time_limit)
+                generator_time = time.time() - generator_start
+                
+                if generator_process.returncode != 0:
+                    return self._create_tle_error_result(
+                        test_number, f"Generator failed: {stderr}", 
+                        execution_time=generator_time, memory_used=max_generator_memory
+                    )
+                
+                input_text = stdout
+                
+            except subprocess.TimeoutExpired:
+                generator_process.kill()
+                generator_time = self.time_limit
+                return self._create_tle_error_result(
+                    test_number, "Generator timeout", 
+                    execution_time=generator_time, memory_used=max_generator_memory
+                )
+            
+            # Stage 2: Run test solution with memory monitoring
+            test_start = time.time()
+            max_test_memory = 0
+            
+            test_process = subprocess.Popen(
+                [self.executables['test']],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                creationflags=subprocess.CREATE_NO_WINDOW,
+                text=True
+            )
+            
+            # Monitor test solution memory usage
+            try:
+                psutil_process = psutil.Process(test_process.pid)
+                # Start the process with input
+                test_process.stdin.write(input_text)
+                test_process.stdin.close()
+                
+                while test_process.poll() is None:
+                    try:
+                        memory_info = psutil_process.memory_info()
+                        current_memory_mb = memory_info.rss / (1024 * 1024)
+                        max_test_memory = max(max_test_memory, current_memory_mb)
+                        time.sleep(0.005)  # Check every 5ms
+                    except (psutil.NoSuchProcess, psutil.AccessDenied):
+                        break
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                pass
+            
+            try:
+                stdout, stderr = test_process.communicate(timeout=self.time_limit)
+                execution_time = time.time() - test_start
+                
+                if test_process.returncode != 0:
+                    return self._create_tle_error_result(
+                        test_number, f"Test solution failed: {stderr}",
+                        execution_time=execution_time, memory_used=max_test_memory
+                    )
+                
+                test_output = stdout
+                
+            except subprocess.TimeoutExpired:
+                test_process.kill()
+                execution_time = self.time_limit
+                test_output = ""
+            
+            # Evaluate performance
+            time_passed = execution_time <= self.time_limit
+            memory_passed = max_test_memory <= self.memory_limit
+            test_passed = time_passed and memory_passed
+            
+            return {
+                'test_name': f'Test {test_number} - Solution',
+                'test_number': test_number,
+                'passed': test_passed,
+                'time_passed': time_passed,
+                'memory_passed': memory_passed,
+                'execution_time': execution_time,
+                'memory_used': max_test_memory,
+                'time_limit': self.time_limit,
+                'memory_limit': self.memory_limit,
+                'timestamp': datetime.now().isoformat(),
+                'timed_out': execution_time >= self.time_limit,
+                'memory_exceeded': max_test_memory > self.memory_limit,
+                'performance_ratio': execution_time / self.time_limit if self.time_limit > 0 else 0,
+                'memory_ratio': max_test_memory / self.memory_limit if self.memory_limit > 0 else 0,
+                'input': input_text,
+                'output': test_output,
+                'generator_time': generator_time,
+                'generator_memory': max_generator_memory
+            }
+
+        except Exception as e:
+            return self._create_tle_error_result(test_number, f"Unexpected error: {str(e)}")
+
+    def _create_tle_error_result(self, test_number, error_msg, execution_time=0.0, memory_used=0.0):
+        """Create a standardized TLE error result"""
+        return {
+            'test_name': f'Test {test_number} - Error',
+            'test_number': test_number,
+            'passed': False,
+            'time_passed': False,
+            'memory_passed': memory_used <= self.memory_limit,
+            'execution_time': execution_time,
+            'memory_used': memory_used,
+            'time_limit': self.time_limit,
+            'memory_limit': self.memory_limit,
+            'timestamp': datetime.now().isoformat(),
+            'timed_out': execution_time >= self.time_limit,
+            'memory_exceeded': memory_used > self.memory_limit,
+            'performance_ratio': execution_time / self.time_limit if self.time_limit > 0 else 0,
+            'memory_ratio': memory_used / self.memory_limit if self.memory_limit > 0 else 0,
+            'input': "",
+            'output': "",
+            'error_details': error_msg,
+            'generator_time': 0.0,
+            'generator_memory': 0.0
+        }
 
     def stop(self):
         """Stop the worker"""
@@ -199,68 +272,144 @@ class TLERunner(QObject):
         self.db_manager = DatabaseManager()  # Add database manager
 
     def compile_all(self):
-        """Compile all files"""
+        """Compile all files in parallel with optimizations and caching"""
         self.compilation_failed = False
         self.status_window = CompilationStatusWindow()
         self.status_window.show()
-        self._compile_next('generator')
+        
+        # Start parallel compilation in a separate thread to avoid blocking UI
+        compile_thread = threading.Thread(target=self._parallel_compile_all)
+        compile_thread.daemon = True
+        compile_thread.start()
+
+    def _parallel_compile_all(self):
+        """Compile all files in parallel with smart caching and optimization"""
+        files_to_compile = ['generator', 'test']
+        max_workers = min(2, multiprocessing.cpu_count())  # Use both files or available cores
+        
+        self.compilationOutput.emit("🚀 Starting optimized parallel compilation...\n", 'info')
+        
+        # Check which files need recompilation
+        files_needing_compilation = []
+        for file_key in files_to_compile:
+            if self._needs_recompilation(file_key):
+                files_needing_compilation.append(file_key)
+            else:
+                self.compilationOutput.emit(f"✅ {file_key}.exe is up-to-date, skipping compilation\n", 'success')
+                self.status_window.update_status(file_key, True, f"{file_key}.exe up-to-date")
+        
+        if not files_needing_compilation:
+            self.compilationOutput.emit("\n🎉 All files are up-to-date! No compilation needed.\n", 'success')
+            self.compilationFinished.emit(True)
+            return
+        
+        compilation_results = {}
+        all_success = True
+        
+        # Compile files in parallel
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # Submit compilation jobs
+            future_to_file = {
+                executor.submit(self._compile_single_file, file_key): file_key 
+                for file_key in files_needing_compilation
+            }
+            
+            # Process results as they complete
+            for future in as_completed(future_to_file):
+                file_key = future_to_file[future]
+                try:
+                    success, output = future.result()
+                    compilation_results[file_key] = (success, output)
+                    
+                    if success:
+                        self.compilationOutput.emit(f"✅ Successfully compiled {file_key}.cpp\n", 'success')
+                        self.status_window.update_status(file_key, True, f"Compiled {file_key}.cpp")
+                    else:
+                        all_success = False
+                        self.compilationOutput.emit(f"❌ Failed to compile {file_key}.cpp:\n{output}\n", 'error')
+                        self.status_window.update_status(file_key, False, output)
+                        
+                except Exception as e:
+                    all_success = False
+                    error_msg = f"Compilation error for {file_key}: {str(e)}"
+                    self.compilationOutput.emit(f"❌ {error_msg}\n", 'error')
+                    self.status_window.update_status(file_key, False, error_msg)
+        
+        # Final result
+        if all_success:
+            self.compilationOutput.emit("\n🎉 All files compiled successfully with optimizations!\n", 'success')
+            self.compilationFinished.emit(True)
+        else:
+            self.compilationOutput.emit("\n❌ Some files failed to compile.\n", 'error')
+            self.compilationFinished.emit(False)
+
+    def _needs_recompilation(self, file_key):
+        """Check if file needs recompilation based on timestamps"""
+        source_file = self.files[file_key]
+        executable_file = self.executables[file_key]
+        
+        # If executable doesn't exist, need to compile
+        if not os.path.exists(executable_file):
+            return True
+        
+        # If source doesn't exist, can't compile
+        if not os.path.exists(source_file):
+            return True
+        
+        # Compare timestamps
+        try:
+            source_mtime = os.path.getmtime(source_file)
+            exe_mtime = os.path.getmtime(executable_file)
+            return source_mtime > exe_mtime  # Source is newer than executable
+        except OSError:
+            return True  # If we can't check timestamps, be safe and recompile
+
+    def _compile_single_file(self, file_key):
+        """Compile a single file with optimization flags"""
+        source_file = self.files[file_key]
+        executable_file = self.executables[file_key]
+        
+        # Optimized compiler flags for TLE testing (balance between compile time and runtime performance)
+        compiler_flags = [
+            '-O2',           # Level 2 optimization for good performance/compile time balance
+            '-march=native', # Optimize for current CPU architecture
+            '-mtune=native', # Tune for current CPU
+            '-pipe',         # Use pipes instead of temporary files
+            '-std=c++17',    # Use modern C++ standard
+            '-DNDEBUG',      # Disable debug assertions for better performance
+        ]
+        
+        try:
+            compile_command = ['g++'] + compiler_flags + [source_file, '-o', executable_file]
+            
+            result = subprocess.run(
+                compile_command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=30  # 30 second timeout per file
+            )
+            
+            if result.returncode == 0:
+                return True, f"Compiled {file_key}.cpp with optimizations"
+            else:
+                return False, result.stderr
+                
+        except subprocess.TimeoutExpired:
+            return False, f"Compilation timeout for {file_key}.cpp"
+        except Exception as e:
+            return False, f"Compilation error: {str(e)}"
 
     def _compile_next(self, current_file):
-        """Compile the specified file and chain to the next one"""
-        if self.compilation_failed:
-            return
-
-        if current_file not in self.files:
-            self.compilationFinished.emit(True)
-            return
-
-        self.compilationOutput.emit(f"\nCompiling {current_file}.cpp...\n", 'info')
-        
-        process = QProcess()
-        self.current_process = process
-        
-        process.finished.connect(
-            lambda code, status: self._handle_compilation_finished(
-                code, current_file, process.readAllStandardError().data().decode()
-            )
-        )
-
-        process.start('g++', [
-            self.files[current_file],
-            '-o',
-            self.executables[current_file]
-        ])
+        """Legacy method - kept for compatibility but not used in parallel compilation"""
+        pass
 
     def _handle_compilation_finished(self, exit_code, current_file, error_output):
-        """Handle compilation completion and chain to next file"""
-        next_file_map = {
-            'generator': 'test',
-            'test': None
-        }
+        """Legacy method - kept for compatibility but not used in parallel compilation"""
+        pass
 
-        if exit_code != 0:
-            self.compilation_failed = True
-            error_msg = f"Compilation Error in {current_file}.cpp:\n{error_output}\n"
-            self.compilationOutput.emit(error_msg, 'error')
-            self.status_window.update_status(current_file, False, error_output)
-            self.compilationFinished.emit(False)
-            return
-
-        success_msg = f"Successfully compiled {current_file}.cpp\n"
-        self.compilationOutput.emit(success_msg, 'success')
-        self.status_window.update_status(current_file, True, success_msg)
-
-        next_file = next_file_map[current_file]
-        if next_file:
-            self._compile_next(next_file)
-        else:
-            final_msg = "\nAll files compiled successfully!\n"
-            self.compilationOutput.emit(final_msg, 'success')
-            self.status_window.update_status('all', True, final_msg)
-            self.compilationFinished.emit(True)
-
-    def run_tle_test(self, time_limit, memory_limit=256, test_count=1):
-        """Start TLE testing using QThread and worker"""
+    def run_tle_test(self, time_limit, memory_limit=256, test_count=1, max_workers=None):
+        """Start TLE testing using QThread and parallel worker"""
         self.time_limit = time_limit  # Store for database saving (in ms)
         self.memory_limit = memory_limit  # Store for database saving (in MB)
         self.test_count = test_count  # Store for database saving
@@ -273,8 +422,8 @@ class TLERunner(QObject):
         self.status_window.test_count = test_count  # Pass test count
         self.status_window.show()
 
-        # Create worker and thread
-        self.worker = TLETestWorker(self.workspace_dir, self.executables, time_limit, memory_limit, test_count)
+        # Create worker and thread with parallel processing
+        self.worker = TLETestWorker(self.workspace_dir, self.executables, time_limit, memory_limit, test_count, max_workers)
         self.thread = QThread()
         self.worker.moveToThread(self.thread)
 
