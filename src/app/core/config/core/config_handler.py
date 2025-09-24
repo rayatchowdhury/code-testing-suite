@@ -31,7 +31,12 @@ class ConfigManager:
     CONFIG_DIR = USER_DATA_DIR
     
     def __init__(self, config_file='config.json'):
-        self.config_file = os.path.join(self.CONFIG_DIR, config_file)
+        # If config_file is an absolute path, use it directly
+        # Otherwise, treat it as a filename under CONFIG_DIR
+        if os.path.isabs(config_file):
+            self.config_file = config_file
+        else:
+            self.config_file = os.path.join(self.CONFIG_DIR, config_file)
 
     def load_config(self):
         """Load configuration from JSON file with validation."""
@@ -64,8 +69,9 @@ class ConfigManager:
     def save_config(self, config):
         """Save configuration to JSON file with backup."""
         try:
-            # Ensure config directory exists
-            os.makedirs(self.CONFIG_DIR, exist_ok=True)
+            # Ensure the directory for the config file exists
+            config_dir = os.path.dirname(self.config_file)
+            os.makedirs(config_dir, exist_ok=True)
 
             # Backup existing config
             if os.path.exists(self.config_file):
@@ -179,8 +185,13 @@ class ConfigPersistence:
             self.parent.show_error("Unexpected Error", "Failed to load configuration", str(e))
             cfg = {}
 
-        # Populate fields with safe defaults
-        self.parent.cpp_version_combo.setCurrentText(cfg.get("cpp_version", "auto"))
+        # Populate fields with safe defaults (use actual defaults from get_default_config)
+        try:
+            default_config = self.config_manager.get_default_config()
+        except:
+            default_config = {}
+        
+        self.parent.cpp_version_combo.setCurrentText(cfg.get("cpp_version", default_config.get("cpp_version", "c++17")))
         self.parent.workspace_input.setText(cfg.get("workspace_folder", ""))
         
         # Updated for new gemini format (Phase 1)
