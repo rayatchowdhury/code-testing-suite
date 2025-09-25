@@ -1,7 +1,7 @@
 """
 Code Testing Suite - PySide6 Desktop Application
 
-A comprehensive code editor with AI integration, stress testing,
+A comprehensive code editor with AI integration, comparison testing,
 and time-limit testing capabilities.
 """
 

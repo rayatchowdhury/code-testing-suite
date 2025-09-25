@@ -6,7 +6,7 @@ from PySide6.QtGui import QFont
 from src.app.presentation.views.comparator.comparator_display_area import ComparatorDisplay
 from src.app.presentation.views.comparator.test_count_slider import TestCountSlider
 # Lazy import to avoid circular dependency
-# from src.app.core.tools.stresser import Stresser
+# from src.app.core.tools.comparator import Comparator
 
 class ComparatorWindow(SidebarWindowBase):
     def __init__(self, parent=None):
@@ -47,9 +47,9 @@ class ComparatorWindow(SidebarWindowBase):
         self.sidebar.button_clicked.connect(self.handle_button_click)
 
         # Lazy import to avoid circular dependency
-        from src.app.core.tools.stresser import Stresser
-        self.stresser = Stresser(self.display_area.workspace_dir)
-        self.stresser.compilationOutput.connect(self.display_area.console.displayOutput)
+        from src.app.core.tools.comparator import Comparator
+        self.comparator = Comparator(self.display_area.workspace_dir)
+        self.comparator.compilationOutput.connect(self.display_area.console.displayOutput)
 
     # Remove the handle_edit_button method since we no longer have edit buttons
 
@@ -77,10 +77,10 @@ class ComparatorWindow(SidebarWindowBase):
                     elif reply == QMessageBox.Cancel:
                         return
 
-            self.stresser.compile_all()
+            self.comparator.compile_all()
         elif button_text == 'Run':
             test_count = self.test_count_slider.value()
-            self.stresser.run_stress_test(test_count)
+            self.comparator.run_comparison_test(test_count)
         elif button_text == 'Results':
             # Navigate to results window
             if self.can_close():
@@ -96,7 +96,7 @@ class ComparatorWindow(SidebarWindowBase):
     def handle_test_count_changed(self, value):
         # Handle the slider value change
         print(f"Test count changed to: {value}")
-        # You can store this value or use it in your stress testing logic
+        # You can store this value or use it in your comparison testing logic
 
     def refresh_ai_panels(self):
         """Refresh AI panel visibility based on current configuration"""

@@ -22,7 +22,7 @@ class ResultsWindow(SidebarWindowBase):
         # View options section
         view_section = self.sidebar.add_section("View Options")
         
-        for button_text in ['Show All', 'Show Stress Tests', 'Show TLE Tests']:
+        for button_text in ['Show All', 'Show Comparison Tests', 'Show Benchmark Tests']:
             btn = self.sidebar.add_button(button_text, view_section)
             btn.clicked.connect(lambda checked, text=button_text: self.handle_view_button(text))
         
@@ -55,10 +55,10 @@ class ResultsWindow(SidebarWindowBase):
         """Handle view option button clicks"""
         if button_text == 'Show All':
             self.display_area.test_type_combo.setCurrentText("All")
-        elif button_text == 'Show Stress Tests':
-            self.display_area.test_type_combo.setCurrentText("Stress Tests")
-        elif button_text == 'Show TLE Tests':
-            self.display_area.test_type_combo.setCurrentText("TLE Tests")
+        elif button_text == 'Show Comparison Tests':
+            self.display_area.test_type_combo.setCurrentText("Comparison Tests")
+        elif button_text == 'Show Benchmark Tests':
+            self.display_area.test_type_combo.setCurrentText("Benchmark Tests")
     
     def export_results(self):
         """Export results to CSV or JSON"""

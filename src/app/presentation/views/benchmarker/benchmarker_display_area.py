@@ -5,7 +5,7 @@ import os
 
 from src.app.presentation.widgets.display_area_widgets.editor import EditorWidget
 from src.app.presentation.widgets.display_area_widgets.console import ConsoleOutput
-from src.app.core.tools.tle_compiler_runner import TLECompilerRunner
+from src.app.core.tools.benchmarker import BenchmarkCompilerRunner
 from src.app.presentation.styles.style import MATERIAL_COLORS
 from src.app.presentation.styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE
 from src.app.presentation.styles.components.test_view_styles import (
@@ -27,7 +27,7 @@ class BenchmarkerDisplay(QWidget):
         # Open generator file by default
         self._handle_file_button('Generator')
 
-        self.compiler_runner = TLECompilerRunner(self.console)
+        self.compiler_runner = BenchmarkCompilerRunner(self.console)
 
     def _setup_ui(self):
         main_layout = QHBoxLayout(self)
@@ -80,9 +80,9 @@ class BenchmarkerDisplay(QWidget):
         content_layout.addWidget(button_panel)
         content_layout.addWidget(self.editor)
 
-        # Initialize AI panel with tle type (lazy loading)
+        # Initialize AI panel with benchmark type (lazy loading)
         self.ai_panel = self.editor.get_ai_panel()
-        self.ai_panel.set_panel_type("tle")
+        self.ai_panel.set_panel_type("benchmark")
 
         # Add inner panel to outer panel
         outer_layout.addWidget(content_panel)

@@ -2,7 +2,7 @@
 BaseTestWorker - Consolidated parallel testing patterns for all tools.
 
 This class consolidates the 400+ lines of duplicated worker patterns
-from ValidatorTestWorker, TLETestWorker, and StressTestWorker into a
+from ValidatorTestWorker, BenchmarkTestWorker, and ComparisonTestWorker into a
 single reusable base class with consistent parallel execution and error handling.
 """
 
@@ -22,7 +22,7 @@ class BaseTestWorker(QObject):
     Base worker class for parallel test execution.
     
     This class consolidates the common parallel testing patterns that were
-    duplicated across ValidatorTestWorker, TLETestWorker, and StressTestWorker,
+    duplicated across ValidatorTestWorker, BenchmarkTestWorker, and ComparisonTestWorker,
     providing:
     - Parallel test execution with optimal worker count
     - Thread-safe result storage and signal emission

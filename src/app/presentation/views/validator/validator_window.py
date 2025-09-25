@@ -47,7 +47,7 @@ class ValidatorWindow(SidebarWindowBase):
         self.sidebar.button_clicked.connect(self.handle_button_click)
 
         # Lazy import to avoid circular dependency
-        from src.app.core.tools.validator_runner import ValidatorRunner
+        from src.app.core.tools.validator import ValidatorRunner
         self.validator_runner = ValidatorRunner(self.display_area.workspace_dir)
         self.validator_runner.compilationOutput.connect(self.display_area.console.displayOutput)
 

@@ -6,19 +6,16 @@ and testing code.
 """
 
 from src.app.core.tools.compiler_runner import CompilerRunner
-from src.app.core.tools.validator_compiler_runner import ValidatorCompilerRunner
-from src.app.core.tools.stress_compiler_runner import StressCompilerRunner
-from src.app.core.tools.tle_compiler_runner import TLECompilerRunner
-from src.app.core.tools.validator_runner import ValidatorRunner
-from src.app.core.tools.stresser import Stresser
-from src.app.core.tools.tle_runner import TLERunner
+from src.app.core.tools.benchmarker import BenchmarkCompilerRunner, Benchmarker
+from src.app.core.tools.validator import ValidatorRunner
+from src.app.core.tools.comparator import Comparator
 
 __all__ = [
     'CompilerRunner',
     'ValidatorCompilerRunner', 
-    'StressCompilerRunner',
-    'TLECompilerRunner',
+    'ComparisonCompilerRunner',
+    'BenchmarkCompilerRunner',
     'ValidatorRunner',
-    'Stresser',
-    'TLERunner'
+    'Comparator',
+    'Benchmarker'
 ]

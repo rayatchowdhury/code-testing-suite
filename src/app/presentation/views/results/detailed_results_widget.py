@@ -686,19 +686,19 @@ class DetailedResultsWidget(QWidget):
     
     def _load_analysis(self, analysis_data):
         """Load analysis and insights"""
-        if self.test_result.test_type == "stress":
+        if self.test_result.test_type in ["stress", "comparison"]:
             self._load_stress_analysis(analysis_data)
-        elif self.test_result.test_type == "tle":
-            self._load_tle_analysis(analysis_data)
+        elif self.test_result.test_type in ["tle", "benchmark"]:
+            self._load_benchmark_analysis(analysis_data)
     
     def _load_stress_analysis(self, analysis_data):
-        """Load stress test specific analysis"""
+        """Load comparison test specific analysis"""
         analysis_card = QWidget()
         analysis_card.setStyleSheet(RESULTS_CARD_STYLE)
         layout = QVBoxLayout(analysis_card)
         layout.setContentsMargins(16, 16, 16, 16)
         
-        title = QLabel("Stress Test Analysis")
+        title = QLabel("Comparison Test Analysis")
         title.setStyleSheet(RESULTS_LABEL_TITLE_STYLE)
         layout.addWidget(title)
         
@@ -712,8 +712,8 @@ class DetailedResultsWidget(QWidget):
         
         self.analysis_container.addWidget(analysis_card)
     
-    def _load_tle_analysis(self, analysis_data):
-        """Load TLE test specific analysis"""
+    def _load_benchmark_analysis(self, analysis_data):
+        """Load benchmark test specific analysis"""
         analysis_card = QWidget()
         analysis_card.setStyleSheet(RESULTS_CARD_STYLE)
         layout = QVBoxLayout(analysis_card)

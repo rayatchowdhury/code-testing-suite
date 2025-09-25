@@ -19,6 +19,7 @@ A powerful desktop application designed to streamline your coding workflow with 
 ## 📋 Table of Contents
 
 - [✨ Features](#-features)
+- [🏗️ Architecture](#️-architecture)
 - [🚀 Installation](#-installation)
 - [📖 Usage](#-usage)
 - [📸 Screenshots](#-screenshots)
@@ -76,6 +77,86 @@ A powerful desktop application designed to streamline your coding workflow with 
 </tr>
 </table>
 </div>
+
+## 🏗️ Architecture
+
+The Code Testing Suite features a clean, maintainable architecture built around the **BaseRunner Template Method Pattern**, achieved through a comprehensive migration that eliminated over 800 lines of duplicate code.
+
+### 🎯 Core Architecture
+
+<div align="center">
+
+```
+BaseRunner (Template Method Pattern)
+├── ValidatorRunner    → Validation testing
+├── TLERunner         → Time limit testing  
+└── Comparator        → Comparison testing
+```
+
+</div>
+
+### 🔧 Key Components
+
+<div align="center">
+<table>
+<tr>
+<td width="50%" align="center">
+
+### 🏛️ Base Classes
+
+- **BaseRunner**: Template method for test execution
+- **BaseCompiler**: Unified compilation logic
+- **BaseTestWorker**: Parallel test execution
+- **ProcessExecutor**: System utilities
+
+</td>
+<td width="50%" align="center">
+
+### ⚙️ Specialized Workers
+
+- **ValidatorTestWorker**: 3-stage validation
+- **TLETestWorker**: Performance monitoring  
+- **ComparisonTestWorker**: Output comparison
+- Optimized parallel execution per type
+
+</td>
+</tr>
+</table>
+</div>
+
+### 🚀 Migration Benefits
+
+- **✅ 70-80% code reduction** in core files
+- **✅ Single source of truth** for all testing logic
+- **✅ Template method pattern** for consistent behavior
+- **✅ Easy extensibility** for new test types
+- **✅ Improved maintainability** with centralized logic
+
+### 📖 For Developers
+
+Want to add a new test type? Simply inherit from `BaseRunner`:
+
+```python
+from src.app.core.tools.base.base_runner import BaseRunner
+
+class MyCustomRunner(BaseRunner):
+    def _create_worker(self):
+        return MyCustomTestWorker()
+    
+    def _process_results(self, result):
+        # Custom result processing
+        pass
+```
+
+<details>
+<summary>📚 View Architecture Documentation</summary>
+
+- [Migration Plan](MIGRATION_PLAN_DETAILED.md) - Complete migration strategy
+- [Architecture Patterns](ARCHITECTURE_PATTERNS.md) - Template method implementation  
+- [Phase 5 Summary](PHASE_5_COMPLETION_SUMMARY.md) - Cleanup and optimization
+- [Phase 6 Results](PHASE_6_VALIDATION_RESULTS.md) - Final validation
+
+</details>
 
 ## 🚀 Installation
 

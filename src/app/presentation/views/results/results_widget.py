@@ -69,7 +69,7 @@ class TestResultsWidget(QWidget):
         type_label = QLabel("Test Type:")
         type_label.setStyleSheet(RESULTS_LABEL_FILTER_STYLE)
         self.test_type_combo = QComboBox()
-        self.test_type_combo.addItems(["All", "Stress Tests", "TLE Tests"])
+        self.test_type_combo.addItems(["All", "Comparison Tests", "Benchmark Tests"])
         self.test_type_combo.currentTextChanged.connect(self._filter_results)
         self.test_type_combo.setStyleSheet(RESULTS_COMBO_STYLE)
 
@@ -272,9 +272,10 @@ class TestResultsWidget(QWidget):
     def _get_test_type_filter(self):
         """Get the test type filter value"""
         type_text = self.test_type_combo.currentText()
-        if type_text == "Stress Tests":
-            return "stress"
-        elif type_text == "TLE Tests":
+        if type_text == "Comparison Tests":
+            return "stress"  # Still use "stress" for backward compatibility with existing data
+        elif type_text == "Benchmark Tests":
+            return "tle"     # Still use "tle" for backward compatibility with existing data
             return "tle"
         return None
     
@@ -299,7 +300,9 @@ class TestResultsWidget(QWidget):
             self.results_table.setItem(row, 0, QTableWidgetItem(date_str))
             
             # Test type
-            type_display = "Stress Test" if result.test_type == "stress" else "TLE Test"
+            type_display = ("Comparison Test" if result.test_type in ["stress", "comparison"] else
+                           "Benchmark Test" if result.test_type in ["tle", "benchmark"] else
+                           "Validator Test")
             self.results_table.setItem(row, 1, QTableWidgetItem(type_display))
             
             # File name (extract from path)
@@ -419,7 +422,9 @@ class TestResultsWidget(QWidget):
             date_str = datetime.fromisoformat(result.timestamp).strftime("%m-%d %H:%M")
             self.recent_table.setItem(row, 0, QTableWidgetItem(date_str))
             
-            type_display = "Stress" if result.test_type == "stress" else "TLE"
+            type_display = ("Comparison" if result.test_type in ["stress", "comparison"] else
+                           "Benchmark" if result.test_type in ["tle", "benchmark"] else
+                           "Validator")
             self.recent_table.setItem(row, 1, QTableWidgetItem(type_display))
             
             file_name = result.file_path.split('/')[-1] if result.file_path else "Unknown"

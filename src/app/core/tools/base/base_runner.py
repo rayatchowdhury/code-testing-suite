@@ -2,13 +2,13 @@
 BaseRunner - Consolidated runner patterns for all tools.
 
 This class consolidates the 300+ lines of duplicated runner boilerplate
-from ValidatorRunner, TLERunner, and Stresser into a single reusable
+from ValidatorRunner, Benchmarker, and Comparator into a single reusable
 base class with consistent threading, database integration, and lifecycle management.
 """
 
 import os
 import json
-from typing import Dict, Optional, Any
+from typing import Dict, Any
 from datetime import datetime
 from PySide6.QtCore import QObject, Signal, QThread
 from src.app.core.tools.base.base_compiler import BaseCompiler
@@ -20,16 +20,50 @@ logger = logging.getLogger(__name__)
 
 class BaseRunner(QObject):
     """
-    Base runner class for all testing tools.
+    Abstract base class for all test runners in the Code Testing Suite.
     
-    This class consolidates the common runner patterns that were
-    duplicated across ValidatorRunner, TLERunner, and Stresser,
-    providing:
-    - Standardized compilation using BaseCompiler
-    - Consistent threading and worker management
-    - Unified database integration patterns
-    - Common signal handling and lifecycle management
-    - Template method pattern for tool-specific behavior
+    This class consolidates the common runner patterns that were duplicated
+    across ValidatorRunner, Benchmarker, and Comparator, providing standardized:
+    
+    - **Compilation Integration**: BaseCompiler usage with status windows
+    - **Threading Patterns**: Worker/thread creation and lifecycle management  
+    - **Database Integration**: Template method pattern for test result storage
+    - **Signal Management**: Consistent signal forwarding and connections
+    - **Resource Cleanup**: Proper cleanup of threads, processes, and windows
+    
+    ## Template Method Pattern
+    
+    This class implements the Template Method pattern to provide consistent
+    behavior while allowing specialization:
+    
+    1. **_create_test_worker()** - Subclasses create their specialized worker
+    2. **_create_test_result()** - Subclasses build test-specific result objects
+    3. **_create_test_status_window()** - Subclasses create appropriate status windows
+    4. **_connect_worker_signals()** - Subclasses connect runner-specific signals
+    
+    ## Usage Example
+    
+    ```python
+    class MyRunner(BaseRunner):
+        def __init__(self, workspace_dir):
+            files = {'test': os.path.join(workspace_dir, 'test.cpp')}
+            super().__init__(workspace_dir, files, test_type='my_test')
+        
+        def _create_test_worker(self, test_count, **kwargs):
+            return MyTestWorker(self.workspace_dir, self.executables, test_count)
+        
+        def _create_test_result(self, all_passed, test_results, ...):
+            # Create MyTestResult with test-specific analysis
+            return TestResult(...)
+    ```
+    
+    ## Architecture Benefits
+    
+    - **Code Reduction**: Eliminates ~200 lines of duplicate patterns per runner
+    - **Consistency**: All runners follow same initialization/lifecycle patterns  
+    - **Maintainability**: Common bugs fixed once in base class
+    - **Extensibility**: New runners easily inherit established patterns
+    - **Testing**: Base functionality can be tested independently
     """
     
     # Common signals for all runners
@@ -118,12 +152,37 @@ class BaseRunner(QObject):
         """
         Run tests using threading and worker pattern - TEMPLATE METHOD.
         
-        This method provides the common threading infrastructure while
-        allowing subclasses to implement their specific test logic.
+        This method implements the Template Method pattern, providing the common
+        infrastructure for test execution while allowing subclasses to specialize
+        worker creation and result processing.
+        
+        ## Execution Flow:
+        
+        1. **Initialize**: Set test_count, start_time, create status window
+        2. **Create Worker**: Call _create_test_worker() template method
+        3. **Setup Threading**: Create QThread and move worker to thread
+        4. **Connect Signals**: Connect worker signals to status window and external listeners
+        5. **Database Integration**: Connect worker completion to _save_test_results()
+        6. **Start Execution**: Start thread and begin test execution
+        
+        ## Template Methods Called:
+        
+        - **_create_test_worker()**: Subclass creates specialized worker instance
+        - **_create_test_status_window()**: Subclass creates appropriate status window
+        - **_connect_worker_signals()**: Subclass connects runner-specific signals
         
         Args:
-            test_count: Number of tests to run
-            **kwargs: Additional test-specific parameters
+            test_count: Number of tests to execute
+            **kwargs: Additional test-specific parameters passed to _create_test_worker()
+            
+        Example:
+            ```python
+            # ValidatorRunner usage
+            runner.run_tests(10, max_workers=4)
+            
+            # Benchmarker usage  
+            runner.run_tests(5, time_limit=1000, memory_limit=256, max_workers=2)
+            ```
         """
         self.test_count = test_count
         self.test_start_time = datetime.now()

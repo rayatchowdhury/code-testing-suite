@@ -6,7 +6,7 @@ from src.app.presentation.views.benchmarker.benchmarker_display_area import Benc
 from src.app.presentation.views.benchmarker.test_count_slider import TestCountSlider
 from src.app.presentation.views.benchmarker.limits_input_widget import LimitsInputWidget
 # Lazy import to avoid circular dependency
-# from src.app.core.tools.tle_runner import TLERunner
+# from src.app.core.tools.benchmarker import Benchmarker
 
 class BenchmarkerWindow(SidebarWindowBase):
     def __init__(self, parent=None):
@@ -53,9 +53,9 @@ class BenchmarkerWindow(SidebarWindowBase):
         self.sidebar.button_clicked.connect(self.handle_button_click)
 
         # Lazy import to avoid circular dependency
-        from src.app.core.tools.tle_runner import TLERunner
-        self.tle_runner = TLERunner(self.display_area.workspace_dir)
-        self.tle_runner.compilationOutput.connect(self.display_area.console.displayOutput)
+        from src.app.core.tools.benchmarker import Benchmarker
+        self.benchmarker = Benchmarker(self.display_area.workspace_dir)
+        self.benchmarker.compilationOutput.connect(self.display_area.console.displayOutput)
 
     def handle_action_button(self, button_text):
         if button_text == 'Compile':
@@ -77,12 +77,12 @@ class BenchmarkerWindow(SidebarWindowBase):
                     elif reply == QMessageBox.Cancel:
                         return
 
-            self.tle_runner.compile_all()
+            self.benchmarker.compile_all()
         elif button_text == 'Run':
             time_limit = self.limits_widget.get_time_limit()
             memory_limit = self.limits_widget.get_memory_limit()
             test_count = self.test_count_slider.value()
-            self.tle_runner.run_tle_test(time_limit, memory_limit, test_count)
+            self.benchmarker.run_benchmark_test(time_limit, memory_limit, test_count)
         elif button_text == 'Results':
             # Navigate to results window
             if self.can_close():

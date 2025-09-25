@@ -6,7 +6,7 @@ import os
 from src.app.presentation.widgets.display_area_widgets.editor import EditorWidget
 from src.app.presentation.widgets.display_area_widgets.console import ConsoleOutput
 from src.app.presentation.widgets.display_area_widgets.ai_panel import AIPanel
-from src.app.core.tools.validator_compiler_runner import ValidatorCompilerRunner
+from src.app.core.tools.compiler_runner import CompilerRunner
 from src.app.presentation.styles.style import MATERIAL_COLORS
 from src.app.presentation.styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE
 from src.app.presentation.styles.components.test_view_styles import (
@@ -29,7 +29,7 @@ class ValidatorDisplay(QWidget):
         self._handle_file_button('Generator')
 
         # Initialize threaded compiler instead of regular compiler
-        self.compiler_runner = ValidatorCompilerRunner(self.console)
+        self.compiler_runner = CompilerRunner(self.console)
 
     def _setup_ui(self):
         main_layout = QHBoxLayout(self)

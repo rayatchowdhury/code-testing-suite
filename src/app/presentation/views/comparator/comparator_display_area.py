@@ -6,7 +6,7 @@ import os
 from src.app.presentation.widgets.display_area_widgets.editor import EditorWidget
 from src.app.presentation.widgets.display_area_widgets.console import ConsoleOutput
 from src.app.presentation.widgets.display_area_widgets.ai_panel import AIPanel
-from src.app.core.tools.stress_compiler_runner import StressCompilerRunner
+from src.app.core.tools.compiler_runner import CompilerRunner
 from src.app.presentation.styles.style import MATERIAL_COLORS
 from src.app.presentation.styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE
 from src.app.presentation.styles.components.test_view_styles import (
@@ -29,7 +29,7 @@ class ComparatorDisplay(QWidget):
         self._handle_file_button('Generator')
 
         # Initialize threaded compiler instead of regular compiler
-        self.compiler_runner = StressCompilerRunner(self.console)
+        self.compiler_runner = CompilerRunner(self.console)
 
     def _setup_ui(self):
         main_layout = QHBoxLayout(self)
@@ -81,9 +81,9 @@ class ComparatorDisplay(QWidget):
         content_layout.addWidget(button_panel)
         content_layout.addWidget(self.editor)
 
-        # Initialize AI panel with stress type (lazy loading)
+        # Initialize AI panel with comparison type (lazy loading)
         self.ai_panel = self.editor.get_ai_panel()
-        self.ai_panel.set_panel_type("stress")
+        self.ai_panel.set_panel_type("comparison")
 
         # Add inner panel to outer panel
         outer_layout.addWidget(content_panel)

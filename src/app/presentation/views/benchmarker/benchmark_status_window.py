@@ -106,23 +106,20 @@ class BenchmarkStatusWindow(QDialog):
     def _setup_styles(self):
         self.setStyleSheet(TEST_VIEW_STATUS_DIALOG_STYLE)
 
-    @Slot(str, int, int)
-    def show_test_running(self, test_name, current_test, total_tests):
+    @Slot(int, int)
+    def show_test_running(self, current_test, total_tests):
         """Show currently running test with progress"""
         self.history_widget.hide()
         self.current_test_widget.show()
         
         if total_tests > 1:
             self.progress_bar.show()
-            self.progress_bar.setMaximum(total_tests * 2)  # *2 because we run generator + solution for each test
-            progress = (current_test - 1) * 2
-            if "Solution" in test_name:
-                progress += 1
-            self.progress_bar.setValue(progress)
-            self.status_label.setText(f"Running {test_name} ({current_test}/{total_tests})")
+            self.progress_bar.setMaximum(total_tests)
+            self.progress_bar.setValue(current_test)
+            self.status_label.setText(f"Running Test {current_test}/{total_tests}")
         else:
             self.progress_bar.hide()
-            self.status_label.setText(f"Running {test_name}...")
+            self.status_label.setText(f"Running Test {current_test}...")
         
         self.time_label.setText("Time taken: 0.0s")
         self.memory_label.setText("Memory used: 0.0 MB")

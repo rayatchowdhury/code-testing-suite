@@ -32,7 +32,7 @@ class FilesSnapshot:
 class TestResult:
     """Data class for test results"""
     id: Optional[int] = None
-    test_type: str = ""  # 'stress' or 'tle'
+    test_type: str = ""  # 'stress' or 'benchmark'
     file_path: str = ""
     test_count: int = 0
     passed_tests: int = 0

@@ -2,7 +2,7 @@
 BaseCompiler - Consolidated compilation logic for all tools.
 
 This class consolidates the 450+ lines of duplicated compilation logic
-from validator_runner.py, tle_runner.py, and stresser.py into a single
+from validator.py, benchmarker.py, and comparator.py into a single
 reusable base class with consistent optimizations and caching.
 """
 
@@ -84,7 +84,7 @@ class BaseCompiler(QObject):
         Compile all files in parallel with smart caching and optimization.
         
         This method consolidates the identical logic from validator_runner.py,
-        tle_runner.py, and stresser.py.
+        benchmarker.py, and comparator.py.
         """
         files_to_compile = list(self.files.keys())
         max_workers = min(len(files_to_compile), multiprocessing.cpu_count())
