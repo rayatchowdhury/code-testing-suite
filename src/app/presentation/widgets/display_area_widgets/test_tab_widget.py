@@ -6,8 +6,10 @@ This widget provides a consistent tab interface for switching between different
 code files in test windows (Comparator, Validator, Benchmarker).
 """
 
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QMessageBox
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton, 
+                              QMessageBox, QLabel, QMenu)
+from PySide6.QtCore import Qt, Signal, QPoint
+from PySide6.QtGui import QCursor
 import os
 
 from src.app.presentation.styles.components.test_view_styles import (
@@ -16,6 +18,8 @@ from src.app.presentation.styles.components.test_view_styles import (
     TEST_VIEW_CONTENT_PANEL_STYLE
 )
 from src.app.shared.constants import WORKSPACE_DIR
+from src.app.shared.utils.tab_code_templates import TabCodeTemplates
+from src.app.presentation.styles.constants import MATERIAL_COLORS
 
 
 class TestTabWidget(QWidget):
@@ -29,15 +33,18 @@ class TestTabWidget(QWidget):
     # Signals
     fileChanged = Signal(str)  # Emitted when switching to a different file
     tabClicked = Signal(str)   # Emitted when any tab is clicked
+    languageChanged = Signal(str, str)  # Emitted when language changes (tab_name, language)
     
-    def __init__(self, parent=None, tab_config=None, default_tab=None):
+    def __init__(self, parent=None, tab_config=None, default_tab=None, multi_language=False, default_language='cpp'):
         """
         Initialize TestTabWidget.
         
         Args:
             parent: Parent widget
-            tab_config: Dict mapping tab names to file names
+            tab_config: Dict mapping tab names to file names (legacy) or language configs
             default_tab: Name of the tab to activate by default
+            multi_language: Enable multi-language support
+            default_language: Default language for new tabs ('cpp', 'py', 'java')
         """
         super().__init__(parent)
         
@@ -45,6 +52,16 @@ class TestTabWidget(QWidget):
         self.tab_config = tab_config or {}
         self.default_tab = default_tab
         self.workspace_dir = WORKSPACE_DIR
+        self.multi_language = multi_language
+        self.available_languages = ['cpp', 'py', 'java']
+        self.default_language = default_language
+        
+        # Multi-language state management
+        if multi_language:
+            self.current_language_per_tab = {}  # tab_name -> current_language
+            self.unsaved_changes_per_tab = {}   # tab_name -> {language: bool}
+            # Convert legacy config to multi-language format if needed
+            self._ensure_multi_language_config()
         
         # State management
         self.file_buttons = {}
@@ -54,6 +71,52 @@ class TestTabWidget(QWidget):
         self._setup_ui()
         os.makedirs(self.workspace_dir, exist_ok=True)
         
+    def _ensure_multi_language_config(self):
+        """Convert legacy config to multi-language format if needed."""
+        for tab_name, config in self.tab_config.items():
+            if isinstance(config, str):
+                # Legacy format: convert single file to language dict
+                extension = config.split('.')[-1]
+                base_name = config.rsplit('.', 1)[0]
+                
+                # Create consistent naming for all languages
+                if tab_name == 'Generator':
+                    self.tab_config[tab_name] = {
+                        'cpp': 'generator.cpp',
+                        'py': 'generator.py', 
+                        'java': 'Generator.java'  # Capital for Java class
+                    }
+                elif tab_name == 'Test Code':
+                    self.tab_config[tab_name] = {
+                        'cpp': 'test.cpp',
+                        'py': 'test.py',
+                        'java': 'Test.java'  # Consistent naming
+                    }
+                elif tab_name == 'Correct Code':
+                    self.tab_config[tab_name] = {
+                        'cpp': 'correct.cpp',
+                        'py': 'correct.py',
+                        'java': 'Correct.java'  # Consistent naming
+                    }
+                elif tab_name == 'Validator Code':
+                    self.tab_config[tab_name] = {
+                        'cpp': 'validator.cpp',
+                        'py': 'validator.py',
+                        'java': 'Validator.java'  # Consistent naming
+                    }
+                else:
+                    # Generic fallback
+                    clean_name = base_name.replace(' ', '').lower()
+                    self.tab_config[tab_name] = {
+                        'cpp': f"{clean_name}.cpp",
+                        'py': f"{clean_name}.py",
+                        'java': f"{clean_name.title()}.java"
+                    }
+            
+            # Initialize current language and unsaved state
+            self.current_language_per_tab[tab_name] = self.default_language
+            self.unsaved_changes_per_tab[tab_name] = {lang: False for lang in self.available_languages}
+        
     def _setup_ui(self):
         """Setup the tab widget UI."""
         layout = QVBoxLayout(self)
@@ -62,22 +125,183 @@ class TestTabWidget(QWidget):
         
         # Create button panel with background
         button_panel = QWidget()
+        button_panel.setMinimumHeight(56)  # Set minimum height for button panel
         button_panel.setStyleSheet(TEST_VIEW_BUTTON_PANEL_STYLE)
         button_layout = QHBoxLayout(button_panel)
-        button_layout.setContentsMargins(8, 8, 8, 8)
-        button_layout.setSpacing(8)
+        button_layout.setContentsMargins(12, 8, 12, 8)  # Slightly more padding
+        button_layout.setSpacing(10)  # Increased spacing between tabs
         
         # Create tab buttons
         for tab_name in self.tab_config.keys():
-            btn = QPushButton(tab_name)
-            btn.setMinimumHeight(36)
+            if self.multi_language:
+                # Create custom tab widget with modern Material Design styling
+                tab_widget = QWidget()
+                tab_widget.setMinimumWidth(160)  # Set minimum width to prevent collision
+                tab_widget.setMaximumHeight(48)  # Control height
+                tab_widget.setStyleSheet(f"""
+                    QWidget {{
+                        border: 1px solid {MATERIAL_COLORS['outline_variant']};
+                        border-radius: 8px;
+                        background: {MATERIAL_COLORS['surface_variant']};
+                        margin: 2px;
+                    }}
+                    QWidget:hover {{
+                        border-color: {MATERIAL_COLORS['outline']};
+                        background: {MATERIAL_COLORS['surface_bright']};
+                    }}
+                """)
+                
+                tab_layout = QHBoxLayout(tab_widget)
+                tab_layout.setContentsMargins(2, 2, 2, 2)
+                tab_layout.setSpacing(0)
+                
+                # Main button (80% of the width)
+                btn = QPushButton(tab_name)
+                btn.setMinimumHeight(40)
+                btn.setMinimumWidth(110)  # Ensure button has minimum width
+                btn.setSizePolicy(btn.sizePolicy().horizontalPolicy(), btn.sizePolicy().verticalPolicy())
+                btn.clicked.connect(lambda checked, name=tab_name: self._handle_tab_click(name))
+                
+                # Modern button styling with Material Design colors
+                btn.setStyleSheet(f"""
+                    QPushButton {{
+                        border: none;
+                        border-radius: 6px;
+                        background: transparent;
+                        color: {MATERIAL_COLORS['on_surface']};
+                        font-size: 13px;
+                        font-weight: 500;
+                        padding: 8px 12px;
+                        text-align: center;
+                        min-width: 110px;
+                    }}
+                    QPushButton:hover {{
+                        background: rgba(255, 255, 255, 0.08);
+                    }}
+                    QPushButton:pressed {{
+                        background: rgba(255, 255, 255, 0.12);
+                    }}
+                    QPushButton[isActive="true"] {{
+                        background: {MATERIAL_COLORS['primary_container']};
+                        color: {MATERIAL_COLORS['on_primary_container']};
+                        font-weight: 600;
+                    }}
+                    QPushButton[isActive="true"]:hover {{
+                        background: {MATERIAL_COLORS['primary']};
+                        color: {MATERIAL_COLORS['on_primary']};
+                    }}
+                """)
+                
+                # Language selector container (20% of width) with modern styling
+                lang_container = QWidget()
+                lang_container.setMinimumWidth(50)  # Minimum width for language selector
+                lang_container.setMaximumWidth(50)  # Fixed width to prevent expansion
+                lang_container.setStyleSheet(f"""
+                    QWidget {{
+                        border: none;
+                        border-left: 1px solid {MATERIAL_COLORS['outline_variant']};
+                        border-radius: 0;
+                        border-top-right-radius: 6px;
+                        border-bottom-right-radius: 6px;
+                        background: {MATERIAL_COLORS['surface_dim']};
+                        min-width: 50px;
+                        max-width: 50px;
+                    }}
+                    QWidget:hover {{
+                        background: {MATERIAL_COLORS['surface_bright']};
+                        border-left-color: {MATERIAL_COLORS['outline']};
+                    }}
+                """)
+                
+                lang_layout = QVBoxLayout(lang_container)
+                lang_layout.setContentsMargins(4, 4, 4, 4)
+                lang_layout.setAlignment(Qt.AlignCenter)
+                
+                current_lang = self.current_language_per_tab[tab_name]
+                lang_label = QLabel(current_lang.upper())
+                lang_label.setAlignment(Qt.AlignCenter)
+                lang_label.setStyleSheet(f"""
+                    QLabel {{
+                        color: {MATERIAL_COLORS['text_secondary']};
+                        font-size: 10px;
+                        font-weight: 600;
+                        padding: 4px 2px;
+                        background: transparent;
+                        border: none;
+                        border-radius: 3px;
+                    }}
+                    QLabel:hover {{
+                        color: {MATERIAL_COLORS['primary']};
+                        background: rgba(0, 150, 199, 0.1);
+                    }}
+                """)
+                lang_label.mousePressEvent = lambda event, tab=tab_name: self._show_language_menu(event, tab)
+                lang_label.setCursor(QCursor(Qt.PointingHandCursor))
+                lang_label.setToolTip(f"Click to change language for {tab_name}")
+                
+                lang_layout.addWidget(lang_label)
+                
+                # Add widgets to tab layout - use stretch factors to maintain ratios
+                tab_layout.addWidget(btn, 3)  # 75% width
+                tab_layout.addWidget(lang_container, 1)  # 25% width (but fixed at 50px)
+                
+                # Store references
+                self.file_buttons[tab_name] = btn
+                setattr(btn, 'language_label', lang_label)
+                setattr(btn, 'tab_container', tab_widget)
+                
+                button_layout.addWidget(tab_widget)
+            else:
+                # Legacy single-language button with improved styling
+                btn = QPushButton(tab_name)
+                btn.setMinimumHeight(40)
+                btn.setMinimumWidth(120)  # Consistent minimum width
+                btn.clicked.connect(lambda checked, name=tab_name: self._handle_tab_click(name))
+                
+                # Apply consistent Material Design styling for single-language buttons
+                btn.setStyleSheet(f"""
+                    QPushButton {{
+                        background-color: {MATERIAL_COLORS['surface_variant']};
+                        border: 1px solid {MATERIAL_COLORS['outline_variant']};
+                        border-radius: 8px;
+                        color: {MATERIAL_COLORS['on_surface']};
+                        padding: 8px 16px;
+                        font-weight: 500;
+                        font-size: 13px;
+                        min-width: 120px;
+                    }}
+                    QPushButton:hover {{
+                        background-color: {MATERIAL_COLORS['surface_bright']};
+                        border-color: {MATERIAL_COLORS['outline']};
+                    }}
+                    QPushButton[isActive="true"] {{
+                        background-color: {MATERIAL_COLORS['primary_container']};
+                        border: 2px solid {MATERIAL_COLORS['primary']};
+                        color: {MATERIAL_COLORS['on_primary_container']};
+                        font-weight: 600;
+                        padding: 7px 15px;
+                    }}
+                    QPushButton[isActive="true"]:hover {{
+                        background-color: {MATERIAL_COLORS['primary']};
+                        color: {MATERIAL_COLORS['on_primary']};
+                    }}
+                    QPushButton[hasUnsavedChanges="true"] {{
+                        border: 2px solid {MATERIAL_COLORS['error']};
+                        padding: 7px 15px;
+                    }}
+                """)
+                
+                self.file_buttons[tab_name] = btn
+                button_layout.addWidget(btn)
+            
+            # Set properties for state management
             btn.setProperty("isActive", False)
             btn.setProperty("hasUnsavedChanges", False)
-            btn.setStyleSheet(TEST_VIEW_FILE_BUTTON_STYLE)
-            btn.clicked.connect(lambda checked, name=tab_name: self._handle_tab_click(name))
-            
-            self.file_buttons[tab_name] = btn
-            button_layout.addWidget(btn)
+        
+        # Add spacer to prevent tabs from stretching unnecessarily
+        from PySide6.QtWidgets import QSpacerItem, QSizePolicy
+        spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        button_layout.addItem(spacer)
         
         # Create content panel
         self.content_panel = QWidget()
@@ -103,31 +327,198 @@ class TestTabWidget(QWidget):
     def get_content_widget(self):
         """Get the current content widget."""
         return self._content_widget
+    
+    def _show_language_menu(self, event, tab_name):
+        """Show language selection menu when language indicator is clicked."""
+        if not self.multi_language:
+            return
+            
+        menu = QMenu()
+        menu.setStyleSheet(f"""
+            QMenu {{
+                background-color: {MATERIAL_COLORS['surface']};
+                border: 1px solid {MATERIAL_COLORS['outline']};
+                border-radius: 8px;
+                padding: 8px 0px;
+                min-width: 100px;
+                box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
+            }}
+            QMenu::item {{
+                background-color: transparent;
+                padding: 10px 16px;
+                margin: 2px 6px;
+                border-radius: 6px;
+                color: {MATERIAL_COLORS['on_surface']};
+                font-size: 12px;
+                font-weight: 500;
+                min-height: 20px;
+            }}
+            QMenu::item:selected {{
+                background-color: {MATERIAL_COLORS['primary_container']};
+                color: {MATERIAL_COLORS['on_primary_container']};
+            }}
+            QMenu::item:checked {{
+                background-color: {MATERIAL_COLORS['primary']};
+                color: {MATERIAL_COLORS['on_primary']};
+                font-weight: 600;
+            }}
+            QMenu::separator {{
+                height: 1px;
+                background-color: {MATERIAL_COLORS['outline_variant']};
+                margin: 6px 12px;
+            }}
+        """)
         
-    def _handle_tab_click(self, tab_name, skip_save_prompt=False):
-        """Handle tab button clicks and switch between files."""
-        # Check if current file has unsaved changes (unless skipping prompt)
-        if not skip_save_prompt and self.current_button and self.current_button.property("hasUnsavedChanges"):
+        current_lang = self.current_language_per_tab.get(tab_name)
+        
+        for lang in self.available_languages:
+            action = menu.addAction(f"{lang.upper()}")
+            action.setCheckable(True)
+            action.setChecked(lang == current_lang)
+            action.triggered.connect(
+                lambda checked, language=lang: self._handle_language_change(tab_name, language)
+            )
+        
+        # Show menu at cursor position
+        menu.exec(QCursor.pos())
+    
+    def _handle_language_change(self, tab_name, new_language):
+        """Handle language dropdown selection change."""
+        if not self.multi_language:
+            return
+            
+        old_language = self.current_language_per_tab.get(tab_name)
+        print(f"Switching {tab_name} from {old_language} to {new_language}")
+        
+        # Check for unsaved changes in current language
+        if (old_language and 
+            old_language != new_language and 
+            self.unsaved_changes_per_tab[tab_name].get(old_language, False)):
+            
             reply = QMessageBox.question(
-                self, 
-                "Unsaved Changes",
-                f"Do you want to save changes to {self.current_button.text()}?",
+                self, "Unsaved Changes",
+                f"Save changes to {tab_name} ({old_language.upper()}) before switching to {new_language.upper()}?",
                 QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel
             )
             
             if reply == QMessageBox.Save:
-                # Emit signal for parent to handle saving
                 self.tabClicked.emit("save_current")
-                # Note: Parent should call this method again with skip_save_prompt=True after saving
+                # Note: Parent should handle saving and call this method again
                 return
             elif reply == QMessageBox.Cancel:
                 return
         
+        # Update current language
+        self.current_language_per_tab[tab_name] = new_language
+        
+        # Update language indicator
+        self._update_tab_language_indicator(tab_name, new_language)
+        
+        # If this tab is currently active, switch to new language file
+        button = self.file_buttons[tab_name]
+        if button == self.current_button:
+            file_path = self._get_current_file_path(tab_name, new_language)
+            print(f"Switching to file: {file_path}")
+            
+            # Create file if it doesn't exist
+            if not os.path.exists(file_path):
+                default_content = self._get_default_content(tab_name, new_language)
+                os.makedirs(os.path.dirname(file_path), exist_ok=True)
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    f.write(default_content)
+                print(f"Created new file {file_path} with template")
+            
+            # Emit signals to reload file content
+            self.fileChanged.emit(file_path)
+            self.languageChanged.emit(tab_name, new_language)
+        
+        print(f"Language change completed for {tab_name}")
+    
+    def _update_tab_language_indicator(self, tab_name, language):
+        """Update the language indicator label for a tab."""
+        button = self.file_buttons[tab_name]
+        if hasattr(button, 'language_label'):
+            button.language_label.setText(language.upper())
+        
+    def _get_current_file_path(self, tab_name, language=None):
+        """Get file path for specific tab and language."""
+        if self.multi_language:
+            if language is None:
+                language = self.current_language_per_tab.get(tab_name, self.default_language)
+            file_name = self.tab_config[tab_name][language]
+        else:
+            file_name = self.tab_config[tab_name]
+        
+        return os.path.join(self.workspace_dir, file_name)
+        
+    def _handle_tab_click(self, tab_name, skip_save_prompt=False):
+        """Handle tab button clicks and switch between files."""
+        # Check if current file has unsaved changes (unless skipping prompt)
+        if not skip_save_prompt and self.current_button:
+            if self.multi_language:
+                # Check unsaved changes for current language
+                current_tab_name = self._get_original_tab_name()
+                current_lang = self.current_language_per_tab.get(current_tab_name, self.default_language)
+                has_changes = self.unsaved_changes_per_tab.get(current_tab_name, {}).get(current_lang, False)
+            else:
+                has_changes = self.current_button.property("hasUnsavedChanges")
+                
+            if has_changes:
+                reply = QMessageBox.question(
+                    self, 
+                    "Unsaved Changes",
+                    f"Do you want to save changes to {current_tab_name if self.multi_language else self.current_button.text()}?",
+                    QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel
+                )
+                
+                if reply == QMessageBox.Save:
+                    # Emit signal for parent to handle saving
+                    self.tabClicked.emit("save_current")
+                    # Note: Parent should call this method again with skip_save_prompt=True after saving
+                    return
+                elif reply == QMessageBox.Cancel:
+                    return
+        
         # Update button states
         if self.current_button:
             self.current_button.setProperty("isActive", False)
-            self.current_button.setProperty("hasUnsavedChanges", False)
+            if not self.multi_language:
+                self.current_button.setProperty("hasUnsavedChanges", False)
             self.current_button.style().polish(self.current_button)
+            
+            # Update container styling if multi-language
+            if self.multi_language and hasattr(self.current_button, 'tab_container'):
+                old_tab_name = self._get_original_tab_name()
+                container = self.current_button.tab_container
+                current_style = container.styleSheet()
+                
+                # Check if old tab has unsaved changes
+                has_unsaved = self.unsaved_changes_per_tab.get(old_tab_name, {}).get(
+                    self.current_language_per_tab.get(old_tab_name, self.default_language), False
+                )
+                
+                if has_unsaved:
+                    # Inactive tab with unsaved changes - keep error border but thinner
+                    new_style = current_style.replace(
+                        f"border: 2px solid {MATERIAL_COLORS['primary']};",
+                        f"border: 2px solid {MATERIAL_COLORS['error']};"
+                    )
+                    new_style = new_style.replace(
+                        f"border: 2px solid {MATERIAL_COLORS['error']};",
+                        f"border: 2px solid {MATERIAL_COLORS['error']};"
+                    )  # Keep error color
+                else:
+                    # Inactive tab without unsaved changes - normal border
+                    new_style = current_style.replace(
+                        f"border: 2px solid {MATERIAL_COLORS['primary']};",
+                        f"border: 1px solid {MATERIAL_COLORS['outline_variant']};"
+                    )
+                    new_style = new_style.replace(
+                        f"border: 2px solid {MATERIAL_COLORS['error']};",
+                        f"border: 1px solid {MATERIAL_COLORS['outline_variant']};"
+                    )
+                
+                container.setStyleSheet(new_style)
         
         # Set new active button
         new_button = self.file_buttons[tab_name]
@@ -135,13 +526,47 @@ class TestTabWidget(QWidget):
         new_button.style().polish(new_button)
         self.current_button = new_button
         
+        # Update container styling for active state
+        if self.multi_language and hasattr(new_button, 'tab_container'):
+            container = new_button.tab_container
+            current_style = container.styleSheet()
+            
+            # Check if this tab has unsaved changes
+            has_unsaved = self.unsaved_changes_per_tab.get(tab_name, {}).get(
+                self.current_language_per_tab.get(tab_name, self.default_language), False
+            )
+            
+            if has_unsaved:
+                # Active tab with unsaved changes - error border
+                new_style = current_style.replace(
+                    f"border: 1px solid {MATERIAL_COLORS['outline_variant']};",
+                    f"border: 2px solid {MATERIAL_COLORS['error']};"
+                )
+            else:
+                # Active tab without unsaved changes - primary border
+                new_style = current_style.replace(
+                    f"border: 1px solid {MATERIAL_COLORS['outline_variant']};",
+                    f"border: 2px solid {MATERIAL_COLORS['primary']};"
+                )
+            
+            container.setStyleSheet(new_style)
+        
         # Get file path
-        file_name = self.tab_config[tab_name]
-        file_path = os.path.join(self.workspace_dir, file_name)
+        if self.multi_language:
+            current_lang = self.current_language_per_tab.get(tab_name, self.default_language)
+            file_path = self._get_current_file_path(tab_name, current_lang)
+        else:
+            file_name = self.tab_config[tab_name]
+            file_path = os.path.join(self.workspace_dir, file_name)
         
         # Create file if it doesn't exist with appropriate content
         if not os.path.exists(file_path):
-            default_content = self._get_default_content(tab_name)
+            if self.multi_language:
+                default_content = self._get_default_content(tab_name, current_lang)
+            else:
+                default_content = self._get_default_content(tab_name)
+            
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
             with open(file_path, 'w', encoding='utf-8') as f:
                 f.write(default_content)
         
@@ -149,92 +574,25 @@ class TestTabWidget(QWidget):
         self.fileChanged.emit(file_path)
         self.tabClicked.emit(tab_name)
         
-    def _get_default_content(self, tab_name):
-        """Get default content for new files based on tab name."""
-        if tab_name == 'Generator':
-            return '''#include <iostream>
-#include <random>
-#include <chrono>
-using namespace std;
-
-int main() {
-    // Seed random number generator
-    mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
-    
-    // Generate random test case
-    // Example: generate random array
-    int n = uniform_int_distribution<int>(1, 10)(rng);
-    
-    cout << n << endl;
-    for (int i = 0; i < n; i++) {
-        cout << uniform_int_distribution<int>(1, 100)(rng);
-        if (i < n - 1) cout << " ";
-    }
-    cout << endl;
-    
-    return 0;
-}'''
-        elif tab_name in ['Test Code', 'Correct Code']:
-            return '''#include <iostream>
-#include <vector>
-#include <algorithm>
-using namespace std;
-
-int main() {
-    // Read input
-    int n;
-    cin >> n;
-    
-    vector<int> arr(n);
-    for (int i = 0; i < n; i++) {
-        cin >> arr[i];
-    }
-    
-    // Your algorithm here
-    
-    // Output result
-    for (int i = 0; i < n; i++) {
-        cout << arr[i];
-        if (i < n - 1) cout << " ";
-    }
-    cout << endl;
-    
-    return 0;
-}'''
-        elif tab_name == 'Validator Code':
-            return '''#include <iostream>
-#include <vector>
-#include <cassert>
-using namespace std;
-
-int main() {
-    // Read input
-    int n;
-    cin >> n;
-    
-    // Validate input constraints
-    assert(n >= 1 && n <= 1000000);
-    
-    vector<int> arr(n);
-    for (int i = 0; i < n; i++) {
-        cin >> arr[i];
-        assert(arr[i] >= 1 && arr[i] <= 1000000);
-    }
-    
-    // Additional validation logic here
-    
-    cout << "Input is valid" << endl;
-    
-    return 0;
-}'''
-        else:
-            return '''#include <iostream>
-using namespace std;
-
-int main() {
-    // Your code here
-    return 0;
-}'''
+    def _get_default_content(self, tab_name, language='cpp'):
+        """
+        Get default template content for a tab in specified language.
+        Uses centralized TabCodeTemplates for consistency.
+        """
+        try:
+            return TabCodeTemplates.get_template(tab_name, language)
+        except Exception as e:
+            print(f"Error getting template for {tab_name} ({language}): {e}")
+            # Fallback to basic template
+            if language == 'cpp':
+                return '#include <iostream>\nusing namespace std;\n\nint main() {\n    // Your code here\n    return 0;\n}'
+            elif language == 'py':
+                return 'def main():\n    # Your code here\n    pass\n\nif __name__ == "__main__":\n    main()\n'
+            elif language == 'java':
+                class_name = tab_name.replace(' ', '') if tab_name else 'Main'
+                return f'public class {class_name} {{\n    public static void main(String[] args) {{\n        // Your code here\n    }}\n}}'
+            else:
+                return '// Your code here\n'
     
     def activate_tab(self, tab_name, skip_save_prompt=False):
         """Programmatically activate a tab."""
@@ -253,34 +611,127 @@ int main() {
     def mark_current_tab_unsaved(self):
         """Mark the current tab as having unsaved changes."""
         if self.current_button:
-            self.current_button.setProperty("hasUnsavedChanges", True)
+            if self.multi_language:
+                current_tab_name = self._get_original_tab_name()
+                current_lang = self.current_language_per_tab.get(current_tab_name, self.default_language)
+                self.unsaved_changes_per_tab[current_tab_name][current_lang] = True
+                # Update visual indicator with border color
+                self._update_tab_unsaved_indicator(current_tab_name, True)
+            else:
+                self.current_button.setProperty("hasUnsavedChanges", True)
             self.current_button.style().polish(self.current_button)
     
     def mark_current_tab_saved(self):
         """Mark the current tab as saved."""
         if self.current_button:
-            self.current_button.setProperty("hasUnsavedChanges", False)
+            if self.multi_language:
+                current_tab_name = self._get_original_tab_name()
+                current_lang = self.current_language_per_tab.get(current_tab_name, self.default_language)
+                self.unsaved_changes_per_tab[current_tab_name][current_lang] = False
+                # Update visual indicator with border color
+                self._update_tab_unsaved_indicator(current_tab_name, False)
+            else:
+                self.current_button.setProperty("hasUnsavedChanges", False)
             self.current_button.style().polish(self.current_button)
+    
+    def _get_original_tab_name(self):
+        """Get the original tab name without any asterisk indicators."""
+        if self.current_button:
+            # Remove asterisk if present
+            return self.current_button.text().rstrip('*')
+        return None
+    
+    def _update_tab_unsaved_indicator(self, tab_name, has_unsaved):
+        """Update visual indicator for unsaved changes using border color."""
+        if tab_name in self.file_buttons:
+            button = self.file_buttons[tab_name]
+            
+            if self.multi_language and hasattr(button, 'tab_container'):
+                container = button.tab_container
+                current_style = container.styleSheet()
+                new_style = current_style  # Initialize with current style
+                
+                if has_unsaved:
+                    # Change border to error color for unsaved changes
+                    if f"border-color: {MATERIAL_COLORS['outline']};" in current_style:
+                        # Active/hover state with unsaved changes
+                        new_style = current_style.replace(
+                            f"border-color: {MATERIAL_COLORS['outline']};",
+                            f"border-color: {MATERIAL_COLORS['error']}; border-width: 2px;"
+                        )
+                    elif f"border: 1px solid {MATERIAL_COLORS['outline_variant']};" in current_style:
+                        # Normal state with unsaved changes  
+                        new_style = current_style.replace(
+                            f"border: 1px solid {MATERIAL_COLORS['outline_variant']};",
+                            f"border: 2px solid {MATERIAL_COLORS['error']};"
+                        )
+                    elif f"border: 2px solid {MATERIAL_COLORS['primary']};" in current_style:
+                        # Active state with unsaved changes
+                        new_style = current_style.replace(
+                            f"border: 2px solid {MATERIAL_COLORS['primary']};",
+                            f"border: 2px solid {MATERIAL_COLORS['error']};"
+                        )
+                else:
+                    # Restore normal border colors
+                    if f"border: 2px solid {MATERIAL_COLORS['error']};" in current_style:
+                        # Check if this is the active tab
+                        if button == self.current_button:
+                            # Restore to active border
+                            new_style = current_style.replace(
+                                f"border: 2px solid {MATERIAL_COLORS['error']};",
+                                f"border: 2px solid {MATERIAL_COLORS['primary']};"
+                            )
+                        else:
+                            # Restore to normal border
+                            new_style = current_style.replace(
+                                f"border: 2px solid {MATERIAL_COLORS['error']};",
+                                f"border: 1px solid {MATERIAL_COLORS['outline_variant']};"
+                            )
+                    elif f"border-color: {MATERIAL_COLORS['error']}; border-width: 2px;" in current_style:
+                        # Restore hover state
+                        new_style = current_style.replace(
+                            f"border-color: {MATERIAL_COLORS['error']}; border-width: 2px;",
+                            f"border-color: {MATERIAL_COLORS['outline']};"
+                        )
+                
+                container.setStyleSheet(new_style)
     
     def get_current_tab_name(self):
         """Get the name of the currently active tab."""
         if self.current_button:
-            return self.current_button.text()
+            # Always return the original button text without any indicators
+            return self.current_button.text().rstrip('*')
         return None
     
     def get_current_file_path(self):
         """Get the file path of the currently active tab."""
         current_tab = self.get_current_tab_name()
-        if current_tab and current_tab in self.tab_config:
-            file_name = self.tab_config[current_tab]
-            return os.path.join(self.workspace_dir, file_name)
+        if current_tab:
+            if self.multi_language:
+                current_lang = self.current_language_per_tab.get(current_tab, self.default_language)
+                return self._get_current_file_path(current_tab, current_lang)
+            else:
+                file_name = self.tab_config[current_tab]
+                return os.path.join(self.workspace_dir, file_name)
         return None
     
     def has_unsaved_changes(self):
         """Check if the current tab has unsaved changes."""
         if self.current_button:
-            return self.current_button.property("hasUnsavedChanges")
+            if self.multi_language:
+                current_tab_name = self._get_original_tab_name()
+                current_lang = self.current_language_per_tab.get(current_tab_name, self.default_language)
+                return self.unsaved_changes_per_tab.get(current_tab_name, {}).get(current_lang, False)
+            else:
+                return self.current_button.property("hasUnsavedChanges")
         return False
+    
+    def get_current_language(self):
+        """Get the current language of the active tab."""
+        if self.multi_language:
+            current_tab = self.get_current_tab_name()
+            return self.current_language_per_tab.get(current_tab, self.default_language)
+        return 'cpp'  # Default for non-multi-language mode
 
     def set_tab_config(self, tab_config, default_tab=None):
         """Update the tab configuration and rebuild the UI."""
@@ -293,5 +744,14 @@ int main() {
         self.file_buttons.clear()
         self.current_button = None
         
+        # Re-initialize multi-language state if needed
+        if self.multi_language:
+            self._ensure_multi_language_config()
+        
         # Rebuild UI
         self._setup_ui()
+    
+    def switch_language(self, tab_name, language):
+        """Programmatically switch language for a specific tab."""
+        if self.multi_language and tab_name in self.file_buttons:
+            self._handle_language_change(tab_name, language)

@@ -54,16 +54,30 @@ class ValidatorDisplay(QWidget):
         # Create editor
         self.editor = EditorWidget()
         
-        # Create test tabs widget with validator configuration
+        # Create test tabs widget with validator configuration (multi-language)
         tab_config = {
-            'Generator': 'generator.cpp',
-            'Test Code': 'test.cpp',
-            'Validator Code': 'validator.cpp'
+            'Generator': {
+                'cpp': 'generator.cpp',
+                'py': 'generator.py',
+                'java': 'Generator.java'
+            },
+            'Test Code': {
+                'cpp': 'test.cpp',
+                'py': 'test.py',
+                'java': 'TestCode.java'
+            },
+            'Validator Code': {
+                'cpp': 'validator.cpp',
+                'py': 'validator.py',
+                'java': 'ValidatorCode.java'
+            }
         }
         self.test_tabs = TestTabWidget(
             parent=self,
             tab_config=tab_config,
-            default_tab='Generator'
+            default_tab='Generator',
+            multi_language=True,
+            default_language='cpp'
         )
         
         # Set editor as the content widget for tabs
@@ -97,6 +111,7 @@ class ValidatorDisplay(QWidget):
         # Connect test tabs signals
         self.test_tabs.fileChanged.connect(self._handle_file_changed)
         self.test_tabs.tabClicked.connect(self._handle_tab_clicked)
+        self.test_tabs.languageChanged.connect(self._handle_language_changed)
         
         # Connect console compile & run button
         self.console.compile_run_btn.clicked.connect(self.compile_and_run_code)
@@ -127,6 +142,13 @@ class ValidatorDisplay(QWidget):
         else:
             # Regular tab click - no additional action needed
             pass
+
+    def _handle_language_changed(self, tab_name, language):
+        """Handle language switching in tabs."""
+        print(f"Validator: Switched to {language.upper()} in {tab_name}")
+        # Update AI panel context if needed
+        if hasattr(self.ai_panel, 'refresh_context'):
+            self.ai_panel.refresh_context()
 
     def _handle_text_changed(self):
         """Handle text changes in editor."""
