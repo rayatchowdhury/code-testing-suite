@@ -120,7 +120,7 @@ class ComparatorDisplay(QWidget):
     
     def _connect_signals(self):
         """Connect UI signals to their handlers."""
-        # Connect file button clicks
+        # Connect file button clicks (use lambda to maintain default parameter)
         for btn_name, btn in self.file_buttons.items():
             btn.clicked.connect(lambda checked, name=btn_name: self._handle_file_button(name))
         
@@ -135,10 +135,10 @@ class ComparatorDisplay(QWidget):
         if hasattr(self.ai_panel, 'refresh_context'):
             self.filePathChanged.connect(self.ai_panel.refresh_context)
 
-    def _handle_file_button(self, button_name):
+    def _handle_file_button(self, button_name, skip_save_prompt=False):
         """Handle file button clicks and switch between files."""
-        # Check if current file has unsaved changes
-        if self.current_button and self.current_button.property("hasUnsavedChanges"):
+        # Check if current file has unsaved changes (unless skipping prompt)
+        if not skip_save_prompt and self.current_button and self.current_button.property("hasUnsavedChanges"):
             reply = QMessageBox.question(
                 self, 
                 "Unsaved Changes",

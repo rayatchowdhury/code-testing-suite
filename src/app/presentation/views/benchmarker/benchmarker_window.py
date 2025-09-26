@@ -69,8 +69,8 @@ class BenchmarkerWindow(SidebarWindowBase):
                     )
                     
                     if reply == QMessageBox.Save:
-                        # Switch to this file
-                        self.display_area._handle_file_button(btn_name)
+                        # Switch to this file (skip save prompt since we already handled it)
+                        self.display_area._handle_file_button(btn_name, skip_save_prompt=True)
                         if not self.display_area.editor.saveFile():
                             return
                     elif reply == QMessageBox.Cancel:

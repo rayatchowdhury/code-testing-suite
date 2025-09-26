@@ -70,7 +70,7 @@ class ValidatorWindow(SidebarWindowBase):
                     )
                     
                     if reply == QMessageBox.Save:
-                        # Switch to this file
+                        # Switch to this file (no need to skip save prompt since validator doesn't double-check)
                         self.display_area._handle_file_button(btn_name)
                         if not self.display_area.editor.saveFile():
                             return

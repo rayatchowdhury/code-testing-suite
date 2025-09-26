@@ -104,6 +104,7 @@ class BenchmarkerDisplay(QWidget):
         main_layout.addWidget(self.splitter)
 
     def _connect_signals(self):
+        # Connect file button clicks (use lambda to maintain default parameter)
         for name, btn in self.file_buttons.items():
             btn.clicked.connect(lambda checked, n=name: self._handle_file_button(n))
         self.console.compile_run_btn.clicked.connect(self.compile_and_run_code)
@@ -116,9 +117,9 @@ class BenchmarkerDisplay(QWidget):
             self.current_button.style().unpolish(self.current_button)
             self.current_button.style().polish(self.current_button)
     
-    def _handle_file_button(self, button_text):
-        # Check if current file has unsaved changes
-        if self.current_button and self.current_button.property("hasUnsavedChanges"):
+    def _handle_file_button(self, button_text, skip_save_prompt=False):
+        # Check if current file has unsaved changes (unless skipping prompt)
+        if not skip_save_prompt and self.current_button and self.current_button.property("hasUnsavedChanges"):
             reply = QMessageBox.question(
                 self, 
                 "Unsaved Changes",
