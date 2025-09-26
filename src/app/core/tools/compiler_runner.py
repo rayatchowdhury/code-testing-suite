@@ -344,24 +344,33 @@ class CompilerRunner(QObject):
         if self.worker:
             self.worker.stop_execution()
             
-        if self.thread and self.thread.isRunning():
-            self.thread.quit()
-            if not self.thread.wait(5000):  # Wait up to 5 seconds
-                logger.warning("Thread did not terminate gracefully, forcing termination")
-                self.thread.terminate()
-                self.thread.wait(1000)  # Wait 1 more second after terminate
-            
-        if self.thread:
-            self.thread.deleteLater()
+        try:
+            if self.thread and hasattr(self.thread, 'isRunning') and self.thread.isRunning():
+                self.thread.quit()
+                if not self.thread.wait(5000):  # Wait up to 5 seconds
+                    logger.warning("Thread did not terminate gracefully, forcing termination")
+                    self.thread.terminate()
+                    self.thread.wait(1000)  # Wait 1 more second after terminate
+                
+            if self.thread:
+                self.thread.deleteLater()
+                self.thread = None
+                
+            if self.worker:
+                self.worker.deleteLater()
+                self.worker = None
+        except RuntimeError:
+            # Handle case where Qt objects are already deleted
             self.thread = None
-            
-        if self.worker:
-            self.worker.deleteLater()
             self.worker = None
 
     def __del__(self):
         """Destructor to ensure proper cleanup"""
-        self._cleanup_worker()
+        try:
+            self._cleanup_worker()
+        except RuntimeError:
+            # Skip cleanup if Qt objects are already deleted
+            pass
 
     def _on_thread_started(self):
         """Called when thread starts"""

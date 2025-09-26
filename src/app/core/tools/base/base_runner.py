@@ -356,11 +356,15 @@ class BaseRunner(QObject):
             self.worker.stop()
         
         # Clean up thread
-        if self.thread and self.thread.isRunning():
-            self.thread.quit()
-            if not self.thread.wait(3000):  # Wait up to 3 seconds
-                self.thread.terminate()
-                self.thread.wait(1000)
+        try:
+            if self.thread and hasattr(self.thread, 'isRunning') and self.thread.isRunning():
+                self.thread.quit()
+                if not self.thread.wait(3000):  # Wait up to 3 seconds
+                    self.thread.terminate()
+                    self.thread.wait(1000)
+        except RuntimeError:
+            # Handle case where Qt objects are already deleted
+            pass
         
         # Close status window
         if self.status_window:
@@ -400,4 +404,8 @@ class BaseRunner(QObject):
     
     def __del__(self):
         """Ensure proper cleanup on destruction."""
-        self.stop()
+        try:
+            self.stop()
+        except RuntimeError:
+            # Skip cleanup if Qt objects are already deleted
+            pass
