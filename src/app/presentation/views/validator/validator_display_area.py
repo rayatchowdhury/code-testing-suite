@@ -6,14 +6,10 @@ import os
 from src.app.presentation.widgets.display_area_widgets.editor import EditorWidget
 from src.app.presentation.widgets.display_area_widgets.console import ConsoleOutput
 from src.app.presentation.widgets.display_area_widgets.ai_panel import AIPanel
+from src.app.presentation.widgets.display_area_widgets.test_tab_widget import TestTabWidget
 from src.app.core.tools.compiler_runner import CompilerRunner
 from src.app.presentation.styles.style import MATERIAL_COLORS
 from src.app.presentation.styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE
-from src.app.presentation.styles.components.test_view_styles import (
-    TEST_VIEW_BUTTON_PANEL_STYLE,
-    TEST_VIEW_FILE_BUTTON_STYLE,
-    TEST_VIEW_CONTENT_PANEL_STYLE
-)
 from src.app.shared.constants import WORKSPACE_DIR
 
 class ValidatorDisplay(QWidget):
@@ -23,13 +19,18 @@ class ValidatorDisplay(QWidget):
         super().__init__(parent)
         self.workspace_dir = WORKSPACE_DIR
         os.makedirs(self.workspace_dir, exist_ok=True)
+        
         self._setup_ui()
         self._connect_signals()
-        # Open generator file by default
-        self._handle_file_button('Generator')
-
-        # Initialize threaded compiler instead of regular compiler
+        
+        # Initialize threaded compiler
         self.compiler_runner = CompilerRunner(self.console)
+        
+        # Activate default tab
+        self.test_tabs.activate_default_tab()
+
+        # Add backward compatibility property for window files
+        self.file_buttons = self.test_tabs.file_buttons
 
     def _setup_ui(self):
         main_layout = QHBoxLayout(self)
@@ -50,43 +51,30 @@ class ValidatorDisplay(QWidget):
         outer_layout.setContentsMargins(3, 3, 3, 3)
         outer_layout.setSpacing(0)
 
-        # Create button panel with background
-        button_panel = QWidget()
-        button_panel.setStyleSheet(TEST_VIEW_BUTTON_PANEL_STYLE)
-        button_layout = QHBoxLayout(button_panel)
-        button_layout.setContentsMargins(8, 8, 8, 8)
-        button_layout.setSpacing(8)
-
-        # Create file buttons with improved styling
-        self.file_buttons = {}
-        self.current_button = None  # Track active button
-        
-        for name in ['Generator', 'Test Code', 'Validator Code']:
-            btn = QPushButton(name)
-            btn.setMinimumHeight(36)
-            btn.setProperty("isActive", False)
-            btn.setStyleSheet(TEST_VIEW_FILE_BUTTON_STYLE)
-            self.file_buttons[name] = btn
-            button_layout.addWidget(btn)
-
-        # Create editor and AI panel in correct order
+        # Create editor
         self.editor = EditorWidget()
         
-        # Create inner panel for content
-        content_panel = QWidget()
-        content_panel.setStyleSheet(TEST_VIEW_CONTENT_PANEL_STYLE)
-        content_layout = QVBoxLayout(content_panel)
-        content_layout.setContentsMargins(0, 0, 0, 0)
-        content_layout.setSpacing(0)
-        content_layout.addWidget(button_panel)
-        content_layout.addWidget(self.editor)
+        # Create test tabs widget with validator configuration
+        tab_config = {
+            'Generator': 'generator.cpp',
+            'Test Code': 'test.cpp',
+            'Validator Code': 'validator.cpp'
+        }
+        self.test_tabs = TestTabWidget(
+            parent=self,
+            tab_config=tab_config,
+            default_tab='Generator'
+        )
+        
+        # Set editor as the content widget for tabs
+        self.test_tabs.set_content_widget(self.editor)
 
         # Initialize AI panel with validator type (lazy loading)
         self.ai_panel = self.editor.get_ai_panel()
         self.ai_panel.set_panel_type("validator")
 
-        # Add inner panel to outer panel
-        outer_layout.addWidget(content_panel)
+        # Add test tabs to outer panel
+        outer_layout.addWidget(self.test_tabs)
 
         # Setup console
         self.console = ConsoleOutput()
@@ -98,16 +86,17 @@ class ValidatorDisplay(QWidget):
 
         # Configure splitter
         self.splitter.setCollapsible(0, False)
-        self.splitter.setCollapsible(1, False)
+        self.splitter.setCollapsible(1, True)
         self.splitter.setSizes([800, 200])
 
         # Set splitter as main widget
         main_layout.addWidget(self.splitter)
-
+    
     def _connect_signals(self):
-        # Connect file button clicks
-        for btn_name, btn in self.file_buttons.items():
-            btn.clicked.connect(lambda checked, name=btn_name: self._handle_file_button(name))
+        """Connect UI signals to their handlers."""
+        # Connect test tabs signals
+        self.test_tabs.fileChanged.connect(self._handle_file_changed)
+        self.test_tabs.tabClicked.connect(self._handle_tab_clicked)
         
         # Connect console compile & run button
         self.console.compile_run_btn.clicked.connect(self.compile_and_run_code)
@@ -120,129 +109,41 @@ class ValidatorDisplay(QWidget):
         if hasattr(self.ai_panel, 'refresh_context'):
             self.filePathChanged.connect(self.ai_panel.refresh_context)
 
-    def _handle_file_button(self, button_name):
-        # Update button states
-        if self.current_button:
-            self.current_button.setProperty("isActive", False)
-            self.current_button.style().polish(self.current_button)
-        
-        # Set new active button
-        new_button = self.file_buttons[button_name]
-        new_button.setProperty("isActive", True)
-        new_button.style().polish(new_button)
-        self.current_button = new_button
-        
-        # Map button names to file paths
-        file_mapping = {
-            'Generator': os.path.join(self.workspace_dir, 'generator.cpp'),
-            'Test Code': os.path.join(self.workspace_dir, 'test.cpp'),
-            'Validator Code': os.path.join(self.workspace_dir, 'validator.cpp')
-        }
-        
-        file_path = file_mapping[button_name]
-        
-        # Create file if it doesn't exist with appropriate content
-        if not os.path.exists(file_path):
-            default_content = self._get_default_content(button_name)
-            with open(file_path, 'w', encoding='utf-8') as f:
-                f.write(default_content)
-        
+    def _handle_file_changed(self, file_path):
+        """Handle file change from test tabs."""
         # Load file in editor
         self.editor.openFile(file_path)
+        # Mark tab as saved since we just loaded an existing file
+        self.test_tabs.mark_current_tab_saved()
         self.filePathChanged.emit()
 
-    def _get_default_content(self, button_name):
-        if button_name == 'Generator':
-            return '''#include <iostream>
-#include <random>
-#include <chrono>
-using namespace std;
+    def _handle_tab_clicked(self, action_or_tab_name):
+        """Handle tab clicks and special actions."""
+        if action_or_tab_name == "save_current":
+            # Save current file and continue with tab switch
+            if self.editor.saveFile():
+                # Mark as saved
+                self.test_tabs.mark_current_tab_saved()
+        else:
+            # Regular tab click - no additional action needed
+            pass
 
-int main() {
-    // Seed random number generator
-    mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
-    
-    // Generate random test case
-    // Example: generate random array
-    int n = uniform_int_distribution<int>(1, 10)(rng);
-    cout << n << endl;
-    
-    for (int i = 0; i < n; i++) {
-        int x = uniform_int_distribution<int>(1, 100)(rng);
-        cout << x << " ";
-    }
-    cout << endl;
-    
-    return 0;
-}'''
-        elif button_name == 'Validator Code':
-            return '''#include <iostream>
-#include <fstream>
-using namespace std;
-
-bool isValid(/* input variables */, /* output variables */) {
-    // TODO: Add your validation logic here
-    if (/* output according to input */)
-        return true;
-    return false;
-}
-
-int main(int argc, char* argv[]) {
-    if (argc < 3) return 2;
-    
-    ifstream input(argv[1]);   // test input file
-    ifstream output(argv[2]);  // test output file
-    
-    if (!input || !output) return 2;
-    
-    // TODO: Read input variables
-    // int n; input >> n;
-    
-    // TODO: Read output variables  
-    // int result; output >> result;
-    
-    // Return 1 if valid, 0 if invalid, 2+ if error
-    return isValid(/* pass variables */) ? 1 : 0;
-}'''
-        elif button_name == 'Test Code':
-            return '''#include <iostream>
-#include <vector>
-#include <algorithm>
-using namespace std;
-
-int main() {
-    // Read input
-    // TODO: Read your input format here
-    
-    // Process and solve
-    // TODO: Implement your solution here
-    
-    // Output result
-    // TODO: Output your solution here
-    
-    return 0;
-}'''
-        return ""
-
-    def _handle_text_changed(self, modified):
-        """Handle text changes in the editor"""
-        if self.current_button:
-            self.current_button.setProperty("hasUnsavedChanges", modified)
-            self.current_button.style().polish(self.current_button)
+    def _handle_text_changed(self):
+        """Handle text changes in editor."""
+        self.test_tabs.mark_current_tab_unsaved()
 
     def handle_file_saved(self):
-        """Handle file saved event"""
-        if self.current_button:
-            self.current_button.setProperty("hasUnsavedChanges", False)
-            self.current_button.style().polish(self.current_button)
-            
-        # Emit signal that file content has changed
-        self.filePathChanged.emit()
+        """Handle file saved event."""
+        self.test_tabs.mark_current_tab_saved()
+
+    def _handle_file_button(self, button_name, skip_save_prompt=False):
+        """Backward compatibility method for window files."""
+        self.test_tabs.activate_tab(button_name, skip_save_prompt)
 
     def compile_and_run_code(self):
-        """Compile and run the current code"""
+        """Compile and run the current code."""
         # Check for unsaved changes before compiling
-        if self.current_button and self.current_button.property("hasUnsavedChanges"):
+        if self.test_tabs.has_unsaved_changes():
             reply = QMessageBox.question(
                 self,
                 "Unsaved Changes",
@@ -256,15 +157,4 @@ int main() {
             elif reply == QMessageBox.Cancel:
                 return
 
-        current_file = self.editor.currentFilePath
-        if not current_file:
-            return
 
-        self.console.compile_run_btn.setEnabled(False)
-        
-        def on_complete():
-            self.console.compile_run_btn.setEnabled(True)
-            self.compiler_runner.finished.disconnect(on_complete)
-        
-        self.compiler_runner.finished.connect(on_complete)
-        self.compiler_runner.compile_and_run_code(current_file)

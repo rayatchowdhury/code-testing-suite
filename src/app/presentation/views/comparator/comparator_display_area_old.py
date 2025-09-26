@@ -39,9 +39,6 @@ class ComparatorDisplay(QWidget):
         # Activate default tab
         self.test_tabs.activate_default_tab()
 
-        # Add backward compatibility property for window files
-        self.file_buttons = self.test_tabs.file_buttons
-
     def _setup_ui(self):
         """Setup the main UI layout."""
         main_layout = QHBoxLayout(self)
@@ -124,8 +121,6 @@ class ComparatorDisplay(QWidget):
         """Handle file change from test tabs."""
         # Load file in editor
         self.editor.openFile(file_path)
-        # Mark tab as saved since we just loaded an existing file
-        self.test_tabs.mark_current_tab_saved()
         self.filePathChanged.emit()
 
     def _handle_tab_clicked(self, action_or_tab_name):
@@ -133,7 +128,9 @@ class ComparatorDisplay(QWidget):
         if action_or_tab_name == "save_current":
             # Save current file and continue with tab switch
             if self.editor.saveFile():
-                # Mark as saved
+                # Find which tab was being switched to and complete the switch
+                # This is a bit complex with the current signal structure
+                # For now, just mark as saved
                 self.test_tabs.mark_current_tab_saved()
         else:
             # Regular tab click - no additional action needed
@@ -146,10 +143,6 @@ class ComparatorDisplay(QWidget):
     def handle_file_saved(self):
         """Handle file saved event."""
         self.test_tabs.mark_current_tab_saved()
-
-    def _handle_file_button(self, button_name, skip_save_prompt=False):
-        """Backward compatibility method for window files."""
-        self.test_tabs.activate_tab(button_name, skip_save_prompt)
 
     def compile_and_run_code(self):
         """Compile and run the current code."""

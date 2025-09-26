@@ -5,14 +5,10 @@ import os
 
 from src.app.presentation.widgets.display_area_widgets.editor import EditorWidget
 from src.app.presentation.widgets.display_area_widgets.console import ConsoleOutput
+from src.app.presentation.widgets.display_area_widgets.test_tab_widget import TestTabWidget
 from src.app.core.tools.benchmarker import BenchmarkCompilerRunner
 from src.app.presentation.styles.style import MATERIAL_COLORS
 from src.app.presentation.styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE
-from src.app.presentation.styles.components.test_view_styles import (
-    TEST_VIEW_BUTTON_PANEL_STYLE,
-    TEST_VIEW_FILE_BUTTON_STYLE,
-    TEST_VIEW_CONTENT_PANEL_STYLE
-)
 from src.app.shared.constants import WORKSPACE_DIR
 
 class BenchmarkerDisplay(QWidget):
@@ -22,12 +18,18 @@ class BenchmarkerDisplay(QWidget):
         super().__init__(parent)
         self.workspace_dir = WORKSPACE_DIR
         os.makedirs(self.workspace_dir, exist_ok=True)
+        
         self._setup_ui()
         self._connect_signals()
-        # Open generator file by default
-        self._handle_file_button('Generator')
-
+        
+        # Initialize compiler
         self.compiler_runner = BenchmarkCompilerRunner(self.console)
+        
+        # Activate default tab
+        self.test_tabs.activate_default_tab()
+
+        # Add backward compatibility property for window files
+        self.file_buttons = self.test_tabs.file_buttons
 
     def _setup_ui(self):
         main_layout = QHBoxLayout(self)
@@ -48,44 +50,29 @@ class BenchmarkerDisplay(QWidget):
         outer_layout.setContentsMargins(3, 3, 3, 3)
         outer_layout.setSpacing(0)
 
-        # Create button panel with background
-        button_panel = QWidget()
-        button_panel.setStyleSheet(TEST_VIEW_BUTTON_PANEL_STYLE)
-        button_layout = QHBoxLayout(button_panel)
-        button_layout.setContentsMargins(8, 8, 8, 8)
-        button_layout.setSpacing(8)
-
-        # Create file buttons with improved styling
-        self.file_buttons = {}
-        self.current_button = None  # Track active button
-        
-        # Only Generator and Test Code buttons
-        for name in ['Generator', 'Test Code']:
-            btn = QPushButton(name)
-            btn.setMinimumHeight(36)
-            btn.setProperty("isActive", False)
-            btn.setStyleSheet(TEST_VIEW_FILE_BUTTON_STYLE)
-            self.file_buttons[name] = btn
-            button_layout.addWidget(btn)
-
-        # Create editor and AI panel in correct order
+        # Create editor
         self.editor = EditorWidget()
         
-        # Create inner panel for content
-        content_panel = QWidget()
-        content_panel.setStyleSheet(TEST_VIEW_CONTENT_PANEL_STYLE)
-        content_layout = QVBoxLayout(content_panel)
-        content_layout.setContentsMargins(0, 0, 0, 0)
-        content_layout.setSpacing(0)
-        content_layout.addWidget(button_panel)
-        content_layout.addWidget(self.editor)
+        # Create test tabs widget with benchmarker configuration (only Generator and Test Code)
+        tab_config = {
+            'Generator': 'generator.cpp',
+            'Test Code': 'test.cpp'
+        }
+        self.test_tabs = TestTabWidget(
+            parent=self,
+            tab_config=tab_config,
+            default_tab='Generator'
+        )
+        
+        # Set editor as the content widget for tabs
+        self.test_tabs.set_content_widget(self.editor)
 
         # Initialize AI panel with benchmark type (lazy loading)
         self.ai_panel = self.editor.get_ai_panel()
         self.ai_panel.set_panel_type("benchmark")
 
-        # Add inner panel to outer panel
-        outer_layout.addWidget(content_panel)
+        # Add test tabs to outer panel
+        outer_layout.addWidget(self.test_tabs)
 
         # Setup console
         self.console = ConsoleOutput()
@@ -98,82 +85,63 @@ class BenchmarkerDisplay(QWidget):
         # Configure splitter
         self.splitter.setCollapsible(0, False)
         self.splitter.setCollapsible(1, True)
-        self.splitter.setSizes([600, 250])
+        self.splitter.setSizes([800, 200])
 
-        # Add splitter to main layout
+        # Set splitter as main widget
         main_layout.addWidget(self.splitter)
-
-    def _connect_signals(self):
-        # Connect file button clicks (use lambda to maintain default parameter)
-        for name, btn in self.file_buttons.items():
-            btn.clicked.connect(lambda checked, n=name: self._handle_file_button(n))
-        self.console.compile_run_btn.clicked.connect(self.compile_and_run_code)
-        self.editor.codeEditor.document().modificationChanged.connect(self._handle_text_changed)
-        self.editor.filePathChanged.connect(self.handle_file_saved)
-
-    def _handle_text_changed(self, modified):
-        if self.current_button:
-            self.current_button.setProperty("hasUnsavedChanges", modified)
-            self.current_button.style().unpolish(self.current_button)
-            self.current_button.style().polish(self.current_button)
     
-    def _handle_file_button(self, button_text, skip_save_prompt=False):
-        # Check if current file has unsaved changes (unless skipping prompt)
-        if not skip_save_prompt and self.current_button and self.current_button.property("hasUnsavedChanges"):
-            reply = QMessageBox.question(
-                self, 
-                "Unsaved Changes",
-                f"Do you want to save changes to {self.current_button.text()}?",
-                QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel
-            )
-            
-            if reply == QMessageBox.Save:
-                if not self.editor.saveFile():
-                    return  # If save was cancelled or failed
-            elif reply == QMessageBox.Cancel:
-                return
+    def _connect_signals(self):
+        """Connect UI signals to their handlers."""
+        # Connect test tabs signals
+        self.test_tabs.fileChanged.connect(self._handle_file_changed)
+        self.test_tabs.tabClicked.connect(self._handle_tab_clicked)
         
-        # Update active button state
-        if self.current_button:
-            self.current_button.setProperty("isActive", False)
-            self.current_button.setProperty("hasUnsavedChanges", False)
-            self.current_button.style().unpolish(self.current_button)
-            self.current_button.style().polish(self.current_button)
+        # Connect console compile & run button
+        self.console.compile_run_btn.clicked.connect(self.compile_and_run_code)
         
-        clicked_button = self.file_buttons[button_text]
-        clicked_button.setProperty("isActive", True)
-        clicked_button.style().unpolish(clicked_button)
-        clicked_button.style().polish(clicked_button)
-        self.current_button = clicked_button
+        # Connect editor signals
+        self.editor.fileSaved.connect(self.handle_file_saved)
+        self.editor.textChanged.connect(self._handle_text_changed)
+        
+        # Connect AI panel refresh to editor file changes (if method exists)
+        if hasattr(self.ai_panel, 'refresh_context'):
+            self.filePathChanged.connect(self.ai_panel.refresh_context)
 
-        file_map = {
-            'Generator': 'generator.cpp',
-            'Test Code': 'test.cpp'
-        }
-        
-        file_path = os.path.join(self.workspace_dir, file_map[button_text])
-        
-        # Create file if it doesn't exist
-        if not os.path.exists(file_path):
-            with open(file_path, 'w', encoding='utf-8') as f:
-                f.write('// Add your code here\n')
-        
-        # Load file content
-        with open(file_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-            
-        self.editor.currentFilePath = file_path
-        self.editor.codeEditor.setPlainText(content)
-        self.editor.codeEditor._setup_syntax_highlighting(file_path)
-        
-        # Reset unsaved changes state after loading file
-        clicked_button.setProperty("hasUnsavedChanges", False)
-        clicked_button.style().unpolish(clicked_button)
-        clicked_button.style().polish(clicked_button)
+    def _handle_file_changed(self, file_path):
+        """Handle file change from test tabs."""
+        # Load file in editor
+        self.editor.openFile(file_path)
+        # Mark tab as saved since we just loaded an existing file
+        self.test_tabs.mark_current_tab_saved()
+        self.filePathChanged.emit()
+
+    def _handle_tab_clicked(self, action_or_tab_name):
+        """Handle tab clicks and special actions."""
+        if action_or_tab_name == "save_current":
+            # Save current file and continue with tab switch
+            if self.editor.saveFile():
+                # Mark as saved
+                self.test_tabs.mark_current_tab_saved()
+        else:
+            # Regular tab click - no additional action needed
+            pass
+
+    def _handle_text_changed(self):
+        """Handle text changes in editor."""
+        self.test_tabs.mark_current_tab_unsaved()
+
+    def handle_file_saved(self):
+        """Handle file saved event."""
+        self.test_tabs.mark_current_tab_saved()
+
+    def _handle_file_button(self, button_name, skip_save_prompt=False):
+        """Backward compatibility method for window files."""
+        self.test_tabs.activate_tab(button_name, skip_save_prompt)
 
     def compile_and_run_code(self):
+        """Compile and run the current code."""
         # Check for unsaved changes before compiling
-        if self.current_button and self.current_button.property("hasUnsavedChanges"):
+        if self.test_tabs.has_unsaved_changes():
             reply = QMessageBox.question(
                 self,
                 "Unsaved Changes",
@@ -187,21 +155,4 @@ class BenchmarkerDisplay(QWidget):
             elif reply == QMessageBox.Cancel:
                 return
 
-        if not self.editor.currentFilePath:
-            return
 
-        self.console.compile_run_btn.setEnabled(False)
-        
-        def on_complete():
-            self.console.compile_run_btn.setEnabled(True)
-            self.compiler_runner.finished.disconnect(on_complete)
-        
-        self.compiler_runner.finished.connect(on_complete)
-        self.compiler_runner.compile_and_run_code(self.editor.currentFilePath)
-
-    def handle_file_saved(self):
-        # Update button state when file is saved
-        if self.current_button:
-            self.current_button.setProperty("hasUnsavedChanges", False)
-            self.current_button.style().unpolish(self.current_button)
-            self.current_button.style().polish(self.current_button)
