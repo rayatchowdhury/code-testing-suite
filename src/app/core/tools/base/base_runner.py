@@ -126,27 +126,7 @@ class BaseRunner(QObject):
         Returns:
             bool: True if compilation started successfully
         """
-        # Set up status window if available
-        status_window = self._create_compilation_status_window()
-        if status_window:
-            self.compiler.status_window = status_window
-        
         return self.compiler.compile_all()
-    
-    def _create_compilation_status_window(self):
-        """
-        Create compilation status window - can be overridden by subclasses.
-        
-        Returns:
-            Optional status window instance
-        """
-        # Import here to avoid circular dependencies
-        try:
-            from src.app.presentation.views.comparator.compilation_status_window import CompilationStatusWindow
-            return CompilationStatusWindow()
-        except ImportError:
-            logger.warning("CompilationStatusWindow not available")
-            return None
     
     def run_tests(self, test_count: int, **kwargs) -> None:
         """

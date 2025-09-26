@@ -3,8 +3,7 @@ from src.app.presentation.views.base_window import SidebarWindowBase
 from PySide6.QtWidgets import QMessageBox
 from src.app.presentation.widgets.sidebar import Sidebar
 from src.app.presentation.views.benchmarker.benchmarker_display_area import BenchmarkerDisplay
-from src.app.presentation.views.benchmarker.test_count_slider import TestCountSlider
-from src.app.presentation.views.benchmarker.limits_input_widget import LimitsInputWidget
+from src.app.presentation.widgets.sidebar_widgets import TestCountSlider, LimitsInputWidget
 # Lazy import to avoid circular dependency
 # from src.app.core.tools.benchmarker import Benchmarker
 
@@ -23,7 +22,7 @@ class BenchmarkerWindow(SidebarWindowBase):
         
         # Add test count slider section below resource limits
         test_count_section = self.sidebar.add_section("Number of Tests")
-        self.test_count_slider = TestCountSlider()
+        self.test_count_slider = TestCountSlider(mode="benchmarker")
         self.test_count_slider.valueChanged.connect(self.handle_test_count_changed)
         test_count_section.layout().addWidget(self.test_count_slider)
         

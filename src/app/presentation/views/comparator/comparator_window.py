@@ -4,7 +4,7 @@ from src.app.presentation.widgets.sidebar import Sidebar
 from PySide6.QtWidgets import QPushButton, QMessageBox
 from PySide6.QtGui import QFont
 from src.app.presentation.views.comparator.comparator_display_area import ComparatorDisplay
-from src.app.presentation.views.comparator.test_count_slider import TestCountSlider
+from src.app.presentation.widgets.sidebar_widgets import TestCountSlider
 # Lazy import to avoid circular dependency
 # from src.app.core.tools.comparator import Comparator
 
@@ -17,7 +17,7 @@ class ComparatorWindow(SidebarWindowBase):
         
         # Replace options section with slider
         options_section = self.sidebar.add_section("Number of Tests")
-        self.test_count_slider = TestCountSlider()
+        self.test_count_slider = TestCountSlider(mode="comparator")
         self.test_count_slider.valueChanged.connect(self.handle_test_count_changed)
         options_section.layout().addWidget(self.test_count_slider)
         

@@ -1,9 +1,24 @@
+# -*- coding: utf-8 -*-
+"""
+Reusable LimitsInputWidget for the Code Testing Suite application.
+
+This widget provides input fields for time and memory limits,
+designed to be used across different views (benchmarker, validator, comparator).
+"""
+
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QLineEdit, QGroupBox
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIntValidator
 from src.app.presentation.styles.style import MATERIAL_COLORS
 
+
 class LimitsInputWidget(QWidget):
+    """
+    A reusable widget for inputting time and memory limits.
+    
+    Provides time limit input (10-60000ms) and memory limit input (1-8192MB)
+    with modern grouped styling and validation.
+    """
     timeLimitChanged = Signal(int)  # Time limit in ms
     memoryLimitChanged = Signal(int)  # Memory limit in MB
     
@@ -13,7 +28,7 @@ class LimitsInputWidget(QWidget):
         self.setup_styles()
         
     def setup_ui(self):
-        """Setup the UI layout - clean and simple"""
+        """Setup the UI layout - clean and simple."""
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(12, 4, 12, 4)  # Match sidebar button margins exactly (4px 12px)
         main_layout.setSpacing(6)  # Reduced spacing from 8 to 6
@@ -72,7 +87,7 @@ class LimitsInputWidget(QWidget):
         self.memory_input.textChanged.connect(self._on_memory_changed)
         
     def setup_styles(self):
-        """Apply consistent styling based on app design patterns"""
+        """Apply consistent styling based on app design patterns."""
         
         # Main widget - subtle background matching sidebar sections
         self.setStyleSheet(f"""
@@ -147,7 +162,7 @@ class LimitsInputWidget(QWidget):
         """)
     
     def _on_time_changed(self, text):
-        """Handle time input change with validation feedback"""
+        """Handle time input change with validation feedback."""
         try:
             if text and text.isdigit():
                 value = int(text)
@@ -157,7 +172,7 @@ class LimitsInputWidget(QWidget):
             pass
     
     def _on_memory_changed(self, text):
-        """Handle memory input change with validation feedback"""
+        """Handle memory input change with validation feedback."""
         try:
             if text and text.isdigit():
                 value = int(text)
@@ -167,23 +182,23 @@ class LimitsInputWidget(QWidget):
             pass
     
     def get_time_limit(self):
-        """Get current time limit value"""
+        """Get current time limit value."""
         try:
             return int(self.time_input.text()) if self.time_input.text() else 1000
         except ValueError:
             return 1000
     
     def get_memory_limit(self):
-        """Get current memory limit value"""
+        """Get current memory limit value."""
         try:
             return int(self.memory_input.text()) if self.memory_input.text() else 256
         except ValueError:
             return 256
     
     def set_time_limit(self, value):
-        """Set time limit value"""
+        """Set time limit value."""
         self.time_input.setText(str(value))
     
     def set_memory_limit(self, value):
-        """Set memory limit value"""
+        """Set memory limit value."""
         self.memory_input.setText(str(value))

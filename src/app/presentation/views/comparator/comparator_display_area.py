@@ -16,15 +16,31 @@ from src.app.presentation.styles.components.test_view_styles import (
 )
 from src.app.shared.constants import WORKSPACE_DIR
 
+
 class ComparatorDisplay(QWidget):
+    """
+    ComparatorDisplay widget for comparing code solutions.
+    
+    Provides file switching between Generator, Correct Code, and Test Code
+    with integrated editor, console, and AI panel functionality.
+    """
+    
     filePathChanged = Signal()
+    comparisonStarted = Signal()
+    comparisonCompleted = Signal(bool)  # success
     
     def __init__(self, parent=None):
         super().__init__(parent)
         self.workspace_dir = WORKSPACE_DIR
         os.makedirs(self.workspace_dir, exist_ok=True)
+        
+        # Initialize components
+        self.file_buttons = {}
+        self.current_button = None
+        
         self._setup_ui()
         self._connect_signals()
+        
         # Open generator file by default
         self._handle_file_button('Generator')
 
@@ -32,6 +48,7 @@ class ComparatorDisplay(QWidget):
         self.compiler_runner = CompilerRunner(self.console)
 
     def _setup_ui(self):
+        """Setup the main UI layout."""
         main_layout = QHBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
@@ -58,9 +75,6 @@ class ComparatorDisplay(QWidget):
         button_layout.setSpacing(8)
 
         # Create file buttons with improved styling
-        self.file_buttons = {}
-        self.current_button = None  # Track active button
-        
         for name in ['Generator', 'Correct Code', 'Test Code']:
             btn = QPushButton(name)
             btn.setMinimumHeight(36)
@@ -69,7 +83,7 @@ class ComparatorDisplay(QWidget):
             self.file_buttons[name] = btn
             button_layout.addWidget(btn)
 
-        # Create editor and AI panel in correct order
+        # Create editor
         self.editor = EditorWidget()
         
         # Create inner panel for content
@@ -98,26 +112,31 @@ class ComparatorDisplay(QWidget):
 
         # Configure splitter
         self.splitter.setCollapsible(0, False)
-        self.splitter.setCollapsible(1, True)
-        self.splitter.setSizes([600, 250])
+        self.splitter.setCollapsible(1, False)
+        self.splitter.setSizes([800, 200])
 
-        # Add splitter to main layout
+        # Set splitter as main widget
         main_layout.addWidget(self.splitter)
-
-    def _connect_signals(self):
-        for name, btn in self.file_buttons.items():
-            btn.clicked.connect(lambda checked, n=name: self._handle_file_button(n))
-        self.console.compile_run_btn.clicked.connect(self.compile_and_run_code)
-        self.editor.codeEditor.document().modificationChanged.connect(self._handle_text_changed)
-        self.editor.filePathChanged.connect(self.handle_file_saved)
-
-    def _handle_text_changed(self, modified):
-        if self.current_button:
-            self.current_button.setProperty("hasUnsavedChanges", modified)
-            self.current_button.style().unpolish(self.current_button)
-            self.current_button.style().polish(self.current_button)
     
+    def _connect_signals(self):
+        """Connect UI signals to their handlers."""
+        # Connect file button clicks
+        for btn_name, btn in self.file_buttons.items():
+            btn.clicked.connect(lambda checked, name=btn_name: self._handle_file_button(name))
+        
+        # Connect console compile & run button
+        self.console.compile_run_btn.clicked.connect(self.compile_and_run_code)
+        
+        # Connect editor signals
+        self.editor.fileSaved.connect(self.handle_file_saved)
+        self.editor.textChanged.connect(self._handle_text_changed)
+        
+        # Connect AI panel refresh to editor file changes (if method exists)
+        if hasattr(self.ai_panel, 'refresh_context'):
+            self.filePathChanged.connect(self.ai_panel.refresh_context)
+
     def _handle_file_button(self, button_name):
+        """Handle file button clicks and switch between files."""
         # Check if current file has unsaved changes
         if self.current_button and self.current_button.property("hasUnsavedChanges"):
             reply = QMessageBox.question(
@@ -133,46 +152,117 @@ class ComparatorDisplay(QWidget):
             elif reply == QMessageBox.Cancel:
                 return
         
-        # Update active button state
+        # Update button states
         if self.current_button:
             self.current_button.setProperty("isActive", False)
             self.current_button.setProperty("hasUnsavedChanges", False)
-            self.current_button.style().unpolish(self.current_button)
             self.current_button.style().polish(self.current_button)
         
-        clicked_button = self.file_buttons[button_name]
-        clicked_button.setProperty("isActive", True)
-        clicked_button.style().unpolish(clicked_button)
-        clicked_button.style().polish(clicked_button)
-        self.current_button = clicked_button
-
-        file_map = {
-            'Generator': 'generator.cpp',
-            'Correct Code': 'correct.cpp',
-            'Test Code': 'test.cpp'
+        # Set new active button
+        new_button = self.file_buttons[button_name]
+        new_button.setProperty("isActive", True)
+        new_button.style().polish(new_button)
+        self.current_button = new_button
+        
+        # Map button names to file paths
+        file_mapping = {
+            'Generator': os.path.join(self.workspace_dir, 'generator.cpp'),
+            'Correct Code': os.path.join(self.workspace_dir, 'correct.cpp'),
+            'Test Code': os.path.join(self.workspace_dir, 'test.cpp')
         }
         
-        file_path = os.path.join(self.workspace_dir, file_map[button_name])
+        file_path = file_mapping[button_name]
         
-        # Create file if it doesn't exist
+        # Create file if it doesn't exist with appropriate content
         if not os.path.exists(file_path):
+            default_content = self._get_default_content(button_name)
             with open(file_path, 'w', encoding='utf-8') as f:
-                f.write('// Add your code here\n')
+                f.write(default_content)
         
-        # Load file content
-        with open(file_path, 'r', encoding='utf-8') as f:
-            content = f.read()
+        # Load file in editor
+        self.editor.openFile(file_path)
+        self.filePathChanged.emit()
+
+    def _get_default_content(self, button_name):
+        """Get default content for new files based on button name."""
+        if button_name == 'Generator':
+            return '''#include <iostream>
+#include <random>
+#include <chrono>
+using namespace std;
+
+int main() {
+    // Seed random number generator
+    mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
+    
+    // Generate random test case
+    // Example: generate random array
+    int n = uniform_int_distribution<int>(1, 10)(rng);
+    cout << n << endl;
+    
+    for (int i = 0; i < n; i++) {
+        int x = uniform_int_distribution<int>(1, 100)(rng);
+        cout << x << " ";
+    }
+    cout << endl;
+    
+    return 0;
+}'''
+        elif button_name == 'Correct Code':
+            return '''#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    // Read input
+    // TODO: Read your input format here
+    
+    // Process and solve
+    // TODO: Implement your CORRECT solution here
+    
+    // Output result
+    // TODO: Output your solution here
+    
+    return 0;
+}'''
+        elif button_name == 'Test Code':
+            return '''#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    // Read input
+    // TODO: Read your input format here
+    
+    // Process and solve
+    // TODO: Implement the solution you want to TEST here
+    
+    // Output result
+    // TODO: Output your solution here
+    
+    return 0;
+}'''
+        return ""
+
+    def _handle_text_changed(self, modified):
+        """Handle text changes in the editor."""
+        if self.current_button:
+            self.current_button.setProperty("hasUnsavedChanges", modified)
+            self.current_button.style().polish(self.current_button)
+
+    def handle_file_saved(self):
+        """Handle file saved event."""
+        if self.current_button:
+            self.current_button.setProperty("hasUnsavedChanges", False)
+            self.current_button.style().polish(self.current_button)
             
-        self.editor.currentFilePath = file_path
-        self.editor.codeEditor.setPlainText(content)
-        self.editor.codeEditor._setup_syntax_highlighting(file_path)
-        
-        # Reset unsaved changes state after loading file
-        clicked_button.setProperty("hasUnsavedChanges", False)
-        clicked_button.style().unpolish(clicked_button)
-        clicked_button.style().polish(clicked_button)
+        # Emit signal that file content has changed
+        self.filePathChanged.emit()
 
     def compile_and_run_code(self):
+        """Compile and run the current code."""
         # Check for unsaved changes before compiling
         if self.current_button and self.current_button.property("hasUnsavedChanges"):
             reply = QMessageBox.question(
@@ -188,7 +278,8 @@ class ComparatorDisplay(QWidget):
             elif reply == QMessageBox.Cancel:
                 return
 
-        if not self.editor.currentFilePath:
+        current_file = self.editor.currentFilePath
+        if not current_file:
             return
 
         self.console.compile_run_btn.setEnabled(False)
@@ -198,11 +289,4 @@ class ComparatorDisplay(QWidget):
             self.compiler_runner.finished.disconnect(on_complete)
         
         self.compiler_runner.finished.connect(on_complete)
-        self.compiler_runner.compile_and_run_code(self.editor.currentFilePath)
-
-    def handle_file_saved(self):
-        # Update button state when file is saved
-        if self.current_button:
-            self.current_button.setProperty("hasUnsavedChanges", False)
-            self.current_button.style().unpolish(self.current_button)
-            self.current_button.style().polish(self.current_button)
+        self.compiler_runner.compile_and_run_code(current_file)

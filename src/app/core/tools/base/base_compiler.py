@@ -36,7 +36,7 @@ class BaseCompiler(QObject):
     compilationOutput = Signal(str, str)  # (message, type)
     
     def __init__(self, workspace_dir: str, files_dict: Dict[str, str], 
-                 optimization_level: str = 'O2', status_window=None):
+                 optimization_level: str = 'O2'):
         """
         Initialize the base compiler.
         
@@ -44,13 +44,11 @@ class BaseCompiler(QObject):
             workspace_dir: Directory containing source files
             files_dict: Dictionary mapping file keys to source file paths
             optimization_level: Compiler optimization level ('O0', 'O1', 'O2', 'O3')
-            status_window: Optional status window for compilation progress
         """
         super().__init__()
         self.workspace_dir = workspace_dir
         self.files = files_dict
         self.optimization_level = optimization_level
-        self.status_window = status_window
         self.compilation_failed = False
         
         # Create executables dict from files dict
@@ -67,10 +65,6 @@ class BaseCompiler(QObject):
             bool: True if all files compiled successfully, False otherwise
         """
         self.compilation_failed = False
-        
-        # Show status window if available
-        if self.status_window:
-            self.status_window.show()
         
         # Start parallel compilation in a separate thread to avoid blocking UI
         compile_thread = threading.Thread(target=self._parallel_compile_all)
@@ -100,8 +94,6 @@ class BaseCompiler(QObject):
                 self.compilationOutput.emit(
                     f"✅ {file_key}.exe is up-to-date, skipping compilation\n", 'success'
                 )
-                if self.status_window:
-                    self.status_window.update_status(file_key, True, f"{file_key}.exe up-to-date")
         
         if not files_needing_compilation:
             self.compilationOutput.emit("\n🎉 All files are up-to-date! No compilation needed.\n", 'success')
@@ -128,20 +120,14 @@ class BaseCompiler(QObject):
                     
                     if success:
                         self.compilationOutput.emit(f"✅ Successfully compiled {file_key}.cpp\n", 'success')
-                        if self.status_window:
-                            self.status_window.update_status(file_key, True, f"Compiled {file_key}.cpp")
                     else:
                         all_success = False
                         self.compilationOutput.emit(f"❌ Failed to compile {file_key}.cpp:\n{output}\n", 'error')
-                        if self.status_window:
-                            self.status_window.update_status(file_key, False, output)
                         
                 except Exception as e:
                     all_success = False
                     error_msg = f"Compilation error for {file_key}: {str(e)}"
                     self.compilationOutput.emit(f"❌ {error_msg}\n", 'error')
-                    if self.status_window:
-                        self.status_window.update_status(file_key, False, error_msg)
         
         # Final result
         if all_success:
@@ -273,8 +259,7 @@ class BaseCompiler(QObject):
         """Stop any running compilation process."""
         # This method can be extended by subclasses if they need
         # to stop specific compilation processes
-        if hasattr(self, 'status_window') and self.status_window:
-            self.status_window.close()
+        pass
             
     def __del__(self):
         """Destructor to ensure proper cleanup."""
