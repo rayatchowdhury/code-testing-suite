@@ -7,7 +7,7 @@ code files in test windows (Comparator, Validator, Benchmarker).
 """
 
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton, 
-                              QMessageBox, QLabel, QMenu)
+                              QMessageBox, QLabel, QMenu, QSpacerItem, QSizePolicy)
 from PySide6.QtCore import Qt, Signal, QPoint
 from PySide6.QtGui import QCursor
 import os
@@ -125,29 +125,34 @@ class TestTabWidget(QWidget):
         
         # Create button panel with background
         button_panel = QWidget()
-        button_panel.setMinimumHeight(56)  # Set minimum height for button panel
+        # button_panel.setMinimumHeight(40)  # Set minimum height for button panel
         button_panel.setStyleSheet(TEST_VIEW_BUTTON_PANEL_STYLE)
         button_layout = QHBoxLayout(button_panel)
-        button_layout.setContentsMargins(12, 8, 12, 8)  # Slightly more padding
-        button_layout.setSpacing(10)  # Increased spacing between tabs
+        button_layout.setContentsMargins(8, 8, 8, 8)  # Reduced padding for edge-to-edge
+        button_layout.setSpacing(7)  # Reduced spacing for better space utilization
         
         # Create tab buttons
         for tab_name in self.tab_config.keys():
             if self.multi_language:
-                # Create custom tab widget with modern Material Design styling
+                # Create custom tab widget with responsive design
                 tab_widget = QWidget()
-                tab_widget.setMinimumWidth(160)  # Set minimum width to prevent collision
-                tab_widget.setMaximumHeight(48)  # Control height
+                # tab_widget.setMinimumWidth(140)  # Reduced minimum width for better fitting
+                # tab_widget.setMaximumHeight(48)  # Control height
+                tab_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)  # Allow horizontal expansion
                 tab_widget.setStyleSheet(f"""
                     QWidget {{
                         border: 1px solid {MATERIAL_COLORS['outline_variant']};
                         border-radius: 8px;
                         background: {MATERIAL_COLORS['surface_variant']};
-                        margin: 2px;
+                        margin: 1px 0 1px 1px;
                     }}
                     QWidget:hover {{
                         border-color: {MATERIAL_COLORS['outline']};
                         background: {MATERIAL_COLORS['surface_bright']};
+                    }}
+                    QWidget[hasUnsavedChanges="true"] {{
+                        border: 2px solid {MATERIAL_COLORS['error']} !important;
+                        margin: 1px 0 1px 1px;
                     }}
                 """)
                 
@@ -155,25 +160,25 @@ class TestTabWidget(QWidget):
                 tab_layout.setContentsMargins(2, 2, 2, 2)
                 tab_layout.setSpacing(0)
                 
-                # Main button (80% of the width)
+                # Main button (flexible width with minimum)
                 btn = QPushButton(tab_name)
-                btn.setMinimumHeight(40)
-                btn.setMinimumWidth(110)  # Ensure button has minimum width
-                btn.setSizePolicy(btn.sizePolicy().horizontalPolicy(), btn.sizePolicy().verticalPolicy())
+                btn.setMinimumHeight(35)
+                # btn.setMinimumWidth(90)  # Reduced minimum for narrower windows
+                btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)  # Allow expansion
                 btn.clicked.connect(lambda checked, name=tab_name: self._handle_tab_click(name))
                 
-                # Modern button styling with Material Design colors
+                # Modern button styling with connected design (no right border-radius for seamless connection)
                 btn.setStyleSheet(f"""
                     QPushButton {{
                         border: none;
                         border-radius: 6px;
+                        border-top-right-radius: 0;
+                        border-bottom-right-radius: 0;
                         background: transparent;
                         color: {MATERIAL_COLORS['on_surface']};
                         font-size: 13px;
                         font-weight: 500;
-                        padding: 8px 12px;
                         text-align: center;
-                        min-width: 110px;
                     }}
                     QPushButton:hover {{
                         background: rgba(255, 255, 255, 0.08);
@@ -190,12 +195,19 @@ class TestTabWidget(QWidget):
                         background: {MATERIAL_COLORS['primary']};
                         color: {MATERIAL_COLORS['on_primary']};
                     }}
+                    QPushButton[hasUnsavedChanges="true"] {{
+                        border: 2px solid {MATERIAL_COLORS['error']} !important;
+                        border-radius: 6px;
+                        border-top-right-radius: 0;
+                        border-bottom-right-radius: 0;
+                        padding: 6px 6px;
+                        padding-right: 0px;
+                    }}
                 """)
                 
-                # Language selector container (20% of width) with modern styling
+                # Language selector container with fixed width to prevent collision
                 lang_container = QWidget()
-                lang_container.setMinimumWidth(50)  # Minimum width for language selector
-                lang_container.setMaximumWidth(50)  # Fixed width to prevent expansion
+                lang_container.setFixedWidth(45)  # Slightly smaller fixed width
                 lang_container.setStyleSheet(f"""
                     QWidget {{
                         border: none;
@@ -204,8 +216,8 @@ class TestTabWidget(QWidget):
                         border-top-right-radius: 6px;
                         border-bottom-right-radius: 6px;
                         background: {MATERIAL_COLORS['surface_dim']};
-                        min-width: 50px;
-                        max-width: 50px;
+                        min-width: 45px;
+                        max-width: 45px;
                     }}
                     QWidget:hover {{
                         background: {MATERIAL_COLORS['surface_bright']};
@@ -214,7 +226,7 @@ class TestTabWidget(QWidget):
                 """)
                 
                 lang_layout = QVBoxLayout(lang_container)
-                lang_layout.setContentsMargins(4, 4, 4, 4)
+                lang_layout.setContentsMargins(2, 4, 2, 4)
                 lang_layout.setAlignment(Qt.AlignCenter)
                 
                 current_lang = self.current_language_per_tab[tab_name]
@@ -223,9 +235,9 @@ class TestTabWidget(QWidget):
                 lang_label.setStyleSheet(f"""
                     QLabel {{
                         color: {MATERIAL_COLORS['text_secondary']};
-                        font-size: 10px;
+                        font-size: 9px;
                         font-weight: 600;
-                        padding: 4px 2px;
+                        padding: 4px 1px;
                         background: transparent;
                         border: none;
                         border-radius: 3px;
@@ -241,21 +253,24 @@ class TestTabWidget(QWidget):
                 
                 lang_layout.addWidget(lang_label)
                 
-                # Add widgets to tab layout - use stretch factors to maintain ratios
-                tab_layout.addWidget(btn, 3)  # 75% width
-                tab_layout.addWidget(lang_container, 1)  # 25% width (but fixed at 50px)
+                # Add widgets to tab layout - button expands, language selector fixed
+                tab_layout.addWidget(btn, 1)  # Button gets all available space
+                tab_layout.addWidget(lang_container, 0)  # Language selector fixed width
                 
                 # Store references
                 self.file_buttons[tab_name] = btn
                 setattr(btn, 'language_label', lang_label)
                 setattr(btn, 'tab_container', tab_widget)
+                tab_widget.setProperty("hasUnsavedChanges", False)
                 
-                button_layout.addWidget(tab_widget)
+                # Add tab widget to layout with equal stretch
+                button_layout.addWidget(tab_widget, 1)  # Each tab gets equal space
             else:
-                # Legacy single-language button with improved styling
+                # Legacy single-language button with stretching support
                 btn = QPushButton(tab_name)
-                btn.setMinimumHeight(40)
-                btn.setMinimumWidth(120)  # Consistent minimum width
+                # btn.setMinimumHeight(40)
+                # btn.setMinimumWidth(100)  # Reduced minimum width
+                btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)  # Allow expansion
                 btn.clicked.connect(lambda checked, name=tab_name: self._handle_tab_click(name))
                 
                 # Apply consistent Material Design styling for single-language buttons
@@ -265,10 +280,9 @@ class TestTabWidget(QWidget):
                         border: 1px solid {MATERIAL_COLORS['outline_variant']};
                         border-radius: 8px;
                         color: {MATERIAL_COLORS['on_surface']};
-                        padding: 8px 16px;
+                        padding: 8px 12px;
                         font-weight: 500;
                         font-size: 13px;
-                        min-width: 120px;
                     }}
                     QPushButton:hover {{
                         background-color: {MATERIAL_COLORS['surface_bright']};
@@ -279,29 +293,25 @@ class TestTabWidget(QWidget):
                         border: 2px solid {MATERIAL_COLORS['primary']};
                         color: {MATERIAL_COLORS['on_primary_container']};
                         font-weight: 600;
-                        padding: 7px 15px;
+                        padding: 7px 11px;
                     }}
                     QPushButton[isActive="true"]:hover {{
                         background-color: {MATERIAL_COLORS['primary']};
                         color: {MATERIAL_COLORS['on_primary']};
                     }}
                     QPushButton[hasUnsavedChanges="true"] {{
-                        border: 2px solid {MATERIAL_COLORS['error']};
-                        padding: 7px 15px;
+                        border: 2px solid {MATERIAL_COLORS['error']} !important;
+                        padding: 7px 11px;
                     }}
                 """)
                 
                 self.file_buttons[tab_name] = btn
-                button_layout.addWidget(btn)
+                # Add with equal stretch for edge-to-edge layout
+                button_layout.addWidget(btn, 1)  # Each button gets equal space
             
             # Set properties for state management
             btn.setProperty("isActive", False)
             btn.setProperty("hasUnsavedChanges", False)
-        
-        # Add spacer to prevent tabs from stretching unnecessarily
-        from PySide6.QtWidgets import QSpacerItem, QSizePolicy
-        spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        button_layout.addItem(spacer)
         
         # Create content panel
         self.content_panel = QWidget()
@@ -341,7 +351,6 @@ class TestTabWidget(QWidget):
                 border-radius: 8px;
                 padding: 8px 0px;
                 min-width: 100px;
-                box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
             }}
             QMenu::item {{
                 background-color: transparent;
@@ -642,59 +651,18 @@ class TestTabWidget(QWidget):
         return None
     
     def _update_tab_unsaved_indicator(self, tab_name, has_unsaved):
-        """Update visual indicator for unsaved changes using border color."""
+        """Update visual indicator for unsaved changes using properties."""
         if tab_name in self.file_buttons:
             button = self.file_buttons[tab_name]
             
             if self.multi_language and hasattr(button, 'tab_container'):
                 container = button.tab_container
-                current_style = container.styleSheet()
-                new_style = current_style  # Initialize with current style
-                
-                if has_unsaved:
-                    # Change border to error color for unsaved changes
-                    if f"border-color: {MATERIAL_COLORS['outline']};" in current_style:
-                        # Active/hover state with unsaved changes
-                        new_style = current_style.replace(
-                            f"border-color: {MATERIAL_COLORS['outline']};",
-                            f"border-color: {MATERIAL_COLORS['error']}; border-width: 2px;"
-                        )
-                    elif f"border: 1px solid {MATERIAL_COLORS['outline_variant']};" in current_style:
-                        # Normal state with unsaved changes  
-                        new_style = current_style.replace(
-                            f"border: 1px solid {MATERIAL_COLORS['outline_variant']};",
-                            f"border: 2px solid {MATERIAL_COLORS['error']};"
-                        )
-                    elif f"border: 2px solid {MATERIAL_COLORS['primary']};" in current_style:
-                        # Active state with unsaved changes
-                        new_style = current_style.replace(
-                            f"border: 2px solid {MATERIAL_COLORS['primary']};",
-                            f"border: 2px solid {MATERIAL_COLORS['error']};"
-                        )
-                else:
-                    # Restore normal border colors
-                    if f"border: 2px solid {MATERIAL_COLORS['error']};" in current_style:
-                        # Check if this is the active tab
-                        if button == self.current_button:
-                            # Restore to active border
-                            new_style = current_style.replace(
-                                f"border: 2px solid {MATERIAL_COLORS['error']};",
-                                f"border: 2px solid {MATERIAL_COLORS['primary']};"
-                            )
-                        else:
-                            # Restore to normal border
-                            new_style = current_style.replace(
-                                f"border: 2px solid {MATERIAL_COLORS['error']};",
-                                f"border: 1px solid {MATERIAL_COLORS['outline_variant']};"
-                            )
-                    elif f"border-color: {MATERIAL_COLORS['error']}; border-width: 2px;" in current_style:
-                        # Restore hover state
-                        new_style = current_style.replace(
-                            f"border-color: {MATERIAL_COLORS['error']}; border-width: 2px;",
-                            f"border-color: {MATERIAL_COLORS['outline']};"
-                        )
-                
-                container.setStyleSheet(new_style)
+                container.setProperty("hasUnsavedChanges", has_unsaved)
+                container.style().polish(container)
+            else:
+                # Single language mode - use the button directly
+                button.setProperty("hasUnsavedChanges", has_unsaved)
+                button.style().polish(button)
     
     def get_current_tab_name(self):
         """Get the name of the currently active tab."""
