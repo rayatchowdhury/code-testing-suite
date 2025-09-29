@@ -18,6 +18,9 @@ markdown>=3.4.0
 # System monitoring and performance
 psutil>=7.0.0
 
+# Type-safe configuration models for test service
+pydantic>=2.0.0
+
 # Testing framework
 pytest>=8.4.0
 pytest-qt>=4.5.0
