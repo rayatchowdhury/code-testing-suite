@@ -23,7 +23,8 @@ from src.app.core.ai.gemini_client import (
     get_ai_model,
     is_ai_ready,
     should_show_ai_panel,
-    generate_ai_response
+    generate_ai_response,
+    reload_ai_config
 )
 
 # EditorAI Processing
@@ -141,6 +142,7 @@ __all__ = [
     'initialize_gemini',
     'is_gemini_available',
     'is_gemini_ready',
+    'reload_ai_config',
     
     # Backward Compatibility
     'get_gemini_ai'

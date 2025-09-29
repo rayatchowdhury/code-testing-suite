@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from src.app.presentation.views.base_window import SidebarWindowBase
 from PySide6.QtWidgets import QMessageBox
+from PySide6.QtGui import QShowEvent
 from src.app.presentation.widgets.sidebar import Sidebar
 from src.app.presentation.views.benchmarker.benchmarker_display_area import BenchmarkerDisplay
 from src.app.presentation.widgets.sidebar_widgets import TestCountSlider, LimitsInputWidget
@@ -102,6 +103,19 @@ class BenchmarkerWindow(SidebarWindowBase):
     
     def handle_test_count_changed(self, value):
         print(f"Test count changed to: {value} tests")
+
+    def showEvent(self, event):
+        """Handle window show event - reload AI config and refresh AI panels"""
+        super().showEvent(event)
+        # Reload AI configuration to pick up any changes made while window was closed
+        try:
+            from src.app.core.ai import reload_ai_config
+            reload_ai_config()
+        except ImportError:
+            pass  # AI module not available
+        
+        # Refresh AI panels with current configuration
+        self.refresh_ai_panels()
 
     def refresh_ai_panels(self):
         """Refresh AI panel visibility based on current configuration"""

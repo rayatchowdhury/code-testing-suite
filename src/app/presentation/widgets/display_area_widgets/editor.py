@@ -387,6 +387,11 @@ class EditorWidget(QWidget):
             self.ai_panel.customCommandRequested.connect(self._handle_custom_command)
             self.layout().addWidget(self.ai_panel)
             self._ai_panel_initialized = True
+            
+            # Fix: Ensure AI panel visibility is properly refreshed after being added to layout
+            # The panel might be hidden if parent wasn't visible during construction
+            self.ai_panel.refresh_visibility()
+            
             # Force layout update
             self.update()
 

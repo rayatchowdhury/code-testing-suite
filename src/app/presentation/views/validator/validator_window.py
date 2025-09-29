@@ -2,7 +2,7 @@
 from src.app.presentation.views.base_window import SidebarWindowBase
 from src.app.presentation.widgets.sidebar import Sidebar
 from PySide6.QtWidgets import QPushButton, QMessageBox
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, QShowEvent
 from src.app.presentation.views.validator.validator_display_area import ValidatorDisplay
 from src.app.presentation.widgets.sidebar_widgets import TestCountSlider
 # Lazy import to avoid circular dependency
@@ -98,6 +98,19 @@ class ValidatorWindow(SidebarWindowBase):
                 self.parent.window_manager.show_window('help_center')
         else:
             super().handle_button_click(button_text)
+
+    def showEvent(self, event):
+        """Handle window show event - reload AI config and refresh AI panels"""
+        super().showEvent(event)
+        # Reload AI configuration to pick up any changes made while window was closed
+        try:
+            from src.app.core.ai import reload_ai_config
+            reload_ai_config()
+        except ImportError:
+            pass  # AI module not available
+        
+        # Refresh AI panels with current configuration
+        self.refresh_ai_panels()
 
     def refresh_ai_panels(self):
         """Refresh AI panel visibility based on current configuration"""

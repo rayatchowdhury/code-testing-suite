@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QFileDialog, QMessageBox, QPushButton
-from PySide6.QtGui import QFont, QCloseEvent
+from PySide6.QtGui import QFont, QCloseEvent, QShowEvent
 from src.app.presentation.widgets.sidebar import Sidebar
 from src.app.presentation.views.base_window import SidebarWindowBase
 from src.app.presentation.views.code_editor.code_editor_display_area import CodeEditorDisplay
@@ -64,6 +64,19 @@ class CodeEditorWindow(SidebarWindowBase):
 
         # Don't call add_new_tab() in __init__ anymore
         # The welcome screen will show by default
+
+    def showEvent(self, event):
+        """Handle window show event - reload AI config and refresh AI panels"""
+        super().showEvent(event)
+        # Reload AI configuration to pick up any changes made while window was closed
+        try:
+            from src.app.core.ai import reload_ai_config
+            reload_ai_config()
+        except ImportError:
+            pass  # AI module not available
+        
+        # Refresh AI panels with current configuration
+        self.refresh_ai_panels()
 
     def cleanup(self):
         """Clean up resources"""

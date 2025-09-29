@@ -2,7 +2,7 @@
 from src.app.presentation.views.base_window import SidebarWindowBase
 from src.app.presentation.widgets.sidebar import Sidebar
 from PySide6.QtWidgets import QPushButton, QMessageBox
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, QShowEvent
 from src.app.presentation.views.comparator.comparator_display_area import ComparatorDisplay
 from src.app.presentation.widgets.sidebar_widgets import TestCountSlider
 # Lazy import to avoid circular dependency
@@ -97,6 +97,19 @@ class ComparatorWindow(SidebarWindowBase):
         # Handle the slider value change
         print(f"Test count changed to: {value}")
         # You can store this value or use it in your comparison testing logic
+
+    def showEvent(self, event):
+        """Handle window show event - reload AI config and refresh AI panels"""
+        super().showEvent(event)
+        # Reload AI configuration to pick up any changes made while window was closed
+        try:
+            from src.app.core.ai import reload_ai_config
+            reload_ai_config()
+        except ImportError:
+            pass  # AI module not available
+        
+        # Refresh AI panels with current configuration
+        self.refresh_ai_panels()
 
     def refresh_ai_panels(self):
         """Refresh AI panel visibility based on current configuration"""

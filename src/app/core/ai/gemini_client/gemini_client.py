@@ -271,6 +271,16 @@ def is_ai_ready():
     ready, _ = is_gemini_ready()
     return ready
 
+def reload_ai_config():
+    """Reload the AI configuration from file."""
+    global _gemini_client
+    if _gemini_client is not None:
+        try:
+            from src.app.shared.constants import CONFIG_FILE
+            _gemini_client.load_config(CONFIG_FILE)
+        except ImportError:
+            pass
+
 def generate_ai_response(prompt: str, **kwargs) -> str:
     """Generate AI response using global client."""
     client = get_gemini_client()

@@ -88,6 +88,14 @@ class SidebarWindowBase(QWidget):
             config_dialog.exec()
 
     def _on_config_changed(self, config):
-        """Handle configuration changes - refresh AI panels"""
+        """Handle configuration changes - reload AI config and refresh AI panels"""
+        # Reload AI configuration to pick up changes
+        try:
+            from src.app.core.ai import reload_ai_config
+            reload_ai_config()
+        except ImportError:
+            pass  # AI module not available
+        
+        # Refresh AI panels with new configuration
         if hasattr(self, 'refresh_ai_panels'):
             self.refresh_ai_panels()
