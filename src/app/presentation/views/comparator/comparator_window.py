@@ -22,10 +22,19 @@ class ComparatorWindow(SidebarWindowBase):
         options_section.layout().addWidget(self.test_count_slider)
         
         # Split actions into two sections
-        action_section = self.sidebar.add_section("Actions")
+        self.action_section = self.sidebar.add_section("Actions")
+        self.compile_btn = None
+        self.run_btn = None
+        self.stop_btn = None
+        self.status_view_active = False  # Track if status view is active
+        
         for button_text in ['Compile', 'Run']:
-            btn = self.sidebar.add_button(button_text, action_section)
+            btn = self.sidebar.add_button(button_text, self.action_section)
             btn.clicked.connect(lambda checked, text=button_text: self.handle_action_button(text))
+            if button_text == 'Compile':
+                self.compile_btn = btn
+            elif button_text == 'Run':
+                self.run_btn = btn
             
         history_section = self.sidebar.add_section("History")
         results_btn = self.sidebar.add_button('Results', history_section)
@@ -71,6 +80,10 @@ class ComparatorWindow(SidebarWindowBase):
             config=config
         )
         self.comparator.compilationOutput.connect(self.display_area.console.displayOutput)
+        
+        # Connect runner signals for clean separation of concerns
+        self.comparator.testingStarted.connect(self._switch_to_test_mode)
+        self.comparator.testingCompleted.connect(self._on_tests_completed)
     
     def _load_config(self):
         """Load configuration for multi-language compilation."""
@@ -118,19 +131,42 @@ class ComparatorWindow(SidebarWindowBase):
 
             self.comparator.compile_all()
         elif button_text == 'Run':
+            # Set parent window for unified status view integration
+            self.comparator.set_parent_window(self)
+            
+            # Run comparison tests
             test_count = self.test_count_slider.value()
             self.comparator.run_comparison_test(test_count)
+        elif button_text == 'Stop':
+            # Stop running tests
+            if hasattr(self.comparator, 'stop'):
+                self.comparator.stop()
         elif button_text == 'Results':
             # Navigate to results window
             if self.can_close():
                 self.parent.window_manager.show_window('results')
 
     def handle_button_click(self, button_text):
+        if button_text == 'Back':
+            # If status view is active, restore it instead of navigating away
+            if self.status_view_active:
+                # Get the runner and call its back handler
+                runner = self._get_runner()
+                if runner and hasattr(runner, '_handle_back_request'):
+                    runner._handle_back_request()
+                    # Full button restoration when returning to test window
+                    self._restore_normal_mode()
+                return
+        
         if (button_text == 'Help Center'):
             if self.can_close():
                 self.parent.window_manager.show_window('help_center')
         else:
             super().handle_button_click(button_text)
+    
+    def _get_runner(self):
+        """Get the test runner instance"""
+        return self.comparator if hasattr(self, 'comparator') else None
 
     def handle_test_count_changed(self, value):
         # Handle the slider value change
@@ -146,6 +182,56 @@ class ComparatorWindow(SidebarWindowBase):
             reload_ai_config()
         except ImportError:
             pass  # AI module not available
+    
+    def _switch_to_test_mode(self):
+        """Hide Compile and Run buttons, show Stop button when tests start"""
+        self.status_view_active = True
+        
+        # Hide Compile button during test execution
+        if self.compile_btn:
+            self.compile_btn.hide()
+        
+        # Hide Run button
+        if self.run_btn:
+            self.run_btn.hide()
+        
+        if not self.stop_btn:
+            # Create Stop button dynamically
+            self.stop_btn = self.sidebar.add_button('Stop', self.action_section)
+            self.stop_btn.clicked.connect(lambda: self.handle_action_button('Stop'))
+        
+        if self.stop_btn:
+            self.stop_btn.show()
+    
+    def _on_tests_completed(self):
+        """Called when tests finish - show Run, hide Stop (Compile stays hidden until back to window)"""
+        # Show Run button (can run again from status view)
+        if self.run_btn:
+            self.run_btn.show()
+        
+        # Hide Stop button (tests finished)
+        if self.stop_btn:
+            self.stop_btn.hide()
+        
+        # Note: Compile button stays hidden until back to test window
+        # Refresh AI panels with current configuration
+        self.refresh_ai_panels()
+    
+    def _restore_normal_mode(self):
+        """Full restoration when returning to test window - show all buttons"""
+        self.status_view_active = False
+        
+        # Show Compile button (back in test window)
+        if self.compile_btn:
+            self.compile_btn.show()
+        
+        # Show Run button
+        if self.run_btn:
+            self.run_btn.show()
+        
+        # Hide Stop button
+        if self.stop_btn:
+            self.stop_btn.hide()
         
         # Refresh AI panels with current configuration
         self.refresh_ai_panels()

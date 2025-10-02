@@ -155,7 +155,17 @@ class Benchmarker(BaseRunner):
         )
 
     def _create_test_status_window(self):
-        """Create benchmark-specific status window"""
+        """Create benchmark-specific status window or view"""
+        # If parent window is set, return unified status view
+        if hasattr(self, 'parent_window') and self.parent_window:
+            from src.app.presentation.views.benchmarker.benchmarker_status_view import BenchmarkerStatusView
+            return BenchmarkerStatusView(
+                time_limit_ms=self.time_limit,
+                memory_limit_mb=self.memory_limit,
+                parent=self.parent_window
+            )
+        
+        # Otherwise, fall back to dialog-based status window
         from src.app.presentation.views.benchmarker.benchmark_status_window import BenchmarkStatusWindow
         
         status_window = BenchmarkStatusWindow()

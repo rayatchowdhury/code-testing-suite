@@ -79,7 +79,13 @@ class Comparator(BaseRunner):
         )
 
     def _create_test_status_window(self):
-        """Create stress-specific status window"""
+        """Create comparator status window or view"""
+        # If parent window is set, use unified status view
+        if hasattr(self, 'parent_window') and self.parent_window:
+            from src.app.presentation.views.comparator.comparator_status_view import ComparatorStatusView
+            return ComparatorStatusView()
+        
+        # Otherwise, use old dialog-based status window
         return CompareStatusWindow()
 
     def _connect_worker_signals(self, worker):

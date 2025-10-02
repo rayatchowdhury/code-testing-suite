@@ -68,7 +68,13 @@ class ValidatorRunner(BaseRunner):
         )
 
     def _create_test_status_window(self):
-        """Create validation-specific status window"""
+        """Create validation-specific status window or view"""
+        # If parent window is set, return unified status view
+        if hasattr(self, 'parent_window') and self.parent_window:
+            from src.app.presentation.views.validator.validator_status_view import ValidatorStatusView
+            return ValidatorStatusView(self.parent_window)
+        
+        # Otherwise, fall back to dialog-based status window
         return ValidatorStatusWindow()
 
     def _connect_worker_signals(self, worker):

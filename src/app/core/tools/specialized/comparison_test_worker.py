@@ -15,6 +15,7 @@ import time
 import threading
 import multiprocessing
 import subprocess
+import psutil
 from typing import Dict, Any, Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from PySide6.QtCore import QObject, Signal, Slot
@@ -37,7 +38,7 @@ class ComparisonTestWorker(QObject):
     
     # Exact signal signatures from original ComparisonTestWorker
     testStarted = Signal(int, int)  # current test, total tests
-    testCompleted = Signal(int, bool, str, str, str)  # test number, passed, input, correct output, test output
+    testCompleted = Signal(int, bool, str, str, str, float, float)  # test number, passed, input, correct output, test output, time, memory
     allTestsCompleted = Signal(bool)  # True if all passed
 
     def __init__(self, workspace_dir: str, executables: Dict[str, str], 
@@ -137,14 +138,16 @@ class ComparisonTestWorker(QObject):
                         with self._results_lock:
                             self.test_results.append(test_result)
                         
-                        # Emit signals for UI updates
+                        # Emit signals for UI updates with time and memory metrics
                         self.testStarted.emit(completed_tests, self.test_count)
                         self.testCompleted.emit(
                             test_result['test_number'],
                             test_result['passed'],
                             test_result['input'],
                             test_result['correct_output'],
-                            test_result['test_output']
+                            test_result['test_output'],
+                            test_result['total_time'],  # Total execution time
+                            test_result['memory']  # Peak memory usage in MB
                         )
                         
                         if not test_result['passed']:
@@ -160,7 +163,9 @@ class ComparisonTestWorker(QObject):
                         False,
                         "",
                         "",
-                        error_result['error_details']
+                        error_result['error_details'],
+                        error_result['total_time'],
+                        error_result['memory']
                     )
                     all_passed = False
 
@@ -168,13 +173,15 @@ class ComparisonTestWorker(QObject):
 
     def _run_single_comparison_test(self, test_number: int) -> Optional[Dict[str, Any]]:
         """
-        Run a single comparison test with output comparison.
+        Run a single comparison test with output comparison and metrics tracking.
         
         This implements the 3-stage stress testing process:
         1. Generator → produces test input
         2. Test solution → processes input to produce output
         3. Correct solution → processes input to produce expected output
         4. Compare outputs for correctness
+        
+        Tracks execution time and peak memory usage for each stage.
         
         Args:
             test_number: The test number to run
@@ -186,70 +193,106 @@ class ComparisonTestWorker(QObject):
             return None
         
         try:
+            peak_memory_mb = 0.0
+            
             # Stage 1: Generate test input
             generator_start = time.time()
             
-            generator_result = subprocess.run(
+            generator_process = subprocess.Popen(
                 self.execution_commands['generator'],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0,
-                timeout=10,
                 text=True
             )
             
+            # Track generator memory
+            try:
+                proc = psutil.Process(generator_process.pid)
+                while generator_process.poll() is None:
+                    mem_mb = proc.memory_info().rss / (1024 * 1024)
+                    peak_memory_mb = max(peak_memory_mb, mem_mb)
+                    time.sleep(0.01)
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                pass  # Process finished or can't access
+            
+            generator_stdout, generator_stderr = generator_process.communicate(timeout=10)
             generator_time = time.time() - generator_start
             
-            if generator_result.returncode != 0:
-                error_msg = f"Generator failed: {generator_result.stderr}"
-                return self._create_error_result(test_number, error_msg, generator_time)
+            if generator_process.returncode != 0:
+                error_msg = f"Generator failed: {generator_stderr}"
+                return self._create_error_result(test_number, error_msg, generator_time, peak_memory_mb=peak_memory_mb)
             
             # Get generated input
-            input_text = generator_result.stdout
+            input_text = generator_stdout
             
             # Stage 2: Run test solution
             test_start = time.time()
             
-            test_result = subprocess.run(
+            test_process = subprocess.Popen(
                 self.execution_commands['test'],
-                input=input_text,
+                stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0,
-                timeout=30,
                 text=True
             )
             
+            # Track test solution memory
+            try:
+                proc = psutil.Process(test_process.pid)
+                test_process.stdin.write(input_text)
+                test_process.stdin.close()
+                while test_process.poll() is None:
+                    mem_mb = proc.memory_info().rss / (1024 * 1024)
+                    peak_memory_mb = max(peak_memory_mb, mem_mb)
+                    time.sleep(0.01)
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                pass
+            
+            test_stdout, test_stderr = test_process.communicate(timeout=30)
             test_time = time.time() - test_start
             
-            if test_result.returncode != 0:
-                error_msg = f"Test solution failed: {test_result.stderr}"
-                return self._create_error_result(test_number, error_msg, generator_time, test_time)
+            if test_process.returncode != 0:
+                error_msg = f"Test solution failed: {test_stderr}"
+                return self._create_error_result(test_number, error_msg, generator_time, test_time, peak_memory_mb=peak_memory_mb)
             
             # Get test output
-            test_output = test_result.stdout
+            test_output = test_stdout
             
             # Stage 3: Run correct solution
             correct_start = time.time()
             
-            correct_result = subprocess.run(
+            correct_process = subprocess.Popen(
                 self.execution_commands['correct'],
-                input=input_text,
+                stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0,
-                timeout=30,
                 text=True
             )
             
+            # Track correct solution memory
+            try:
+                proc = psutil.Process(correct_process.pid)
+                correct_process.stdin.write(input_text)
+                correct_process.stdin.close()
+                while correct_process.poll() is None:
+                    mem_mb = proc.memory_info().rss / (1024 * 1024)
+                    peak_memory_mb = max(peak_memory_mb, mem_mb)
+                    time.sleep(0.01)
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                pass
+            
+            correct_stdout, correct_stderr = correct_process.communicate(timeout=30)
             correct_time = time.time() - correct_start
             
-            if correct_result.returncode != 0:
-                error_msg = f"Correct solution failed: {correct_result.stderr}"
-                return self._create_error_result(test_number, error_msg, generator_time, test_time, correct_time)
+            if correct_process.returncode != 0:
+                error_msg = f"Correct solution failed: {correct_stderr}"
+                return self._create_error_result(test_number, error_msg, generator_time, test_time, correct_time, peak_memory_mb)
             
             # Get correct output
-            correct_output = correct_result.stdout
+            correct_output = correct_stdout
             
             # Stage 4: Compare outputs
             comparison_start = time.time()
@@ -266,7 +309,10 @@ class ComparisonTestWorker(QObject):
             # Save I/O files to nested directories
             self._save_test_io(test_number, input_text, test_output, correct_output)
             
-            # Create result
+            # Calculate total time
+            total_time = generator_time + test_time + correct_time + comparison_time
+            
+            # Create result with metrics
             return {
                 'test_number': test_number,
                 'passed': outputs_match,
@@ -277,7 +323,8 @@ class ComparisonTestWorker(QObject):
                 'test_time': test_time,
                 'correct_time': correct_time,
                 'comparison_time': comparison_time,
-                'total_time': generator_time + test_time + correct_time + comparison_time,
+                'total_time': total_time,
+                'memory': peak_memory_mb,  # Peak memory in MB
                 'error_details': "" if outputs_match else "Output mismatch",
                 'test_output_full': test_output,  # Full output for database
                 'correct_output_full': correct_output,  # Full output for database
@@ -286,14 +333,14 @@ class ComparisonTestWorker(QObject):
             
         except subprocess.TimeoutExpired as e:
             error_msg = f"Timeout in {e.cmd[0] if e.cmd else 'unknown'} after {e.timeout}s"
-            return self._create_error_result(test_number, error_msg)
+            return self._create_error_result(test_number, error_msg, peak_memory_mb=peak_memory_mb)
         except Exception as e:
             error_msg = f"Unexpected error: {str(e)}"
-            return self._create_error_result(test_number, error_msg)
+            return self._create_error_result(test_number, error_msg, peak_memory_mb=peak_memory_mb)
 
     def _create_error_result(self, test_number: int, error_msg: str, 
                            generator_time: float = 0.0, test_time: float = 0.0, 
-                           correct_time: float = 0.0) -> Dict[str, Any]:
+                           correct_time: float = 0.0, peak_memory_mb: float = 0.0) -> Dict[str, Any]:
         """Create a standardized error result dictionary."""
         return {
             'test_number': test_number,
@@ -306,6 +353,7 @@ class ComparisonTestWorker(QObject):
             'correct_time': correct_time,
             'comparison_time': 0.0,
             'total_time': generator_time + test_time + correct_time,
+            'memory': peak_memory_mb,
             'error_details': error_msg,
             'test_output_full': "",
             'correct_output_full': "",

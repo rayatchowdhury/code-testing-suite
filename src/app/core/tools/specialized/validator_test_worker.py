@@ -15,6 +15,7 @@ import threading
 import multiprocessing
 import tempfile
 import subprocess
+import psutil
 from typing import Dict, Any, Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from PySide6.QtCore import QObject, Signal, Slot
@@ -38,7 +39,7 @@ class ValidatorTestWorker(QObject):
     
     # Exact signal signatures from original ValidatorTestWorker
     testStarted = Signal(int, int)  # current test, total tests
-    testCompleted = Signal(int, bool, str, str, str, str, int)  # test number, passed, input, test_output, validation_message, error_details, validator_exit_code
+    testCompleted = Signal(int, bool, str, str, str, str, int, float, float)  # test number, passed, input, test_output, validation_message, error_details, validator_exit_code, time, memory
     allTestsCompleted = Signal(bool)  # True if all passed
 
     def __init__(self, workspace_dir: str, executables: Dict[str, str], 
@@ -132,7 +133,7 @@ class ValidatorTestWorker(QObject):
                         with self._results_lock:
                             self.test_results.append(test_result)
                         
-                        # Emit signals for UI updates
+                        # Emit signals for UI updates with time and memory metrics
                         self.testStarted.emit(completed_tests, self.test_count)
                         self.testCompleted.emit(
                             test_result['test_number'],
@@ -141,7 +142,9 @@ class ValidatorTestWorker(QObject):
                             test_result['test_output'],
                             test_result['validation_message'],
                             test_result['error_details'],
-                            test_result['validator_exit_code']
+                            test_result['validator_exit_code'],
+                            test_result['total_time'],  # Total execution time
+                            test_result['memory']  # Peak memory usage in MB
                         )
                         
                         if not test_result['passed']:
@@ -159,7 +162,9 @@ class ValidatorTestWorker(QObject):
                         "",
                         "Execution Error",
                         str(e),
-                        -3
+                        -3,
+                        error_result['total_time'],
+                        error_result['memory']
                     )
                     all_passed = False
 
@@ -167,12 +172,14 @@ class ValidatorTestWorker(QObject):
 
     def _run_single_test(self, test_number: int) -> Optional[Dict[str, Any]]:
         """
-        Run a single validation test (executed in parallel) - optimized with in-memory pipes.
+        Run a single validation test with metrics tracking.
         
         This implements the 3-stage validation process:
         1. Generator → produces test input
         2. Test solution → processes input to produce output  
         3. Validator → checks if test output is correct
+        
+        Tracks execution time and peak memory usage for each stage.
         
         Args:
             test_number: The test number to run
@@ -184,82 +191,116 @@ class ValidatorTestWorker(QObject):
             return None
             
         try:
-            # Stage 1: Run generator - capture output in memory
+            peak_memory_mb = 0.0
+            
+            # Stage 1: Run generator with memory tracking
             generator_start = time.time()
             
-            generator_result = subprocess.run(
+            generator_process = subprocess.Popen(
                 self.execution_commands['generator'],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0,
-                timeout=10,
-                text=True  # Decode to string directly
+                text=True
             )
             
+            # Track generator memory
+            try:
+                proc = psutil.Process(generator_process.pid)
+                while generator_process.poll() is None:
+                    mem_mb = proc.memory_info().rss / (1024 * 1024)
+                    peak_memory_mb = max(peak_memory_mb, mem_mb)
+                    time.sleep(0.01)
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                pass
+            
+            generator_stdout, generator_stderr = generator_process.communicate(timeout=10)
             generator_time = time.time() - generator_start
             
-            if generator_result.returncode != 0:
-                error_msg = f"Generator failed: {generator_result.stderr}"
-                return self._create_error_result(test_number, error_msg, "Generator failed", -1, generator_time, 0, 0)
+            if generator_process.returncode != 0:
+                error_msg = f"Generator failed: {generator_stderr}"
+                return self._create_error_result(test_number, error_msg, "Generator failed", -1, generator_time, 0, 0, peak_memory_mb)
             
             # Get generated input data
-            input_text = generator_result.stdout
+            input_text = generator_stdout
             
-            # Stage 2: Run test solution - pipe input directly, capture output in memory
+            # Stage 2: Run test solution with memory tracking
             test_start = time.time()
             
-            test_result = subprocess.run(
+            test_process = subprocess.Popen(
                 self.execution_commands['test'],
-                input=input_text,
+                stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0,
-                timeout=30,
-                text=True  # Decode to string directly
+                text=True
             )
             
+            # Track test solution memory
+            try:
+                proc = psutil.Process(test_process.pid)
+                test_process.stdin.write(input_text)
+                test_process.stdin.close()
+                while test_process.poll() is None:
+                    mem_mb = proc.memory_info().rss / (1024 * 1024)
+                    peak_memory_mb = max(peak_memory_mb, mem_mb)
+                    time.sleep(0.01)
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                pass
+            
+            test_stdout, test_stderr = test_process.communicate(timeout=30)
             test_time = time.time() - test_start
             
-            if test_result.returncode != 0:
-                error_msg = f"Test solution failed: {test_result.stderr}"
-                return self._create_error_result(test_number, error_msg, "Test solution failed", -1, generator_time, test_time, 0)
+            if test_process.returncode != 0:
+                error_msg = f"Test solution failed: {test_stderr}"
+                return self._create_error_result(test_number, error_msg, "Test solution failed", -1, generator_time, test_time, 0, peak_memory_mb)
             
             # Get test output
-            test_output = test_result.stdout
+            test_output = test_stdout
             
-            # Stage 3: Run validator - ultra-fast RAM-based temporary files
+            # Stage 3: Run validator - use temporary files
             validator_start = time.time()
             
-            # Use memory-based temporary files with minimal overhead
-            # Create files in RAM disk if available, otherwise use system temp with optimizations
+            # Create temporary files for validator
             with tempfile.NamedTemporaryFile(mode='w+', suffix='.txt', delete=False, 
                                            dir=None, prefix='vld_in_') as input_temp:
                 input_temp.write(input_text)
                 input_temp.flush()
-                os.fsync(input_temp.fileno())  # Force write to storage
+                os.fsync(input_temp.fileno())
                 input_temp_path = input_temp.name
             
             with tempfile.NamedTemporaryFile(mode='w+', suffix='.txt', delete=False,
                                            dir=None, prefix='vld_out_') as output_temp:
                 output_temp.write(test_output)
                 output_temp.flush()
-                os.fsync(output_temp.fileno())  # Force write to storage
+                os.fsync(output_temp.fileno())
                 output_temp_path = output_temp.name
             
             try:
                 # Build validator command with file arguments
                 validator_command = self.execution_commands['validator'] + [input_temp_path, output_temp_path]
-                validator_result = subprocess.run(
+                
+                validator_process = subprocess.Popen(
                     validator_command,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0,
-                    timeout=10,
                     text=True
                 )
                 
+                # Track validator memory
+                try:
+                    proc = psutil.Process(validator_process.pid)
+                    while validator_process.poll() is None:
+                        mem_mb = proc.memory_info().rss / (1024 * 1024)
+                        peak_memory_mb = max(peak_memory_mb, mem_mb)
+                        time.sleep(0.01)
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    pass
+                
+                validator_stdout, validator_stderr = validator_process.communicate(timeout=10)
                 validator_time = time.time() - validator_start
-                validator_exit_code = validator_result.returncode
+                validator_exit_code = validator_process.returncode
                 
                 # Interpret validator exit code
                 if validator_exit_code == 0:
@@ -270,35 +311,39 @@ class ValidatorTestWorker(QObject):
                 elif validator_exit_code == 1:
                     # Validation failed - wrong answer
                     validation_message = "Wrong Answer"
-                    error_details = validator_result.stdout or validator_result.stderr or "Output doesn't match expected"
+                    error_details = validator_stdout or validator_stderr or "Output doesn't match expected"
                     passed = False
                 elif validator_exit_code == 2:
                     # Validation failed - presentation error
                     validation_message = "Presentation Error"
-                    error_details = validator_result.stdout or validator_result.stderr or "Output format is incorrect"
+                    error_details = validator_stdout or validator_stderr or "Output format is incorrect"
                     passed = False
                 else:
                     # Validator error
                     validation_message = "Validator Error"
-                    error_details = f"Validator crashed with exit code {validator_exit_code}: {validator_result.stderr}"
+                    error_details = f"Validator crashed with exit code {validator_exit_code}: {validator_stderr}"
                     passed = False
                 
                 # Save I/O files to nested directories
                 self._save_test_io(test_number, input_text, test_output)
                 
-                # Create successful test result
+                # Calculate total time
+                total_time = generator_time + test_time + validator_time
+                
+                # Create successful test result with metrics
                 return {
                     'test_number': test_number,
                     'passed': passed,
-                    'input': input_text.strip()[:500] + ("..." if len(input_text.strip()) > 500 else ""),  # Truncate for display
-                    'test_output': test_output.strip()[:500] + ("..." if len(test_output.strip()) > 500 else ""),  # Truncate for display
+                    'input': input_text.strip()[:500] + ("..." if len(input_text.strip()) > 500 else ""),
+                    'test_output': test_output.strip()[:500] + ("..." if len(test_output.strip()) > 500 else ""),
                     'validation_message': validation_message,
                     'error_details': error_details,
                     'validator_exit_code': validator_exit_code,
                     'generator_time': generator_time,
                     'test_time': test_time,
                     'validator_time': validator_time,
-                    'total_time': generator_time + test_time + validator_time
+                    'total_time': total_time,
+                    'memory': peak_memory_mb  # Peak memory in MB
                 }
                 
             finally:
@@ -307,19 +352,19 @@ class ValidatorTestWorker(QObject):
                     os.unlink(input_temp_path)
                     os.unlink(output_temp_path)
                 except OSError:
-                    pass  # Ignore cleanup errors
+                    pass
                     
         except subprocess.TimeoutExpired as e:
             error_msg = f"Timeout in {e.cmd[0] if e.cmd else 'unknown'} after {e.timeout}s"
-            return self._create_error_result(test_number, error_msg, "Timeout", -2)
+            return self._create_error_result(test_number, error_msg, "Timeout", -2, peak_memory_mb=peak_memory_mb)
         except Exception as e:
             error_msg = f"Unexpected error: {str(e)}"
-            return self._create_error_result(test_number, error_msg, "Execution Error", -3)
+            return self._create_error_result(test_number, error_msg, "Execution Error", -3, peak_memory_mb=peak_memory_mb)
 
     def _create_error_result(self, test_number: int, error_msg: str, 
                            validation_message: str = "Error", validator_exit_code: int = -1,
                            generator_time: float = 0, test_time: float = 0, 
-                           validator_time: float = 0) -> Dict[str, Any]:
+                           validator_time: float = 0, peak_memory_mb: float = 0.0) -> Dict[str, Any]:
         """Create a standardized error result dictionary."""
         return {
             'test_number': test_number,
@@ -332,7 +377,8 @@ class ValidatorTestWorker(QObject):
             'generator_time': generator_time,
             'test_time': test_time,
             'validator_time': validator_time,
-            'total_time': generator_time + test_time + validator_time
+            'total_time': generator_time + test_time + validator_time,
+            'memory': peak_memory_mb
         }
 
     def stop(self):

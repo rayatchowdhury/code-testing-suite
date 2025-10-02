@@ -113,7 +113,7 @@ class ComparatorDisplay(QWidget):
         # Configure splitter
         self.splitter.setCollapsible(0, False)
         self.splitter.setCollapsible(1, False)
-        self.splitter.setSizes([800, 200])
+        self.splitter.setSizes([700, 300])
 
         # Set splitter as main widget
         main_layout.addWidget(self.splitter)
@@ -203,3 +203,23 @@ class ComparatorDisplay(QWidget):
         
         self.compiler_runner.finished.connect(on_complete)
         self.compiler_runner.compile_and_run_code(current_file)
+
+    def set_content(self, widget):
+        """
+        Replace display area content with the given widget.
+        
+        This method supports unified status view integration by allowing
+        the display area to be dynamically replaced with a status view widget.
+        
+        Args:
+            widget: QWidget to display
+        """
+        # Clear existing content
+        layout = self.layout()
+        while layout.count():
+            item = layout.takeAt(0)
+            if item.widget():
+                item.widget().setParent(None)
+        
+        # Add new widget
+        layout.addWidget(widget)
