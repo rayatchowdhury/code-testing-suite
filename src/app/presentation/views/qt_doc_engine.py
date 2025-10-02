@@ -1,12 +1,13 @@
 """
-Qt Document Engine - Core components and utilities for Qt-based document widgets
-Provides reusable theme system, styling utilities, and base components
+Qt Document Engine - Complete unified document system for main window and help center
+Consolidates all document components, base classes, and utilities in one place
 """
 
 from PySide6.QtWidgets import *
 from PySide6.QtCore import *
 from PySide6.QtGui import *
-from typing import List
+from typing import List, Optional, Callable
+from dataclasses import dataclass
 
 
 class AppTheme:
@@ -471,3 +472,271 @@ class CallToActionSection(QFrame):
         """End emoji animation"""
         self.emoji.end_hover()
         super().leaveEvent(event)
+
+
+# ==============================================================================
+# HELP CENTER COMPONENTS
+# ==============================================================================
+
+
+class HelpSection(QFrame):
+    """Help section component with icon, title, content and optional list"""
+    
+    def __init__(self, icon: str, title: str, content: str = "", items: List[str] = None, parent: QWidget = None):
+        super().__init__(parent)
+        self.setObjectName("help_section")
+        self._setup_content(icon, title, content, items or [])
+        
+    def _setup_content(self, icon: str, title: str, content: str, items: List[str]):
+        """Build section content"""
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(15)
+        
+        # Header with icon and title
+        layout.addWidget(self._create_header(icon, title))
+        
+        # Content paragraph if provided
+        if content:
+            layout.addWidget(self._create_content(content))
+            
+        # List items if provided
+        if items:
+            layout.addWidget(self._create_item_list(items))
+            
+    def _create_header(self, icon: str, title: str) -> QWidget:
+        """Create section header"""
+        header = QWidget()
+        layout = QHBoxLayout(header)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(12)
+        
+        # Icon
+        icon_label = QLabel(icon)
+        icon_label.setFont(FontUtils.create('title'))
+        icon_label.setFixedSize(40, 40)
+        icon_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(icon_label)
+        
+        # Gradient title
+        title_label = GradientText(title)
+        title_label.setFont(FontUtils.create('title', QFont.Weight.DemiBold))
+        title_label.setWordWrap(True)
+        layout.addWidget(title_label)
+        
+        layout.addStretch()
+        return header
+        
+    def _create_content(self, content: str) -> QLabel:
+        """Create content paragraph"""
+        content_label = QLabel(content)
+        content_label.setWordWrap(True)
+        content_label.setFont(FontUtils.create('description'))
+        content_label.setStyleSheet(f"""
+            color: {AppTheme.COLORS['text']};
+            line-height: 1.6;
+            margin: 10px 0;
+        """)
+        return content_label
+        
+    def _create_item_list(self, items: List[str]) -> QWidget:
+        """Create indented item list"""
+        container = QWidget()
+        layout = QVBoxLayout(container)
+        layout.setContentsMargins(20, 0, 0, 0)  # Indent for help content
+        layout.setSpacing(8)
+        
+        for item in items:
+            layout.addWidget(ListItem(item))
+            
+        return container
+
+
+# ==============================================================================
+# BASE DOCUMENT WIDGET & UTILITIES
+# ==============================================================================
+
+
+def setup_fade_in_animation(widget: QWidget, duration: int = None, delay: int = 50):
+    """
+    Setup and start a fade-in animation for a widget
+    
+    Args:
+        widget: The QWidget to animate
+        duration: Animation duration in ms (defaults to theme duration)
+        delay: Delay before starting animation in ms (default 50ms)
+    """
+    if duration is None:
+        duration = AppTheme.ANIMATION['duration']
+    
+    widget.setWindowOpacity(0)
+    
+    fade_in = QPropertyAnimation(widget, b"windowOpacity")
+    fade_in.setDuration(duration)
+    fade_in.setStartValue(0)
+    fade_in.setEndValue(1)
+    
+    # Start animation after delay
+    QTimer.singleShot(delay, fade_in.start)
+    
+    # Store reference to prevent garbage collection
+    widget._fade_in_animation = fade_in
+    
+    return fade_in
+
+
+class DocumentWidget(QWidget):
+    """
+    Base class for document-style widgets with scroll container and animations
+    
+    Provides:
+    - Scrollable container with consistent styling
+    - Fade-in entrance animation
+    - Template method pattern for content creation
+    
+    Used by both main window intro and help center documents
+    """
+    
+    def __init__(self, parent: QWidget = None):
+        """Initialize document widget"""
+        super().__init__(parent)
+        self._init_ui()
+        self._apply_styles()
+        self._setup_entrance_animation()
+    
+    def _init_ui(self):
+        """Initialize UI structure with scroll container"""
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self._create_scroll_container())
+    
+    def _create_scroll_container(self) -> QScrollArea:
+        """Create scrollable container for document content"""
+        scroll = QScrollArea()
+        scroll.setObjectName("main_scroll")
+        scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        scroll.setFrameShape(QFrame.NoFrame)
+        scroll.setWidget(self.build_content())
+        return scroll
+    
+    def build_content(self) -> QWidget:
+        """
+        Build the document content widget
+        
+        Override this method in subclasses to provide custom content
+        """
+        raise NotImplementedError("Subclasses must implement build_content()")
+    
+    def _apply_styles(self):
+        """Apply base document styles"""
+        styles = [
+            StyleSheet.base(),
+            StyleSheet.scrollarea(),
+            self.get_additional_styles()
+        ]
+        self.setStyleSheet(''.join(styles))
+    
+    def get_additional_styles(self) -> str:
+        """
+        Get additional stylesheet rules for this document
+        Override in subclasses to add custom styles
+        """
+        return ""
+    
+    def _setup_entrance_animation(self):
+        """Setup fade-in animation for document entrance"""
+        setup_fade_in_animation(self)
+
+
+# ==============================================================================
+# HELP DOCUMENT CLASS
+# ==============================================================================
+
+
+@dataclass
+class HelpSectionData:
+    """Data structure for help section content"""
+    icon: str
+    title: str
+    content: str = ""
+    items: List[str] = None
+    
+    def __post_init__(self):
+        """Ensure items is always a list"""
+        if self.items is None:
+            self.items = []
+
+
+class HelpDocument(DocumentWidget):
+    """Help center document widget - renders help content with sections"""
+    
+    def __init__(self, title: str, sections: List[HelpSectionData], parent: QWidget = None):
+        """
+        Initialize help document
+        
+        Args:
+            title: Main document title
+            sections: List of HelpSectionData instances
+        """
+        self.title = title
+        self.sections_data = sections
+        super().__init__(parent)
+        
+    def build_content(self) -> QWidget:
+        """Create main content widget"""
+        content = QWidget()
+        content.setObjectName("content_container")
+        layout = QVBoxLayout(content)
+        
+        # Help-specific layout (slightly less padding, more section spacing)
+        layout.setContentsMargins(30, 20, 30, 30)
+        layout.setSpacing(0)
+        
+        # Add title
+        self._add_title(layout)
+        
+        # Add sections
+        self._add_sections(layout)
+        
+        return content
+        
+    def _add_title(self, layout: QVBoxLayout):
+        """Add main document title"""
+        title_label = GradientText(self.title)
+        title_label.setAlignment(Qt.AlignLeft)  # Left-align for help docs
+        title_label.setWordWrap(True)
+        title_label.setFont(FontUtils.create('large', QFont.Weight.Bold))
+        title_label.setStyleSheet("background: transparent;")
+        layout.addWidget(title_label)
+        layout.addSpacing(20)
+        
+    def _add_sections(self, layout: QVBoxLayout):
+        """Add all help sections"""
+        for i, section_data in enumerate(self.sections_data):
+            if i > 0:
+                layout.addSpacing(30)  # More spacing between sections
+                
+            # Create section widget from dataclass
+            section = HelpSection(
+                section_data.icon,
+                section_data.title,
+                section_data.content,
+                section_data.items
+            )
+            layout.addWidget(section)
+            
+    def get_additional_styles(self) -> str:
+        """Help-specific styles"""
+        return f"""
+            QWidget#content_container {{
+                background-color: {AppTheme.COLORS['background']};
+            }}
+            
+            QFrame#help_section {{
+                background: transparent;
+                border: none;
+                margin-bottom: 10px;
+            }}
+        """

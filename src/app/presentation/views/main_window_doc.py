@@ -1,6 +1,6 @@
 """
 Main Window Document - Application-specific main window implementation
-Uses Qt Document Engine components to create the welcome screen
+All components now imported from unified qt_doc_engine
 """
 
 from PySide6.QtWidgets import *
@@ -10,11 +10,11 @@ from typing import List, Tuple
 
 from .qt_doc_engine import (
     AppTheme, StyleSheet, FontUtils, GradientText, 
-    FeatureCard, CallToActionSection
+    FeatureCard, CallToActionSection, DocumentWidget
 )
 
 
-class MainWindow(QWidget):
+class MainWindow(DocumentWidget):
     """Main application window with scrollable content"""
     
     # Application feature data
@@ -51,31 +51,7 @@ class MainWindow(QWidget):
         ])
     ]
     
-    def __init__(self, parent: QWidget = None):
-        super().__init__(parent)
-        self._init_ui()
-        self._apply_styles()
-        self._setup_entrance_animation()
-        
-    def _init_ui(self):
-        """Initialize the main UI structure"""
-        # Main layout
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(self._create_scroll_container())
-        
-    def _create_scroll_container(self) -> QScrollArea:
-        """Create scrollable container for content"""
-        scroll = QScrollArea()
-        scroll.setObjectName("main_scroll")
-        scroll.setWidgetResizable(True)
-        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        scroll.setFrameShape(QFrame.NoFrame)
-        scroll.setWidget(self._create_content())
-        return scroll
-        
-    def _create_content(self) -> QWidget:
+    def build_content(self) -> QWidget:
         """Create the main content widget with all sections"""
         content = QWidget()
         content.setObjectName("content_container")
@@ -129,25 +105,9 @@ class MainWindow(QWidget):
         layout.addSpacing(AppTheme.LAYOUT['card_margin'])
         layout.addWidget(CallToActionSection())
         
-    def _apply_styles(self):
-        """Apply consolidated stylesheets"""
-        styles = [
-            StyleSheet.base(),
-            StyleSheet.scrollarea(), 
-            StyleSheet.cards()
-        ]
-        self.setStyleSheet(''.join(styles))
-        
-    def _setup_entrance_animation(self):
-        """Setup fade-in animation on window show"""
-        self.setWindowOpacity(0)
-        
-        self.fade_in = QPropertyAnimation(self, b"windowOpacity")
-        self.fade_in.setDuration(AppTheme.ANIMATION['duration'])
-        self.fade_in.setStartValue(0)
-        self.fade_in.setEndValue(1)
-        
-        QTimer.singleShot(50, self.fade_in.start)
+    def get_additional_styles(self) -> str:
+        """Get additional stylesheet for main window"""
+        return StyleSheet.cards()
 
 
 def create_qt_main_window() -> MainWindow:

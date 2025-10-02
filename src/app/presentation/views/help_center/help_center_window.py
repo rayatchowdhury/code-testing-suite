@@ -13,7 +13,8 @@ from src.app.presentation.widgets.sidebar import Sidebar
 from src.app.presentation.widgets.display_area import DisplayArea
 from PySide6.QtWidgets import QPushButton
 from PySide6.QtGui import QFont
-from .help_document_factory import create_help_document
+from ..qt_doc_engine import HelpDocument
+from .help_content import get_document_data
 
 class HelpCenterWindow(SidebarWindowBase):
     def __init__(self, parent=None):
@@ -57,6 +58,7 @@ class HelpCenterWindow(SidebarWindowBase):
             self.display_area.layout.removeWidget(self.current_document)
             self.current_document.deleteLater()
         
-        # Create new document widget
-        self.current_document = create_help_document(topic)
+        # Create new document widget directly
+        data = get_document_data(topic)
+        self.current_document = HelpDocument(data['title'], data['sections'])
         self.display_area.layout.addWidget(self.current_document)
