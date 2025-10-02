@@ -99,12 +99,15 @@ class TestValidatorRunnerIntegration:
             files={'test': str(test_file), 'validator': str(validator_file), 'generator': str(gen_file)}
         )
         
-        # Don't set parent window
+        # Set parent window (required for new architecture)
+        mock_parent = qtbot.addWidget(QWidget())
+        runner.set_parent_window(mock_parent)
+        
         status = runner._create_test_status_window()
         
-        # Should create ValidatorStatusWindow (dialog), not ValidatorStatusView
+        # Should create ValidatorStatusView with parent window
         assert status is not None
-        assert not isinstance(status, ValidatorStatusView)
+        assert isinstance(status, ValidatorStatusView)
 
 
 class TestDisplayAreaIntegration:

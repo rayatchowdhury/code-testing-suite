@@ -11,7 +11,6 @@ import json
 from datetime import datetime
 from PySide6.QtCore import Signal
 from src.app.core.tools.base.base_runner import BaseRunner
-from src.app.presentation.views.comparator.compare_status_window import CompareStatusWindow
 from src.app.persistence.database import TestResult
 from src.app.core.tools.specialized.comparison_test_worker import ComparisonTestWorker
 
@@ -79,14 +78,9 @@ class Comparator(BaseRunner):
         )
 
     def _create_test_status_window(self):
-        """Create comparator status window or view"""
-        # If parent window is set, use unified status view
-        if hasattr(self, 'parent_window') and self.parent_window:
-            from src.app.presentation.views.comparator.comparator_status_view import ComparatorStatusView
-            return ComparatorStatusView()
-        
-        # Otherwise, use old dialog-based status window
-        return CompareStatusWindow()
+        """Create comparator status view"""
+        from src.app.presentation.views.comparator.comparator_status_view import ComparatorStatusView
+        return ComparatorStatusView(parent=self.parent_window)
 
     def _connect_worker_signals(self, worker):
         """Connect stress-specific signals"""

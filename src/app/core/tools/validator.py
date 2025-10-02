@@ -11,7 +11,6 @@ import json
 from datetime import datetime
 from PySide6.QtCore import Signal
 from src.app.core.tools.base.base_runner import BaseRunner
-from src.app.presentation.views.validator.validator_status_window import ValidatorStatusWindow
 from src.app.persistence.database import TestResult
 from src.app.core.tools.specialized.validator_test_worker import ValidatorTestWorker
 
@@ -68,14 +67,9 @@ class ValidatorRunner(BaseRunner):
         )
 
     def _create_test_status_window(self):
-        """Create validation-specific status window or view"""
-        # If parent window is set, return unified status view
-        if hasattr(self, 'parent_window') and self.parent_window:
-            from src.app.presentation.views.validator.validator_status_view import ValidatorStatusView
-            return ValidatorStatusView(self.parent_window)
-        
-        # Otherwise, fall back to dialog-based status window
-        return ValidatorStatusWindow()
+        """Create validation-specific status view"""
+        from src.app.presentation.views.validator.validator_status_view import ValidatorStatusView
+        return ValidatorStatusView(self.parent_window)
 
     def _connect_worker_signals(self, worker):
         """Connect validator-specific signals"""

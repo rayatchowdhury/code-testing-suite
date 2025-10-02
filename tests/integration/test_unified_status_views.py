@@ -351,8 +351,8 @@ class TestRunnerIntegration:
         assert isinstance(val_view, BaseStatusView)
         assert isinstance(bench_view, BaseStatusView)
     
-    def test_all_runners_fallback_to_dialog(self, qtbot, tmp_path):
-        """Test all runners create dialog when no parent is set"""
+    def test_all_runners_require_parent_window(self, qtbot, tmp_path):
+        """Test all runners require parent window to create status views"""
         # Create test files
         test_file = tmp_path / "test.py"
         test_file.write_text("print(input())")
@@ -366,7 +366,10 @@ class TestRunnerIntegration:
         validator_file = tmp_path / "validator.py"
         validator_file.write_text("import sys; sys.exit(0)")
         
-        # Create runners WITHOUT parent
+        # Create mock parent window
+        mock_parent = qtbot.addWidget(QWidget())
+        
+        # Create runners WITH parent
         comparator = Comparator(
             workspace_dir=str(tmp_path),
             files={
@@ -375,6 +378,7 @@ class TestRunnerIntegration:
                 'correct': str(correct_file)
             }
         )
+        comparator.set_parent_window(mock_parent)
         
         validator = ValidatorRunner(
             workspace_dir=str(tmp_path),
@@ -384,6 +388,7 @@ class TestRunnerIntegration:
                 'validator': str(validator_file)
             }
         )
+        validator.set_parent_window(mock_parent)
         
         benchmarker = Benchmarker(
             workspace_dir=str(tmp_path),
@@ -392,13 +397,14 @@ class TestRunnerIntegration:
                 'generator': str(gen_file)
             }
         )
+        benchmarker.set_parent_window(mock_parent)
         
-        # Create status windows (should be dialogs, not views)
-        comp_window = comparator._create_test_status_window()
-        val_window = validator._create_test_status_window()
-        bench_window = benchmarker._create_test_status_window()
+        # Create status views (should be BaseStatusView instances)
+        comp_view = comparator._create_test_status_window()
+        val_view = validator._create_test_status_window()
+        bench_view = benchmarker._create_test_status_window()
         
-        # These should NOT be BaseStatusView instances (they're dialogs)
-        assert not isinstance(comp_window, BaseStatusView)
-        assert not isinstance(val_window, BaseStatusView)
-        assert not isinstance(bench_window, BaseStatusView)
+        # These should all be BaseStatusView instances
+        assert isinstance(comp_view, BaseStatusView)
+        assert isinstance(val_view, BaseStatusView)
+        assert isinstance(bench_view, BaseStatusView)

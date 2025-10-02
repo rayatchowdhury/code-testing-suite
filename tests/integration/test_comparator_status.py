@@ -12,6 +12,7 @@ import pytest
 import os
 from unittest.mock import Mock, patch, MagicMock
 from pathlib import Path
+from PySide6.QtWidgets import QWidget
 
 from src.app.core.tools.comparator import Comparator
 from src.app.presentation.views.comparator.comparator_status_view import ComparatorStatusView
@@ -93,16 +94,19 @@ class TestComparatorRunnerIntegration:
         assert isinstance(status_view, ComparatorStatusView)
         assert isinstance(status_view, BaseStatusView)
         
-    def test_runner_without_parent_creates_dialog(self, temp_workspace, qtbot):
-        """Test runner creates dialog when no parent window"""
+    def test_runner_requires_parent_window(self, temp_workspace, qtbot):
+        """Test runner requires parent window to create status view"""
         comparator = Comparator(workspace_dir=temp_workspace)
         
-        # Don't set parent window
-        status_window = comparator._create_test_status_window()
+        # Set parent window (required for new architecture)
+        mock_parent = qtbot.addWidget(QWidget())
+        comparator.set_parent_window(mock_parent)
         
-        # Should create old-style dialog
-        assert status_window is not None
-        assert not isinstance(status_window, BaseStatusView)
+        status_view = comparator._create_test_status_window()
+        
+        # Should create ComparatorStatusView with parent window
+        assert status_view is not None
+        assert isinstance(status_view, ComparatorStatusView)
 
 
 class TestDisplayAreaIntegration:

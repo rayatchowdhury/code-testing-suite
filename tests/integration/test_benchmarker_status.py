@@ -78,8 +78,8 @@ class TestBenchmarkerRunnerIntegration:
         assert hasattr(status, 'time_limit_ms')
         assert hasattr(status, 'memory_limit_mb')
     
-    def test_runner_without_parent_creates_dialog(self, qtbot, tmp_path):
-        """Test runner without parent window creates dialog (backward compatibility)"""
+    def test_runner_requires_parent_window(self, qtbot, tmp_path):
+        """Test runner requires parent window to create status view"""
         test_file = tmp_path / "test.py"
         test_file.write_text("print(input())")
 
@@ -89,12 +89,17 @@ class TestBenchmarkerRunnerIntegration:
         runner = Benchmarker(
             workspace_dir=str(tmp_path),
             files={'test': str(test_file), 'generator': str(gen_file)}
-        )        # Don't set parent window
+        )
+        
+        # Set parent window (required for new architecture)
+        mock_parent = qtbot.addWidget(QWidget())
+        runner.set_parent_window(mock_parent)
+        
         status = runner._create_test_status_window()
         
-        # Should create BenchmarkStatusWindow (dialog), not BenchmarkerStatusView
+        # Should create BenchmarkerStatusView with parent window
         assert status is not None
-        assert not isinstance(status, BenchmarkerStatusView)
+        assert isinstance(status, BenchmarkerStatusView)
 
 
 class TestDisplayAreaIntegration:

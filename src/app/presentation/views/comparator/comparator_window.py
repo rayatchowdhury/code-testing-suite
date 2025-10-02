@@ -81,6 +81,9 @@ class ComparatorWindow(SidebarWindowBase):
         )
         self.comparator.compilationOutput.connect(self.display_area.console.displayOutput)
         
+        # Set parent window for unified status view integration
+        self.comparator.set_parent_window(self)
+        
         # Connect runner signals for clean separation of concerns
         self.comparator.testingStarted.connect(self._switch_to_test_mode)
         self.comparator.testingCompleted.connect(self._on_tests_completed)
