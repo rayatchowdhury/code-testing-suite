@@ -20,6 +20,13 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from PySide6.QtCore import QObject, Signal, Slot
 from src.app.core.tools.base.base_test_worker import BaseTestWorker
 
+# Import path helpers for nested I/O file organization
+from src.app.shared.constants.paths import (
+    get_input_file_path,
+    get_output_file_path
+)
+from src.app.shared.utils.workspace_utils import ensure_test_type_directory
+
 
 class ValidatorTestWorker(QObject):
     """
@@ -35,15 +42,18 @@ class ValidatorTestWorker(QObject):
     allTestsCompleted = Signal(bool)  # True if all passed
 
     def __init__(self, workspace_dir: str, executables: Dict[str, str], 
-                 test_count: int, max_workers: Optional[int] = None):
+                 test_count: int, max_workers: Optional[int] = None,
+                 execution_commands: Optional[Dict[str, list]] = None):
         """
         Initialize the validator test worker.
         
         Args:
             workspace_dir: Directory containing test files and executables
-            executables: Dictionary with 'generator', 'test', 'validator' executable paths
+            executables: Dictionary with 'generator', 'test', 'validator' executable paths (legacy)
             test_count: Number of tests to run
             max_workers: Maximum number of parallel workers (auto-detected if None)
+            execution_commands: Dictionary with 'generator', 'test', 'validator' execution command lists
+                              (e.g., ['python', 'gen.py'] or ['./test.exe']). If provided, overrides executables.
         """
         super().__init__()
         self.workspace_dir = workspace_dir
@@ -54,6 +64,42 @@ class ValidatorTestWorker(QObject):
         # Use reasonable default: CPU cores - 1, min 1, max 8 (to avoid overwhelming system)
         self.max_workers = max_workers or min(8, max(1, multiprocessing.cpu_count() - 1))
         self._results_lock = threading.Lock()  # Thread-safe results access
+        
+        # Multi-language support: use execution commands if provided, otherwise fall back to executable paths
+        if execution_commands:
+            self.execution_commands = execution_commands
+        else:
+            # Legacy mode: convert executable paths to command lists
+            self.execution_commands = {k: [v] for k, v in executables.items()}
+    
+    def _save_test_io(self, test_number: int, input_data: str, output_data: str):
+        """
+        Save test input and output to nested directories.
+        
+        Args:
+            test_number: The test number
+            input_data: The generated input data
+            output_data: The test solution output data
+        """
+        try:
+            # Ensure nested directory structure exists
+            ensure_test_type_directory(self.workspace_dir, 'validator')
+            
+            # Get full paths for input and output files
+            input_file = get_input_file_path(self.workspace_dir, 'validator', f"input_{test_number}.txt")
+            output_file = get_output_file_path(self.workspace_dir, 'validator', f"output_{test_number}.txt")
+            
+            # Save input file
+            with open(input_file, 'w', encoding='utf-8') as f:
+                f.write(input_data)
+            
+            # Save output file
+            with open(output_file, 'w', encoding='utf-8') as f:
+                f.write(output_data)
+                
+        except Exception as e:
+            # Don't fail the test if file saving fails, just log the error
+            print(f"Warning: Failed to save I/O files for test {test_number}: {e}")
 
     @Slot()
     def run_tests(self):
@@ -142,10 +188,10 @@ class ValidatorTestWorker(QObject):
             generator_start = time.time()
             
             generator_result = subprocess.run(
-                [self.executables['generator']],
+                self.execution_commands['generator'],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                creationflags=subprocess.CREATE_NO_WINDOW,
+                creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0,
                 timeout=10,
                 text=True  # Decode to string directly
             )
@@ -163,11 +209,11 @@ class ValidatorTestWorker(QObject):
             test_start = time.time()
             
             test_result = subprocess.run(
-                [self.executables['test']],
+                self.execution_commands['test'],
                 input=input_text,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                creationflags=subprocess.CREATE_NO_WINDOW,
+                creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0,
                 timeout=30,
                 text=True  # Decode to string directly
             )
@@ -201,11 +247,13 @@ class ValidatorTestWorker(QObject):
                 output_temp_path = output_temp.name
             
             try:
+                # Build validator command with file arguments
+                validator_command = self.execution_commands['validator'] + [input_temp_path, output_temp_path]
                 validator_result = subprocess.run(
-                    [self.executables['validator'], input_temp_path, output_temp_path],
+                    validator_command,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
-                    creationflags=subprocess.CREATE_NO_WINDOW,
+                    creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0,
                     timeout=10,
                     text=True
                 )
@@ -234,6 +282,9 @@ class ValidatorTestWorker(QObject):
                     validation_message = "Validator Error"
                     error_details = f"Validator crashed with exit code {validator_exit_code}: {validator_result.stderr}"
                     passed = False
+                
+                # Save I/O files to nested directories
+                self._save_test_io(test_number, input_text, test_output)
                 
                 # Create successful test result
                 return {

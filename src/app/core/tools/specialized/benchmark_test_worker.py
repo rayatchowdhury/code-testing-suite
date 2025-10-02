@@ -18,6 +18,15 @@ from typing import Dict, Any, Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from PySide6.QtCore import QObject, Signal, Slot
 
+# Import path helpers for nested I/O file organization
+from src.app.shared.constants.paths import (
+    get_input_file_path,
+    get_output_file_path,
+    get_inputs_dir,
+    get_outputs_dir
+)
+from src.app.shared.utils.workspace_utils import ensure_test_type_directory
+
 
 class BenchmarkTestWorker(QObject):
     """
@@ -34,17 +43,20 @@ class BenchmarkTestWorker(QObject):
 
     def __init__(self, workspace_dir: str, executables: Dict[str, str], 
                  time_limit: float, memory_limit: int, test_count: int = 1,
-                 max_workers: Optional[int] = None):
+                 max_workers: Optional[int] = None,
+                 execution_commands: Optional[Dict[str, list]] = None):
         """
         Initialize the TLE test worker.
         
         Args:
             workspace_dir: Directory containing test files and executables
-            executables: Dictionary with 'generator' and 'test' executable paths
+            executables: Dictionary with 'generator' and 'test' executable paths (legacy)
             time_limit: Time limit in milliseconds
             memory_limit: Memory limit in MB
             test_count: Number of tests to run
             max_workers: Maximum number of parallel workers (auto-detected if None)
+            execution_commands: Dictionary with 'generator' and 'test' execution command lists
+                              (e.g., ['python', 'gen.py'] or ['./test.exe']). If provided, overrides executables.
         """
         super().__init__()
         self.workspace_dir = workspace_dir
@@ -57,6 +69,42 @@ class BenchmarkTestWorker(QObject):
         # Use reasonable default for benchmarking (less workers due to memory monitoring overhead)
         self.max_workers = max_workers or min(4, max(1, multiprocessing.cpu_count() - 1))
         self._results_lock = threading.Lock()  # Thread-safe results access
+        
+        # Multi-language support: use execution commands if provided, otherwise fall back to executable paths
+        if execution_commands:
+            self.execution_commands = execution_commands
+        else:
+            # Legacy mode: convert executable paths to command lists
+            self.execution_commands = {k: [v] for k, v in executables.items()}
+    
+    def _save_test_io(self, test_number: int, input_data: str, output_data: str):
+        """
+        Save test input and output to nested directories.
+        
+        Args:
+            test_number: The test number
+            input_data: The generated input data
+            output_data: The test output data
+        """
+        try:
+            # Ensure nested directory structure exists
+            ensure_test_type_directory(self.workspace_dir, 'benchmarker')
+            
+            # Get full paths for input and output files
+            input_file = get_input_file_path(self.workspace_dir, 'benchmarker', f"input_{test_number}.txt")
+            output_file = get_output_file_path(self.workspace_dir, 'benchmarker', f"output_{test_number}.txt")
+            
+            # Save input file
+            with open(input_file, 'w', encoding='utf-8') as f:
+                f.write(input_data)
+            
+            # Save output file
+            with open(output_file, 'w', encoding='utf-8') as f:
+                f.write(output_data)
+                
+        except Exception as e:
+            # Don't fail the test if file saving fails, just log the error
+            print(f"Warning: Failed to save I/O files for test {test_number}: {e}")
 
     @Slot()
     def run_tests(self):
@@ -142,10 +190,10 @@ class BenchmarkTestWorker(QObject):
             generator_start = time.time()
             
             generator_result = subprocess.run(
-                [self.executables['generator']],
+                self.execution_commands['generator'],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                creationflags=subprocess.CREATE_NO_WINDOW,
+                creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0,
                 timeout=10,
                 text=True
             )
@@ -164,11 +212,11 @@ class BenchmarkTestWorker(QObject):
             
             # Start the test process
             process = subprocess.Popen(
-                [self.executables['test']],
+                self.execution_commands['test'],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                creationflags=subprocess.CREATE_NO_WINDOW,
+                creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0,
                 text=True
             )
             
@@ -227,6 +275,9 @@ class BenchmarkTestWorker(QObject):
             # Check if both time and memory limits were respected
             time_passed = test_time <= self.time_limit
             overall_passed = time_passed and memory_passed and process.returncode == 0
+            
+            # Save I/O files to nested directories
+            self._save_test_io(test_number, input_text, stdout)
             
             return {
                 'test_name': f"Test {test_number}",

@@ -163,14 +163,29 @@ class BenchmarkStatusWindow(QDialog):
         # Read and display input/output if available (use latest test files)
         try:
             if self.workspace_dir:
-                input_file = os.path.join(self.workspace_dir, f"input_{test_number}.txt")
-                output_file = os.path.join(self.workspace_dir, f"output_{test_number}.txt")
+                # Use nested benchmarker directory structure for I/O files
+                from src.app.shared.constants.paths import get_input_file_path, get_output_file_path
                 
-                # Fallback to original file names if numbered files don't exist
+                # Try nested structure first (new format)
+                input_file = get_input_file_path(self.workspace_dir, 'benchmarker', f"input_{test_number}.txt")
+                output_file = get_output_file_path(self.workspace_dir, 'benchmarker', f"output_{test_number}.txt")
+                
+                # Fallback to non-numbered files in nested structure
                 if not os.path.exists(input_file):
-                    input_file = os.path.join(self.workspace_dir, "input.txt")
+                    input_file = get_input_file_path(self.workspace_dir, 'benchmarker', "input.txt")
                 if not os.path.exists(output_file):
-                    output_file = os.path.join(self.workspace_dir, "output.txt")
+                    output_file = get_output_file_path(self.workspace_dir, 'benchmarker', "output.txt")
+                
+                # Final fallback to flat structure (for migration/backward compatibility)
+                if not os.path.exists(input_file):
+                    input_file = os.path.join(self.workspace_dir, f"input_{test_number}.txt")
+                    if not os.path.exists(input_file):
+                        input_file = os.path.join(self.workspace_dir, "input.txt")
+                
+                if not os.path.exists(output_file):
+                    output_file = os.path.join(self.workspace_dir, f"output_{test_number}.txt")
+                    if not os.path.exists(output_file):
+                        output_file = os.path.join(self.workspace_dir, "output.txt")
                 
                 if os.path.exists(input_file):
                     with open(input_file, 'r') as f:
@@ -184,8 +199,8 @@ class BenchmarkStatusWindow(QDialog):
                 else:
                     self.output_text.setText("No output file available")
         except Exception as e:
-            self.input_text.setText("Error reading input file")
-            self.output_text.setText("Error reading output file")
+            self.input_text.setText(f"Error reading input file: {str(e)}")
+            self.output_text.setText(f"Error reading output file: {str(e)}")
         
         self._add_to_history(test_name, test_number, passed, time_taken, memory_used, memory_passed, time_exceeded)
         

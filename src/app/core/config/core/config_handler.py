@@ -2,7 +2,6 @@
 
 import json
 import os
-import os.path
 from typing import Dict, Any, Optional
 
 from PySide6.QtWidgets import QMessageBox
@@ -95,14 +94,44 @@ class ConfigManager:
             'cpp_version': str,
             'workspace_folder': str,
             'gemini': dict,  # Standardized format (Phase 1)
-            'editor_settings': dict
+            'editor_settings': dict,
+            'languages': dict  # Multi-language support
         }
         
         for key, expected_type in required_keys.items():
             if key not in config:
+                # Languages is optional - auto-populate with defaults if missing
+                if key == 'languages':
+                    continue
                 errors.append(f"Missing required key: {key}")
             elif not isinstance(config[key], expected_type):
                 errors.append(f"Invalid type for {key}: expected {expected_type.__name__}")
+        
+        # Validate multi-language configurations
+        if 'languages' in config:
+            languages = config['languages']
+            supported_langs = ['cpp', 'py', 'java']
+            
+            for lang in supported_langs:
+                if lang not in languages:
+                    continue  # Optional - will use defaults
+                
+                lang_config = languages[lang]
+                if not isinstance(lang_config, dict):
+                    errors.append(f"Invalid language config for {lang}: expected dict")
+                    continue
+                
+                # Validate language-specific fields
+                if lang == 'cpp':
+                    required_fields = {'compiler': str, 'std_version': str}
+                elif lang == 'py':
+                    required_fields = {'interpreter': str}
+                elif lang == 'java':
+                    required_fields = {'compiler': str, 'runtime': str}
+                
+                for field, field_type in required_fields.items():
+                    if field in lang_config and not isinstance(lang_config[field], field_type):
+                        errors.append(f"Invalid type for {lang}.{field}: expected {field_type.__name__}")
         
         if 'gemini' in config:
             gemini_settings = config['gemini']
@@ -136,7 +165,9 @@ class ConfigManager:
                 elif not isinstance(editor_settings[key], expected_type):
                     errors.append(f"Invalid type for editor setting {key}")
         
-        if missing_keys := [k for k in required_keys if k not in config]:
+        # Check for truly missing keys (excluding optional 'languages')
+        missing_keys = [k for k in required_keys if k not in config and k != 'languages']
+        if missing_keys:
             raise ConfigMissingError(f"Required keys: {', '.join(missing_keys)}")
         
         return errors
@@ -144,8 +175,27 @@ class ConfigManager:
     def get_default_config(self):
         """Get default configuration structure."""
         return {
-            'cpp_version': 'c++17',
+            'cpp_version': 'c++17',  # Legacy field - kept for backward compatibility
             'workspace_folder': '',
+            'languages': {  # Multi-language compiler configurations
+                'cpp': {
+                    'compiler': 'g++',
+                    'std_version': 'c++17',
+                    'optimization': 'O2',
+                    'flags': ['-march=native', '-mtune=native', '-pipe', '-Wall']
+                },
+                'py': {
+                    'interpreter': 'python',
+                    'version': '3',
+                    'flags': ['-u']  # Unbuffered output
+                },
+                'java': {
+                    'compiler': 'javac',
+                    'version': '11',
+                    'flags': [],
+                    'runtime': 'java'
+                }
+            },
             'gemini': {  # Standardized format (Phase 1)
                 'enabled': False,
                 'api_key': '',
@@ -191,8 +241,43 @@ class ConfigPersistence:
         except:
             default_config = {}
         
-        self.parent.cpp_version_combo.setCurrentText(cfg.get("cpp_version", default_config.get("cpp_version", "c++17")))
+        # Note: cpp_version_combo removed - C++ version now in Language Compilers section
         self.parent.workspace_input.setText(cfg.get("workspace_folder", ""))
+        
+        # Load language-specific compiler flags
+        languages = cfg.get("languages", default_config.get("languages", {}))
+        
+        # C++ configuration
+        cpp_config = languages.get("cpp", {})
+        if hasattr(self.parent, 'cpp_compiler_combo'):
+            self.parent.cpp_compiler_combo.setCurrentText(cpp_config.get('compiler', 'g++'))
+        if hasattr(self.parent, 'cpp_std_combo'):
+            # Use languages.cpp.std_version as primary, cpp_version as fallback for backward compat
+            std_version = cpp_config.get('std_version', cfg.get('cpp_version', 'c++17'))
+            self.parent.cpp_std_combo.setCurrentText(std_version)
+        if hasattr(self.parent, 'cpp_opt_combo'):
+            self.parent.cpp_opt_combo.setCurrentText(cpp_config.get('optimization', 'O2'))
+        cpp_flags = cpp_config.get("flags", [])
+        if hasattr(self.parent, 'cpp_flags_input'):
+            self.parent.cpp_flags_input.setText(", ".join(cpp_flags) if isinstance(cpp_flags, list) else str(cpp_flags))
+        
+        # Python configuration
+        py_config = languages.get("py", {})
+        if hasattr(self.parent, 'py_interpreter_combo'):
+            self.parent.py_interpreter_combo.setCurrentText(py_config.get('interpreter', 'python'))
+        py_flags = py_config.get("flags", [])
+        if hasattr(self.parent, 'py_flags_input'):
+            self.parent.py_flags_input.setText(", ".join(py_flags) if isinstance(py_flags, list) else str(py_flags))
+        
+        # Java configuration
+        java_config = languages.get("java", {})
+        if hasattr(self.parent, 'java_compiler_combo'):
+            self.parent.java_compiler_combo.setCurrentText(java_config.get('compiler', 'javac'))
+        if hasattr(self.parent, 'java_runtime_combo'):
+            self.parent.java_runtime_combo.setCurrentText(java_config.get('runtime', 'java'))
+        java_flags = java_config.get("flags", [])
+        if hasattr(self.parent, 'java_flags_input'):
+            self.parent.java_flags_input.setText(", ".join(java_flags) if isinstance(java_flags, list) else str(java_flags))
         
         # Updated for new gemini format (Phase 1)
         gemini_settings = cfg.get("gemini", {}) if isinstance(cfg.get("gemini"), dict) else {}
@@ -242,9 +327,31 @@ class ConfigPersistence:
                 current_config = self.config_manager.get_default_config()
             
             # Update with UI values using new gemini format (Phase 1)
+            # Keep cpp_version for backward compatibility but use languages.cpp.std_version as primary
+            cpp_std_version = self.parent.cpp_std_combo.currentText() if hasattr(self.parent, 'cpp_std_combo') else current_config.get("languages", {}).get("cpp", {}).get("std_version", "c++17")
+            
             config = {
-                "cpp_version": self.parent.cpp_version_combo.currentText(),
+                "cpp_version": cpp_std_version,  # Legacy field for backward compatibility
                 "workspace_folder": self.parent.workspace_input.text().strip(),
+                "languages": {
+                    "cpp": {
+                        "compiler": self.parent.cpp_compiler_combo.currentText() if hasattr(self.parent, 'cpp_compiler_combo') else current_config.get("languages", {}).get("cpp", {}).get("compiler", "g++"),
+                        "std_version": cpp_std_version,
+                        "optimization": self.parent.cpp_opt_combo.currentText() if hasattr(self.parent, 'cpp_opt_combo') else current_config.get("languages", {}).get("cpp", {}).get("optimization", "O2"),
+                        "flags": [f.strip() for f in self.parent.cpp_flags_input.text().split(",") if f.strip()] if hasattr(self.parent, 'cpp_flags_input') else current_config.get("languages", {}).get("cpp", {}).get("flags", [])
+                    },
+                    "py": {
+                        "interpreter": self.parent.py_interpreter_combo.currentText() if hasattr(self.parent, 'py_interpreter_combo') else current_config.get("languages", {}).get("py", {}).get("interpreter", "python"),
+                        "version": current_config.get("languages", {}).get("py", {}).get("version", "3"),
+                        "flags": [f.strip() for f in self.parent.py_flags_input.text().split(",") if f.strip()] if hasattr(self.parent, 'py_flags_input') else current_config.get("languages", {}).get("py", {}).get("flags", [])
+                    },
+                    "java": {
+                        "compiler": self.parent.java_compiler_combo.currentText() if hasattr(self.parent, 'java_compiler_combo') else current_config.get("languages", {}).get("java", {}).get("compiler", "javac"),
+                        "version": current_config.get("languages", {}).get("java", {}).get("version", "11"),
+                        "flags": [f.strip() for f in self.parent.java_flags_input.text().split(",") if f.strip()] if hasattr(self.parent, 'java_flags_input') else current_config.get("languages", {}).get("java", {}).get("flags", []),
+                        "runtime": self.parent.java_runtime_combo.currentText() if hasattr(self.parent, 'java_runtime_combo') else current_config.get("languages", {}).get("java", {}).get("runtime", "java")
+                    }
+                },
                 "gemini": {  # New standardized format
                     "enabled": self.parent.use_ai_checkbox.isChecked(),
                     "api_key": self.parent.key_input.text().strip(),

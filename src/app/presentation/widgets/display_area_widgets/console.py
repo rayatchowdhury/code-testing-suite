@@ -4,6 +4,7 @@ from PySide6.QtCore import Qt, Signal, QTimer
 from PySide6.QtGui import QKeyEvent, QTextCharFormat, QColor, QTextCursor
 from src.app.presentation.styles import CONSOLE_STYLE, MATERIAL_COLORS
 from src.app.presentation.styles.components.console_colors import CONSOLE_COLORS
+from src.app.presentation.styles.components.scrollbar import SCROLLBAR_STYLE
 
 class ConsoleOutput(QWidget):
     inputSubmitted = Signal(str)
@@ -54,6 +55,11 @@ class ConsoleOutput(QWidget):
         self.output.setMaximumBlockCount(1000)  # Limit the number of blocks
         self.output.document().setMaximumBlockCount(1000)  # Ensure both are set
         
+        # Apply custom scrollbar styling to match editor
+        output_scrollbar = QScrollBar()
+        output_scrollbar.setStyleSheet(SCROLLBAR_STYLE)
+        self.output.setVerticalScrollBar(output_scrollbar)
+        
         # Input title with center alignment and matching style
         input_title = QLabel("Input")
         input_title.setObjectName("input_title")  # Add this line
@@ -67,6 +73,11 @@ class ConsoleOutput(QWidget):
         self.input.setMaximumBlockCount(100)  # Limit input history
         self.input.setPlaceholderText("Type your input here and press Enter to submit")
         self.input.textChanged.connect(self._handle_text_change)
+        
+        # Apply custom scrollbar styling to input as well
+        input_scrollbar = QScrollBar()
+        input_scrollbar.setStyleSheet(SCROLLBAR_STYLE)
+        self.input.setVerticalScrollBar(input_scrollbar)
         
         # Compile & Run button with modern gradient and glow effect
         self.compile_run_btn = QPushButton()

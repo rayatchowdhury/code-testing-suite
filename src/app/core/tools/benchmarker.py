@@ -94,15 +94,27 @@ class Benchmarker(BaseRunner):
     # TLE-specific signal signature (must match original)
     testCompleted = Signal(str, int, bool, float, float, bool)  # test name, test number, passed, execution time, memory used, memory passed
 
-    def __init__(self, workspace_dir):
-        # Define files specific to TLE testing
-        files = {
-            'generator': os.path.join(workspace_dir, 'generator.cpp'),
-            'test': os.path.join(workspace_dir, 'test.cpp')
-        }
+    def __init__(self, workspace_dir, files=None, config=None):
+        """
+        Initialize Benchmarker with multi-language support and nested file structure.
         
-        # Initialize BaseRunner with benchmark-specific configuration
-        super().__init__(workspace_dir, files, test_type='benchmark')
+        Args:
+            workspace_dir: Root workspace directory
+            files: Optional dict of file paths. If None, uses defaults in nested structure
+            config: Optional configuration dictionary with language settings
+        """
+        from src.app.shared.constants.paths import get_workspace_file_path
+        
+        # Define files - use provided or nested structure defaults
+        if files is None:
+            # Use nested benchmarker directory structure
+            files = {
+                'generator': get_workspace_file_path(workspace_dir, 'benchmarker', 'generator.cpp'),
+                'test': get_workspace_file_path(workspace_dir, 'benchmarker', 'test.cpp')
+            }
+        
+        # Initialize BaseRunner with benchmark test type for nested structure
+        super().__init__(workspace_dir, files, test_type='benchmark', config=config)
         
         # Store TLE-specific parameters
         self.time_limit = 0
@@ -126,13 +138,20 @@ class Benchmarker(BaseRunner):
         self.time_limit = time_limit or 1000  # Default 1000ms
         self.memory_limit = memory_limit or 256  # Default 256MB
         
+        # Generate execution commands for multi-language support
+        execution_commands = {
+            'generator': self.compiler.get_execution_command('generator'),
+            'test': self.compiler.get_execution_command('test')
+        }
+        
         return BenchmarkTestWorker(
             self.workspace_dir, 
             self.executables, 
             self.time_limit,
             self.memory_limit,
             test_count, 
-            max_workers
+            max_workers,
+            execution_commands=execution_commands
         )
 
     def _create_test_status_window(self):

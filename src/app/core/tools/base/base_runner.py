@@ -8,7 +8,7 @@ base class with consistent threading, database integration, and lifecycle manage
 
 import os
 import json
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from datetime import datetime
 from PySide6.QtCore import QObject, Signal, QThread
 from src.app.core.tools.base.base_compiler import BaseCompiler
@@ -73,33 +73,34 @@ class BaseRunner(QObject):
     allTestsCompleted = Signal(bool)  # True if all passed
     
     def __init__(self, workspace_dir: str, files_dict: Dict[str, str], 
-                 test_type: str, optimization_level: str = 'O2'):
+                 test_type: str, optimization_level: str = 'O2', config: Optional[Dict[str, Any]] = None):
         """
-        Initialize the base runner.
+        Initialize the base runner with multi-language support.
         
         Args:
             workspace_dir: Directory containing source files and executables
             files_dict: Dictionary mapping file keys to source file paths
             test_type: Type of test for database storage ('validator', 'stress', 'tle')
             optimization_level: Compiler optimization level
+            config: Optional configuration dictionary with language settings
         """
         super().__init__()
         self.workspace_dir = workspace_dir
         self.files = files_dict
-        self.test_type = test_type
+        self.test_type = test_type  # Used for both database tracking and file organization
+        self.config = config or {}
         
-        # Create executables dict from files dict
-        self.executables = {
-            key: os.path.join(workspace_dir, f"{key}.exe")
-            for key in files_dict.keys()
-        }
-        
-        # Initialize compiler
+        # Initialize compiler with config for multi-language support and nested structure
         self.compiler = BaseCompiler(
             workspace_dir=workspace_dir,
             files_dict=files_dict,
-            optimization_level=optimization_level
+            optimization_level=optimization_level,
+            config=self.config,
+            test_type=test_type  # Pass test_type for nested file structure
         )
+        
+        # Executables will be set by compiler based on detected languages
+        self.executables = self.compiler.executables
         
         # Connect compiler signals
         self.compiler.compilationFinished.connect(self.compilationFinished)

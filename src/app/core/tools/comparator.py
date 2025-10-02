@@ -27,16 +27,28 @@ class Comparator(BaseRunner):
     # Stress-specific signal signature (must match original)
     testCompleted = Signal(int, bool, str, str, str)  # test number, passed, input, correct output, test output
 
-    def __init__(self, workspace_dir):
-        # Define files specific to comparison testing
-        files = {
-            'generator': os.path.join(workspace_dir, 'generator.cpp'),
-            'correct': os.path.join(workspace_dir, 'correct.cpp'),
-            'test': os.path.join(workspace_dir, 'test.cpp')
-        }
+    def __init__(self, workspace_dir, files=None, config=None):
+        """
+        Initialize Comparator with multi-language support and nested file structure.
         
-        # Initialize BaseRunner with comparison-specific configuration
-        super().__init__(workspace_dir, files, test_type='comparison')
+        Args:
+            workspace_dir: Root workspace directory
+            files: Optional dict of file paths. If None, uses defaults in nested structure
+            config: Optional configuration dictionary with language settings
+        """
+        from src.app.shared.constants.paths import get_workspace_file_path
+        
+        # Define files - use provided or nested structure defaults
+        if files is None:
+            # Use nested comparator directory structure
+            files = {
+                'generator': get_workspace_file_path(workspace_dir, 'comparator', 'generator.cpp'),
+                'correct': get_workspace_file_path(workspace_dir, 'comparator', 'correct.cpp'),
+                'test': get_workspace_file_path(workspace_dir, 'comparator', 'test.cpp')
+            }
+        
+        # Initialize BaseRunner with comparison test type for nested structure
+        super().__init__(workspace_dir, files, test_type='comparison', config=config)
 
     def _get_compiler_flags(self):
         """Get comparison-specific compiler optimization flags"""
@@ -51,11 +63,19 @@ class Comparator(BaseRunner):
 
     def _create_test_worker(self, test_count, max_workers=None, **kwargs):
         """Create ComparisonTestWorker for comparison testing"""
+        # Generate execution commands for multi-language support
+        execution_commands = {
+            'generator': self.compiler.get_execution_command('generator'),
+            'test': self.compiler.get_execution_command('test'),
+            'correct': self.compiler.get_execution_command('correct')
+        }
+        
         return ComparisonTestWorker(
             self.workspace_dir, 
             self.executables, 
             test_count, 
-            max_workers
+            max_workers,
+            execution_commands=execution_commands
         )
 
     def _create_test_status_window(self):

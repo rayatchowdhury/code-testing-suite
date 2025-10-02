@@ -70,10 +70,13 @@ class SidebarWindowBase(QWidget):
         super().resizeEvent(event)
         self.update_splitter_sizes()
 
-    def cleanup(self): pass
-    def save_state(self): pass
-    def restore_state(self): pass
-    def can_close(self): return not self.has_unsaved_changes
+    def cleanup(self):
+        """Clean up resources. Override in subclasses if needed."""
+        pass
+    
+    def can_close(self):
+        """Check if window can be closed. Override to check for unsaved changes."""
+        return not self.has_unsaved_changes
 
     def handle_button_click(self, button_text):
         if button_text == 'Back':

@@ -46,10 +46,46 @@ class ValidatorWindow(SidebarWindowBase):
         # Connect signals
         self.sidebar.button_clicked.connect(self.handle_button_click)
 
+        # Initialize tool with multi-language support
+        self._initialize_tool()
+        
+        # Connect filesManifestChanged signal to reinitialize tool
+        self.display_area.test_tabs.filesManifestChanged.connect(self._on_files_changed)
+    
+    def _initialize_tool(self):
+        """Initialize or reinitialize the validator tool with current file manifest."""
+        # Load configuration
+        config = self._load_config()
+        
+        # Get file manifest from test tabs
+        manifest = self.display_area.test_tabs.get_compilation_manifest()
+        files = manifest['files']
+        
         # Lazy import to avoid circular dependency
         from src.app.core.tools.validator import ValidatorRunner
-        self.validator_runner = ValidatorRunner(self.display_area.workspace_dir)
+        
+        # Create validator with multi-language support
+        self.validator_runner = ValidatorRunner(
+            workspace_dir=self.display_area.workspace_dir,
+            files=files,
+            config=config
+        )
         self.validator_runner.compilationOutput.connect(self.display_area.console.displayOutput)
+    
+    def _load_config(self):
+        """Load configuration for multi-language compilation."""
+        try:
+            from src.app.core.config import ConfigManager
+            config_manager = ConfigManager()
+            return config_manager.load_config()
+        except Exception as e:
+            # Fallback to empty config if loading fails
+            return {}
+    
+    def _on_files_changed(self):
+        """Handle file manifest changes (language switches)."""
+        # Reinitialize tool with new file configuration
+        self._initialize_tool()
 
     # Remove the handle_edit_button method since we no longer have edit buttons
 
@@ -59,6 +95,9 @@ class ValidatorWindow(SidebarWindowBase):
 
     def handle_action_button(self, button_text):
         if button_text == 'Compile':
+            # Clear console before compilation
+            self.display_area.console.clear()
+            
             # Check all files for unsaved changes
             for btn_name, btn in self.display_area.file_buttons.items():
                 if btn.property("hasUnsavedChanges"):

@@ -18,6 +18,8 @@ from src.app.presentation.styles.components.test_view_styles import (
     TEST_VIEW_CONTENT_PANEL_STYLE
 )
 from src.app.shared.constants import WORKSPACE_DIR
+from src.app.shared.constants.paths import get_workspace_file_path
+from src.app.shared.utils.workspace_utils import ensure_test_type_directory
 from src.app.shared.utils.tab_code_templates import TabCodeTemplates
 from src.app.presentation.styles.constants import MATERIAL_COLORS
 
@@ -34,8 +36,9 @@ class TestTabWidget(QWidget):
     fileChanged = Signal(str)  # Emitted when switching to a different file
     tabClicked = Signal(str)   # Emitted when any tab is clicked
     languageChanged = Signal(str, str)  # Emitted when language changes (tab_name, language)
+    filesManifestChanged = Signal()  # Emitted when file manifest changes (for compilation)
     
-    def __init__(self, parent=None, tab_config=None, default_tab=None, multi_language=False, default_language='cpp'):
+    def __init__(self, parent=None, tab_config=None, default_tab=None, multi_language=False, default_language='cpp', test_type='comparator'):
         """
         Initialize TestTabWidget.
         
@@ -45,6 +48,7 @@ class TestTabWidget(QWidget):
             default_tab: Name of the tab to activate by default
             multi_language: Enable multi-language support
             default_language: Default language for new tabs ('cpp', 'py', 'java')
+            test_type: Type of test (comparator/validator/benchmarker) for nested file paths
         """
         super().__init__(parent)
         
@@ -55,6 +59,7 @@ class TestTabWidget(QWidget):
         self.multi_language = multi_language
         self.available_languages = ['cpp', 'py', 'java']
         self.default_language = default_language
+        self.test_type = test_type  # Store test type for nested file paths
         
         # Multi-language state management
         if multi_language:
@@ -69,7 +74,9 @@ class TestTabWidget(QWidget):
         self._content_widget = None
         
         self._setup_ui()
-        os.makedirs(self.workspace_dir, exist_ok=True)
+        # Ensure nested workspace structure exists for this test type
+        if self.workspace_dir:
+            ensure_test_type_directory(self.workspace_dir, self.test_type)
         
     def _ensure_multi_language_config(self):
         """Convert legacy config to multi-language format if needed."""
@@ -397,7 +404,6 @@ class TestTabWidget(QWidget):
             return
             
         old_language = self.current_language_per_tab.get(tab_name)
-        print(f"Switching {tab_name} from {old_language} to {new_language}")
         
         # Check for unsaved changes in current language
         if (old_language and 
@@ -427,7 +433,6 @@ class TestTabWidget(QWidget):
         button = self.file_buttons[tab_name]
         if button == self.current_button:
             file_path = self._get_current_file_path(tab_name, new_language)
-            print(f"Switching to file: {file_path}")
             
             # Create file if it doesn't exist
             if not os.path.exists(file_path):
@@ -435,13 +440,14 @@ class TestTabWidget(QWidget):
                 os.makedirs(os.path.dirname(file_path), exist_ok=True)
                 with open(file_path, 'w', encoding='utf-8') as f:
                     f.write(default_content)
-                print(f"Created new file {file_path} with template")
+                print(f"  → Created new {new_language.upper()} file: {os.path.basename(file_path)}")
             
             # Emit signals to reload file content
             self.fileChanged.emit(file_path)
             self.languageChanged.emit(tab_name, new_language)
         
-        print(f"Language change completed for {tab_name}")
+        # Notify that file manifest has changed (for recompilation)
+        self.filesManifestChanged.emit()
     
     def _update_tab_language_indicator(self, tab_name, language):
         """Update the language indicator label for a tab."""
@@ -450,7 +456,7 @@ class TestTabWidget(QWidget):
             button.language_label.setText(language.upper())
         
     def _get_current_file_path(self, tab_name, language=None):
-        """Get file path for specific tab and language."""
+        """Get file path for specific tab and language using nested structure."""
         if self.multi_language:
             if language is None:
                 language = self.current_language_per_tab.get(tab_name, self.default_language)
@@ -458,7 +464,8 @@ class TestTabWidget(QWidget):
         else:
             file_name = self.tab_config[tab_name]
         
-        return os.path.join(self.workspace_dir, file_name)
+        # Use nested workspace structure (e.g., workspace/comparator/generator.cpp)
+        return get_workspace_file_path(self.workspace_dir, self.test_type, file_name)
         
     def _handle_tab_click(self, tab_name, skip_save_prompt=False):
         """Handle tab button clicks and switch between files."""
@@ -723,3 +730,115 @@ class TestTabWidget(QWidget):
         """Programmatically switch language for a specific tab."""
         if self.multi_language and tab_name in self.file_buttons:
             self._handle_language_change(tab_name, language)
+    
+    def get_all_file_paths_with_languages(self):
+        """
+        Get all file paths with their current languages.
+        
+        Returns:
+            Dict[str, Dict[str, str]]: Dictionary mapping tab names to file info
+                {
+                    'Generator': {'language': 'py', 'file_path': '/path/to/generator.py'},
+                    'Test Code': {'language': 'cpp', 'file_path': '/path/to/test.cpp'},
+                    ...
+                }
+        """
+        result = {}
+        
+        for tab_name in self.tab_config.keys():
+            if self.multi_language:
+                current_lang = self.current_language_per_tab.get(tab_name, self.default_language)
+                file_path = self._get_current_file_path(tab_name, current_lang)
+            else:
+                current_lang = 'cpp'
+                file_name = self.tab_config[tab_name]
+                file_path = os.path.join(self.workspace_dir, file_name)
+            
+            result[tab_name] = {
+                'language': current_lang,
+                'file_path': file_path
+            }
+        
+        return result
+    
+    def get_compilation_manifest(self):
+        """
+        Get complete compilation manifest for all tabs.
+        
+        This provides all information needed by core tools for multi-language compilation.
+        
+        Returns:
+            Dict[str, Any]: Comprehensive manifest with file info
+                {
+                    'files': {
+                        'generator': '/path/to/generator.py',
+                        'test': '/path/to/test.cpp',
+                        ...
+                    },
+                    'languages': {
+                        'generator': 'py',
+                        'test': 'cpp',
+                        ...
+                    },
+                    'tab_info': {
+                        'Generator': {'language': 'py', 'file_path': '...'},
+                        ...
+                    },
+                    'workspace_dir': '/path/to/workspace',
+                    'multi_language': True
+                }
+        """
+        files_dict = {}
+        languages_dict = {}
+        tab_info = self.get_all_file_paths_with_languages()
+        
+        # Map tab names to standardized keys (lowercase, remove spaces)
+        key_mapping = {
+            'Generator': 'generator',
+            'Test Code': 'test',
+            'Correct Code': 'correct',
+            'Validator Code': 'validator'
+        }
+        
+        for tab_name, info in tab_info.items():
+            # Get standardized key
+            key = key_mapping.get(tab_name, tab_name.lower().replace(' ', '_'))
+            
+            files_dict[key] = info['file_path']
+            languages_dict[key] = info['language']
+        
+        manifest = {
+            'files': files_dict,
+            'languages': languages_dict,
+            'tab_info': tab_info,
+            'workspace_dir': self.workspace_dir,
+            'multi_language': self.multi_language
+        }
+        
+        return manifest
+    
+    def get_files_for_tool(self, tool_type='comparator'):
+        """
+        Get file dictionary formatted for specific tool type.
+        
+        Args:
+            tool_type: Type of tool ('comparator', 'benchmarker', 'validator')
+            
+        Returns:
+            Dict[str, str]: File key to path mapping for the tool
+        """
+        manifest = self.get_compilation_manifest()
+        files = manifest['files']
+        
+        # Filter files based on tool type
+        if tool_type == 'comparator':
+            # Needs: generator, correct, test
+            return {k: files[k] for k in ['generator', 'correct', 'test'] if k in files}
+        elif tool_type == 'benchmarker':
+            # Needs: generator, test
+            return {k: files[k] for k in ['generator', 'test'] if k in files}
+        elif tool_type == 'validator':
+            # Needs: generator, test, validator
+            return {k: files[k] for k in ['generator', 'test', 'validator'] if k in files}
+        else:
+            return files

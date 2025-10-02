@@ -637,36 +637,85 @@ class DatabaseManager:
     
     @staticmethod
     def create_files_snapshot(workspace_dir: str) -> FilesSnapshot:
-        """Create a snapshot of all relevant files in the workspace"""
+        """
+        Create a snapshot of all relevant files in the workspace.
+        
+        Supports both flat and nested directory structures:
+        - Flat: workspace_dir/*.cpp, *.py, *.java
+        - Nested: workspace_dir/comparator/*.cpp, workspace_dir/validator/*.py, etc.
+        """
+        from src.app.shared.utils.workspace_utils import is_flat_workspace_structure, list_workspace_files
+        
         snapshot = FilesSnapshot()
         
-        # Common file mappings
+        # Common file mappings (filename -> snapshot attribute)
         file_mappings = {
             'generator.h': 'generator_code',
-            'generator.cpp': 'generator_code', 
+            'generator.cpp': 'generator_code',
+            'Generator.java': 'generator_code',
+            'generator.py': 'generator_code',
             'a.cpp': 'correct_code',
             'correct.cpp': 'correct_code',
+            'Correct.java': 'correct_code',
+            'correct.py': 'correct_code',
             'b.cpp': 'test_code',
             'test.cpp': 'test_code',
-            'tmp.cpp': 'test_code'
+            'Test.java': 'test_code',
+            'test.py': 'test_code',
+            'tmp.cpp': 'test_code',
+            'validator.cpp': 'validator_code',
+            'Validator.java': 'validator_code',
+            'validator.py': 'validator_code'
         }
         
         try:
-            for filename in os.listdir(workspace_dir):
-                filepath = os.path.join(workspace_dir, filename)
-                if os.path.isfile(filepath) and filename.endswith(('.cpp', '.h', '.py', '.java')):
-                    try:
-                        with open(filepath, 'r', encoding='utf-8') as f:
-                            content = f.read()
+            # Check if workspace uses flat or nested structure
+            if is_flat_workspace_structure(workspace_dir):
+                # Legacy flat structure - read files from workspace root
+                for filename in os.listdir(workspace_dir):
+                    filepath = os.path.join(workspace_dir, filename)
+                    if os.path.isfile(filepath) and filename.endswith(('.cpp', '.h', '.py', '.java')):
+                        try:
+                            with open(filepath, 'r', encoding='utf-8') as f:
+                                content = f.read()
+                            
+                            # Map to known file types
+                            if filename in file_mappings:
+                                setattr(snapshot, file_mappings[filename], content)
+                            else:
+                                # Add to additional files with just filename
+                                snapshot.additional_files[filename] = content
+                        except Exception as e:
+                            print(f"Error reading file {filename}: {e}")
+            else:
+                # Nested structure - traverse test type directories
+                for test_type in ['comparator', 'validator', 'benchmarker']:
+                    test_type_dir = os.path.join(workspace_dir, test_type)
+                    if not os.path.exists(test_type_dir):
+                        continue
+                    
+                    for filename in os.listdir(test_type_dir):
+                        filepath = os.path.join(test_type_dir, filename)
                         
-                        # Map to known file types
-                        if filename in file_mappings:
-                            setattr(snapshot, file_mappings[filename], content)
-                        else:
-                            # Add to additional files
-                            snapshot.additional_files[filename] = content
-                    except Exception as e:
-                        print(f"Error reading file {filename}: {e}")
+                        # Skip inputs/outputs subdirectories
+                        if os.path.isdir(filepath):
+                            continue
+                        
+                        # Only read source code files
+                        if filename.endswith(('.cpp', '.h', '.py', '.java')):
+                            try:
+                                with open(filepath, 'r', encoding='utf-8') as f:
+                                    content = f.read()
+                                
+                                # Map to known file types
+                                if filename in file_mappings:
+                                    setattr(snapshot, file_mappings[filename], content)
+                                else:
+                                    # Add to additional files with relative path (test_type/filename)
+                                    relative_path = f"{test_type}/{filename}"
+                                    snapshot.additional_files[relative_path] = content
+                            except Exception as e:
+                                print(f"Error reading file {test_type}/{filename}: {e}")
         except Exception as e:
             print(f"Error creating files snapshot: {e}")
         

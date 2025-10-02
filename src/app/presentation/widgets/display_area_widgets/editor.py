@@ -665,6 +665,7 @@ class EditorWidget(QWidget):
         QShortcut(QKeySequence.SaveAs, self).activated.connect(self.saveFileAs)
 
     def _handle_file_button(self, button_name):
+        """Handle file button clicks (legacy - now mostly handled by TestTabWidget)."""
         # Update active button state
         if self.current_button:
             self.current_button.setProperty("isActive", False)
@@ -677,13 +678,25 @@ class EditorWidget(QWidget):
         clicked_button.style().polish(clicked_button)
         self.current_button = clicked_button
 
+        # Use nested workspace structure based on context
+        # Default to comparator for backward compatibility
+        from src.app.shared.constants.paths import get_workspace_file_path
+        from src.app.shared.utils.workspace_utils import ensure_test_type_directory
+        
+        test_type = getattr(self, 'test_type', 'comparator')  # Get test type from editor if set
+        
         file_map = {
             'Generator': 'generator.cpp',
             'Correct Code': 'correct.cpp',
             'Test Code': 'test.cpp'
         }
         
-        file_path = os.path.join(self.workspace_dir, file_map[button_name])
+        # Get file path using nested structure
+        file_name = file_map[button_name]
+        file_path = get_workspace_file_path(self.workspace_dir, test_type, file_name)
+        
+        # Ensure test type directory exists
+        ensure_test_type_directory(self.workspace_dir, test_type)
         
         # Create file if it doesn't exist
         if not os.path.exists(file_path):

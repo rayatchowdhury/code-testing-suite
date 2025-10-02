@@ -27,24 +27,44 @@ class ValidatorRunner(BaseRunner):
     # Validation-specific signal signature (must match original)
     testCompleted = Signal(int, bool, str, str, str, str, int)  # test number, passed, input, test_output, validation_message, error_details, validator_exit_code
 
-    def __init__(self, workspace_dir):
-        # Define files specific to validation testing
-        files = {
-            'generator': os.path.join(workspace_dir, 'generator.cpp'),
-            'test': os.path.join(workspace_dir, 'test.cpp'),
-            'validator': os.path.join(workspace_dir, 'validator.cpp')
-        }
+    def __init__(self, workspace_dir, files=None, config=None):
+        """
+        Initialize Validator with multi-language support and nested file structure.
         
-        # Initialize BaseRunner with validation-specific configuration
-        super().__init__(workspace_dir, files, test_type='validator')
+        Args:
+            workspace_dir: Root workspace directory
+            files: Optional dict of file paths. If None, uses defaults in nested structure
+            config: Optional configuration dictionary with language settings
+        """
+        from src.app.shared.constants.paths import get_workspace_file_path
+        
+        # Define files - use provided or nested structure defaults
+        if files is None:
+            # Use nested validator directory structure
+            files = {
+                'generator': get_workspace_file_path(workspace_dir, 'validator', 'generator.cpp'),
+                'test': get_workspace_file_path(workspace_dir, 'validator', 'test.cpp'),
+                'validator': get_workspace_file_path(workspace_dir, 'validator', 'validator.cpp')
+            }
+        
+        # Initialize BaseRunner with validator test type for nested structure
+        super().__init__(workspace_dir, files, test_type='validator', config=config)
 
     def _create_test_worker(self, test_count, max_workers=None, **kwargs):
         """Create ValidatorTestWorker for validation testing"""
+        # Generate execution commands for multi-language support
+        execution_commands = {
+            'generator': self.compiler.get_execution_command('generator'),
+            'test': self.compiler.get_execution_command('test'),
+            'validator': self.compiler.get_execution_command('validator')
+        }
+        
         return ValidatorTestWorker(
             self.workspace_dir, 
             self.executables, 
             test_count, 
-            max_workers
+            max_workers,
+            execution_commands=execution_commands
         )
 
     def _create_test_status_window(self):

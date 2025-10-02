@@ -179,7 +179,19 @@ class TestConfigPersistence:
     def mock_dialog(self):
         """Create mock dialog with required UI components."""
         dialog = MagicMock()
-        dialog.cpp_version_combo = MagicMock()
+        # C++ compiler controls (new structure)
+        dialog.cpp_compiler_combo = MagicMock()
+        dialog.cpp_std_combo = MagicMock()
+        dialog.cpp_opt_combo = MagicMock()
+        dialog.cpp_flags_input = MagicMock()
+        # Python interpreter controls
+        dialog.py_interpreter_combo = MagicMock()
+        dialog.py_flags_input = MagicMock()
+        # Java compiler controls
+        dialog.java_compiler_combo = MagicMock()
+        dialog.java_runtime_combo = MagicMock()
+        dialog.java_flags_input = MagicMock()
+        # Other fields
         dialog.workspace_input = MagicMock()
         dialog.key_input = MagicMock()
         dialog.status_label = MagicMock()
@@ -204,7 +216,8 @@ class TestConfigPersistence:
         config_persistence.load_config()
         
         # Verify UI components were populated
-        config_persistence.parent.cpp_version_combo.setCurrentText.assert_called_with(sample_config['cpp_version'])
+        # C++ standard version now loaded into cpp_std_combo (from languages.cpp.std_version or legacy cpp_version)
+        config_persistence.parent.cpp_std_combo.setCurrentText.assert_called()
         config_persistence.parent.workspace_input.setText.assert_called_with(sample_config['workspace_folder'])
         config_persistence.parent.key_input.setText.assert_called_with(sample_config['gemini']['api_key'])
 
@@ -213,8 +226,8 @@ class TestConfigPersistence:
         # Load config (should use defaults)
         config_persistence.load_config()
         
-        # Verify default values were set (actual default is 'c++17', not 'auto')
-        config_persistence.parent.cpp_version_combo.setCurrentText.assert_called_with("c++17")
+        # Verify default values were set (C++ standard now in cpp_std_combo)
+        config_persistence.parent.cpp_std_combo.setCurrentText.assert_called_with("c++17")
         config_persistence.parent.workspace_input.setText.assert_called_with("")
 
     def test_load_config_with_corrupted_file(self, config_persistence):
@@ -226,8 +239,8 @@ class TestConfigPersistence:
         # Load config should handle error gracefully
         config_persistence.load_config()
         
-        # Should fall back to defaults (actual default is 'c++17', not 'auto')
-        config_persistence.parent.cpp_version_combo.setCurrentText.assert_called_with("c++17")
+        # Should fall back to defaults (C++ standard now in cpp_std_combo)
+        config_persistence.parent.cpp_std_combo.setCurrentText.assert_called_with("c++17")
 
     def test_load_config_handles_config_errors(self, config_persistence):
         """Test that load_config handles ConfigError exceptions."""

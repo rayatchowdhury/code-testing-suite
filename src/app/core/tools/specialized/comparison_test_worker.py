@@ -19,6 +19,13 @@ from typing import Dict, Any, Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from PySide6.QtCore import QObject, Signal, Slot
 
+# Import path helpers for nested I/O file organization
+from src.app.shared.constants.paths import (
+    get_input_file_path,
+    get_output_file_path
+)
+from src.app.shared.utils.workspace_utils import ensure_test_type_directory
+
 
 class ComparisonTestWorker(QObject):
     """
@@ -34,15 +41,18 @@ class ComparisonTestWorker(QObject):
     allTestsCompleted = Signal(bool)  # True if all passed
 
     def __init__(self, workspace_dir: str, executables: Dict[str, str], 
-                 test_count: int, max_workers: Optional[int] = None):
+                 test_count: int, max_workers: Optional[int] = None,
+                 execution_commands: Optional[Dict[str, list]] = None):
         """
         Initialize the comparison test worker.
         
         Args:
             workspace_dir: Directory containing test files and executables
-            executables: Dictionary with 'generator', 'test', 'correct' executable paths
+            executables: Dictionary with 'generator', 'test', 'correct' executable paths (legacy)
             test_count: Number of tests to run
             max_workers: Maximum number of parallel workers (auto-detected if None)
+            execution_commands: Dictionary with 'generator', 'test', 'correct' execution command lists
+                              (e.g., ['python', 'gen.py'] or ['./test.exe']). If provided, overrides executables.
         """
         super().__init__()
         self.workspace_dir = workspace_dir
@@ -53,6 +63,48 @@ class ComparisonTestWorker(QObject):
         # Use reasonable default: CPU cores - 1, min 1, max 6 (comparison testing can be I/O intensive)
         self.max_workers = max_workers or min(6, max(1, multiprocessing.cpu_count() - 1))
         self._results_lock = threading.Lock()  # Thread-safe results access
+        
+        # Multi-language support: use execution commands if provided, otherwise fall back to executable paths
+        if execution_commands:
+            self.execution_commands = execution_commands
+        else:
+            # Legacy mode: convert executable paths to command lists
+            self.execution_commands = {k: [v] for k, v in executables.items()}
+    
+    def _save_test_io(self, test_number: int, input_data: str, test_output: str, correct_output: str):
+        """
+        Save test input and outputs to nested directories.
+        
+        Args:
+            test_number: The test number
+            input_data: The generated input data
+            test_output: The test solution output
+            correct_output: The correct solution output
+        """
+        try:
+            # Ensure nested directory structure exists
+            ensure_test_type_directory(self.workspace_dir, 'comparator')
+            
+            # Get full paths for input and output files
+            input_file = get_input_file_path(self.workspace_dir, 'comparator', f"input_{test_number}.txt")
+            test_output_file = get_output_file_path(self.workspace_dir, 'comparator', f"output_{test_number}.txt")
+            correct_output_file = get_output_file_path(self.workspace_dir, 'comparator', f"correct_output_{test_number}.txt")
+            
+            # Save input file
+            with open(input_file, 'w', encoding='utf-8') as f:
+                f.write(input_data)
+            
+            # Save test output file
+            with open(test_output_file, 'w', encoding='utf-8') as f:
+                f.write(test_output)
+            
+            # Save correct output file
+            with open(correct_output_file, 'w', encoding='utf-8') as f:
+                f.write(correct_output)
+                
+        except Exception as e:
+            # Don't fail the test if file saving fails, just log the error
+            print(f"Warning: Failed to save I/O files for test {test_number}: {e}")
 
     @Slot()
     def run_tests(self):
@@ -138,10 +190,10 @@ class ComparisonTestWorker(QObject):
             generator_start = time.time()
             
             generator_result = subprocess.run(
-                [self.executables['generator']],
+                self.execution_commands['generator'],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                creationflags=subprocess.CREATE_NO_WINDOW,
+                creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0,
                 timeout=10,
                 text=True
             )
@@ -159,11 +211,11 @@ class ComparisonTestWorker(QObject):
             test_start = time.time()
             
             test_result = subprocess.run(
-                [self.executables['test']],
+                self.execution_commands['test'],
                 input=input_text,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                creationflags=subprocess.CREATE_NO_WINDOW,
+                creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0,
                 timeout=30,
                 text=True
             )
@@ -181,11 +233,11 @@ class ComparisonTestWorker(QObject):
             correct_start = time.time()
             
             correct_result = subprocess.run(
-                [self.executables['correct']],
+                self.execution_commands['correct'],
                 input=input_text,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                creationflags=subprocess.CREATE_NO_WINDOW,
+                creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0,
                 timeout=30,
                 text=True
             )
@@ -210,6 +262,9 @@ class ComparisonTestWorker(QObject):
             outputs_match = test_output_normalized == correct_output_normalized
             
             comparison_time = time.time() - comparison_start
+            
+            # Save I/O files to nested directories
+            self._save_test_io(test_number, input_text, test_output, correct_output)
             
             # Create result
             return {

@@ -71,7 +71,8 @@ class BenchmarkerDisplay(QWidget):
             tab_config=tab_config,
             default_tab='Generator',
             multi_language=True,
-            default_language='cpp'
+            default_language='cpp',
+            test_type='benchmarker'  # Use nested benchmarker directory
         )
         
         # Set editor as the content widget for tabs
@@ -139,7 +140,7 @@ class BenchmarkerDisplay(QWidget):
 
     def _handle_language_changed(self, tab_name, language):
         """Handle language switching in tabs."""
-        print(f"Benchmarker: Switched to {language.upper()} in {tab_name}")
+        print(f"Benchmarker: Switched {tab_name} to {language.upper()}")
         # Update AI panel context if needed
         if hasattr(self.ai_panel, 'refresh_context'):
             self.ai_panel.refresh_context()

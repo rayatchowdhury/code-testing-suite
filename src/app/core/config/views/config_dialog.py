@@ -170,7 +170,8 @@ class ConfigView(QDialog):
         content_layout.setContentsMargins(0, 0, 20, 20)
 
         # Create sections (inline section builders)
-        content_layout.addWidget(self._create_cpp_section())
+        # Note: Removed standalone C++ Version section - now integrated into Language Compilers
+        content_layout.addWidget(self._create_languages_section())
         content_layout.addWidget(self._create_workspace_section())
         content_layout.addWidget(self._create_ai_section())
         content_layout.addWidget(self._create_editor_section())
@@ -236,26 +237,207 @@ class ConfigView(QDialog):
 
         return frame, content_layout
 
-    def _create_cpp_section(self):
-        """Create C++ configuration section."""
-        frame, layout = self._create_section_frame("🔧 C++ Version")
-
-        # C++ Version selector row
+    def _create_languages_section(self):
+        """Create multi-language compiler flags configuration section."""
+        frame, layout = self._create_section_frame("🌐 Language Compilers")
+        
+        # Info label
+        info_label = QLabel("Configure compilers, interpreters, and flags for each language.")
+        info_label.setStyleSheet(SECTION_INFO_LABEL_STYLE)
+        info_label.setWordWrap(True)
+        layout.addWidget(info_label)
+        
+        # ===== C++ Configuration =====
         cpp_widget = QWidget()
-        cpp_layout = QHBoxLayout(cpp_widget)
-        cpp_layout.setContentsMargins(0, 0, 0, 0)
-        cpp_layout.setSpacing(8)
-
-        cpp_label = QLabel("Default C++ standard:")
-        cpp_label.setFixedWidth(120)
-        cpp_layout.addWidget(cpp_label)
-
-        self.cpp_version_combo = QComboBox()
-        self.cpp_version_combo.addItems(["auto", "c++11", "c++14", "c++17", "c++20", "c++23"])
-        self.cpp_version_combo.setFixedHeight(28)
-        cpp_layout.addWidget(self.cpp_version_combo)
+        cpp_layout = QVBoxLayout(cpp_widget)
+        cpp_layout.setContentsMargins(0, 8, 0, 8)
+        cpp_layout.setSpacing(6)
+        
+        cpp_header = QLabel("C++")
+        cpp_header.setStyleSheet(f"font-weight: 600; font-size: 13px; color: {MATERIAL_COLORS['primary']};")
+        cpp_layout.addWidget(cpp_header)
+        
+        # C++ Compiler selection
+        cpp_compiler_row = QWidget()
+        cpp_compiler_layout = QHBoxLayout(cpp_compiler_row)
+        cpp_compiler_layout.setContentsMargins(0, 0, 0, 0)
+        cpp_compiler_layout.setSpacing(8)
+        
+        cpp_compiler_label = QLabel("Compiler:")
+        cpp_compiler_label.setFixedWidth(100)
+        cpp_compiler_layout.addWidget(cpp_compiler_label)
+        
+        self.cpp_compiler_combo = QComboBox()
+        self.cpp_compiler_combo.addItems(["g++", "clang++", "gcc", "clang"])
+        self.cpp_compiler_combo.setFixedHeight(28)
+        self.cpp_compiler_combo.setToolTip("Select C++ compiler (g++ recommended for competitive programming)")
+        cpp_compiler_layout.addWidget(self.cpp_compiler_combo)
+        
+        cpp_layout.addWidget(cpp_compiler_row)
+        
+        # C++ Standard selection
+        cpp_std_row = QWidget()
+        cpp_std_layout = QHBoxLayout(cpp_std_row)
+        cpp_std_layout.setContentsMargins(0, 0, 0, 0)
+        cpp_std_layout.setSpacing(8)
+        
+        cpp_std_label = QLabel("C++ Standard:")
+        cpp_std_label.setFixedWidth(100)
+        cpp_std_layout.addWidget(cpp_std_label)
+        
+        self.cpp_std_combo = QComboBox()
+        self.cpp_std_combo.addItems(["c++11", "c++14", "c++17", "c++20", "c++23"])
+        self.cpp_std_combo.setFixedHeight(28)
+        self.cpp_std_combo.setToolTip("C++ language standard version")
+        cpp_std_layout.addWidget(self.cpp_std_combo)
+        
+        cpp_layout.addWidget(cpp_std_row)
+        
+        # C++ Optimization level
+        cpp_opt_row = QWidget()
+        cpp_opt_layout = QHBoxLayout(cpp_opt_row)
+        cpp_opt_layout.setContentsMargins(0, 0, 0, 0)
+        cpp_opt_layout.setSpacing(8)
+        
+        cpp_opt_label = QLabel("Optimization:")
+        cpp_opt_label.setFixedWidth(100)
+        cpp_opt_layout.addWidget(cpp_opt_label)
+        
+        self.cpp_opt_combo = QComboBox()
+        self.cpp_opt_combo.addItems(["O0", "O1", "O2", "O3", "Ofast", "Os", "Oz"])
+        self.cpp_opt_combo.setFixedHeight(28)
+        self.cpp_opt_combo.setToolTip("Compiler optimization level (O2 recommended for competitive programming)")
+        cpp_opt_layout.addWidget(self.cpp_opt_combo)
+        
+        cpp_layout.addWidget(cpp_opt_row)
+        
+        # C++ Flags
+        cpp_flags_label = QLabel("Additional Flags:")
+        cpp_flags_label.setStyleSheet(f"font-weight: 500; color: {MATERIAL_COLORS['on_surface']}; margin-top: 4px;")
+        cpp_layout.addWidget(cpp_flags_label)
+        
+        self.cpp_flags_input = QLineEdit()
+        self.cpp_flags_input.setPlaceholderText("e.g., -Wall, -march=native, -pipe")
+        self.cpp_flags_input.setFixedHeight(28)
+        self.cpp_flags_input.setToolTip("Additional compiler flags (comma-separated)")
+        cpp_layout.addWidget(self.cpp_flags_input)
         
         layout.addWidget(cpp_widget)
+        
+        # Separator
+        separator1 = QFrame()
+        separator1.setFrameShape(QFrame.HLine)
+        separator1.setStyleSheet(f"background-color: {MATERIAL_COLORS['outline_variant']};")
+        separator1.setFixedHeight(1)
+        layout.addWidget(separator1)
+        
+        # ===== Python Configuration =====
+        py_widget = QWidget()
+        py_layout = QVBoxLayout(py_widget)
+        py_layout.setContentsMargins(0, 8, 0, 8)
+        py_layout.setSpacing(6)
+        
+        py_header = QLabel("Python")
+        py_header.setStyleSheet(f"font-weight: 600; font-size: 13px; color: {MATERIAL_COLORS['primary']};")
+        py_layout.addWidget(py_header)
+        
+        # Python Interpreter selection
+        py_interpreter_row = QWidget()
+        py_interpreter_layout = QHBoxLayout(py_interpreter_row)
+        py_interpreter_layout.setContentsMargins(0, 0, 0, 0)
+        py_interpreter_layout.setSpacing(8)
+        
+        py_interpreter_label = QLabel("Interpreter:")
+        py_interpreter_label.setFixedWidth(100)
+        py_interpreter_layout.addWidget(py_interpreter_label)
+        
+        self.py_interpreter_combo = QComboBox()
+        self.py_interpreter_combo.addItems(["python", "python3", "pypy", "pypy3"])
+        self.py_interpreter_combo.setFixedHeight(28)
+        self.py_interpreter_combo.setToolTip("Python interpreter (pypy/pypy3 often faster for competitive programming)")
+        py_interpreter_layout.addWidget(self.py_interpreter_combo)
+        
+        py_layout.addWidget(py_interpreter_row)
+        
+        # Python Flags
+        py_flags_label = QLabel("Interpreter Flags:")
+        py_flags_label.setStyleSheet(f"font-weight: 500; color: {MATERIAL_COLORS['on_surface']}; margin-top: 4px;")
+        py_layout.addWidget(py_flags_label)
+        
+        self.py_flags_input = QLineEdit()
+        self.py_flags_input.setPlaceholderText("e.g., -u, -B")
+        self.py_flags_input.setFixedHeight(28)
+        self.py_flags_input.setToolTip("Python interpreter flags (comma-separated)")
+        py_layout.addWidget(self.py_flags_input)
+        
+        layout.addWidget(py_widget)
+        
+        # Separator
+        separator2 = QFrame()
+        separator2.setFrameShape(QFrame.HLine)
+        separator2.setStyleSheet(f"background-color: {MATERIAL_COLORS['outline_variant']};")
+        separator2.setFixedHeight(1)
+        layout.addWidget(separator2)
+        
+        # ===== Java Configuration =====
+        java_widget = QWidget()
+        java_layout = QVBoxLayout(java_widget)
+        java_layout.setContentsMargins(0, 8, 0, 8)
+        java_layout.setSpacing(6)
+        
+        java_header = QLabel("Java")
+        java_header.setStyleSheet(f"font-weight: 600; font-size: 13px; color: {MATERIAL_COLORS['primary']};")
+        java_layout.addWidget(java_header)
+        
+        # Java Compiler selection
+        java_compiler_row = QWidget()
+        java_compiler_layout = QHBoxLayout(java_compiler_row)
+        java_compiler_layout.setContentsMargins(0, 0, 0, 0)
+        java_compiler_layout.setSpacing(8)
+        
+        java_compiler_label = QLabel("Compiler:")
+        java_compiler_label.setFixedWidth(100)
+        java_compiler_layout.addWidget(java_compiler_label)
+        
+        self.java_compiler_combo = QComboBox()
+        self.java_compiler_combo.addItems(["javac", "ecj"])
+        self.java_compiler_combo.setFixedHeight(28)
+        self.java_compiler_combo.setToolTip("Java compiler (javac is standard)")
+        java_compiler_layout.addWidget(self.java_compiler_combo)
+        
+        java_layout.addWidget(java_compiler_row)
+        
+        # Java Runtime selection
+        java_runtime_row = QWidget()
+        java_runtime_layout = QHBoxLayout(java_runtime_row)
+        java_runtime_layout.setContentsMargins(0, 0, 0, 0)
+        java_runtime_layout.setSpacing(8)
+        
+        java_runtime_label = QLabel("Runtime:")
+        java_runtime_label.setFixedWidth(100)
+        java_runtime_layout.addWidget(java_runtime_label)
+        
+        self.java_runtime_combo = QComboBox()
+        self.java_runtime_combo.addItems(["java"])
+        self.java_runtime_combo.setFixedHeight(28)
+        self.java_runtime_combo.setToolTip("Java runtime executable")
+        java_runtime_layout.addWidget(self.java_runtime_combo)
+        
+        java_layout.addWidget(java_runtime_row)
+        
+        # Java Flags
+        java_flags_label = QLabel("Compiler Flags:")
+        java_flags_label.setStyleSheet(f"font-weight: 500; color: {MATERIAL_COLORS['on_surface']}; margin-top: 4px;")
+        java_layout.addWidget(java_flags_label)
+        
+        self.java_flags_input = QLineEdit()
+        self.java_flags_input.setPlaceholderText("e.g., -encoding UTF-8, -Xlint")
+        self.java_flags_input.setFixedHeight(28)
+        self.java_flags_input.setToolTip("Java compiler flags (comma-separated)")
+        java_layout.addWidget(self.java_flags_input)
+        
+        layout.addWidget(java_widget)
+        
         return frame
 
     def _create_workspace_section(self):
