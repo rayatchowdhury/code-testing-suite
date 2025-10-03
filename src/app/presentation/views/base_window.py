@@ -102,3 +102,150 @@ class SidebarWindowBase(QWidget):
         # Refresh AI panels with new configuration
         if hasattr(self, 'refresh_ai_panels'):
             self.refresh_ai_panels()
+    
+    # ===== UI State Management Methods for Test Execution =====
+    # These methods handle UI coordination when tests are running
+    
+    def _switch_to_test_mode(self):
+        """
+        Switch UI to test mode - hide compile/run buttons, show stop button.
+        
+        This method should be called by subclasses when tests start.
+        Subclasses should override to implement their specific button management.
+        """
+        pass  # Override in subclasses
+    
+    def _restore_normal_mode(self):
+        """
+        Restore UI to normal mode - show compile/run buttons, hide stop button.
+        
+        This method should be called by subclasses when tests complete.
+        Subclasses should override to implement their specific button management.
+        """
+        pass  # Override in subclasses
+    
+    def _integrate_status_view(self, status_view):
+        """
+        Integrate status view into display area.
+        
+        This method handles the display area manipulation when switching to
+        test execution view.
+        
+        Args:
+            status_view: The status view widget to display
+        """
+        if not hasattr(self, 'display_area'):
+            return
+        
+        # Store original content for restoration (only if not already stored)
+        if not hasattr(self, '_original_display_content') or self._original_display_content is None:
+            layout = self.display_area.layout()
+            if layout and layout.count() > 0:
+                self._original_display_content = layout.itemAt(0).widget()
+        
+        # Remove current widget from layout
+        layout = self.display_area.layout()
+        if layout and layout.count() > 0:
+            current_widget = layout.itemAt(0).widget()
+            if current_widget:
+                layout.removeWidget(current_widget)
+                current_widget.setParent(None)
+                current_widget.hide()
+        
+        # Add status view to display area
+        if status_view:
+            self.display_area.layout().addWidget(status_view)
+            status_view.show()
+    
+    def _restore_display_area(self):
+        """
+        Restore original display area content.
+        
+        This method handles the display area manipulation when returning from
+        test execution view.
+        """
+        if not hasattr(self, 'display_area'):
+            return
+        
+        # Remove status view from layout
+        layout = self.display_area.layout()
+        if layout and layout.count() > 0:
+            current_widget = layout.itemAt(0).widget()
+            if current_widget:
+                layout.removeWidget(current_widget)
+                current_widget.setParent(None)
+                current_widget.hide()
+        
+        # Restore original display content
+        if hasattr(self, '_original_display_content') and self._original_display_content:
+            self.display_area.layout().addWidget(self._original_display_content)
+            self._original_display_content.show()
+    
+    def _connect_worker_to_status_view(self, worker, status_view):
+        """
+        Connect worker signals to status view.
+        
+        This centralizes the signal connection logic for status views.
+        
+        Args:
+            worker: Test worker instance
+            status_view: Status view widget instance
+        """
+        # Check if worker is valid (not deleted)
+        if not worker:
+            return
+        
+        try:
+            # Connect to view lifecycle methods
+            if hasattr(worker, 'testStarted') and hasattr(status_view, 'on_test_running'):
+                worker.testStarted.connect(status_view.on_test_running)
+            
+            if hasattr(worker, 'testCompleted') and hasattr(status_view, 'on_test_completed'):
+                worker.testCompleted.connect(status_view.on_test_completed)
+            
+            if hasattr(worker, 'allTestsCompleted') and hasattr(status_view, 'on_all_tests_completed'):
+                worker.allTestsCompleted.connect(status_view.on_all_tests_completed)
+        except RuntimeError:
+            # Worker was deleted before we could connect - this is OK, just skip
+            pass
+        
+        # Connect stop and back signals (these are safe as they're on the status view)
+        if hasattr(status_view, 'stopRequested'):
+            status_view.stopRequested.connect(self._on_stop_requested)
+        
+        if hasattr(status_view, 'backRequested'):
+            status_view.backRequested.connect(self._on_back_requested)
+        
+        # Connect run signal for re-running tests
+        if hasattr(status_view, 'runRequested'):
+            status_view.runRequested.connect(self._on_run_requested)
+    
+    def _on_stop_requested(self):
+        """Handle stop request from status view - stop the runner"""
+        runner = self._get_runner()
+        if runner and hasattr(runner, 'stop'):
+            runner.stop()
+    
+    def _on_back_requested(self):
+        """Handle back request from status view - restore display area"""
+        self._restore_display_area()
+        self._restore_normal_mode()
+    
+    def _on_run_requested(self):
+        """
+        Handle run request from status view - re-run tests.
+        
+        Subclasses should override to implement their specific test execution.
+        """
+        pass  # Override in subclasses
+    
+    def _get_runner(self):
+        """
+        Get the test runner instance.
+        
+        Should be overridden by subclasses to return their specific runner.
+        
+        Returns:
+            Test runner instance or None
+        """
+        return None  # Override in subclasses

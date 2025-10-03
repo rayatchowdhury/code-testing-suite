@@ -154,15 +154,6 @@ class Benchmarker(BaseRunner):
             execution_commands=execution_commands
         )
 
-    def _create_test_status_window(self):
-        """Create benchmark-specific status view"""
-        from src.app.presentation.views.benchmarker.benchmarker_status_view import BenchmarkerStatusView
-        return BenchmarkerStatusView(
-            time_limit_ms=self.time_limit,
-            memory_limit_mb=self.memory_limit,
-            parent=self.parent_window
-        )
-
     def _connect_worker_signals(self, worker):
         """Connect benchmark-specific signals"""
         # Call parent to connect common signals  

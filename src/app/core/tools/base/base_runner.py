@@ -38,8 +38,7 @@ class BaseRunner(QObject):
     
     1. **_create_test_worker()** - Subclasses create their specialized worker
     2. **_create_test_result()** - Subclasses build test-specific result objects
-    3. **_create_test_status_window()** - Subclasses create appropriate status windows
-    4. **_connect_worker_signals()** - Subclasses connect runner-specific signals
+    3. **_connect_worker_signals()** - Subclasses connect runner-specific signals
     
     ## Usage Example
     
@@ -116,32 +115,12 @@ class BaseRunner(QObject):
         # Thread and worker management
         self.worker = None
         self.thread = None
-        self.status_window = None
-        
-        # Display area integration (for unified status view)
-        self.parent_window = None
-        self.status_view = None  # Unified status view widget (not dialog)
-        self.original_display_content = None  # For restoring display area
         
         # Test execution tracking
         self.test_start_time = None
         self.test_count = 0
         
         logger.debug(f"Initialized BaseRunner for {test_type} tests in {workspace_dir}")
-    
-    def set_parent_window(self, window):
-        """
-        Set parent window for display area integration.
-        
-        This enables the unified status view pattern where test execution
-        status is embedded in the display area instead of a popup dialog.
-        
-        Args:
-            window: Parent window (ComparatorWindow, ValidatorWindow, etc.)
-                   Must have a display_area attribute with set_content() method
-        """
-        self.parent_window = window
-        logger.debug(f"Set parent window for {self.test_type} runner")
     
     def compile_all(self) -> bool:
         """
@@ -172,7 +151,6 @@ class BaseRunner(QObject):
         ## Template Methods Called:
         
         - **_create_test_worker()**: Subclass creates specialized worker instance
-        - **_create_test_status_window()**: Subclass creates appropriate status window
         - **_connect_worker_signals()**: Subclass connects runner-specific signals
         
         Args:
@@ -191,43 +169,14 @@ class BaseRunner(QObject):
         self.test_count = test_count
         self.test_start_time = datetime.now()
         
-        # Try creating unified status view first (if parent window is set)
-        if hasattr(self, 'parent_window') and self.parent_window:
-            self.status_view = self._create_test_status_window()
-            
-            if self.status_view:
-                # Connect status view signals
-                if hasattr(self.status_view, 'stopRequested'):
-                    self.status_view.stopRequested.connect(self.stop)
-                if hasattr(self.status_view, 'backRequested'):
-                    self.status_view.backRequested.connect(self._handle_back_request)
-                
-                # Integrate into display area
-                self._integrate_status_view()
-                
-                # Notify view that tests are starting
-                if hasattr(self.status_view, 'on_tests_started'):
-                    self.status_view.on_tests_started(test_count)
-        else:
-            # Fallback to old dialog-based status window
-            self.status_window = self._create_test_status_window()
-            if self.status_window:
-                self.status_window.show()
-        
-        # Create worker and thread
+        # Create worker and thread FIRST
         self.worker = self._create_test_worker(test_count, **kwargs)
         self.thread = QThread()
         
         # Move worker to thread
         self.worker.moveToThread(self.thread)
         
-        # Connect worker signals to status view OR status window
-        if self.status_view:
-            self._connect_worker_to_status_view(self.worker, self.status_view)
-        elif self.status_window:
-            self._connect_worker_to_status_window(self.worker, self.status_window)
-        
-        # Connect worker signals to external listeners
+        # Connect worker signals to external listeners (including presentation layer)
         self._connect_worker_signals(self.worker)
         
         # Connect database saving
@@ -238,6 +187,11 @@ class BaseRunner(QObject):
         self.worker.allTestsCompleted.connect(self.thread.quit)
         self.worker.allTestsCompleted.connect(self.worker.deleteLater)
         self.thread.finished.connect(self.thread.deleteLater)
+        
+        # NOW emit signal to notify presentation layer that testing is starting
+        # Worker is fully created and ready for signal connections
+        # Presentation layer will handle status view creation and integration
+        self.testingStarted.emit()
         
         # Start the thread
         self.thread.start()
@@ -259,142 +213,24 @@ class BaseRunner(QObject):
         """
         raise NotImplementedError("Subclasses must implement _create_test_worker()")
     
-    def _create_test_status_window(self):
-        """
-        Create test status window - can be overridden by subclasses.
-        
-        Returns:
-            Optional status window instance
-        """
-        # Default implementation - subclasses should override
-        return None
-    
-    def _connect_worker_to_status_window(self, worker, status_window):
-        """
-        Connect worker signals to status window.
-        
-        Can be overridden by subclasses for specific signal connections.
-        
-        Args:
-            worker: Test worker instance
-            status_window: Status window instance
-        """
-        # Default connections - subclasses can override
-        if hasattr(worker, 'testStarted') and hasattr(status_window, 'show_test_running'):
-            worker.testStarted.connect(status_window.show_test_running)
-        
-        if hasattr(worker, 'testCompleted') and hasattr(status_window, 'show_test_complete'):
-            worker.testCompleted.connect(status_window.show_test_complete)
-        
-        if hasattr(worker, 'allTestsCompleted') and hasattr(status_window, 'show_all_passed'):
-            worker.allTestsCompleted.connect(status_window.show_all_passed)
-    
-    def _connect_worker_to_status_view(self, worker, status_view):
-        """
-        Connect worker signals to unified status view.
-        
-        Args:
-            worker: Test worker instance
-            status_view: Unified status view widget instance
-        """
-        # Connect to view lifecycle methods
-        if hasattr(worker, 'testStarted') and hasattr(status_view, 'on_test_running'):
-            worker.testStarted.connect(status_view.on_test_running)
-        
-        if hasattr(worker, 'testCompleted') and hasattr(status_view, 'on_test_completed'):
-            worker.testCompleted.connect(status_view.on_test_completed)
-        
-        if hasattr(worker, 'allTestsCompleted') and hasattr(status_view, 'on_all_tests_completed'):
-            worker.allTestsCompleted.connect(status_view.on_all_tests_completed)
-    
-    def _integrate_status_view(self):
-        """Integrate status view into parent window's display area and update sidebar"""
-        if not hasattr(self, 'parent_window') or not self.parent_window:
-            logger.warning("Cannot integrate status view: no parent window set")
-            return
-        
-        if not hasattr(self.parent_window, 'display_area'):
-            logger.warning("Cannot integrate status view: parent window has no display_area")
-            return
-        
-        # Store original content for restoration (only if not already stored)
-        # This prevents storing a status view as "original" when running tests again
-        try:
-            # Use layout() method to get the layout (Qt's built-in method)
-            layout = self.parent_window.display_area.layout()
-            if layout and layout.count() > 0:
-                current_widget = layout.itemAt(0).widget()
-                
-                # Only store as original if we don't have one yet
-                # This preserves the FIRST original content (test window) across multiple runs
-                if not hasattr(self, 'original_display_content') or self.original_display_content is None:
-                    self.original_display_content = current_widget
-                    logger.debug("Stored original display content for first time")
-                
-                # Remove current widget from layout (could be old status view or original content)
-                if current_widget:
-                    layout.removeWidget(current_widget)
-                    current_widget.setParent(None)  # Detach from parent
-                    current_widget.hide()  # Hide it
-        except Exception as e:
-            logger.warning(f"Error storing original content: {e}")
-            if not hasattr(self, 'original_display_content'):
-                self.original_display_content = None
-        
-        # Add status view to display area
-        if self.status_view:
-            self.parent_window.display_area.layout().addWidget(self.status_view)
-            logger.debug(f"Integrated status view into display area")
-        else:
-            logger.warning("Display area has no set_content method")
-        
-        # Emit signal for UI to switch to test mode (clean separation of concerns)
-        try:
-            self.testingStarted.emit()
-            logger.debug("Emitted testingStarted signal")
-        except (RuntimeError, AttributeError):
-            # Signal not initialized (e.g., in tests with __new__ without __init__)
-            pass
-    
-    def _handle_back_request(self):
-        """Handle back button from status view - restore original display and sidebar"""
-        if hasattr(self, 'parent_window') and self.parent_window and self.original_display_content:
-            # Remove status view from layout
-            layout = self.parent_window.display_area.layout()
-            if layout and self.status_view:
-                layout.removeWidget(self.status_view)
-                self.status_view.setParent(None)
-                self.status_view.hide()
-            
-            # Restore original display content
-            # Note: We keep the reference to original_display_content so it can be reused
-            # if tests are run again from the restored test window
-            if self.original_display_content:
-                self.parent_window.display_area.layout().addWidget(self.original_display_content)
-                self.original_display_content.show()  # Show the restored widget
-                logger.debug("Restored original display content (kept reference for future runs)")
-            
-            # Emit signal for UI to restore normal mode (clean separation of concerns)
-            try:
-                self.testingCompleted.emit()
-                logger.debug("Emitted testingCompleted signal")
-            except (RuntimeError, AttributeError):
-                # Signal not initialized (e.g., in tests with __new__ without __init__)
-                pass
-    
     def _connect_worker_signals(self, worker):
         """
-        Connect worker signals to external listeners.
+        Connect worker signals to external listeners - TEMPLATE METHOD.
+        
+        This method connects common worker signals and can be extended by subclasses
+        to connect additional test-type-specific signals.
         
         Args:
             worker: Test worker instance
         """
-        # Forward signals to external listeners
+        # Forward common signals to external listeners (including presentation layer)
         if hasattr(worker, 'testStarted'):
             worker.testStarted.connect(self.testStarted)
         
         if hasattr(worker, 'allTestsCompleted'):
             worker.allTestsCompleted.connect(self.allTestsCompleted)
+        
+        # Subclasses can override to connect additional signals
     
     def _save_test_results(self, all_passed: bool) -> None:
         """
@@ -438,14 +274,9 @@ class BaseRunner(QObject):
                 
         except Exception as e:
             logger.error(f"Error saving test results: {e}")
-        finally:
-            # Emit signal for UI to restore normal mode (clean separation of concerns)
-            try:
-                self.testingCompleted.emit()
-                logger.debug("Emitted testingCompleted signal after test completion")
-            except (RuntimeError, AttributeError):
-                # Signal not initialized (e.g., in tests with __new__ without __init__)
-                pass
+        
+        # Note: No testingCompleted signal emitted here - status view should remain
+        # open for user to review results. Only user clicking Back button should close it.
     
     def _create_test_result(self, all_passed: bool, test_results: list, 
                            passed_tests: int, failed_tests: int, total_time: float) -> TestResult:
@@ -511,14 +342,8 @@ class BaseRunner(QObject):
             # Handle case where Qt objects are already deleted
             pass
         
-        # Restore display area if using unified status view
-        if hasattr(self, 'status_view') and self.status_view:
-            self._handle_back_request()
-            self.status_view = None
-        
-        # Close status window (old dialog pattern)
-        if self.status_window:
-            self.status_window.close()
+        # Emit signal for presentation layer to handle UI cleanup
+        self.testingCompleted.emit()
         
         logger.debug(f"Stopped {self.test_type} runner")
     
@@ -539,6 +364,18 @@ class BaseRunner(QObject):
             Dict[str, str]: Dictionary of executable keys to paths
         """
         return self.executables.copy()
+    
+    def get_current_worker(self):
+        """
+        Get the current test worker instance.
+        
+        This allows the presentation layer to connect to worker signals
+        for UI updates without BaseRunner managing the UI directly.
+        
+        Returns:
+            Current worker instance or None
+        """
+        return self.worker
     
     def is_compiled(self) -> bool:
         """

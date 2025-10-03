@@ -81,12 +81,9 @@ class ValidatorWindow(SidebarWindowBase):
         )
         self.validator_runner.compilationOutput.connect(self.display_area.console.displayOutput)
         
-        # Set parent window for unified status view integration
-        self.validator_runner.set_parent_window(self)
-        
-        # Connect runner signals for clean separation of concerns
-        self.validator_runner.testingStarted.connect(self._switch_to_test_mode)
-        self.validator_runner.testingCompleted.connect(self._on_tests_completed)
+        # Connect runner signals to handle UI state changes
+        self.validator_runner.testingStarted.connect(self._on_testing_started)
+        self.validator_runner.testingCompleted.connect(self._on_testing_completed)
     
     def _load_config(self):
         """Load configuration for multi-language compilation."""
@@ -155,12 +152,7 @@ class ValidatorWindow(SidebarWindowBase):
         if button_text == 'Back':
             # If status view is active, restore it instead of navigating away
             if self.status_view_active:
-                # Get the runner and call its back handler
-                runner = self._get_runner()
-                if runner and hasattr(runner, '_handle_back_request'):
-                    runner._handle_back_request()
-                    # Full button restoration when returning to test window
-                    self._restore_normal_mode()
+                self._on_back_requested()
                 return
         
         if button_text == 'Help Center':
@@ -183,6 +175,43 @@ class ValidatorWindow(SidebarWindowBase):
         except ImportError:
             pass  # AI module not available
     
+    def _on_testing_started(self):
+        """Handle testing started signal - create and show status view"""
+        # Create status view
+        from src.app.presentation.views.validator.validator_status_view import ValidatorStatusView
+        status_view = ValidatorStatusView(parent=self)
+        
+        # Store reference
+        self.status_view = status_view
+        self.current_status_view = status_view
+        
+        # Get worker and connect signals
+        worker = self.validator_runner.get_current_worker()
+        if worker and status_view:
+            self._connect_worker_to_status_view(worker, status_view)
+            
+            # Connect allTestsCompleted to switch buttons
+            try:
+                if hasattr(worker, 'allTestsCompleted'):
+                    worker.allTestsCompleted.connect(self._switch_to_completed_mode)
+            except RuntimeError:
+                pass  # Worker deleted, ignore
+            
+            # Notify view that tests are starting
+            if hasattr(status_view, 'on_tests_started'):
+                status_view.on_tests_started(self.test_count_slider.value())
+        
+        # Integrate status view into display area
+        self._integrate_status_view(status_view)
+        
+        # Switch to test mode (hide compile/run, show stop)
+        self._switch_to_test_mode()
+    
+    def _on_testing_completed(self):
+        """Handle testing completed signal - switch to completed mode but stay in status view"""
+        # When tests are stopped, switch to Run button but keep status view open
+        self._switch_to_completed_mode()
+    
     def _switch_to_test_mode(self):
         """Hide Compile and Run buttons, show Stop button when tests start"""
         self.status_view_active = True
@@ -202,20 +231,38 @@ class ValidatorWindow(SidebarWindowBase):
         
         if self.stop_btn:
             self.stop_btn.show()
+            
+        # Hide rerun button during test execution
+        if hasattr(self, 'rerun_btn') and self.rerun_btn:
+            self.rerun_btn.hide()
     
-    def _on_tests_completed(self):
-        """Called when tests finish - show Run, hide Stop (Compile stays hidden until back to window)"""
-        # Show Run button (can run again from status view)
-        if self.run_btn:
-            self.run_btn.show()
-        
-        # Hide Stop button (tests finished)
+    def _switch_to_completed_mode(self):
+        """Show Run button after tests complete (while viewing status)"""
+        # Hide Stop button
         if self.stop_btn:
             self.stop_btn.hide()
         
-        # Note: Compile button stays hidden until back to test window
-        # Refresh AI panels with current configuration
-        self.refresh_ai_panels()
+        # Create and show Rerun button
+        if not hasattr(self, 'rerun_btn') or not self.rerun_btn:
+            self.rerun_btn = self.sidebar.add_button('Run', self.action_section)
+            self.rerun_btn.clicked.connect(self._handle_rerun_tests)
+        
+        if self.rerun_btn:
+            self.rerun_btn.show()
+    
+    def _handle_rerun_tests(self):
+        """Handle rerun button click - trigger test execution again"""
+        if hasattr(self, 'current_status_view') and self.current_status_view:
+            # Emit runRequested signal from status view
+            self.current_status_view.runRequested.emit()
+            # Switch back to test mode (show Stop button)
+            self._switch_to_test_mode()
+    
+    def _on_run_requested(self):
+        """Handle run request from status view - re-run validation tests"""
+        # Run validation tests with same test count
+        test_count = self.test_count_slider.value()
+        self.validator_runner.run_validation_test(test_count)
     
     def _restore_normal_mode(self):
         """Full restoration when returning to test window - show all buttons"""
@@ -232,6 +279,10 @@ class ValidatorWindow(SidebarWindowBase):
         # Hide Stop button
         if self.stop_btn:
             self.stop_btn.hide()
+            
+        # Hide rerun button (back in test window)
+        if hasattr(self, 'rerun_btn') and self.rerun_btn:
+            self.rerun_btn.hide()
         
         # Refresh AI panels with current configuration
         self.refresh_ai_panels()

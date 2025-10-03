@@ -66,11 +66,6 @@ class ValidatorRunner(BaseRunner):
             execution_commands=execution_commands
         )
 
-    def _create_test_status_window(self):
-        """Create validation-specific status view"""
-        from src.app.presentation.views.validator.validator_status_view import ValidatorStatusView
-        return ValidatorStatusView(self.parent_window)
-
     def _connect_worker_signals(self, worker):
         """Connect validator-specific signals"""
         # Call parent to connect common signals  

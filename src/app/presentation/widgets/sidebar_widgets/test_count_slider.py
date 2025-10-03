@@ -21,9 +21,9 @@ class TestCountSlider(QWidget):
     A reusable slider widget for selecting number of test cases.
     
     Supports different configurations for different contexts:
-    - validator: Higher range (1-500), default 10
-    - comparator: Medium range (1-200), default 10  
-    - benchmarker: Lower range (1-100), default 5 for performance
+    - validator: Range (1-999), default 50
+    - comparator: Range (1-999), default 50
+    - benchmarker: Range (1-999), default 50
     """
     valueChanged = Signal(int)
     
@@ -74,21 +74,21 @@ class TestCountSlider(QWidget):
         """Configure slider ranges and defaults based on mode."""
         if self.mode == "validator":
             self.slider.setMinimum(1)
-            self.slider.setMaximum(500)  # High range for comprehensive validation
-            self.slider.setValue(10)     # Moderate default
+            self.slider.setMaximum(999)  # High range for comprehensive validation
+            self.slider.setValue(50)     # Default 50 tests
         elif self.mode == "comparator":
             self.slider.setMinimum(1)
-            self.slider.setMaximum(200)  # Medium range for comparison tests
-            self.slider.setValue(10)     # Moderate default
+            self.slider.setMaximum(999)  # High range for comparison tests
+            self.slider.setValue(50)     # Default 50 tests
         elif self.mode == "benchmarker":
             self.slider.setMinimum(1)
-            self.slider.setMaximum(100)  # Lower range for performance tests
-            self.slider.setValue(5)      # Lower default for performance
+            self.slider.setMaximum(999)  # High range for performance tests
+            self.slider.setValue(50)     # Default 50 tests
         else:
             # Default fallback configuration
             self.slider.setMinimum(1)
-            self.slider.setMaximum(200)
-            self.slider.setValue(10)
+            self.slider.setMaximum(999)
+            self.slider.setValue(50)
     
     def _setup_input_styles(self):
         """Style the input field to match the limits input design."""

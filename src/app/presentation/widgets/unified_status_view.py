@@ -14,10 +14,12 @@ class BaseStatusView(QWidget):
     Signals:
         stopRequested: User clicked stop button
         backRequested: User clicked back button
+        runRequested: User clicked run button to re-run tests
     """
     
     stopRequested = Signal()
     backRequested = Signal()
+    runRequested = Signal()
     
     def __init__(self, test_type: str, parent=None):
         """
@@ -172,3 +174,7 @@ class BaseStatusView(QWidget):
         self.tests_running = False
         self.controls_panel.update_stop_button_state(False)
         self.progress_section.mark_complete(all_passed)
+        
+    def is_tests_running(self) -> bool:
+        """Check if tests are currently running"""
+        return self.tests_running
