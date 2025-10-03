@@ -16,5 +16,5 @@ def get_main_window():
 
 def get_window_manager():
     """Lazy import of WindowManager"""
-    from src.app.shared.utils.window_manager import WindowManager
+    from src.app.presentation.views import WindowManager
     return WindowManager

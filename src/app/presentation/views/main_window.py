@@ -287,7 +287,7 @@ class MainWindow(QMainWindow):
         
     def _setup_window_manager(self) -> None:
         """Setup window manager and show main content"""
-        from src.app.shared.utils.window_manager import WindowManager
+        from src.app.presentation.views import WindowManager
         
         self.window_manager = WindowManager(self)
         self.setCentralWidget(self.window_manager)
