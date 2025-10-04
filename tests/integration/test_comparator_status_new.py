@@ -118,7 +118,7 @@ class TestWindowUICoordination:
     
     def test_window_creates_status_view_on_signal(self, qtbot):
         """Test window creates status view when receiving testingStarted signal"""
-        from src.app.presentation.views.base_window import SidebarWindowBase
+        from src.app.presentation.window_controller.base_window import SidebarWindowBase
         
         # Create mock window with necessary attributes
         window = Mock(spec=SidebarWindowBase)

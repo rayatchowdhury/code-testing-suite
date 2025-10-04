@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from src.app.presentation.views.base_window import SidebarWindowBase
+from src.app.presentation.window_controller.base_window import SidebarWindowBase
 from src.app.presentation.widgets.sidebar import Sidebar
 from PySide6.QtWidgets import QPushButton, QMessageBox
 from PySide6.QtGui import QFont, QShowEvent
@@ -63,6 +63,16 @@ class ValidatorWindow(SidebarWindowBase):
     
     def _initialize_tool(self):
         """Initialize or reinitialize the validator tool with current file manifest."""
+        # Disconnect old runner's signals if it exists
+        if hasattr(self, 'validator_runner') and self.validator_runner:
+            try:
+                self.validator_runner.compilationOutput.disconnect()
+                self.validator_runner.testingStarted.disconnect()
+                self.validator_runner.testingCompleted.disconnect()
+            except (RuntimeError, TypeError):
+                # Signals already disconnected or runner deleted
+                pass
+        
         # Load configuration
         config = self._load_config()
         

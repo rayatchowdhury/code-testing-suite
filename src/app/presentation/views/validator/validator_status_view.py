@@ -103,15 +103,17 @@ class ValidatorStatusView(BaseStatusView):
         
         data = self.test_data[test_number]
         
-        # Create and show detail dialog
-        # Map validator data to dialog parameters
+        # Create and show detail dialog with 3 sections: Input, Output, Validator Log
         dialog = ValidatorDetailDialog(
             test_number=test_number,
             passed=data['passed'],
             time=data['time'],
             memory=data['memory'],
-            expected_output=data.get('validation_message', 'No validation message'),
-            actual_output=data.get('test_output', 'No output'),
+            input_data=data.get('input_data', 'No input data'),
+            test_output=data.get('test_output', 'No output'),
+            validation_message=data.get('validation_message', 'Unknown'),
+            error_details=data.get('error_details', ''),
+            validator_exit_code=data.get('validator_exit_code', -1),
             parent=self
         )
         

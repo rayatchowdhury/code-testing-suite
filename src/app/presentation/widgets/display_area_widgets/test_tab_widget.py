@@ -20,7 +20,6 @@ from src.app.presentation.styles.components.test_view_styles import (
 from src.app.shared.constants import WORKSPACE_DIR
 from src.app.shared.constants.paths import get_workspace_file_path
 from src.app.shared.utils.workspace_utils import ensure_test_type_directory
-from src.app.shared.utils.tab_code_templates import TabCodeTemplates
 from src.app.presentation.styles.constants import MATERIAL_COLORS
 
 
@@ -593,22 +592,68 @@ class TestTabWidget(QWidget):
     def _get_default_content(self, tab_name, language='cpp'):
         """
         Get default template content for a tab in specified language.
-        Uses centralized TabCodeTemplates for consistency.
+        Reads template files from src/resources/templates directory.
         """
+        # Map tab names to template file base names
+        template_map = {
+            'Generator': 'generator',
+            'Test Code': 'test',
+            'Correct Code': 'correct',
+            'Validator Code': 'validator'
+        }
+        
+        # Map language codes to file extensions
+        extension_map = {
+            'cpp': '.cpp',
+            'py': '.py',
+            'java': '.java'
+        }
+        
+        # Get the base template name
+        template_base = template_map.get(tab_name)
+        if not template_base:
+            # Fallback for unknown tab names
+            template_base = tab_name.lower().replace(' ', '_')
+        
+        # Determine file extension and adjust name for Java (capitalize)
+        extension = extension_map.get(language, '.cpp')
+        if language == 'java':
+            # Java files need to match class name (capitalized)
+            template_filename = template_base.capitalize() + extension
+        else:
+            template_filename = template_base + extension
+        
+        # Get path to template file
+        # Use absolute path relative to this file's location
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        # Navigate from widgets/display_area_widgets to resources/templates
+        templates_dir = os.path.join(
+            current_dir, '..', '..', '..', '..', 'resources', 'templates'
+        )
+        template_path = os.path.normpath(os.path.join(templates_dir, template_filename))
+        
+        # Try to read template file
         try:
-            return TabCodeTemplates.get_template(tab_name, language)
-        except Exception as e:
-            print(f"Error getting template for {tab_name} ({language}): {e}")
-            # Fallback to basic template
-            if language == 'cpp':
-                return '#include <iostream>\nusing namespace std;\n\nint main() {\n    // Your code here\n    return 0;\n}'
-            elif language == 'py':
-                return 'def main():\n    # Your code here\n    pass\n\nif __name__ == "__main__":\n    main()\n'
-            elif language == 'java':
-                class_name = tab_name.replace(' ', '') if tab_name else 'Main'
-                return f'public class {class_name} {{\n    public static void main(String[] args) {{\n        // Your code here\n    }}\n}}'
+            if os.path.exists(template_path):
+                with open(template_path, 'r', encoding='utf-8') as f:
+                    return f.read()
             else:
-                return '// Your code here\n'
+                print(f"Template file not found: {template_path}")
+                # Fall through to fallback
+        except Exception as e:
+            print(f"Error reading template file {template_path}: {e}")
+            # Fall through to fallback
+        
+        # Fallback to basic template if file not found or read error
+        if language == 'cpp':
+            return '#include <iostream>\nusing namespace std;\n\nint main() {\n    // Your code here\n    return 0;\n}'
+        elif language == 'py':
+            return 'def main():\n    # Your code here\n    pass\n\nif __name__ == "__main__":\n    main()\n'
+        elif language == 'java':
+            class_name = tab_name.replace(' ', '') if tab_name else 'Main'
+            return f'public class {class_name} {{\n    public static void main(String[] args) {{\n        // Your code here\n    }}\n}}'
+        else:
+            return '// Your code here\n'
     
     def activate_tab(self, tab_name, skip_save_prompt=False):
         """Programmatically activate a tab."""

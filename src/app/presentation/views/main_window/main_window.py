@@ -21,7 +21,7 @@ from PySide6.QtCore import Signal, QTimer
 
 from src.app.presentation.widgets.sidebar import Sidebar
 from src.app.presentation.widgets.display_area import DisplayArea
-from src.app.presentation.views.base_window import SidebarWindowBase
+from src.app.presentation.window_controller.base_window import SidebarWindowBase
 
 
 class MainWindowConfig:
@@ -126,11 +126,11 @@ class MainWindowContent(SidebarWindowBase):
             
         try:
             # Force reload of the module to get fresh changes
-            module_name = 'src.app.presentation.views.main_window_doc'
+            module_name = 'src.app.presentation.views.main_window.main_window_content'
             if module_name in sys.modules:
                 importlib.reload(sys.modules[module_name])
             
-            from src.app.presentation.views.main_window_doc import create_qt_main_window
+            from src.app.presentation.views.main_window.main_window_content import create_qt_main_window
             
             self.main_content_widget = create_qt_main_window()
             self.display_area.layout.addWidget(self.main_content_widget)
@@ -287,7 +287,7 @@ class MainWindow(QMainWindow):
         
     def _setup_window_manager(self) -> None:
         """Setup window manager and show main content"""
-        from src.app.presentation.views import WindowManager
+        from src.app.presentation.window_controller.window_management import WindowManager
         
         self.window_manager = WindowManager(self)
         self.setCentralWidget(self.window_manager)

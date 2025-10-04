@@ -196,13 +196,16 @@ class ValidatorTestWorker(QObject):
             # Stage 1: Run generator with memory tracking
             generator_start = time.time()
             
-            generator_process = subprocess.Popen(
-                self.execution_commands['generator'],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0,
-                text=True
-            )
+            try:
+                generator_process = subprocess.Popen(
+                    self.execution_commands['generator'],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0,
+                    text=True
+                )
+            except Exception as e:
+                return self._create_error_result(test_number, f"Failed to start generator: {e}", "Generator failed", -1, 0, 0, 0, 0)
             
             # Track generator memory
             try:

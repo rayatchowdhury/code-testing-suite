@@ -4,7 +4,7 @@ All help content defined here using HelpSectionData from qt_doc_engine
 """
 
 from typing import List, Dict
-from ..qt_doc_engine import HelpSectionData
+from src.app.presentation.window_controller.qt_doc_engine import HelpSectionData
 
 # Alias for backwards compatibility and cleaner code
 HelpSection = HelpSectionData

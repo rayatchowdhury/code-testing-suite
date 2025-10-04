@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from src.app.presentation.views.base_window import SidebarWindowBase
+from src.app.presentation.window_controller.base_window import SidebarWindowBase
 from src.app.presentation.widgets.sidebar import Sidebar
 from PySide6.QtWidgets import QPushButton, QMessageBox
 from PySide6.QtGui import QFont, QShowEvent
@@ -63,6 +63,16 @@ class ComparatorWindow(SidebarWindowBase):
     
     def _initialize_tool(self):
         """Initialize or reinitialize the comparator tool with current file manifest."""
+        # Disconnect old comparator's signals if it exists
+        if hasattr(self, 'comparator') and self.comparator:
+            try:
+                self.comparator.compilationOutput.disconnect()
+                self.comparator.testingStarted.disconnect()
+                self.comparator.testingCompleted.disconnect()
+            except (RuntimeError, TypeError):
+                # Signals may already be disconnected or object deleted
+                pass
+        
         # Load configuration
         config = self._load_config()
         

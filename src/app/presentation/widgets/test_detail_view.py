@@ -240,7 +240,7 @@ class ComparatorDetailDialog(TestDetailDialog):
         layout.addWidget(actual_edit)
         
         return content
-        
+    
     def _style_text_edit(self, edit: QTextEdit):
         """Apply consistent styling to text edits"""
         edit.setStyleSheet(f"""
@@ -260,7 +260,8 @@ class ValidatorDetailDialog(TestDetailDialog):
     """Detail view for validator test cards"""
     
     def __init__(self, test_number: int, passed: bool, time: float, memory: float,
-                 expected_output: str, actual_output: str, parent=None):
+                 input_data: str, test_output: str, validation_message: str, 
+                 error_details: str, validator_exit_code: int, parent=None):
         """
         Initialize validator detail dialog.
         
@@ -269,47 +270,230 @@ class ValidatorDetailDialog(TestDetailDialog):
             passed: Whether test passed
             time: Execution time in seconds
             memory: Memory usage in MB
-            expected_output: Expected output
-            actual_output: Actual program output
+            input_data: Input generated for this test
+            test_output: Output from test solution
+            validation_message: Validation result (Correct/Wrong Answer/etc)
+            error_details: Additional error information if failed
+            validator_exit_code: Exit code from validator (0=Correct, 1=WA, 2=PE)
             parent: Parent widget
         """
-        self.expected_output = expected_output
-        self.actual_output = actual_output
+        self.input_data = input_data
+        self.test_output = test_output
+        self.validation_message = validation_message
+        self.error_details = error_details
+        self.validator_exit_code = validator_exit_code
         super().__init__(test_number, passed, time, memory, parent)
         
     def _create_content(self) -> QFrame:
-        """Create validator-specific content with output comparison"""
+        """Create validator-specific content with 3 sections: Input, Output, Validator Log"""
         content = QFrame()
         layout = QVBoxLayout(content)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(12)
         
-        # Expected output section
-        expected_label = QLabel("✅ Expected Output:")
-        expected_label.setStyleSheet("font-weight: bold; font-size: 14px;")
-        layout.addWidget(expected_label)
+        # Section 1: Input
+        input_label = QLabel("📥 Input:")
+        input_label.setStyleSheet("font-weight: bold; font-size: 14px;")
+        layout.addWidget(input_label)
         
-        expected_edit = QTextEdit()
-        expected_edit.setPlainText(self.expected_output)
-        expected_edit.setReadOnly(True)
-        self._style_text_edit(expected_edit)
-        layout.addWidget(expected_edit)
+        input_edit = QTextEdit()
+        input_edit.setPlainText(self.input_data)
+        input_edit.setReadOnly(True)
+        self._style_text_edit(input_edit)
+        layout.addWidget(input_edit)
         
-        # Actual output section
-        actual_label = QLabel("📤 Actual Output:")
-        actual_label.setStyleSheet("font-weight: bold; font-size: 14px;")
-        layout.addWidget(actual_label)
+        # Section 2: Output
+        output_label = QLabel("📤 Output:")
+        output_label.setStyleSheet("font-weight: bold; font-size: 14px;")
+        layout.addWidget(output_label)
         
-        actual_edit = QTextEdit()
-        actual_edit.setPlainText(self.actual_output)
-        actual_edit.setReadOnly(True)
-        self._style_text_edit(actual_edit)
-        layout.addWidget(actual_edit)
+        output_edit = QTextEdit()
+        output_edit.setPlainText(self.test_output)
+        output_edit.setReadOnly(True)
+        self._style_text_edit(output_edit)
+        layout.addWidget(output_edit)
+        
+        # Section 3: Validator Log
+        validator_label = QLabel("� Validator Log:")
+        validator_label.setStyleSheet("font-weight: bold; font-size: 14px;")
+        layout.addWidget(validator_label)
+        
+        validator_edit = QTextEdit()
+        validator_log = self._create_validator_log()
+        validator_edit.setPlainText(validator_log)
+        validator_edit.setReadOnly(True)
+        self._style_text_edit(validator_edit, is_log=True)
+        layout.addWidget(validator_edit)
         
         return content
+    
+    def _create_validator_log(self) -> str:
+        """
+        Create the validator log message based on test result.
         
+        Returns:
+            Formatted validator log string
+        """
+        if self.passed:
+            return "✅ Valid output\n\nThe test solution produced correct output for the given input."
+        else:
+            # Failed case - explain why
+            log_lines = [f"❌ {self.validation_message}"]
+            
+            # Add exit code interpretation
+            if self.validator_exit_code == 1:
+                log_lines.append("\nExit Code: 1 (Wrong Answer)")
+                log_lines.append("The output is incorrect for the given input.")
+            elif self.validator_exit_code == 2:
+                log_lines.append("\nExit Code: 2 (Presentation Error)")
+                log_lines.append("The output has formatting issues (e.g., extra spaces, wrong line breaks).")
+            elif self.validator_exit_code == -1:
+                log_lines.append("\nExit Code: -1 (Generator/Test Failed)")
+                log_lines.append("The generator or test solution failed to execute properly.")
+            elif self.validator_exit_code == -2:
+                log_lines.append("\nExit Code: -2 (Timeout)")
+                log_lines.append("The execution exceeded the time limit.")
+            elif self.validator_exit_code == -3:
+                log_lines.append("\nExit Code: -3 (Execution Error)")
+                log_lines.append("An unexpected error occurred during execution.")
+            else:
+                log_lines.append(f"\nExit Code: {self.validator_exit_code}")
+            
+            # Add error details if available
+            if self.error_details:
+                log_lines.append(f"\nDetails:\n{self.error_details}")
+            
+            return "\n".join(log_lines)
+    
+    def _style_text_edit(self, edit: QTextEdit, is_log: bool = False):
+        """
+        Apply consistent styling to text edits.
+        
+        Args:
+            edit: The QTextEdit to style
+            is_log: If True, use different styling for validator log section
+        """
+        if is_log:
+            # Validator log gets special styling
+            bg_color = MATERIAL_COLORS['surface'] if self.passed else "#2d1f1f"  # Slightly reddish for failures
+            edit.setStyleSheet(f"""
+                QTextEdit {{
+                    background: {bg_color};
+                    border: 1px solid {MATERIAL_COLORS['outline']};
+                    border-radius: 6px;
+                    padding: 12px;
+                    color: {MATERIAL_COLORS['text_primary']};
+                    font-family: 'Segoe UI', 'Arial', sans-serif;
+                    font-size: 13px;
+                    line-height: 1.5;
+                }}
+            """)
+        else:
+            # Input/Output sections use monospace font
+            edit.setStyleSheet(f"""
+                QTextEdit {{
+                    background: {MATERIAL_COLORS['surface']};
+                    border: 1px solid {MATERIAL_COLORS['outline']};
+                    border-radius: 6px;
+                    padding: 8px;
+                    color: {MATERIAL_COLORS['text_primary']};
+                    font-family: 'Consolas', 'Courier New', monospace;
+                    font-size: 12px;
+                }}
+            """)
+
+
+class BenchmarkerDetailDialog(TestDetailDialog):
+    """Detail view for benchmarker test cards"""
+    
+    def __init__(self, test_number: int, passed: bool, time: float, memory: float,
+                 test_size: int = 0, input_data: str = "", output_data: str = "", parent=None):
+        """
+        Initialize benchmarker detail dialog.
+        
+        Args:
+            test_number: Test case number
+            passed: Whether test passed (within limits)
+            time: Execution time in seconds
+            memory: Memory usage in MB
+            test_size: Size of test input (number of lines)
+            input_data: Input data for the test
+            output_data: Output data from the test
+            parent: Parent widget
+        """
+        self.test_size = test_size
+        self.input_data = input_data
+        self.output_data = output_data
+        super().__init__(test_number, passed, time, memory, parent)
+        
+    def _create_content(self) -> QFrame:
+        """Create benchmarker-specific content with Input, Output, and Summary sections"""
+        content = QFrame()
+        layout = QVBoxLayout(content)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(12)
+        
+        # Section 1: Input
+        input_label = QLabel("� Input:")
+        input_label.setStyleSheet("font-weight: bold; font-size: 14px;")
+        layout.addWidget(input_label)
+        
+        input_edit = QTextEdit()
+        input_edit.setPlainText(self.input_data if self.input_data else "No input data available")
+        input_edit.setReadOnly(True)
+        input_edit.setMaximumHeight(150)
+        self._style_text_edit(input_edit)
+        layout.addWidget(input_edit)
+        
+        # Section 2: Output
+        output_label = QLabel("📤 Output:")
+        output_label.setStyleSheet("font-weight: bold; font-size: 14px;")
+        layout.addWidget(output_label)
+        
+        output_edit = QTextEdit()
+        output_edit.setPlainText(self.output_data if self.output_data else "No output data available")
+        output_edit.setReadOnly(True)
+        output_edit.setMaximumHeight(150)
+        self._style_text_edit(output_edit)
+        layout.addWidget(output_edit)
+        
+        # Section 3: Performance Summary
+        summary_label = QLabel("📊 Performance Summary:")
+        summary_label.setStyleSheet("font-weight: bold; font-size: 14px;")
+        layout.addWidget(summary_label)
+        
+        summary_edit = QTextEdit()
+        summary_text = self._create_performance_summary()
+        summary_edit.setPlainText(summary_text)
+        summary_edit.setReadOnly(True)
+        self._style_summary_edit(summary_edit)
+        layout.addWidget(summary_edit)
+        
+        return content
+    
+    def _create_performance_summary(self) -> str:
+        """
+        Create simplified performance summary.
+        
+        Returns:
+            Formatted performance summary string
+        """
+        # Count input lines
+        input_lines = len(self.input_data.strip().split('\n')) if self.input_data else 0
+        
+        summary_lines = []
+        summary_lines.append(f"📝 Number of Input Lines: {input_lines:,}")
+        
+        # Performance verdict
+        if self.passed:
+            summary_lines.append("\n✅ Performance within acceptable limits")
+        else:
+            summary_lines.append("\n❌ Performance exceeded limits")
+        
+        return "\n".join(summary_lines)
+    
     def _style_text_edit(self, edit: QTextEdit):
-        """Apply consistent styling to text edits"""
+        """Apply monospace styling for input/output sections"""
         edit.setStyleSheet(f"""
             QTextEdit {{
                 background: {MATERIAL_COLORS['surface']};
@@ -321,63 +505,19 @@ class ValidatorDetailDialog(TestDetailDialog):
                 font-size: 12px;
             }}
         """)
-
-
-class BenchmarkerDetailDialog(TestDetailDialog):
-    """Detail view for benchmarker test cards"""
     
-    def __init__(self, test_number: int, passed: bool, time: float, memory: float,
-                 test_size: int, parent=None):
-        """
-        Initialize benchmarker detail dialog.
-        
-        Args:
-            test_number: Test case number
-            passed: Whether test passed (within limits)
-            time: Execution time in seconds
-            memory: Memory usage in MB
-            test_size: Size of test input
-            parent: Parent widget
-        """
-        self.test_size = test_size
-        super().__init__(test_number, passed, time, memory, parent)
-        
-    def _create_content(self) -> QFrame:
-        """Create benchmarker-specific content with performance metrics"""
-        content = QFrame()
-        layout = QVBoxLayout(content)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(12)
-        
-        # Performance metrics
-        metrics_label = QLabel("📊 Performance Metrics:")
-        metrics_label.setStyleSheet("font-weight: bold; font-size: 14px;")
-        layout.addWidget(metrics_label)
-        
-        # Metrics panel
-        metrics_panel = QFrame()
-        metrics_layout = QVBoxLayout(metrics_panel)
-        metrics_layout.setContentsMargins(12, 12, 12, 12)
-        metrics_layout.setSpacing(8)
-        
-        size_label = QLabel(f"Test Size: {self.test_size:,} elements")
-        time_per_element = (self.time / self.test_size * 1000) if self.test_size > 0 else 0
-        efficiency_label = QLabel(f"Time per Element: {time_per_element:.3f} ms")
-        memory_per_element = (self.memory / self.test_size) if self.test_size > 0 else 0
-        memory_efficiency_label = QLabel(f"Memory per Element: {memory_per_element:.3f} MB")
-        
-        for label in [size_label, efficiency_label, memory_efficiency_label]:
-            label.setStyleSheet("font-size: 13px;")
-            metrics_layout.addWidget(label)
-        
-        metrics_panel.setStyleSheet(f"""
-            QFrame {{
-                background: {MATERIAL_COLORS['surface_variant']};
+    def _style_summary_edit(self, edit: QTextEdit):
+        """Apply special styling for performance summary section"""
+        bg_color = MATERIAL_COLORS['surface'] if self.passed else "#2d1f1f"  # Slightly reddish for failures
+        edit.setStyleSheet(f"""
+            QTextEdit {{
+                background: {bg_color};
+                border: 1px solid {MATERIAL_COLORS['outline']};
                 border-radius: 6px;
+                padding: 12px;
+                color: {MATERIAL_COLORS['text_primary']};
+                font-family: 'Segoe UI', 'Arial', sans-serif;
+                font-size: 13px;
+                line-height: 1.5;
             }}
         """)
-        
-        layout.addWidget(metrics_panel)
-        layout.addStretch()
-        
-        return content

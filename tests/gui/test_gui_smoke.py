@@ -7,7 +7,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtTest import QTest
 
 # Import main GUI components
-from src.app.presentation.views.main_window import MainWindow
+from src.app.presentation.views.main_window.main_window import MainWindow
 from src.app.presentation.widgets.sidebar import Sidebar
 from src.app.presentation.widgets.display_area import DisplayArea
 

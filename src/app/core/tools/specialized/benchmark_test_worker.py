@@ -36,9 +36,9 @@ class BenchmarkTestWorker(QObject):
     from benchmarker.py while maintaining exact signal compatibility.
     """
     
-    # Exact signal signatures from original BenchmarkTestWorker
+    # Updated signal signatures to include input/output data
     testStarted = Signal(int, int)  # current test, total tests
-    testCompleted = Signal(str, int, bool, float, float, bool)  # test name, test number, passed, execution time, memory used, memory passed
+    testCompleted = Signal(str, int, bool, float, float, bool, str, str, int)  # test name, test number, passed, execution time, memory used, memory passed, input_data, output_data, test_size
     allTestsCompleted = Signal(bool)  # True if all passed
 
     def __init__(self, workspace_dir: str, executables: Dict[str, str], 
@@ -145,7 +145,10 @@ class BenchmarkTestWorker(QObject):
                             test_result['passed'],
                             test_result['execution_time'],
                             test_result['memory_used'],
-                            test_result['memory_passed']
+                            test_result['memory_passed'],
+                            test_result.get('input', ''),
+                            test_result.get('output', ''),
+                            test_result.get('test_size', 0)
                         )
                         
                         if not test_result['passed']:
@@ -162,7 +165,10 @@ class BenchmarkTestWorker(QObject):
                         False,
                         0.0,
                         0.0,
-                        False
+                        False,
+                        '',
+                        '',
+                        0
                     )
                     all_passed = False
 
@@ -247,6 +253,9 @@ class BenchmarkTestWorker(QObject):
                 
                 test_time = time.time() - test_start
                 
+                # Calculate test size (number of input lines)
+                test_size = len(input_text.strip().split('\n')) if input_text.strip() else 0
+                
                 return {
                     'test_name': f"Test {test_number}",
                     'test_number': test_number,
@@ -256,8 +265,9 @@ class BenchmarkTestWorker(QObject):
                     'memory_passed': max_memory_used <= self.memory_limit,
                     'error_details': f"Time Limit Exceeded ({self.time_limit:.2f}s)",
                     'generator_time': generator_time,
-                    'input': input_text.strip()[:200] + ("..." if len(input_text.strip()) > 200 else ""),
-                    'output': ""
+                    'input': input_text,  # Store full input
+                    'output': "",
+                    'test_size': test_size
                 }
             
             test_time = time.time() - test_start
@@ -279,6 +289,9 @@ class BenchmarkTestWorker(QObject):
             # Save I/O files to nested directories
             self._save_test_io(test_number, input_text, stdout)
             
+            # Calculate test size (number of input lines)
+            test_size = len(input_text.strip().split('\n')) if input_text.strip() else 0
+            
             return {
                 'test_name': f"Test {test_number}",
                 'test_number': test_number,
@@ -289,8 +302,9 @@ class BenchmarkTestWorker(QObject):
                 'time_passed': time_passed,
                 'error_details': self._get_error_details(time_passed, memory_passed, process.returncode),
                 'generator_time': generator_time,
-                'input': input_text.strip()[:200] + ("..." if len(input_text.strip()) > 200 else ""),
-                'output': stdout.strip()[:200] + ("..." if len(stdout.strip()) > 200 else "") if stdout else ""
+                'input': input_text,  # Store full input
+                'output': stdout if stdout else "",  # Store full output
+                'test_size': test_size
             }
             
         except Exception as e:
@@ -324,7 +338,8 @@ class BenchmarkTestWorker(QObject):
             'error_details': error_msg,
             'generator_time': 0.0,
             'input': "",
-            'output': ""
+            'output': "",
+            'test_size': 0
         }
 
     def stop(self):

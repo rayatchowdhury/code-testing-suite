@@ -86,19 +86,21 @@ class ProgressSection(QWidget):
 
 
 class VisualProgressBar(QWidget):
-    """Visual progress bar with tick/cross emojis"""
+    """Segmented progress bar with color-coded blocks"""
     
     def __init__(self, parent=None):
         super().__init__(parent)
         self.results = []
         self.total = 0
         self.current = 0
+        self.segments = []
+        self.segment_size = 1  # How many tests per segment
         self._setup_ui()
         
     def _setup_ui(self):
         self.layout = QHBoxLayout(self)
         self.layout.setContentsMargins(8, 8, 8, 8)
-        self.layout.setSpacing(4)
+        self.layout.setSpacing(2)
         
         self.setStyleSheet(f"""
             QWidget {{
@@ -114,37 +116,122 @@ class VisualProgressBar(QWidget):
         self.total = total
         self.current = 0
         self._clear_layout()
+        self.segments = []
         
-        # Add placeholders (limit to 50 for UI performance)
-        display_count = min(total, 50)
-        for i in range(display_count):
-            label = QLabel("⏳")
-            label.setAlignment(Qt.AlignCenter)
-            label.setFixedSize(24, 24)
-            self.layout.addWidget(label)
+        # Calculate optimal segment count and size
+        if total <= 100:
+            # Show individual segments for small test counts
+            segment_count = total
+            self.segment_size = 1
+        elif total <= 200:
+            # 1 segment = 2 tests
+            segment_count = 100
+            self.segment_size = 2
+        elif total <= 500:
+            # 1 segment = ~5 tests
+            segment_count = 100
+            self.segment_size = total // 100
+        else:
+            # 1 segment = ~10+ tests
+            segment_count = 100
+            self.segment_size = total // 100
+        
+        # Create segments
+        for i in range(segment_count):
+            segment = QFrame()
+            segment.setFixedSize(max(4, 800 // segment_count), 24)
+            segment.setStyleSheet(f"""
+                QFrame {{
+                    background: {MATERIAL_COLORS['surface_dim']};
+                    border: 1px solid {MATERIAL_COLORS['outline_variant']};
+                    border-radius: 2px;
+                }}
+            """)
             
-        # Add indicator if showing subset
-        if total > 50:
-            more_label = QLabel(f"+{total - 50}")
-            more_label.setAlignment(Qt.AlignCenter)
-            more_label.setStyleSheet("color: #666; font-size: 10px;")
-            self.layout.addWidget(more_label)
+            # Add tooltip
+            start_test = i * self.segment_size + 1
+            end_test = min((i + 1) * self.segment_size, total)
+            if self.segment_size == 1:
+                segment.setToolTip(f"Test {start_test}")
+            else:
+                segment.setToolTip(f"Tests {start_test}-{end_test}")
+            
+            self.layout.addWidget(segment)
+            self.segments.append({
+                'widget': segment,
+                'passed': 0,
+                'failed': 0,
+                'total': 0
+            })
+            
+        # Add indicator if using aggregated segments
+        if self.segment_size > 1:
+            info_label = QLabel(f"({self.segment_size} tests/segment)")
+            info_label.setAlignment(Qt.AlignCenter)
+            info_label.setStyleSheet("color: #666; font-size: 9px;")
+            self.layout.addWidget(info_label)
             
     def add_result(self, passed: bool):
         """Add test result"""
         self.results.append(passed)
-        index = len(self.results) - 1
+        test_index = len(self.results) - 1
         
-        # Only update if within display limit
-        if index < min(self.total, 50) and index < self.layout.count():
-            label = self.layout.itemAt(index).widget()
-            if isinstance(label, QLabel):
-                label.setText("✓" if passed else "✗")
-                label.setStyleSheet(f"""
-                    color: {MATERIAL_COLORS['primary'] if passed else MATERIAL_COLORS['error']};
-                    font-size: 16px;
-                    font-weight: bold;
-                """)
+        # Calculate which segment this test belongs to
+        segment_index = test_index // self.segment_size
+        
+        if segment_index < len(self.segments):
+            segment = self.segments[segment_index]
+            segment['total'] += 1
+            if passed:
+                segment['passed'] += 1
+            else:
+                segment['failed'] += 1
+            
+            # Update segment color based on results
+            self._update_segment_color(segment_index)
+            
+    def _update_segment_color(self, segment_index: int):
+        """Update segment color based on its test results"""
+        segment = self.segments[segment_index]
+        widget = segment['widget']
+        passed = segment['passed']
+        failed = segment['failed']
+        total = segment['total']
+        
+        if total == 0:
+            # Not yet tested - gray
+            color = MATERIAL_COLORS['surface_dim']
+        elif failed == 0:
+            # All passed - green
+            color = MATERIAL_COLORS['primary']
+        elif passed == 0:
+            # All failed - red
+            color = MATERIAL_COLORS['error']
+        else:
+            # Mixed results - determine by majority
+            if passed > failed:
+                # More passed than failed - light green
+                color = '#40A9D4'  # primary_light
+            else:
+                # More failed than passed - orange/red
+                color = '#FF8C42'  # Warning orange
+        
+        widget.setStyleSheet(f"""
+            QFrame {{
+                background: {color};
+                border: 1px solid {MATERIAL_COLORS['outline_variant']};
+                border-radius: 2px;
+            }}
+        """)
+        
+        # Update tooltip with current stats
+        start_test = segment_index * self.segment_size + 1
+        end_test = min((segment_index + 1) * self.segment_size, self.total)
+        if self.segment_size == 1:
+            tooltip = f"Test {start_test}: {'Passed' if passed > 0 else 'Failed'}"
+        else:
+            tooltip = f"Tests {start_test}-{end_test}\nPassed: {passed}, Failed: {failed}"
+        widget.setToolTip(tooltip)
             
     def set_current(self, current: int, total: int):
         """Highlight current test"""

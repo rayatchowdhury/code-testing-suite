@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QFileDialog, QMessageBox, QPushButton
 from PySide6.QtGui import QFont, QCloseEvent, QShowEvent
 from src.app.presentation.widgets.sidebar import Sidebar
-from src.app.presentation.views.base_window import SidebarWindowBase
+from src.app.presentation.window_controller.base_window import SidebarWindowBase
 from src.app.presentation.views.code_editor.code_editor_display_area import CodeEditorDisplay
 from src.app.core.tools.compiler_runner import CompilerRunner
 import os

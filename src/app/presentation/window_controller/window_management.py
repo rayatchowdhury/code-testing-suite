@@ -88,7 +88,7 @@ class WindowFactory:
         """Register default window creators with lazy imports."""
         
         def _create_main_window():
-            from src.app.presentation.views.main_window import MainWindowContent
+            from src.app.presentation.views.main_window.main_window import MainWindowContent
             return MainWindowContent
         
         def _create_code_editor():

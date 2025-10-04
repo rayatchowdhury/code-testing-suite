@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from src.app.presentation.views.base_window import SidebarWindowBase
+from src.app.presentation.window_controller.base_window import SidebarWindowBase
 from PySide6.QtWidgets import QMessageBox
 from PySide6.QtGui import QShowEvent
 from src.app.presentation.widgets.sidebar import Sidebar
@@ -69,6 +69,16 @@ class BenchmarkerWindow(SidebarWindowBase):
     
     def _initialize_tool(self):
         """Initialize or reinitialize the benchmarker tool with current file manifest."""
+        # Disconnect old benchmarker's signals if it exists
+        if hasattr(self, 'benchmarker') and self.benchmarker:
+            try:
+                self.benchmarker.compilationOutput.disconnect()
+                self.benchmarker.testingStarted.disconnect()
+                self.benchmarker.testingCompleted.disconnect()
+            except (RuntimeError, TypeError):
+                # Signals may already be disconnected or object deleted
+                pass
+        
         # Load configuration
         config = self._load_config()
         
