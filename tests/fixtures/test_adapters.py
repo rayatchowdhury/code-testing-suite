@@ -39,7 +39,6 @@ class MockConfigManager:
         """Default configuration for testing."""
         return {
             'cpp_version': 'c++17',
-            'workspace_folder': '/test/workspace',
             'gemini': {
                 'enabled': False,
                 'api_key': '',

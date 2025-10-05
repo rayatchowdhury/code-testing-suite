@@ -35,13 +35,11 @@ class TestConfigManager:
         
         # Verify required keys exist
         assert 'cpp_version' in config
-        assert 'workspace_folder' in config
         assert 'gemini' in config
         assert 'editor_settings' in config
         
         # Verify data types
         assert isinstance(config['cpp_version'], str)
-        assert isinstance(config['workspace_folder'], str)
         assert isinstance(config['gemini'], dict)
         assert isinstance(config['editor_settings'], dict)
         
@@ -191,8 +189,7 @@ class TestConfigPersistence:
         dialog.java_compiler_combo = MagicMock()
         dialog.java_runtime_combo = MagicMock()
         dialog.java_flags_input = MagicMock()
-        # Other fields
-        dialog.workspace_input = MagicMock()
+        # Other fields (workspace_input removed - workspace is always default)
         dialog.key_input = MagicMock()
         dialog.status_label = MagicMock()
         dialog.use_ai_checkbox = MagicMock()
@@ -218,7 +215,7 @@ class TestConfigPersistence:
         # Verify UI components were populated
         # C++ standard version now loaded into cpp_std_combo (from languages.cpp.std_version or legacy cpp_version)
         config_persistence.parent.cpp_std_combo.setCurrentText.assert_called()
-        config_persistence.parent.workspace_input.setText.assert_called_with(sample_config['workspace_folder'])
+        # workspace_input removed - workspace is always ~/.code_testing_suite/workspace/
         config_persistence.parent.key_input.setText.assert_called_with(sample_config['gemini']['api_key'])
 
     def test_load_config_missing_file(self, config_persistence):
@@ -228,7 +225,7 @@ class TestConfigPersistence:
         
         # Verify default values were set (C++ standard now in cpp_std_combo)
         config_persistence.parent.cpp_std_combo.setCurrentText.assert_called_with("c++17")
-        config_persistence.parent.workspace_input.setText.assert_called_with("")
+        # workspace_input removed - workspace is always ~/.code_testing_suite/workspace/
 
     def test_load_config_with_corrupted_file(self, config_persistence):
         """Test loading config with corrupted file."""

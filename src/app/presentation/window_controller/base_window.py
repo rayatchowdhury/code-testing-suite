@@ -91,7 +91,17 @@ class SidebarWindowBase(QWidget):
             config_dialog.exec()
 
     def _on_config_changed(self, config):
-        """Handle configuration changes - reload AI config and refresh AI panels"""
+        """
+        Handle configuration changes - reload AI config, refresh AI panels, and reinitialize tools.
+        
+        This enables hot-reload of configuration changes without requiring app restart.
+        When compilation flags, compiler settings, or other config changes are saved,
+        the tools (comparator/validator/benchmarker) are automatically reinitialized
+        to use the new settings.
+        
+        Args:
+            config: The new configuration dictionary
+        """
         # Reload AI configuration to pick up changes
         try:
             from src.app.core.ai import reload_ai_config
@@ -102,6 +112,19 @@ class SidebarWindowBase(QWidget):
         # Refresh AI panels with new configuration
         if hasattr(self, 'refresh_ai_panels'):
             self.refresh_ai_panels()
+        
+        # Reinitialize tools (comparator/validator/benchmarker) to pick up new compilation settings
+        # This allows compilation flags, compiler selection, optimization levels, etc. to take
+        # effect immediately without restarting the application
+        if hasattr(self, '_initialize_tool'):
+            self._initialize_tool()
+            
+            # Inform user that tools have been reloaded (optional visual feedback)
+            if hasattr(self, 'display_area') and hasattr(self.display_area, 'console'):
+                self.display_area.console.displayOutput(
+                    "✓ Configuration updated - compilation settings reloaded", 
+                    "success"
+                )
     
     # ===== UI State Management Methods for Test Execution =====
     # These methods handle UI coordination when tests are running

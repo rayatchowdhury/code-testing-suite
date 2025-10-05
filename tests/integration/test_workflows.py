@@ -35,7 +35,6 @@ class TestConfigurationWorkflow:
         
         # Step 2: Modify configuration
         config['cpp_version'] = 'c++20'
-        config['workspace_folder'] = '/test/workspace'
         config['gemini']['enabled'] = True
         config['gemini']['api_key'] = 'test-key-123'
         
@@ -45,7 +44,6 @@ class TestConfigurationWorkflow:
         # Step 4: Reload and verify changes persisted
         reloaded_config = config_manager.load_config()
         assert reloaded_config['cpp_version'] == 'c++20'
-        assert reloaded_config['workspace_folder'] == '/test/workspace'
         assert reloaded_config['gemini']['enabled'] is True
         assert reloaded_config['gemini']['api_key'] == 'test-key-123'
 
@@ -343,7 +341,6 @@ class TestCompilationWorkflow:
         config_manager = ConfigManager(os.path.join(temp_config_dir, 'config.json'))
         config = config_manager.load_config()
         config['cpp_version'] = 'c++17'
-        config['workspace_folder'] = str(tmp_path)
         config_manager.save_config(config)
         
         # Create test source file
@@ -365,11 +362,10 @@ int main() {
         # Verify configuration can be used for compilation settings
         reloaded_config = config_manager.load_config()
         assert reloaded_config['cpp_version'] == 'c++17'
-        assert reloaded_config['workspace_folder'] == str(tmp_path)
         
         # Mock compilation command construction
         cpp_version = reloaded_config['cpp_version']
-        workspace = Path(reloaded_config['workspace_folder'])
+        workspace = tmp_path  # Use tmp_path directly instead of from config
         
         expected_compile_args = [
             'g++',
@@ -463,7 +459,6 @@ class TestEndToEndWorkflows:
         # Step 1: Setup configuration
         config_manager = ConfigManager(os.path.join(temp_config_dir, 'config.json'))
         config = config_manager.load_config()
-        config['workspace_folder'] = str(tmp_path)
         config['cpp_version'] = 'c++17'
         config_manager.save_config(config)
         
@@ -523,7 +518,7 @@ int main() {
         
         # Verify configuration
         final_config = config_manager.load_config()
-        assert final_config['workspace_folder'] == str(tmp_path)
+        # workspace_folder removed - workspace is always ~/.code_testing_suite/workspace/
         
         # Verify files exist
         for filename in files:

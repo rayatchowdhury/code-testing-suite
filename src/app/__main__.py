@@ -83,6 +83,13 @@ def main():
         # Initialize logging first
         setup_logging()
         
+        # Initialize workspace structure before any windows open
+        from src.app.shared.constants import WORKSPACE_DIR, ensure_user_data_dir
+        from src.app.shared.utils.workspace_utils import ensure_workspace_structure
+        
+        ensure_user_data_dir()
+        ensure_workspace_structure(WORKSPACE_DIR)
+        
         # Import Qt components
         from PySide6.QtWidgets import QApplication
         from PySide6.QtCore import Qt

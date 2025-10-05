@@ -424,9 +424,7 @@ class EditorWidget(QWidget):
         """Handle custom AI command"""
         if code is None:
             code = self.getCode()
-        asyncio.create_task(
-            self._process_code('custom', code, command=command)
-        )
+        self._process_code('custom', code, command=command)
 
     def _clean_code_response(self, text: str) -> str:
         """Strip everything but the actual code."""

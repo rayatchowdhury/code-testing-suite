@@ -5,6 +5,7 @@ Embedded in display area, not a popup dialog.
 
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QMessageBox
 from PySide6.QtCore import Signal
+from src.app.presentation.styles.components.status_view_styles import STATUS_VIEW_CONTAINER_STYLE
 
 
 class BaseStatusView(QWidget):
@@ -44,19 +45,14 @@ class BaseStatusView(QWidget):
     def _setup_ui(self):
         """Setup the main UI structure - content only, no sidebar"""
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(16)
+        layout.setContentsMargins(24, 24, 24, 24)
+        layout.setSpacing(20)
         
         # Import here to avoid circular imports
         from src.app.presentation.widgets.status_view_widgets import (
-            ControlsPanel,
             ProgressSection,
             CardsSection
         )
-        
-        # Control panel (file buttons only - stop button now in sidebar)
-        self.controls_panel = ControlsPanel(self.test_type)
-        # Note: stopClicked signal no longer connected - stop button in sidebar
         
         # Progress section
         self.progress_section = ProgressSection()
@@ -65,19 +61,13 @@ class BaseStatusView(QWidget):
         self.cards_section = CardsSection()
         
         # Add to layout
-        layout.addWidget(self.controls_panel)
         layout.addWidget(self.progress_section)
         layout.addWidget(self.cards_section, stretch=1)
 
         
     def _setup_styles(self):
-        """Apply styling"""
-        from src.app.presentation.styles.style import MATERIAL_COLORS
-        self.setStyleSheet(f"""
-            QWidget {{
-                background: {MATERIAL_COLORS['surface']};
-            }}
-        """)
+        """Apply modern gradient-based styling"""
+        self.setStyleSheet(STATUS_VIEW_CONTAINER_STYLE)
         
     def _handle_back(self):
         """Handle back button click - emit signal for window to handle"""
@@ -112,7 +102,6 @@ class BaseStatusView(QWidget):
         self.completed_tests = 0
         self.passed_tests = 0
         self.failed_tests = 0
-        self.controls_panel.update_stop_button_state(True)
         self.progress_section.reset(total)
         self.cards_section.clear()
         
@@ -172,7 +161,6 @@ class BaseStatusView(QWidget):
     def on_all_tests_completed(self, all_passed: bool):
         """Called when all tests complete"""
         self.tests_running = False
-        self.controls_panel.update_stop_button_state(False)
         self.progress_section.mark_complete(all_passed)
         
     def is_tests_running(self) -> bool:
