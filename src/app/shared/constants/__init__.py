@@ -22,8 +22,8 @@ from .paths import (
     CONFIG_FILE,
     EDITOR_STATE_FILE,
     MAIN_WINDOW_HTML,
-    EDITOR_WELCOME_HTML,
-    HTML_CSS,
+    # EDITOR_WELCOME_HTML removed - file doesn't exist
+    # HTML_CSS removed - not used in codebase
     HELP_CONTENT_DIR,
     ensure_user_data_dir,
     get_icon_path,
@@ -48,8 +48,8 @@ __all__ = [
     'CONFIG_FILE',
     'EDITOR_STATE_FILE',
     'MAIN_WINDOW_HTML',
-    'EDITOR_WELCOME_HTML',
-    'HTML_CSS',
+    # 'EDITOR_WELCOME_HTML' removed - file doesn't exist
+    # 'HTML_CSS' removed - not used in codebase
     'HELP_CONTENT_DIR',
     
     # Utility functions

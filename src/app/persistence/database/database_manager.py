@@ -641,28 +641,27 @@ class DatabaseManager:
         Create a snapshot of all relevant files in the workspace.
         
         Supports both flat and nested directory structures:
-        - Flat: workspace_dir/*.cpp, *.py, *.java
-        - Nested: workspace_dir/comparator/*.cpp, workspace_dir/validator/*.py, etc.
+        - Flat (LEGACY): workspace_dir/*.cpp, *.py, *.java
+        - Nested (CURRENT): workspace_dir/comparator/*.cpp, workspace_dir/validator/*.py, etc.
+        
+        Note: Flat structure support maintained for backward compatibility with old test results.
         """
         from src.app.shared.utils.workspace_utils import is_flat_workspace_structure, list_workspace_files
         
         snapshot = FilesSnapshot()
         
         # Common file mappings (filename -> snapshot attribute)
+        # Note: Legacy mappings (a.cpp, b.cpp, tmp.cpp) removed as those files no longer exist
         file_mappings = {
-            'generator.h': 'generator_code',
             'generator.cpp': 'generator_code',
             'Generator.java': 'generator_code',
             'generator.py': 'generator_code',
-            'a.cpp': 'correct_code',
             'correct.cpp': 'correct_code',
             'Correct.java': 'correct_code',
             'correct.py': 'correct_code',
-            'b.cpp': 'test_code',
             'test.cpp': 'test_code',
             'Test.java': 'test_code',
             'test.py': 'test_code',
-            'tmp.cpp': 'test_code',
             'validator.cpp': 'validator_code',
             'Validator.java': 'validator_code',
             'validator.py': 'validator_code'

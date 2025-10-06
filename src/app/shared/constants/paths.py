@@ -9,8 +9,9 @@ import os
 from pathlib import Path
 
 # Project structure - updated for src layout  
-# Navigate up from src/app/constants/paths.py to project root
-PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
+# Navigate up from src/app/shared/constants/paths.py to project root
+# __file__ -> paths.py, .parent -> constants/, .parent -> shared/, .parent -> app/, .parent -> src/, .parent -> project root
+PROJECT_ROOT = Path(__file__).parent.parent.parent.parent.parent
 SRC_ROOT = PROJECT_ROOT / "src"
 RESOURCES_DIR = SRC_ROOT / "resources"
 ICONS_DIR = RESOURCES_DIR / "icons"
@@ -50,9 +51,10 @@ TEST_TYPE_ALIASES = {
 }
 
 # HTML and CSS files
-MAIN_WINDOW_HTML = PROJECT_ROOT / "views" / "main_window.html"
-EDITOR_WELCOME_HTML = PROJECT_ROOT / "views" / "code_editor" / "editor_welcome.html"
-HTML_CSS = PROJECT_ROOT / "styles" / "html.css"
+# Correct path: Located in src/app/presentation/views/
+MAIN_WINDOW_HTML = PROJECT_ROOT / "src" / "app" / "presentation" / "views" / "main_window.html"
+# Note: EDITOR_WELCOME_HTML removed - file doesn't exist
+# Note: HTML_CSS moved to presentation/styles/html.css
 
 # Help center content
 HELP_CONTENT_DIR = PROJECT_ROOT / "views" / "help_center" / "content"
