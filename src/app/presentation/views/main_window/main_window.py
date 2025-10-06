@@ -35,8 +35,7 @@ class MainWindowConfig:
     # Sidebar sections and buttons
     SIDEBAR_SECTIONS = {
         "Editor": ["Code Editor"],
-        "Tests": ["Compare", "Validate", "Benchmark"],
-        "History": ["Results"]
+        "Tests": ["Compare", "Validate", "Benchmark"]
     }
     
     # Window mapping for navigation
@@ -81,6 +80,8 @@ class MainWindowContent(SidebarWindowBase):
                 self.sidebar.add_button(button_name, section)
         
         # Add footer elements
+        self.sidebar.add_results_button()
+        self.sidebar.add_footer_button_divider()
         self.sidebar.add_help_button()
         self.sidebar.add_footer_divider()
         

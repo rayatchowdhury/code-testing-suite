@@ -36,10 +36,8 @@ class ValidatorWindow(SidebarWindowBase):
             elif button_text == 'Run':
                 self.run_btn = btn
             
-        history_section = self.sidebar.add_section("History")
-        results_btn = self.sidebar.add_button('Results', history_section)
-        results_btn.clicked.connect(lambda checked: self.handle_action_button('Results'))
-            
+        self.sidebar.add_results_button()
+        self.sidebar.add_footer_button_divider()
         self.sidebar.add_help_button()
         self.sidebar.add_footer_divider()
 

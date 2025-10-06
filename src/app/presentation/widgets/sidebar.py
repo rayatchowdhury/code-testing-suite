@@ -219,6 +219,18 @@ class Sidebar(QWidget):
         self.footer.layout().addWidget(self.back_button)
         return self.back_button
 
+    def add_results_button(self):
+        results_btn = QPushButton("Results")
+        results_btn.setObjectName("results_button")
+        results_btn.clicked.connect(
+            lambda: self.button_clicked.emit("Results"))
+        self.footer.layout().addWidget(results_btn)
+        return results_btn
+    
+    def add_footer_button_divider(self):
+        """Add a simple divider between footer buttons"""
+        self.add_footer_divider()
+
     def add_help_button(self):
         help_btn = QPushButton("Help Center")
         help_btn.setObjectName("footer_button")  # Changed from back_button

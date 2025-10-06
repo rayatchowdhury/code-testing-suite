@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from src.app.presentation.window_controller.base_window import SidebarWindowBase
-from PySide6.QtWidgets import QMessageBox
+from PySide6.QtWidgets import QPushButton, QMessageBox
 from PySide6.QtGui import QShowEvent
 from src.app.presentation.widgets.sidebar import Sidebar
 from src.app.presentation.views.benchmarker.benchmarker_display_area import BenchmarkerDisplay
@@ -42,10 +42,8 @@ class BenchmarkerWindow(SidebarWindowBase):
             elif button_text == 'Run':
                 self.run_btn = btn
             
-        history_section = self.sidebar.add_section("History") 
-        results_btn = self.sidebar.add_button('Results', history_section)
-        results_btn.clicked.connect(lambda checked: self.handle_action_button('Results'))
-            
+        self.sidebar.add_results_button()
+        self.sidebar.add_footer_button_divider()
         self.sidebar.add_help_button()
         self.sidebar.add_footer_divider()
 
