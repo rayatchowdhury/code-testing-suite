@@ -7,12 +7,12 @@ This module contains the user interface components and view logic.
 # Lazy imports to avoid circular dependencies
 def get_main_window():
     """Lazy import of MainWindow"""
-    from src.app.presentation.views.main_window import MainWindow
+    from src.app.presentation.views.main_window.main_window import MainWindow
     return MainWindow
 
 def get_sidebar_window_base():
     """Lazy import of SidebarWindowBase"""  
-    from src.app.presentation.views.base_window import SidebarWindowBase
+    from src.app.presentation.window_controller.base_window import SidebarWindowBase
     return SidebarWindowBase
 
 # Styles module - this is safe to import directly

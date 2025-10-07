@@ -91,8 +91,8 @@ class Benchmarker(BaseRunner):
     duplicate runner code while maintaining exact API compatibility.
     """
     
-    # TLE-specific signal signature (must match original)
-    testCompleted = Signal(str, int, bool, float, float, bool)  # test name, test number, passed, execution time, memory used, memory passed
+    # Updated signal signature to include input/output data
+    testCompleted = Signal(str, int, bool, float, float, bool, str, str, int)  # test name, test number, passed, execution time, memory used, memory passed, input_data, output_data, test_size
 
     def __init__(self, workspace_dir):
         # Define files specific to TLE testing
@@ -192,7 +192,7 @@ class Benchmarker(BaseRunner):
         
         # Create and return TestResult object
         return TestResult(
-            test_type="tle",
+            test_type="benchmark",
             file_path=test_file_path,
             test_count=self.test_count,
             passed_tests=passed_tests,

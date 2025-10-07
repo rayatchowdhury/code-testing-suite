@@ -39,7 +39,6 @@ class MockConfigManager:
         """Default configuration for testing."""
         return {
             'cpp_version': 'c++17',
-            'workspace_folder': '/test/workspace',
             'gemini': {
                 'enabled': False,
                 'api_key': '',
@@ -383,7 +382,7 @@ class TestDataFactory:
     @staticmethod
     def create_test_result(**kwargs):
         """Create TestResult for testing."""
-        from src.app.persistence.database.database_manager import TestResult
+        from src.app.persistence.database import TestResult
         
         defaults = {
             'test_type': 'stress',
@@ -399,28 +398,12 @@ class TestDataFactory:
         defaults.update(kwargs)
         return TestResult(**defaults)
     
-    @staticmethod
-    def create_test_case_result(**kwargs):
-        """Create TestCaseResult for testing."""
-        from src.app.persistence.database.database_manager import TestCaseResult
-        
-        defaults = {
-            'test_number': 1,
-            'passed': True,
-            'input_data': '5 3',
-            'expected_output': '8',
-            'actual_output': '8',
-            'execution_time': 0.001,
-            'timestamp': '2023-01-01T12:00:01'
-        }
-        
-        defaults.update(kwargs)
-        return TestCaseResult(**defaults)
+    # Phase 6 (Issue #7): Removed create_test_case_result - TestCaseResult class removed
     
     @staticmethod
     def create_session(**kwargs):
         """Create Session for testing."""
-        from src.app.persistence.database.database_manager import Session
+        from src.app.persistence.database import Session
         
         defaults = {
             'session_name': 'Test Session',

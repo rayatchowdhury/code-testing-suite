@@ -50,7 +50,6 @@ def sample_config():
     """Sample configuration data for testing."""
     return {
         'cpp_version': 'c++17',
-        'workspace_folder': '/test/workspace',
         'gemini': {
             'enabled': True,
             'api_key': 'test-api-key',
@@ -72,7 +71,6 @@ def invalid_config():
     """Invalid configuration data for error testing."""
     return {
         'cpp_version': 123,  # Should be string
-        'workspace_folder': '',
         'gemini': 'invalid',  # Should be dict
         'editor_settings': {
             'autosave': 'yes',  # Should be bool

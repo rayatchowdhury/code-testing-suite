@@ -7,8 +7,8 @@ import pytest
 from datetime import datetime
 from unittest.mock import patch, MagicMock
 
-from src.app.persistence.database.database_manager import (
-    DatabaseManager, TestResult, TestCaseResult, FilesSnapshot, 
+from src.app.persistence.database import (
+    DatabaseManager, TestResult, FilesSnapshot, 
     Session, ProjectData
 )
 
@@ -16,52 +16,51 @@ from src.app.persistence.database.database_manager import (
 class TestDataClasses:
     """Test cases for data classes."""
 
-    def test_test_case_result_creation(self):
-        """Test TestCaseResult data class creation."""
-        result = TestCaseResult(
-            test_number=1,
-            passed=True,
-            input_data="5 3",
-            expected_output="8",
-            actual_output="8",
-            execution_time=0.001,
-            memory_usage=1024,
-            error_message="",
-            timestamp="2023-01-01 12:00:00"
-        )
-        
-        assert result.test_number == 1
-        assert result.passed is True
-        assert result.input_data == "5 3"
-        assert result.expected_output == "8"
-        assert result.actual_output == "8"
-        assert result.execution_time == 0.001
-        assert result.memory_usage == 1024
-        assert result.error_message == ""
-        assert result.timestamp == "2023-01-01 12:00:00"
+    # Phase 6 (Issue #7): Removed test_test_case_result_creation - TestCaseResult class removed
 
     def test_files_snapshot_creation(self):
-        """Test FilesSnapshot data class creation."""
+        """Test FilesSnapshot data class creation with NEW format."""
         snapshot = FilesSnapshot(
-            generator_code="// generator",
-            correct_code="// correct",
-            test_code="// test",
-            additional_files={"helper.h": "// helper"}
+            files={
+                "generator.cpp": {
+                    "content": "// generator",
+                    "language": "cpp",
+                    "role": "generator"
+                },
+                "correct.cpp": {
+                    "content": "// correct",
+                    "language": "cpp",
+                    "role": "correct"
+                },
+                "test.cpp": {
+                    "content": "// test",
+                    "language": "cpp",
+                    "role": "test"
+                },
+                "helper.h": {
+                    "content": "// helper",
+                    "language": "cpp",
+                    "role": "additional"
+                }
+            },
+            test_type="comparison",
+            primary_language="cpp"
         )
         
-        assert snapshot.generator_code == "// generator"
-        assert snapshot.correct_code == "// correct"
-        assert snapshot.test_code == "// test"
-        assert snapshot.additional_files == {"helper.h": "// helper"}
+        assert "generator.cpp" in snapshot.files
+        assert snapshot.files["generator.cpp"]["content"] == "// generator"
+        assert snapshot.files["correct.cpp"]["content"] == "// correct"
+        assert snapshot.files["test.cpp"]["content"] == "// test"
+        assert snapshot.files["helper.h"]["content"] == "// helper"
 
     def test_files_snapshot_default_factory(self):
-        """Test FilesSnapshot with default factory for additional_files."""
+        """Test FilesSnapshot with default factory for files dict."""
         snapshot1 = FilesSnapshot()
         snapshot2 = FilesSnapshot()
         
         # Should have separate dict instances (not shared)
-        snapshot1.additional_files["file1.cpp"] = "content1"
-        assert "file1.cpp" not in snapshot2.additional_files
+        snapshot1.files["file1.cpp"] = {"content": "content1", "language": "cpp", "role": "test"}
+        assert "file1.cpp" not in snapshot2.files
 
     def test_test_result_creation(self):
         """Test TestResult data class creation."""
@@ -151,10 +150,12 @@ class TestDatabaseManager:
     @patch('sqlite3.connect', side_effect=sqlite3.Error("Connection failed"))
     def test_connect_failure(self, mock_connect, mock_database):
         """Test database connection failure."""
-        manager = DatabaseManager(mock_database)
-        connection = manager.connect()
+        from src.app.persistence.database import DatabaseError
         
-        assert connection is None
+        # DatabaseManager.__init__ calls _initialize_database which calls connect()
+        # So the exception is raised during initialization
+        with pytest.raises(DatabaseError, match="Failed to connect to database"):
+            manager = DatabaseManager(mock_database)
 
     def test_close_connection(self, db_manager):
         """Test closing database connection."""
@@ -264,19 +265,8 @@ class TestDatabaseManager:
         assert len(all_results) >= 3
         assert all(isinstance(result, TestResult) for result in all_results)
 
-    @pytest.mark.skip(reason="TestCaseResult methods not implemented in current DatabaseManager")
-    def test_save_test_case_result(self, db_manager):
-        """Test saving test case result."""
-        # This test is skipped because the current DatabaseManager
-        # doesn't have test_case_result methods implemented
-        pass
-
-    @pytest.mark.skip(reason="TestCaseResult methods not implemented in current DatabaseManager")
-    def test_get_test_cases_for_result(self, db_manager):
-        """Test retrieving test cases for a specific test result."""
-        # This test is skipped because the current DatabaseManager
-        # doesn't have test_case_result methods implemented
-        pass
+    # Phase 6 (Issue #7): Removed skipped TestCaseResult tests - functionality not needed
+    # Test case results are stored as JSON in TestResult.test_details
 
     def test_save_session(self, db_manager):
         """Test saving session data."""
@@ -334,11 +324,12 @@ class TestDatabaseManager:
 
     @patch('sqlite3.connect', side_effect=sqlite3.Error("Database error"))
     def test_database_error_handling(self, mock_connect, mock_database):
-        """Test that database errors are handled gracefully."""
-        manager = DatabaseManager(mock_database)
+        """Test that database errors are raised as DatabaseError exceptions."""
+        from src.app.persistence.database import DatabaseError
         
-        # Methods should handle database errors gracefully
-        assert manager.connect() is None
+        # DatabaseManager now raises DatabaseError instead of returning None
+        with pytest.raises(DatabaseError, match="Failed to connect to database"):
+            manager = DatabaseManager(mock_database)
 
     def test_context_manager_usage(self, db_manager):
         """Test using DatabaseManager as context manager if implemented."""

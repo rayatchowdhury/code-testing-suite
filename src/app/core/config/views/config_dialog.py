@@ -171,8 +171,8 @@ class ConfigView(QDialog):
 
         # Create sections (inline section builders)
         # Note: Removed standalone C++ Version section - now integrated into Language Compilers
+        # Note: Removed Workspace section - workspace is always ~/.code_testing_suite/workspace/
         content_layout.addWidget(self._create_languages_section())
-        content_layout.addWidget(self._create_workspace_section())
         content_layout.addWidget(self._create_ai_section())
         content_layout.addWidget(self._create_editor_section())
         content_layout.addWidget(self._create_database_section())
@@ -440,34 +440,6 @@ class ConfigView(QDialog):
         
         return frame
 
-    def _create_workspace_section(self):
-        """Create workspace configuration section."""
-        frame, layout = self._create_section_frame("📁 Workspace")
-
-        # Workspace folder row
-        ws_widget = QWidget()
-        ws_layout = QHBoxLayout(ws_widget)
-        ws_layout.setContentsMargins(0, 0, 0, 0)
-        ws_layout.setSpacing(8)
-
-        ws_label = QLabel("Workspace folder:")
-        ws_label.setFixedWidth(120)
-        ws_layout.addWidget(ws_label)
-        
-        self.workspace_input = QLineEdit()
-        self.workspace_input.setPlaceholderText("Select workspace folder...")
-        self.workspace_input.setFixedHeight(28)
-        ws_layout.addWidget(self.workspace_input)
-        
-        browse_btn = QPushButton("Browse")
-        browse_btn.setObjectName("small_button")
-        browse_btn.setFixedSize(80, 28)
-        browse_btn.clicked.connect(self._browse_workspace)
-        ws_layout.addWidget(browse_btn)
-        
-        layout.addWidget(ws_widget)
-        return frame
-
     def _create_ai_section(self):
         """Create AI configuration section with proper controls."""
         frame, layout = self._create_section_frame("🤖 AI Assistant")
@@ -618,6 +590,11 @@ class ConfigView(QDialog):
         self.cleanup_btn.clicked.connect(self.db_operations.cleanup_old_data)
         buttons_layout1.addWidget(self.cleanup_btn)
 
+        self.optimize_btn = QPushButton("🔧 Optimize Database")
+        self.optimize_btn.setObjectName("secondary_button")
+        self.optimize_btn.clicked.connect(self.db_operations.optimize_database)
+        buttons_layout1.addWidget(self.optimize_btn)
+
         buttons_layout1.addStretch(1)
         layout.addWidget(buttons_row1)
 
@@ -728,12 +705,6 @@ class ConfigView(QDialog):
         """Handle discovery completion - DEPRECATED."""
         # This method is no longer used but kept for compatibility
         pass
-
-    def _browse_workspace(self):
-        """Browse for workspace folder."""
-        path = QFileDialog.getExistingDirectory(self, "Select workspace folder")
-        if path:
-            self.workspace_input.setText(path)
 
     def _save_and_close(self):
         """Save configuration and close dialog."""

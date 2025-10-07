@@ -55,8 +55,8 @@ def create_main_window():
     import importlib
     import sys
     modules_to_reload = [
-        'src.app.presentation.views.qt_main_window_faithful',
-        'src.app.presentation.views.main_window'
+        'src.app.presentation.views.main_window.main_window',
+        'src.app.presentation.views.main_window.main_window_content'
     ]
     for module in modules_to_reload:
         if module in sys.modules:
@@ -65,13 +65,13 @@ def create_main_window():
             
     try:
         # Use relative import within src.app package
-        from src.app.presentation.views.main_window import MainWindow
-        print("Creating MainWindow from src.app.presentation.views.main_window")
+        from src.app.presentation.views.main_window.main_window import MainWindow
+        print("Creating MainWindow from src.app.presentation.views.main_window.main_window")
         return MainWindow()
     except ImportError as e:
         # If relative import fails, try absolute import
         try:
-            from src.app.presentation.views.main_window import MainWindow
+            from src.app.presentation.views.main_window.main_window import MainWindow
             print("Creating MainWindow from absolute import")
             return MainWindow()
         except ImportError:
@@ -82,6 +82,13 @@ def main():
     try:
         # Initialize logging first
         setup_logging()
+        
+        # Initialize workspace structure before any windows open
+        from src.app.shared.constants import WORKSPACE_DIR, ensure_user_data_dir
+        from src.app.shared.utils.workspace_utils import ensure_workspace_structure
+        
+        ensure_user_data_dir()
+        ensure_workspace_structure(WORKSPACE_DIR)
         
         # Import Qt components
         from PySide6.QtWidgets import QApplication

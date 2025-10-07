@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from src.app.presentation.views.base_window import SidebarWindowBase
+from src.app.presentation.window_controller.base_window import SidebarWindowBase
 from src.app.presentation.widgets.sidebar import Sidebar
 from PySide6.QtWidgets import QPushButton, QMessageBox
 from PySide6.QtGui import QFont, QShowEvent
@@ -36,10 +36,8 @@ class ComparatorWindow(SidebarWindowBase):
             elif button_text == 'Run':
                 self.run_btn = btn
             
-        history_section = self.sidebar.add_section("History")
-        results_btn = self.sidebar.add_button('Results', history_section)
-        results_btn.clicked.connect(lambda checked: self.handle_action_button('Results'))
-            
+        self.sidebar.add_results_button()
+        self.sidebar.add_footer_button_divider()
         self.sidebar.add_help_button()
         self.sidebar.add_footer_divider()
 
@@ -63,6 +61,16 @@ class ComparatorWindow(SidebarWindowBase):
     
     def _initialize_tool(self):
         """Initialize or reinitialize the comparator tool with current file manifest."""
+        # Disconnect old comparator's signals if it exists
+        if hasattr(self, 'comparator') and self.comparator:
+            try:
+                self.comparator.compilationOutput.disconnect()
+                self.comparator.testingStarted.disconnect()
+                self.comparator.testingCompleted.disconnect()
+            except (RuntimeError, TypeError):
+                # Signals may already be disconnected or object deleted
+                pass
+        
         # Load configuration
         config = self._load_config()
         
@@ -150,6 +158,12 @@ class ComparatorWindow(SidebarWindowBase):
                 self._on_back_requested()
                 return
         
+        # Handle Save button (Phase 2: Issue #39)
+        if button_text == 'Save':
+            if self.status_view:
+                self.status_view.save_to_database()
+            return
+        
         if (button_text == 'Help Center'):
             if self.can_close():
                 self.parent.window_manager.show_window('help_center')
@@ -180,6 +194,12 @@ class ComparatorWindow(SidebarWindowBase):
         # Create status view
         from src.app.presentation.views.comparator.comparator_status_view import ComparatorStatusView
         status_view = ComparatorStatusView(parent=self)
+        
+        # Set runner for on-demand saving (Issue #39)
+        status_view.set_runner(self.comparator)
+        
+        # Replace Results button with Save button (Phase 2: Issue #39)
+        self.sidebar.replace_results_with_save_button()
         
         # Store reference
         self.status_view = status_view
@@ -268,6 +288,9 @@ class ComparatorWindow(SidebarWindowBase):
         """Full restoration when returning to test window - show all buttons"""
         self.status_view_active = False
         
+        # Restore Results button (Phase 2: Issue #39)
+        self.sidebar.restore_results_button()
+        
         # Show Compile button (back in test window)
         if self.compile_btn:
             self.compile_btn.show()
@@ -286,6 +309,14 @@ class ComparatorWindow(SidebarWindowBase):
         
         # Refresh AI panels with current configuration
         self.refresh_ai_panels()
+
+    def enable_save_button(self):
+        """Enable the Save button after tests complete (Phase 2: Issue #39)"""
+        self.sidebar.enable_save_button()
+    
+    def mark_results_saved(self):
+        """Mark results as saved in the UI (Phase 2: Issue #39)"""
+        self.sidebar.mark_results_saved()
 
     def refresh_ai_panels(self):
         """Refresh AI panel visibility based on current configuration"""

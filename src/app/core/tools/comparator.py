@@ -121,7 +121,7 @@ class Comparator(BaseRunner):
         
         # Create and return TestResult object
         return TestResult(
-            test_type="stress",
+            test_type="comparison",
             file_path=test_file_path,
             test_count=self.test_count,
             passed_tests=passed_tests,

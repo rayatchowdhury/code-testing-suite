@@ -92,7 +92,6 @@ class ConfigManager:
         errors = []
         required_keys = {
             'cpp_version': str,
-            'workspace_folder': str,
             'gemini': dict,  # Standardized format (Phase 1)
             'editor_settings': dict,
             'languages': dict  # Multi-language support
@@ -176,7 +175,6 @@ class ConfigManager:
         """Get default configuration structure."""
         return {
             'cpp_version': 'c++17',  # Legacy field - kept for backward compatibility
-            'workspace_folder': '',
             'languages': {  # Multi-language compiler configurations
                 'cpp': {
                     'compiler': 'g++',
@@ -242,7 +240,7 @@ class ConfigPersistence:
             default_config = {}
         
         # Note: cpp_version_combo removed - C++ version now in Language Compilers section
-        self.parent.workspace_input.setText(cfg.get("workspace_folder", ""))
+        # Note: workspace_input removed - workspace is always ~/.code_testing_suite/workspace/
         
         # Load language-specific compiler flags
         languages = cfg.get("languages", default_config.get("languages", {}))
@@ -332,7 +330,6 @@ class ConfigPersistence:
             
             config = {
                 "cpp_version": cpp_std_version,  # Legacy field for backward compatibility
-                "workspace_folder": self.parent.workspace_input.text().strip(),
                 "languages": {
                     "cpp": {
                         "compiler": self.parent.cpp_compiler_combo.currentText() if hasattr(self.parent, 'cpp_compiler_combo') else current_config.get("languages", {}).get("cpp", {}).get("compiler", "g++"),

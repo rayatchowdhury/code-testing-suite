@@ -8,6 +8,13 @@ Clicking a card shows detailed test information.
 from PySide6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QLabel
 from PySide6.QtCore import Qt, Signal
 from src.app.presentation.styles.style import MATERIAL_COLORS
+from src.app.presentation.styles.components.status_view_styles import (
+    get_test_card_style,
+    TEST_CARD_LABEL_HEADER_STYLE,
+    TEST_CARD_LABEL_STATUS_PASSED_STYLE,
+    TEST_CARD_LABEL_STATUS_FAILED_STYLE,
+    TEST_CARD_LABEL_METRIC_STYLE
+)
 
 
 class BaseTestCard(QFrame):
@@ -43,22 +50,18 @@ class BaseTestCard(QFrame):
     def _setup_ui(self):
         """Setup card UI with header and metrics"""
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(12, 10, 12, 10)
-        layout.setSpacing(6)
+        layout.setContentsMargins(14, 12, 14, 12)
+        layout.setSpacing(8)
         
         # Header row: Test # | Status
         header_layout = QHBoxLayout()
         
         self.test_label = QLabel(f"Test #{self.test_number}")
-        self.test_label.setStyleSheet("font-weight: bold; font-size: 14px;")
+        self.test_label.setStyleSheet(TEST_CARD_LABEL_HEADER_STYLE)
         
         self.status_label = QLabel("✓ Passed" if self.passed else "✗ Failed")
-        status_color = MATERIAL_COLORS['primary'] if self.passed else MATERIAL_COLORS['error']
-        self.status_label.setStyleSheet(f"""
-            color: {status_color};
-            font-weight: bold;
-            font-size: 14px;
-        """)
+        status_style = TEST_CARD_LABEL_STATUS_PASSED_STYLE if self.passed else TEST_CARD_LABEL_STATUS_FAILED_STYLE
+        self.status_label.setStyleSheet(status_style)
         
         header_layout.addWidget(self.test_label)
         header_layout.addStretch()
@@ -71,10 +74,7 @@ class BaseTestCard(QFrame):
         self.memory_label = QLabel(f"💾 {self.memory:.1f} MB")
         
         for label in [self.time_label, self.memory_label]:
-            label.setStyleSheet(f"""
-                color: {MATERIAL_COLORS['text_secondary']};
-                font-size: 12px;
-            """)
+            label.setStyleSheet(TEST_CARD_LABEL_METRIC_STYLE)
             
         metrics_layout.addWidget(self.time_label)
         metrics_layout.addWidget(self.memory_label)
@@ -88,27 +88,8 @@ class BaseTestCard(QFrame):
         self.setCursor(Qt.PointingHandCursor)
         
     def _apply_styling(self):
-        """Apply card styling with green/red tint based on pass/fail"""
-        if self.passed:
-            # Green tint for passed tests
-            bg_color = MATERIAL_COLORS.get('primary_container', MATERIAL_COLORS['surface_variant'])
-            border_color = MATERIAL_COLORS['primary']
-        else:
-            # Red tint for failed tests
-            bg_color = MATERIAL_COLORS['error_container']
-            border_color = MATERIAL_COLORS['error']
-        
-        self.setStyleSheet(f"""
-            QFrame {{
-                background: {bg_color};
-                border: 2px solid {border_color};
-                border-radius: 10px;
-            }}
-            QFrame:hover {{
-                border-width: 3px;
-                background: {MATERIAL_COLORS['surface_bright']};
-            }}
-        """)
+        """Apply card styling with gradient background based on pass/fail"""
+        self.setStyleSheet(get_test_card_style(self.passed))
         
     def mousePressEvent(self, event):
         """Handle mouse click to emit signal"""

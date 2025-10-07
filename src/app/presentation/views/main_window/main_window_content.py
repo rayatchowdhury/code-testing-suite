@@ -8,7 +8,7 @@ from PySide6.QtCore import *
 from PySide6.QtGui import *
 from typing import List, Tuple
 
-from .qt_doc_engine import (
+from src.app.presentation.window_controller.qt_doc_engine import (
     AppTheme, StyleSheet, FontUtils, GradientText, 
     FeatureCard, CallToActionSection, DocumentWidget
 )

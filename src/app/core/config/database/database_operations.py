@@ -142,3 +142,63 @@ class DatabaseOperations:
 
         except Exception as e:
             QMessageBox.critical(self.parent, "Deletion Error", f"Failed to delete data: {str(e)}")
+
+    def optimize_database(self):
+        """Optimize database by reclaiming unused space"""
+        try:
+            # Get current stats
+            stats = self.database_manager.get_database_stats()
+            if not stats:
+                QMessageBox.warning(self.parent, "Error", "Could not retrieve database statistics")
+                return
+
+            current_size = stats['database_size_mb']
+            
+            # Show confirmation
+            reply = QMessageBox.question(
+                self.parent,
+                "Optimize Database",
+                f"This will optimize the database file and reclaim unused space.\n\n"
+                f"Current database size: {current_size} MB\n\n"
+                f"This may take a few moments.\n\n"
+                f"Continue?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.Yes
+            )
+
+            if reply != QMessageBox.Yes:
+                return
+
+            # Perform optimization
+            result = self.database_manager.optimize_database()
+            
+            if result:
+                space_saved = result['space_saved_mb']
+                size_before = result['size_before_mb']
+                size_after = result['size_after_mb']
+                
+                if space_saved > 0.01:  # More than 10 KB saved
+                    QMessageBox.information(
+                        self.parent,
+                        "✅ Optimization Complete",
+                        f"Database successfully optimized!\n\n"
+                        f"Before: {size_before} MB\n"
+                        f"After: {size_after} MB\n"
+                        f"Space saved: {space_saved} MB"
+                    )
+                else:
+                    QMessageBox.information(
+                        self.parent,
+                        "✅ Optimization Complete",
+                        f"Database is already optimized.\n\n"
+                        f"Current size: {size_after} MB\n"
+                        f"No significant space to reclaim."
+                    )
+                
+                # Refresh the stats display
+                self.refresh_database_stats()
+            else:
+                QMessageBox.critical(self.parent, "Optimization Failed", "Failed to optimize database. Check console for details.")
+
+        except Exception as e:
+            QMessageBox.critical(self.parent, "Optimization Error", f"Failed to optimize database: {str(e)}")

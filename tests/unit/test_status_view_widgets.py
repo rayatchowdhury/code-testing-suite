@@ -6,49 +6,13 @@ import pytest
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel
 from src.app.presentation.widgets.status_view_widgets import (
-    ControlsPanel,
     ProgressSection,
     VisualProgressBar,
     StatsPanel,
     CardsSection
 )
 
-
-class TestControlsPanel:
-    """Test suite for ControlsPanel"""
-    
-    def test_controls_panel_creation(self, qtbot):
-        """Test controls panel can be created"""
-        panel = ControlsPanel('comparator')
-        qtbot.addWidget(panel)
-        
-        assert panel.test_type == 'comparator'
-        assert panel.file_buttons_container is not None
-        # Note: stop button removed - now in sidebar
-        
-    def test_file_buttons_container_exists(self, qtbot):
-        """Test file buttons container exists"""
-        panel = ControlsPanel('validator')
-        qtbot.addWidget(panel)
-        
-        assert panel.file_buttons_container is not None
-        assert panel.file_buttons_layout is not None
-        
-    def test_controls_panel_for_all_types(self, qtbot):
-        """Test controls panel works for all test types"""
-        for test_type in ['comparator', 'validator', 'benchmarker']:
-            panel = ControlsPanel(test_type)
-            qtbot.addWidget(panel)
-            assert panel.test_type == test_type
-            
-    def test_update_stop_button_state_backwards_compat(self, qtbot):
-        """Test update_stop_button_state exists for backwards compatibility"""
-        panel = ControlsPanel('comparator')
-        qtbot.addWidget(panel)
-        
-        # Should not raise error (backwards compatibility)
-        panel.update_stop_button_state(True)
-        panel.update_stop_button_state(False)
+# Phase 6 (Issue #7): Removed TestControlsPanel class - ControlsPanel widget removed from codebase
 
 
 class TestProgressSection:

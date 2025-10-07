@@ -6,41 +6,19 @@ from PySide6.QtWidgets import (QWidget, QHBoxLayout, QVBoxLayout, QPushButton,
                               QLabel, QFrame, QScrollArea, QStackedWidget)
 from PySide6.QtCore import Qt, Signal
 from src.app.presentation.styles.style import MATERIAL_COLORS
-
-
-class ControlsPanel(QWidget):
-    """Control panel with file buttons and stop button"""
-    
-    stopClicked = Signal()
-    
-    def __init__(self, test_type: str, parent=None):
-        super().__init__(parent)
-        self.test_type = test_type
-        self._setup_ui()
-        
-    def _setup_ui(self):
-        layout = QHBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        
-        # File buttons container (will be populated by parent)
-        self.file_buttons_container = QWidget()
-        self.file_buttons_layout = QHBoxLayout(self.file_buttons_container)
-        self.file_buttons_layout.setContentsMargins(0, 0, 0, 0)
-        
-        # Note: Stop button removed - now in sidebar
-        # The stopClicked signal is kept for backwards compatibility
-        
-        layout.addWidget(self.file_buttons_container, stretch=1)
-        
-        self._apply_styles()
-        
-    def _apply_styles(self):
-        # Styles for file buttons container only now
-        pass
-        
-    def update_stop_button_state(self, running: bool):
-        """Kept for backwards compatibility - stop button now in sidebar"""
-        pass
+from src.app.presentation.styles.components.status_view_styles import (
+    PROGRESS_SECTION_CONTAINER_STYLE,
+    VISUAL_PROGRESS_BAR_STYLE,
+    SEGMENT_DEFAULT_STYLE,
+    get_segment_style,
+    STATS_PANEL_STYLE,
+    STATS_LABEL_PASSED_STYLE,
+    STATS_LABEL_FAILED_STYLE,
+    STATS_PERCENTAGE_STYLE,
+    CARDS_SECTION_SCROLL_STYLE,
+    CARDS_SECTION_TITLE_PASSED_STYLE,
+    CARDS_SECTION_TITLE_FAILED_STYLE
+)
             
 
 class ProgressSection(QWidget):
@@ -53,15 +31,19 @@ class ProgressSection(QWidget):
     def _setup_ui(self):
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(12)
         
-        # Visual progress (80% width)
+        # Visual progress (75% width)
         self.visual_progress = VisualProgressBar()
         
-        # Stats panel (20% width)
+        # Stats panel (25% width)
         self.stats_panel = StatsPanel()
         
-        layout.addWidget(self.visual_progress, stretch=4)
+        layout.addWidget(self.visual_progress, stretch=3)
         layout.addWidget(self.stats_panel, stretch=1)
+        
+        # Apply container styling
+        self.setStyleSheet(PROGRESS_SECTION_CONTAINER_STYLE)
         
     def reset(self, total_tests: int):
         """Reset for new test run"""
@@ -86,27 +68,23 @@ class ProgressSection(QWidget):
 
 
 class VisualProgressBar(QWidget):
-    """Visual progress bar with tick/cross emojis"""
+    """Segmented progress bar with color-coded blocks"""
     
     def __init__(self, parent=None):
         super().__init__(parent)
         self.results = []
         self.total = 0
         self.current = 0
+        self.segments = []
+        self.segment_size = 1  # How many tests per segment
         self._setup_ui()
         
     def _setup_ui(self):
         self.layout = QHBoxLayout(self)
-        self.layout.setContentsMargins(8, 8, 8, 8)
-        self.layout.setSpacing(4)
+        self.layout.setContentsMargins(12, 12, 12, 12)
+        self.layout.setSpacing(0)  # No spacing for connected segments
         
-        self.setStyleSheet(f"""
-            QWidget {{
-                background: {MATERIAL_COLORS['surface_variant']};
-                border: 1px solid {MATERIAL_COLORS['outline']};
-                border-radius: 8px;
-            }}
-        """)
+        self.setStyleSheet(VISUAL_PROGRESS_BAR_STYLE)
         
     def reset(self, total: int):
         """Reset progress bar"""
@@ -114,37 +92,127 @@ class VisualProgressBar(QWidget):
         self.total = total
         self.current = 0
         self._clear_layout()
+        self.segments = []
         
-        # Add placeholders (limit to 50 for UI performance)
-        display_count = min(total, 50)
-        for i in range(display_count):
-            label = QLabel("⏳")
-            label.setAlignment(Qt.AlignCenter)
-            label.setFixedSize(24, 24)
-            self.layout.addWidget(label)
+        # Calculate optimal segment count and size
+        if total <= 100:
+            # Show individual segments for small test counts
+            segment_count = total
+            self.segment_size = 1
+        elif total <= 200:
+            # 1 segment = 2 tests
+            segment_count = 100
+            self.segment_size = 2
+        elif total <= 500:
+            # 1 segment = ~5 tests
+            segment_count = 100
+            self.segment_size = total // 100
+        else:
+            # 1 segment = ~10+ tests
+            segment_count = 100
+            self.segment_size = total // 100
+        
+        # Create segments
+        for i in range(segment_count):
+            segment = QFrame()
+            segment.setFixedSize(max(5, 800 // segment_count), 28)
             
-        # Add indicator if showing subset
-        if total > 50:
-            more_label = QLabel(f"+{total - 50}")
-            more_label.setAlignment(Qt.AlignCenter)
-            more_label.setStyleSheet("color: #666; font-size: 10px;")
-            self.layout.addWidget(more_label)
+            # Apply default style with no border radius on inner sides for connected look
+            if i == 0:
+                # First segment - round left side only
+                segment.setStyleSheet(SEGMENT_DEFAULT_STYLE.replace("border-radius: 3px;", "border-radius: 3px 0 0 3px;"))
+            elif i == segment_count - 1:
+                # Last segment - round right side only
+                segment.setStyleSheet(SEGMENT_DEFAULT_STYLE.replace("border-radius: 3px;", "border-radius: 0 3px 3px 0;"))
+            else:
+                # Middle segments - no rounding
+                segment.setStyleSheet(SEGMENT_DEFAULT_STYLE.replace("border-radius: 3px;", "border-radius: 0;"))
+            
+            # Add tooltip
+            start_test = i * self.segment_size + 1
+            end_test = min((i + 1) * self.segment_size, total)
+            if self.segment_size == 1:
+                segment.setToolTip(f"Test {start_test}")
+            else:
+                segment.setToolTip(f"Tests {start_test}-{end_test}")
+            
+            self.layout.addWidget(segment)
+            self.segments.append({
+                'widget': segment,
+                'passed': 0,
+                'failed': 0,
+                'total': 0,
+                'position': 'first' if i == 0 else 'last' if i == segment_count - 1 else 'middle'
+            })
+            
+        # Add indicator if using aggregated segments
+        if self.segment_size > 1:
+            info_label = QLabel(f"({self.segment_size} tests/segment)")
+            info_label.setAlignment(Qt.AlignCenter)
+            info_label.setStyleSheet("color: #666; font-size: 9px;")
+            self.layout.addWidget(info_label)
             
     def add_result(self, passed: bool):
         """Add test result"""
         self.results.append(passed)
-        index = len(self.results) - 1
+        test_index = len(self.results) - 1
         
-        # Only update if within display limit
-        if index < min(self.total, 50) and index < self.layout.count():
-            label = self.layout.itemAt(index).widget()
-            if isinstance(label, QLabel):
-                label.setText("✓" if passed else "✗")
-                label.setStyleSheet(f"""
-                    color: {MATERIAL_COLORS['primary'] if passed else MATERIAL_COLORS['error']};
-                    font-size: 16px;
-                    font-weight: bold;
-                """)
+        # Calculate which segment this test belongs to
+        segment_index = test_index // self.segment_size
+        
+        if segment_index < len(self.segments):
+            segment = self.segments[segment_index]
+            segment['total'] += 1
+            if passed:
+                segment['passed'] += 1
+            else:
+                segment['failed'] += 1
+            
+            # Update segment color based on results
+            self._update_segment_color(segment_index)
+            
+    def _update_segment_color(self, segment_index: int):
+        """Update segment color based on its test results"""
+        segment = self.segments[segment_index]
+        widget = segment['widget']
+        passed = segment['passed']
+        failed = segment['failed']
+        total = segment['total']
+        position = segment['position']
+        
+        # Determine state and apply appropriate gradient style
+        if total == 0:
+            state = 'default'
+        elif failed == 0:
+            state = 'passed'
+        elif passed == 0:
+            state = 'failed'
+        else:
+            # Mixed results - determine by majority
+            if passed > failed:
+                state = 'mixed_pass'
+            else:
+                state = 'mixed_fail'
+        
+        # Get base style and adjust border radius based on position
+        base_style = get_segment_style(state)
+        if position == 'first':
+            style = base_style.replace("border-radius: 3px;", "border-radius: 3px 0 0 3px;")
+        elif position == 'last':
+            style = base_style.replace("border-radius: 3px;", "border-radius: 0 3px 3px 0;")
+        else:
+            style = base_style.replace("border-radius: 3px;", "border-radius: 0;")
+        
+        widget.setStyleSheet(style)
+        
+        # Update tooltip with current stats
+        start_test = segment_index * self.segment_size + 1
+        end_test = min((segment_index + 1) * self.segment_size, self.total)
+        if self.segment_size == 1:
+            tooltip = f"Test {start_test}: {'Passed' if passed > 0 else 'Failed'}"
+        else:
+            tooltip = f"Tests {start_test}-{end_test}\nPassed: {passed}, Failed: {failed}"
+        widget.setToolTip(tooltip)
             
     def set_current(self, current: int, total: int):
         """Highlight current test"""
@@ -172,29 +240,26 @@ class StatsPanel(QWidget):
         
     def _setup_ui(self):
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(12, 8, 12, 8)
-        layout.setSpacing(4)
+        layout.setContentsMargins(16, 12, 16, 12)
+        layout.setSpacing(8)
         
         self.percentage_label = QLabel("0%")
-        self.passed_label = QLabel("Passed: 0")
-        self.failed_label = QLabel("Failed: 0")
+        self.percentage_label.setAlignment(Qt.AlignCenter)
+        self.percentage_label.setStyleSheet(STATS_PERCENTAGE_STYLE)
         
-        for label in [self.percentage_label, self.passed_label, self.failed_label]:
-            label.setAlignment(Qt.AlignCenter)
-            layout.addWidget(label)
+        self.passed_label = QLabel("Passed: 0")
+        self.passed_label.setAlignment(Qt.AlignCenter)
+        
+        self.failed_label = QLabel("Failed: 0")
+        self.failed_label.setAlignment(Qt.AlignCenter)
+        
+        layout.addWidget(self.percentage_label)
+        layout.addSpacing(4)
+        layout.addWidget(self.passed_label)
+        layout.addWidget(self.failed_label)
+        layout.addStretch()
             
-        self.setStyleSheet(f"""
-            QWidget {{
-                background: {MATERIAL_COLORS['surface_variant']};
-                border: 1px solid {MATERIAL_COLORS['outline']};
-                border-radius: 8px;
-            }}
-            QLabel {{
-                color: {MATERIAL_COLORS['on_surface']};
-                font-weight: bold;
-                font-size: 13px;
-            }}
-        """)
+        self.setStyleSheet(STATS_PANEL_STYLE)
         
     def reset(self):
         """Reset statistics"""
@@ -213,11 +278,11 @@ class StatsPanel(QWidget):
         self.passed_label.setText(f"Passed: {passed}")
         self.failed_label.setText(f"Failed: {failed}")
         
-        # Color code labels
+        # Color code labels with new gradient-aware styles
         if passed > 0:
-            self.passed_label.setStyleSheet(f"color: {MATERIAL_COLORS['primary']}; font-weight: bold; font-size: 13px;")
+            self.passed_label.setStyleSheet(STATS_LABEL_PASSED_STYLE)
         if failed > 0:
-            self.failed_label.setStyleSheet(f"color: {MATERIAL_COLORS['error']}; font-weight: bold; font-size: 13px;")
+            self.failed_label.setStyleSheet(STATS_LABEL_FAILED_STYLE)
 
 
 class CardsSection(QWidget):
@@ -235,91 +300,16 @@ class CardsSection(QWidget):
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.setSpacing(16)
         
-        # Single column initially
-        self.single_scroll = self._create_scroll_area()
-        self.single_container = QWidget()
-        self.single_layout = QVBoxLayout(self.single_container)
-        self.single_layout.setAlignment(Qt.AlignTop)
-        self.single_layout.setSpacing(8)
-        self.single_scroll.setWidget(self.single_container)
-        
-        self.main_layout.addWidget(self.single_scroll)
-        
-        # Split columns (will be created when needed)
-        self.passed_scroll = None
-        self.failed_scroll = None
-        self.passed_container = None
-        self.failed_container = None
-        self.passed_layout = None
-        self.failed_layout = None
-        
-    def _create_scroll_area(self) -> QScrollArea:
-        """Create configured scroll area"""
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        scroll.setStyleSheet(f"""
-            QScrollArea {{
-                border: 1px solid {MATERIAL_COLORS['outline']};
-                border-radius: 8px;
-                background: transparent;
-            }}
-        """)
-        return scroll
-        
-    def clear(self):
-        """Clear all cards"""
-        self.passed_cards = []
-        self.failed_cards = []
-        self._clear_layout(self.single_layout)
-        
-        if self.layout_mode == 'split':
-            self._switch_to_single_layout()
-            
-    def add_card(self, card: QWidget, passed: bool):
-        """Add test card"""
-        if passed:
-            self.passed_cards.append(card)
-            if self.layout_mode == 'single':
-                self.single_layout.addWidget(card)
-            else:
-                self.passed_layout.addWidget(card)
-        else:
-            self.failed_cards.append(card)
-            if self.layout_mode == 'single' and len(self.failed_cards) == 1:
-                # First failure - switch to split layout
-                self._switch_to_split_layout()
-            if self.layout_mode == 'split':
-                self.failed_layout.addWidget(card)
-                
-    def _switch_to_split_layout(self):
-        """Switch from single to split column layout"""
-        if self.layout_mode == 'split':
-            return
-            
-        self.layout_mode = 'split'
-        
-        # Hide single column
-        self.single_scroll.hide()
-        
-        # Create passed column
+        # Always start with passed column (single mode will show passed tests)
         passed_widget = QWidget()
         passed_main_layout = QVBoxLayout(passed_widget)
         passed_main_layout.setContentsMargins(0, 0, 0, 0)
         passed_main_layout.setSpacing(8)
         
-        passed_title = QLabel("✓ Passed Tests")
-        passed_title.setStyleSheet(f"""
-            QLabel {{
-                background: {MATERIAL_COLORS['primary_container']};
-                color: {MATERIAL_COLORS['on_primary_container']};
-                padding: 8px;
-                border-radius: 6px;
-                font-weight: bold;
-                font-size: 14px;
-            }}
-        """)
-        passed_main_layout.addWidget(passed_title)
+        # Passed title with counter
+        self.passed_title = QLabel("✓ Passed Tests (0)")
+        self.passed_title.setStyleSheet(CARDS_SECTION_TITLE_PASSED_STYLE)
+        passed_main_layout.addWidget(self.passed_title)
         
         self.passed_scroll = self._create_scroll_area()
         self.passed_container = QWidget()
@@ -329,24 +319,80 @@ class CardsSection(QWidget):
         self.passed_scroll.setWidget(self.passed_container)
         passed_main_layout.addWidget(self.passed_scroll)
         
+        self.main_layout.addWidget(passed_widget)
+        
+        # Failed column (will be created when needed)
+        self.failed_scroll = None
+        self.failed_container = None
+        self.failed_layout = None
+        self.failed_title = None
+        self.failed_widget = None
+        
+    def _create_scroll_area(self) -> QScrollArea:
+        """Create configured scroll area"""
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scroll.setStyleSheet(CARDS_SECTION_SCROLL_STYLE)
+        return scroll
+        
+    def clear(self):
+        """Clear all cards"""
+        self.passed_cards = []
+        self.failed_cards = []
+        self._clear_layout(self.passed_layout)
+        
+        # Remove failed column if it exists
+        if self.layout_mode == 'split':
+            self._remove_failed_column()
+        
+        # Reset counter
+        self._update_title_counters()
+            
+    def add_card(self, card: QWidget, passed: bool):
+        """Add test card"""
+        if passed:
+            self.passed_cards.append(card)
+            self.passed_layout.addWidget(card)
+            # Update passed counter
+            self._update_title_counters()
+        else:
+            self.failed_cards.append(card)
+            if self.layout_mode == 'single' and len(self.failed_cards) == 1:
+                # First failure - add failed column
+                self._add_failed_column()
+            if self.layout_mode == 'split':
+                self.failed_layout.addWidget(card)
+                # Update failed counter
+                self._update_title_counters()
+    
+    def _update_title_counters(self):
+        """Update the test counters in titles"""
+        passed_count = len(self.passed_cards)
+        self.passed_title.setText(f"✓ Passed Tests ({passed_count})")
+        
+        if self.layout_mode == 'split' and self.failed_title:
+            failed_count = len(self.failed_cards)
+            self.failed_title.setText(f"✗ Failed Tests ({failed_count})")
+                
+    def _add_failed_column(self):
+        """Add failed column when first test fails"""
+        if self.layout_mode == 'split':
+            return
+            
+        self.layout_mode = 'split'
+        
         # Create failed column
-        failed_widget = QWidget()
-        failed_main_layout = QVBoxLayout(failed_widget)
+        self.failed_widget = QWidget()
+        failed_main_layout = QVBoxLayout(self.failed_widget)
         failed_main_layout.setContentsMargins(0, 0, 0, 0)
         failed_main_layout.setSpacing(8)
         
-        failed_title = QLabel("✗ Failed Tests")
-        failed_title.setStyleSheet(f"""
-            QLabel {{
-                background: {MATERIAL_COLORS['error_container']};
-                color: {MATERIAL_COLORS['on_error_container']};
-                padding: 8px;
-                border-radius: 6px;
-                font-weight: bold;
-                font-size: 14px;
-            }}
-        """)
-        failed_main_layout.addWidget(failed_title)
+        # Failed title with counter
+        failed_count = len(self.failed_cards)
+        self.failed_title = QLabel(f"✗ Failed Tests ({failed_count})")
+        self.failed_title.setStyleSheet(CARDS_SECTION_TITLE_FAILED_STYLE)
+        failed_main_layout.addWidget(self.failed_title)
         
         self.failed_scroll = self._create_scroll_area()
         self.failed_container = QWidget()
@@ -356,37 +402,24 @@ class CardsSection(QWidget):
         self.failed_scroll.setWidget(self.failed_container)
         failed_main_layout.addWidget(self.failed_scroll)
         
-        # Add columns to main layout
-        self.main_layout.addWidget(passed_widget)
-        self.main_layout.addWidget(failed_widget)
-        
-        # Move existing passed cards
-        for card in self.passed_cards:
-            card.setParent(None)
-            self.passed_layout.addWidget(card)
+        # Add failed column to main layout
+        self.main_layout.addWidget(self.failed_widget)
             
-    def _switch_to_single_layout(self):
-        """Switch back to single column (for reset)"""
+    def _remove_failed_column(self):
+        """Remove failed column when clearing tests"""
         if self.layout_mode == 'single':
             return
             
         self.layout_mode = 'single'
         
-        # Remove split columns
-        if self.passed_scroll and self.passed_scroll.parent():
-            self.passed_scroll.parent().deleteLater()
-            self.passed_scroll = None
-            self.passed_container = None
-            self.passed_layout = None
-            
-        if self.failed_scroll and self.failed_scroll.parent():
-            self.failed_scroll.parent().deleteLater()
+        # Remove failed column
+        if self.failed_widget:
+            self.failed_widget.deleteLater()
+            self.failed_widget = None
             self.failed_scroll = None
             self.failed_container = None
             self.failed_layout = None
-            
-        # Show single column
-        self.single_scroll.show()
+            self.failed_title = None
         
     def _clear_layout(self, layout: QVBoxLayout):
         """Clear all widgets from layout"""

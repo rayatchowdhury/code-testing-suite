@@ -21,7 +21,7 @@ from PySide6.QtCore import Signal, QTimer
 
 from src.app.presentation.widgets.sidebar import Sidebar
 from src.app.presentation.widgets.display_area import DisplayArea
-from src.app.presentation.views.base_window import SidebarWindowBase
+from src.app.presentation.window_controller.base_window import SidebarWindowBase
 
 
 class MainWindowConfig:
@@ -35,8 +35,7 @@ class MainWindowConfig:
     # Sidebar sections and buttons
     SIDEBAR_SECTIONS = {
         "Editor": ["Code Editor"],
-        "Tests": ["Compare", "Validate", "Benchmark"],
-        "History": ["Results"]
+        "Tests": ["Compare", "Validate", "Benchmark"]
     }
     
     # Window mapping for navigation
@@ -81,6 +80,8 @@ class MainWindowContent(SidebarWindowBase):
                 self.sidebar.add_button(button_name, section)
         
         # Add footer elements
+        self.sidebar.add_results_button()
+        self.sidebar.add_footer_button_divider()
         self.sidebar.add_help_button()
         self.sidebar.add_footer_divider()
         
@@ -126,11 +127,11 @@ class MainWindowContent(SidebarWindowBase):
             
         try:
             # Force reload of the module to get fresh changes
-            module_name = 'src.app.presentation.views.main_window_doc'
+            module_name = 'src.app.presentation.views.main_window.main_window_content'
             if module_name in sys.modules:
                 importlib.reload(sys.modules[module_name])
             
-            from src.app.presentation.views.main_window_doc import create_qt_main_window
+            from src.app.presentation.views.main_window.main_window_content import create_qt_main_window
             
             self.main_content_widget = create_qt_main_window()
             self.display_area.layout.addWidget(self.main_content_widget)
@@ -287,7 +288,7 @@ class MainWindow(QMainWindow):
         
     def _setup_window_manager(self) -> None:
         """Setup window manager and show main content"""
-        from src.app.shared.utils.window_manager import WindowManager
+        from src.app.presentation.window_controller.window_management import WindowManager
         
         self.window_manager = WindowManager(self)
         self.setCentralWidget(self.window_manager)

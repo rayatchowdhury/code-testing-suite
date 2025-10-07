@@ -5,8 +5,11 @@ This package contains all the GUI windows and their components.
 """
 
 # Main window exports
-from src.app.presentation.views.main_window import MainWindow, MainWindowContent
-from src.app.presentation.views.base_window import SidebarWindowBase
+from src.app.presentation.views.main_window.main_window import MainWindow, MainWindowContent
+from src.app.presentation.window_controller.base_window import SidebarWindowBase
+
+# Window management
+from src.app.presentation.window_controller.window_management import WindowFactory, WindowManager
 
 # Specific view window exports
 from src.app.presentation.views.benchmarker.benchmarker_window import BenchmarkerWindow
@@ -26,6 +29,10 @@ __all__ = [
     # Main windows
     "MainWindow", 
     "MainWindowContent",
+    
+    # Window management
+    "WindowFactory",
+    "WindowManager",
     
     # Specific windows
     "BenchmarkerWindow",

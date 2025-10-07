@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QSplitter, QHBoxLayout, QPushButton, QMessageBox
 from PySide6.QtCore import Qt, Signal
-import os
 
 from src.app.presentation.widgets.display_area_widgets.editor import EditorWidget
 from src.app.presentation.widgets.display_area_widgets.console import ConsoleOutput
@@ -17,8 +16,8 @@ class ValidatorDisplay(QWidget):
     
     def __init__(self, parent=None):
         super().__init__(parent)
+        # Workspace structure is initialized at application startup
         self.workspace_dir = WORKSPACE_DIR
-        os.makedirs(self.workspace_dir, exist_ok=True)
         
         self._setup_ui()
         self._connect_signals()

@@ -151,6 +151,43 @@ QPushButton#footer_button:pressed {{
     padding: 11px 17px 9px 19px;
 }}
 
+QPushButton#results_button {{ 
+    color: {COLORS['text_light']};
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                stop:0 rgba(0, 110, 145, 0.22),
+                stop:0.35 rgba(50, 85, 135, 0.20),
+                stop:0.65 rgba(115, 55, 120, 0.20),
+                stop:1 rgba(180, 25, 95, 0.22));
+    border: 1px solid rgba(0, 110, 145, 0.40);
+    text-align: center;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 500;
+    margin: 2px 16px 8px 16px; 
+    border-radius: 8px;
+    font-family: 'Segoe UI', system-ui;
+}}
+
+QPushButton#results_button:hover {{
+    color: white;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                stop:0 rgba(0, 120, 155, 0.32),
+                stop:0.35 rgba(60, 95, 150, 0.29),
+                stop:0.65 rgba(130, 65, 135, 0.29),
+                stop:1 rgba(200, 30, 105, 0.32));
+    border: 1px solid rgba(60, 95, 145, 0.60);
+}}
+
+QPushButton#results_button:pressed {{
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                stop:0 rgba(0, 130, 165, 0.40),
+                stop:0.35 rgba(70, 105, 165, 0.37),
+                stop:0.65 rgba(145, 75, 145, 0.37),
+                stop:1 rgba(215, 35, 115, 0.40));
+    border: 1px solid rgba(110, 70, 135, 0.70);
+    padding: 11px 17px 9px 19px;
+}}
+
 QFrame#sidebar_section {{
     background: 1b1b1e;
     border-bottom: 1px solid {COLORS['primary']}44;

@@ -2,68 +2,34 @@ import sqlite3
 import json
 import os
 import difflib
+import logging
 from datetime import datetime
 from typing import List, Dict, Optional, Tuple
-from dataclasses import dataclass, field
 from src.app.shared.constants import USER_DATA_DIR
 
-@dataclass
-class TestCaseResult:
-    """Data class for individual test case results"""
-    test_number: int
-    passed: bool
-    input_data: str
-    expected_output: str
-    actual_output: str
-    execution_time: float
-    memory_usage: int = 0
-    error_message: str = ""
-    timestamp: str = ""
-    
-@dataclass
-class FilesSnapshot:
-    """Data class for code files snapshot"""
-    generator_code: str = ""
-    correct_code: str = ""
-    test_code: str = ""
-    additional_files: Dict[str, str] = field(default_factory=dict)  # For any other files
-    
-@dataclass
-class TestResult:
-    """Data class for test results"""
-    id: Optional[int] = None
-    test_type: str = ""  # 'stress' or 'benchmark'
-    file_path: str = ""
-    test_count: int = 0
-    passed_tests: int = 0
-    failed_tests: int = 0
-    total_time: float = 0.0
-    timestamp: str = ""
-    test_details: str = ""  # JSON string of detailed results
-    project_name: str = ""
-    files_snapshot: str = ""  # JSON string of all file contents
-    mismatch_analysis: str = ""  # JSON string of detailed mismatch analysis
+# Import models from separate module (Phase 1 refactoring)
+from .models import FilesSnapshot, TestResult, Session, ProjectData
 
-@dataclass
-class Session:
-    """Data class for editor sessions"""
-    id: Optional[int] = None
-    session_name: str = ""
-    open_files: str = ""  # JSON string of file paths
-    active_file: str = ""
-    timestamp: str = ""
-    project_name: str = ""
+# Import constants (Phase 3 refactoring)
+from .constants import (
+    DEFAULT_RESULTS_LIMIT,
+    DEFAULT_SESSIONS_LIMIT,
+    DEFAULT_PROJECTS_LIMIT,
+    OLD_DATA_CLEANUP_DAYS,
+    TEST_TYPE_COMPARISON,
+    SUCCESS_RATE_PERCENTAGE_MULTIPLIER,
+)
 
-@dataclass
-class ProjectData:
-    """Data class for project information"""
-    id: Optional[int] = None
-    project_name: str = ""
-    project_path: str = ""
-    last_accessed: str = ""
-    file_count: int = 0
-    total_lines: int = 0
-    languages: str = ""  # JSON string of languages used
+# Set up logger
+logger = logging.getLogger(__name__)
+
+
+class DatabaseError(Exception):
+    """Custom exception for database operations"""
+    pass
+
+# Phase 6 (Issue #7): Removed TestCaseResult class - unused/dead code
+# Individual test case results are now stored as JSON in TestResult.test_details
 
 class DatabaseManager:
     """Manages SQLite database operations for the Code Testing Suite"""
@@ -82,10 +48,11 @@ class DatabaseManager:
         try:
             self.connection = sqlite3.connect(self.db_path)
             self.connection.row_factory = sqlite3.Row  # Enable column access by name
+            logger.debug(f"Database connection established: {self.db_path}")
             return self.connection
         except sqlite3.Error as e:
-            print(f"Database connection error: {e}")
-            return None
+            logger.error(f"Database connection error: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to connect to database: {e}") from e
     
     def close(self):
         """Close database connection"""
@@ -166,17 +133,17 @@ class DatabaseManager:
             ''')
             
             connection.commit()
+            logger.info("Database initialized successfully")
             
         except sqlite3.Error as e:
-            print(f"Database initialization error: {e}")
+            logger.error(f"Database initialization error: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to initialize database: {e}") from e
         finally:
             self.close()
     
     def save_test_result(self, result: TestResult) -> int:
         """Save a test result to the database"""
         connection = self.connect()
-        if not connection:
-            return -1
         
         try:
             cursor = connection.cursor()
@@ -194,20 +161,31 @@ class DatabaseManager:
             ))
             
             connection.commit()
-            return cursor.lastrowid
+            result_id = cursor.lastrowid
+            logger.info(f"Saved test result #{result_id} (type={result.test_type}, project={result.project_name})")
+            return result_id
+            
+        except sqlite3.IntegrityError as e:
+            logger.error(f"Integrity error saving test result: {e}", exc_info=True)
+            raise DatabaseError(f"Invalid test result data: {e}") from e
             
         except sqlite3.Error as e:
-            print(f"Error saving test result: {e}")
-            return -1
+            logger.error(f"Database error saving test result: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to save test result: {e}") from e
+            
         finally:
             self.close()
     
     def get_test_results(self, test_type: str = None, project_name: str = None, 
-                        limit: int = 100) -> List[TestResult]:
-        """Retrieve test results from the database"""
+                        days: int = None, file_name: str = None, status: str = None,
+                        limit: int = DEFAULT_RESULTS_LIMIT) -> List[TestResult]:
+        """
+        Retrieve test results from the database with efficient SQL filtering
+        
+        Phase 4 (Issue #10): Added SQL-based filtering for days, file_name, and status
+        instead of post-processing in Python for better performance
+        """
         connection = self.connect()
-        if not connection:
-            return []
         
         try:
             cursor = connection.cursor()
@@ -219,8 +197,23 @@ class DatabaseManager:
                 conditions.append("test_type = ?")
                 params.append(test_type)
             if project_name:
-                conditions.append("project_name = ?")
-                params.append(project_name)
+                conditions.append("project_name LIKE ?")
+                params.append(f"%{project_name}%")
+            if days:
+                # Phase 4 (Issue #10): SQL date filtering
+                from datetime import datetime, timedelta
+                cutoff = (datetime.now() - timedelta(days=days)).isoformat()
+                conditions.append("timestamp >= ?")
+                params.append(cutoff)
+            if file_name:
+                # Phase 4 (Issue #10): SQL file name filtering
+                conditions.append("file_path LIKE ?")
+                params.append(f"%{file_name}%")
+            if status == 'passed':
+                # Phase 4 (Issue #10): SQL status filtering
+                conditions.append("passed_tests = test_count")
+            elif status == 'failed':
+                conditions.append("failed_tests > 0")
             
             if conditions:
                 query += " WHERE " + " AND ".join(conditions)
@@ -249,19 +242,19 @@ class DatabaseManager:
                 )
                 results.append(result)
             
+            logger.info(f"Retrieved {len(results)} test results (type={test_type}, project={project_name}, days={days}, file={file_name}, status={status}, limit={limit})")
             return results
             
         except sqlite3.Error as e:
-            print(f"Error retrieving test results: {e}")
-            return []
+            logger.error(f"Error retrieving test results: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to retrieve test results: {e}") from e
+            
         finally:
             self.close()
     
     def save_session(self, session: Session) -> int:
         """Save an editor session to the database"""
         connection = self.connect()
-        if not connection:
-            return -1
         
         try:
             cursor = connection.cursor()
@@ -275,15 +268,18 @@ class DatabaseManager:
             ))
             
             connection.commit()
-            return cursor.lastrowid
+            session_id = cursor.lastrowid
+            logger.info(f"Saved session #{session_id} (name={session.session_name}, project={session.project_name})")
+            return session_id
             
         except sqlite3.Error as e:
-            print(f"Error saving session: {e}")
-            return -1
+            logger.error(f"Error saving session: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to save session: {e}") from e
+            
         finally:
             self.close()
     
-    def get_sessions(self, project_name: str = None, limit: int = 10) -> List[Session]:
+    def get_sessions(self, project_name: str = None, limit: int = DEFAULT_SESSIONS_LIMIT) -> List[Session]:
         """Retrieve editor sessions from the database"""
         connection = self.connect()
         if not connection:
@@ -319,19 +315,19 @@ class DatabaseManager:
                 )
                 sessions.append(session)
             
+            logger.info(f"Retrieved {len(sessions)} sessions (project={project_name}, limit={limit})")
             return sessions
             
         except sqlite3.Error as e:
-            print(f"Error retrieving sessions: {e}")
-            return []
+            logger.error(f"Error retrieving sessions: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to retrieve sessions: {e}") from e
+            
         finally:
             self.close()
     
     def save_project_data(self, project: ProjectData) -> int:
         """Save or update project data"""
         connection = self.connect()
-        if not connection:
-            return -1
         
         try:
             cursor = connection.cursor()
@@ -346,15 +342,18 @@ class DatabaseManager:
             ))
             
             connection.commit()
-            return cursor.lastrowid
+            project_id = cursor.lastrowid
+            logger.info(f"Saved project data #{project_id} (name={project.project_name}, path={project.project_path})")
+            return project_id
             
         except sqlite3.Error as e:
-            print(f"Error saving project data: {e}")
-            return -1
+            logger.error(f"Error saving project data: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to save project data: {e}") from e
+            
         finally:
             self.close()
     
-    def get_projects(self, limit: int = 50) -> List[ProjectData]:
+    def get_projects(self, limit: int = DEFAULT_PROJECTS_LIMIT) -> List[ProjectData]:
         """Retrieve project data from the database"""
         connection = self.connect()
         if not connection:
@@ -383,11 +382,13 @@ class DatabaseManager:
                 )
                 projects.append(project)
             
+            logger.info(f"Retrieved {len(projects)} projects (limit={limit})")
             return projects
             
         except sqlite3.Error as e:
-            print(f"Error retrieving projects: {e}")
-            return []
+            logger.error(f"Error retrieving projects: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to retrieve projects: {e}") from e
+            
         finally:
             self.close()
     
@@ -435,23 +436,23 @@ class DatabaseManager:
             cursor.execute(success_query, params)
             result = cursor.fetchone()
             if result and result['total_attempted'] > 0:
-                stats['success_rate'] = (result['total_passed'] / result['total_attempted']) * 100
+                stats['success_rate'] = (result['total_passed'] / result['total_attempted']) * SUCCESS_RATE_PERCENTAGE_MULTIPLIER
             else:
                 stats['success_rate'] = 0
             
+            logger.info(f"Retrieved test statistics (project={project_name}, total_tests={stats.get('total_tests', 0)})")
             return stats
             
         except sqlite3.Error as e:
-            print(f"Error getting test statistics: {e}")
-            return {}
+            logger.error(f"Error getting test statistics: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to retrieve test statistics: {e}") from e
+            
         finally:
             self.close()
     
-    def cleanup_old_data(self, days: int = 30):
+    def cleanup_old_data(self, days: int = OLD_DATA_CLEANUP_DAYS):
         """Clean up old data to maintain database size"""
         connection = self.connect()
-        if not connection:
-            return
         
         try:
             cursor = connection.cursor()
@@ -464,18 +465,66 @@ class DatabaseManager:
                 DELETE FROM test_results 
                 WHERE timestamp < ?
             ''', (cutoff_date,))
+            test_rows_deleted = cursor.rowcount
             
             # Clean old sessions
             cursor.execute('''
                 DELETE FROM sessions 
                 WHERE timestamp < ?
             ''', (cutoff_date,))
+            session_rows_deleted = cursor.rowcount
             
             connection.commit()
-            print(f"Cleaned up data older than {days} days")
+            
+            # VACUUM the database to reclaim space after deletions
+            if test_rows_deleted > 0 or session_rows_deleted > 0:
+                cursor.execute("VACUUM")
+            
+            logger.info(f"Cleaned up old data (days={days}, test_results={test_rows_deleted}, sessions={session_rows_deleted}, database vacuumed)")
             
         except sqlite3.Error as e:
-            print(f"Error cleaning up old data: {e}")
+            logger.error(f"Error cleaning up old data: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to cleanup old data: {e}") from e
+            
+        finally:
+            self.close()
+    
+    def delete_test_result(self, result_id: int):
+        """Delete a specific test result by ID
+        
+        Phase 4 (Issue #14): Individual test result deletion with CASCADE
+        
+        Args:
+            result_id: The ID of the test result to delete
+            
+        Returns:
+            bool: True if deletion was successful, False if result not found
+            
+        Raises:
+            DatabaseError: If deletion fails due to database error
+        """
+        connection = self.connect()
+        
+        try:
+            cursor = connection.cursor()
+            
+            # Check if result exists
+            cursor.execute('SELECT id FROM test_results WHERE id = ?', (result_id,))
+            if not cursor.fetchone():
+                logger.warning(f"Test result ID {result_id} not found")
+                return False
+            
+            # Delete the result (CASCADE will handle related records)
+            cursor.execute('DELETE FROM test_results WHERE id = ?', (result_id,))
+            
+            connection.commit()
+            logger.info(f"Deleted test result ID {result_id}")
+            return True
+            
+        except sqlite3.Error as e:
+            logger.error(f"Error deleting test result ID {result_id}: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to delete test result: {e}") from e
+            
         finally:
             self.close()
     
@@ -486,12 +535,10 @@ class DatabaseManager:
             confirm: Must be True to actually delete data (safety check)
         """
         if not confirm:
-            print("Warning: delete_all_data requires confirm=True parameter to execute")
+            logger.warning("delete_all_data called without confirm=True, operation aborted")
             return False
         
         connection = self.connect()
-        if not connection:
-            return False
         
         try:
             cursor = connection.cursor()
@@ -514,17 +561,202 @@ class DatabaseManager:
             cursor.execute("DELETE FROM sqlite_sequence WHERE name='sessions'")
             
             connection.commit()
-            print(f"Successfully deleted all data:")
-            print(f"  - {test_results_count} test results")
-            print(f"  - {sessions_count} sessions")
-            print(f"  - Reset ID counters")
+            
+            # VACUUM the database to reclaim space
+            # This shrinks the database file by removing deleted data
+            cursor.execute("VACUUM")
+            
+            logger.warning(f"Deleted all database data: {test_results_count} test results, {sessions_count} sessions, ID counters reset, database vacuumed")
             
             return True
             
         except sqlite3.Error as e:
-            print(f"Error deleting all data: {e}")
+            logger.error(f"Error deleting all data: {e}", exc_info=True)
             connection.rollback()
-            return False
+            raise DatabaseError(f"Failed to delete all data: {e}") from e
+            
+        finally:
+            self.close()
+    
+    def migrate_old_results_to_new_format(self, dry_run: bool = False):
+        """Migrate all old FilesSnapshot format results to new format.
+        
+        Iterates through all test results, detects old format (generator_code, correct_code, etc.),
+        converts to new format using FilesSnapshot.from_json() with automatic migration,
+        and updates the database.
+        
+        Args:
+            dry_run: If True, only reports what would be migrated without making changes
+            
+        Returns:
+            dict: Migration statistics
+                - total_results: Total number of results in database
+                - old_format_count: Number of results with old format
+                - migrated_count: Number successfully migrated
+                - failed_count: Number that failed migration
+                - skipped_count: Number already in new format
+                - failures: List of (result_id, error_message) tuples
+        """
+        connection = self.connect()
+        
+        try:
+            cursor = connection.cursor()
+            
+            # Get all test results
+            cursor.execute('SELECT id, files_snapshot FROM test_results WHERE files_snapshot IS NOT NULL AND files_snapshot != ""')
+            all_results = cursor.fetchall()
+            
+            total_results = len(all_results)
+            old_format_count = 0
+            migrated_count = 0
+            failed_count = 0
+            skipped_count = 0
+            failures = []
+            
+            logger.info(f"Starting FilesSnapshot migration - found {total_results} results with file data")
+            
+            for result_id, files_snapshot_json in all_results:
+                try:
+                    # Parse the snapshot
+                    snapshot_data = json.loads(files_snapshot_json)
+                    
+                    # Detect format - old format has generator_code/correct_code keys
+                    is_old_format = any(key.endswith('_code') for key in snapshot_data.keys())
+                    
+                    if not is_old_format:
+                        # Already new format
+                        skipped_count += 1
+                        logger.debug(f"Result #{result_id}: Already in new format, skipping")
+                        continue
+                    
+                    old_format_count += 1
+                    logger.info(f"Result #{result_id}: Detected old format, migrating...")
+                    
+                    if dry_run:
+                        logger.info(f"  [DRY RUN] Would migrate result #{result_id}")
+                        migrated_count += 1
+                        continue
+                    
+                    # Use FilesSnapshot.from_json() to auto-migrate
+                    snapshot = FilesSnapshot.from_json(files_snapshot_json)
+                    
+                    # Convert back to new format JSON
+                    new_json = snapshot.to_json()
+                    
+                    # Update database
+                    cursor.execute(
+                        'UPDATE test_results SET files_snapshot = ? WHERE id = ?',
+                        (new_json, result_id)
+                    )
+                    
+                    migrated_count += 1
+                    logger.info(f"  ✓ Result #{result_id}: Successfully migrated")
+                    logger.debug(f"    Old keys: {list(snapshot_data.keys())}")
+                    logger.debug(f"    New files: {list(snapshot.files.keys())}")
+                    
+                except json.JSONDecodeError as e:
+                    failed_count += 1
+                    error_msg = f"Invalid JSON: {str(e)}"
+                    failures.append((result_id, error_msg))
+                    logger.error(f"  ✗ Result #{result_id}: {error_msg}")
+                    
+                except Exception as e:
+                    failed_count += 1
+                    error_msg = str(e)
+                    failures.append((result_id, error_msg))
+                    logger.error(f"  ✗ Result #{result_id}: Migration failed - {error_msg}")
+            
+            if not dry_run and (migrated_count > 0 or failed_count > 0):
+                connection.commit()
+                logger.info(f"Migration committed: {migrated_count} migrated, {failed_count} failed")
+            
+            stats = {
+                'total_results': total_results,
+                'old_format_count': old_format_count,
+                'migrated_count': migrated_count,
+                'failed_count': failed_count,
+                'skipped_count': skipped_count,
+                'failures': failures
+            }
+            
+            # Log summary
+            if dry_run:
+                logger.info(f"\n{'='*60}")
+                logger.info(f"MIGRATION DRY RUN SUMMARY")
+                logger.info(f"{'='*60}")
+            else:
+                logger.info(f"\n{'='*60}")
+                logger.info(f"MIGRATION COMPLETE")
+                logger.info(f"{'='*60}")
+            
+            logger.info(f"Total results checked: {total_results}")
+            logger.info(f"Old format detected: {old_format_count}")
+            logger.info(f"Successfully migrated: {migrated_count}")
+            logger.info(f"Already new format: {skipped_count}")
+            logger.info(f"Failed: {failed_count}")
+            
+            if failures:
+                logger.warning(f"\nFailed migrations:")
+                for result_id, error in failures:
+                    logger.warning(f"  - Result #{result_id}: {error}")
+            
+            logger.info(f"{'='*60}\n")
+            
+            return stats
+            
+        except sqlite3.Error as e:
+            logger.error(f"Database error during migration: {e}", exc_info=True)
+            connection.rollback()
+            raise DatabaseError(f"Migration failed: {e}") from e
+            
+        finally:
+            self.close()
+    
+    def optimize_database(self):
+        """Optimize database by reclaiming unused space (VACUUM)
+        
+        This should be called after deleting large amounts of data.
+        VACUUM rebuilds the database file, reclaiming space from deleted records.
+        
+        Returns:
+            dict: Statistics before and after optimization (size reduction info)
+        """
+        connection = self.connect()
+        
+        try:
+            # Get size before
+            size_before = 0
+            if os.path.exists(self.db_path):
+                size_before = os.path.getsize(self.db_path)
+            
+            cursor = connection.cursor()
+            
+            # VACUUM to reclaim space
+            cursor.execute("VACUUM")
+            
+            # Get size after
+            size_after = 0
+            if os.path.exists(self.db_path):
+                size_after = os.path.getsize(self.db_path)
+            
+            space_saved = size_before - size_after
+            space_saved_mb = space_saved / (1024 * 1024)
+            
+            logger.info(f"Database optimized: {size_before/1024/1024:.2f} MB → {size_after/1024/1024:.2f} MB (saved {space_saved_mb:.2f} MB)")
+            
+            return {
+                'size_before_bytes': size_before,
+                'size_after_bytes': size_after,
+                'space_saved_bytes': space_saved,
+                'size_before_mb': round(size_before / (1024 * 1024), 2),
+                'size_after_mb': round(size_after / (1024 * 1024), 2),
+                'space_saved_mb': round(space_saved_mb, 2)
+            }
+            
+        except sqlite3.Error as e:
+            logger.error(f"Error optimizing database: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to optimize database: {e}") from e
+            
         finally:
             self.close()
     
@@ -572,11 +804,13 @@ class DatabaseManager:
                 'database_size_mb': round(db_size_mb, 2) if db_size > 0 else 0
             }
             
+            logger.info(f"Database stats: {test_results_count} test results, {sessions_count} sessions, {stats['database_size_mb']} MB")
             return stats
             
         except sqlite3.Error as e:
-            print(f"Error getting database stats: {e}")
-            return None
+            logger.error(f"Error getting database stats: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to retrieve database stats: {e}") from e
+            
         finally:
             self.close()
     
@@ -636,87 +870,118 @@ class DatabaseManager:
         }
     
     @staticmethod
-    def create_files_snapshot(workspace_dir: str) -> FilesSnapshot:
+    def create_files_snapshot(workspace_dir: str, test_type: str = TEST_TYPE_COMPARISON) -> FilesSnapshot:
         """
-        Create a snapshot of all relevant files in the workspace.
+        Create a snapshot of relevant files for the specified test type.
         
-        Supports both flat and nested directory structures:
-        - Flat: workspace_dir/*.cpp, *.py, *.java
-        - Nested: workspace_dir/comparator/*.cpp, workspace_dir/validator/*.py, etc.
+        NEW BEHAVIOR: Only saves files needed for the test type with full filenames and extensions.
+        - Comparison/Comparator: generator, correct, test (3 files)
+        - Validation/Validator: generator, validator, test (3 files)  
+        - Benchmark/Benchmarker: generator, test (2 files)
+        
+        Args:
+            workspace_dir: Root workspace directory (~/.code_testing_suite/workspace)
+            test_type: Test type ('comparison', 'validation', 'benchmark', or 'comparator', 'validator', 'benchmarker')
+        
+        Returns:
+            FilesSnapshot: Snapshot with only relevant files, full filenames, and per-file metadata
         """
-        from src.app.shared.utils.workspace_utils import is_flat_workspace_structure, list_workspace_files
-        
-        snapshot = FilesSnapshot()
-        
-        # Common file mappings (filename -> snapshot attribute)
-        file_mappings = {
-            'generator.h': 'generator_code',
-            'generator.cpp': 'generator_code',
-            'Generator.java': 'generator_code',
-            'generator.py': 'generator_code',
-            'a.cpp': 'correct_code',
-            'correct.cpp': 'correct_code',
-            'Correct.java': 'correct_code',
-            'correct.py': 'correct_code',
-            'b.cpp': 'test_code',
-            'test.cpp': 'test_code',
-            'Test.java': 'test_code',
-            'test.py': 'test_code',
-            'tmp.cpp': 'test_code',
-            'validator.cpp': 'validator_code',
-            'Validator.java': 'validator_code',
-            'validator.py': 'validator_code'
+        # Normalize test type names
+        test_type_map = {
+            'comparison': 'comparator',
+            'comparator': 'comparator',
+            'validation': 'validator',
+            'validator': 'validator',
+            'benchmark': 'benchmarker',
+            'benchmarker': 'benchmarker',
+            'stress': 'comparator'  # Legacy support
         }
         
-        try:
-            # Check if workspace uses flat or nested structure
-            if is_flat_workspace_structure(workspace_dir):
-                # Legacy flat structure - read files from workspace root
-                for filename in os.listdir(workspace_dir):
-                    filepath = os.path.join(workspace_dir, filename)
-                    if os.path.isfile(filepath) and filename.endswith(('.cpp', '.h', '.py', '.java')):
-                        try:
-                            with open(filepath, 'r', encoding='utf-8') as f:
-                                content = f.read()
-                            
-                            # Map to known file types
-                            if filename in file_mappings:
-                                setattr(snapshot, file_mappings[filename], content)
-                            else:
-                                # Add to additional files with just filename
-                                snapshot.additional_files[filename] = content
-                        except Exception as e:
-                            print(f"Error reading file {filename}: {e}")
-            else:
-                # Nested structure - traverse test type directories
-                for test_type in ['comparator', 'validator', 'benchmarker']:
-                    test_type_dir = os.path.join(workspace_dir, test_type)
-                    if not os.path.exists(test_type_dir):
-                        continue
-                    
-                    for filename in os.listdir(test_type_dir):
-                        filepath = os.path.join(test_type_dir, filename)
-                        
-                        # Skip inputs/outputs subdirectories
-                        if os.path.isdir(filepath):
-                            continue
-                        
-                        # Only read source code files
-                        if filename.endswith(('.cpp', '.h', '.py', '.java')):
-                            try:
-                                with open(filepath, 'r', encoding='utf-8') as f:
-                                    content = f.read()
-                                
-                                # Map to known file types
-                                if filename in file_mappings:
-                                    setattr(snapshot, file_mappings[filename], content)
-                                else:
-                                    # Add to additional files with relative path (test_type/filename)
-                                    relative_path = f"{test_type}/{filename}"
-                                    snapshot.additional_files[relative_path] = content
-                            except Exception as e:
-                                print(f"Error reading file {test_type}/{filename}: {e}")
-        except Exception as e:
-            print(f"Error creating files snapshot: {e}")
+        test_subdir = test_type_map.get(test_type.lower(), 'comparator')
+        normalized_test_type = {
+            'comparator': 'comparison',
+            'validator': 'validation',
+            'benchmarker': 'benchmark'
+        }[test_subdir]
         
-        return snapshot
+        snapshot = FilesSnapshot(test_type=normalized_test_type)
+        
+        # Define required files per test type
+        required_roles = {
+            'comparator': ['generator', 'correct', 'test'],
+            'validator': ['generator', 'validator', 'test'],
+            'benchmarker': ['generator', 'test']
+        }
+        
+        required = required_roles.get(test_subdir, ['generator', 'test'])
+        test_type_dir = os.path.join(workspace_dir, test_subdir)
+        
+        try:
+            if not os.path.exists(test_type_dir):
+                logger.warning(f"Test type directory not found: {test_type_dir}")
+                return snapshot
+            
+            # Track languages to determine primary
+            language_counts = {'cpp': 0, 'py': 0, 'java': 0}
+            
+            # Track which roles have been filled (only one file per role)
+            roles_found = set()
+            
+            # Read all source files in test type directory
+            for filename in os.listdir(test_type_dir):
+                filepath = os.path.join(test_type_dir, filename)
+                
+                # Skip directories (inputs/outputs)
+                if os.path.isdir(filepath):
+                    continue
+                
+                # Only process source code files
+                if not filename.endswith(('.cpp', '.h', '.py', '.java')):
+                    continue
+                
+                try:
+                    with open(filepath, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    
+                    # Detect language from extension
+                    if filename.endswith('.py'):
+                        language = 'py'
+                    elif filename.endswith('.java'):
+                        language = 'java'
+                    else:
+                        language = 'cpp'
+                    
+                    # Determine file role
+                    base_name = filename.split('.')[0].lower()
+                    role = None
+                    
+                    # Check if this is a required file (only if role not already found)
+                    for req_role in required:
+                        if req_role in base_name and req_role not in roles_found:
+                            role = req_role
+                            roles_found.add(req_role)
+                            break
+                    
+                    # Only add files that match required roles
+                    if role is not None:
+                        snapshot.files[filename] = {
+                            'content': content,
+                            'language': language,
+                            'role': role
+                        }
+                        language_counts[language] += 1
+                
+                except Exception as e:
+                    logger.warning(f"Error reading file {filename}: {e}")
+            
+            # Determine primary language (most common)
+            if language_counts:
+                snapshot.primary_language = max(language_counts, key=language_counts.get)
+            
+            logger.info(f"Created snapshot for {test_type} ({test_subdir}): {len(snapshot.files)} files, primary language: {snapshot.primary_language}")
+            
+            return snapshot
+            
+        except Exception as e:
+            logger.error(f"Error creating files snapshot: {e}", exc_info=True)
+            return snapshot

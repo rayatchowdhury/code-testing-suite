@@ -1,9 +1,5 @@
 """
-Shared    FileOper    'FileOperations',
-    'WindowFactory', 
-    'WindowManager',ns,
-    WindowFactory,
-    WindowManager,ule for the Code Testing Suite.
+Shared module for the Code Testing Suite.
 
 This module contains shared utilities, constants, and common functionality.
 """
@@ -12,17 +8,11 @@ This module contains shared utilities, constants, and common functionality.
 from .constants import *
 
 # Import all utils  
-from .utils import (
-    FileOperations,
-    WindowFactory,
-    WindowManager
-)
+from .utils import FileOperations
 
 # Re-export everything for convenient access
 from .constants import __all__ as constants_all
 
 __all__ = constants_all + [
-    'FileOperations',
-    'WindowFactory', 
-    'WindowManager'
+    'FileOperations'
 ]

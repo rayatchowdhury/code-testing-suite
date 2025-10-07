@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, 
                               QTableWidgetItem, QHeaderView, QPushButton, QLabel,
                               QComboBox, QDateEdit, QSpinBox, QTextEdit, QSplitter,
-                              QTabWidget, QGroupBox, QProgressBar, QTabBar)
+                              QTabWidget, QGroupBox, QProgressBar, QTabBar, QLineEdit, QMessageBox)
 from PySide6.QtCore import Qt, QDate, Signal
 from PySide6.QtGui import QFont
 import json
@@ -17,7 +17,6 @@ from src.app.presentation.styles.components.results import (
     RESULTS_LABEL_TITLE_STYLE, RESULTS_LABEL_FILTER_STYLE, RESULTS_LABEL_STAT_STYLE,
     RESULTS_LABEL_DETAILS_STYLE
 )
-from src.app.presentation.views.results.detailed_results_widget import DetailedResultsWidget
 
 class TestResultsWidget(QWidget):
     """Widget to display test results from database"""
@@ -61,15 +60,19 @@ class TestResultsWidget(QWidget):
         # Filters section with Material Design styling
         filters_panel = QWidget()
         filters_panel.setStyleSheet(RESULTS_FILTERS_PANEL_STYLE)
-        filters_layout = QHBoxLayout(filters_panel)
-        filters_layout.setContentsMargins(16, 12, 16, 12)
-        filters_layout.setSpacing(16)
+        filters_main_layout = QVBoxLayout(filters_panel)
+        filters_main_layout.setContentsMargins(16, 12, 16, 12)
+        filters_main_layout.setSpacing(12)
+        
+        # First row: Type and Date filters
+        filters_row1 = QHBoxLayout()
+        filters_row1.setSpacing(16)
 
         # Test type filter
         type_label = QLabel("Test Type:")
         type_label.setStyleSheet(RESULTS_LABEL_FILTER_STYLE)
         self.test_type_combo = QComboBox()
-        self.test_type_combo.addItems(["All", "Comparison Tests", "Benchmark Tests"])
+        self.test_type_combo.addItems(["All", "Comparison Tests", "Benchmark Tests", "Validator Tests"])
         self.test_type_combo.currentTextChanged.connect(self._filter_results)
         self.test_type_combo.setStyleSheet(RESULTS_COMBO_STYLE)
 
@@ -86,12 +89,63 @@ class TestResultsWidget(QWidget):
         refresh_btn.setStyleSheet(RESULTS_BUTTON_STYLE)
         refresh_btn.clicked.connect(self._load_results)
 
-        filters_layout.addWidget(type_label)
-        filters_layout.addWidget(self.test_type_combo)
-        filters_layout.addWidget(date_label)
-        filters_layout.addWidget(self.date_filter)
-        filters_layout.addWidget(refresh_btn)
-        filters_layout.addStretch()
+        filters_row1.addWidget(type_label)
+        filters_row1.addWidget(self.test_type_combo)
+        filters_row1.addWidget(date_label)
+        filters_row1.addWidget(self.date_filter)
+        filters_row1.addWidget(refresh_btn)
+        filters_row1.addStretch()
+        
+        # Second row: Search filters (Phase 4 Issue #12)
+        filters_row2 = QHBoxLayout()
+        filters_row2.setSpacing(16)
+        
+        # Project name search
+        project_label = QLabel("Project:")
+        project_label.setStyleSheet(RESULTS_LABEL_FILTER_STYLE)
+        self.project_search = QLineEdit()
+        self.project_search.setPlaceholderText("Search by project name...")
+        self.project_search.setStyleSheet(RESULTS_COMBO_STYLE)
+        self.project_search.returnPressed.connect(self._perform_search)
+        
+        # File name search
+        file_label = QLabel("File:")
+        file_label.setStyleSheet(RESULTS_LABEL_FILTER_STYLE)
+        self.file_search = QLineEdit()
+        self.file_search.setPlaceholderText("Search by file name...")
+        self.file_search.setStyleSheet(RESULTS_COMBO_STYLE)
+        self.file_search.returnPressed.connect(self._perform_search)
+        
+        # Status filter
+        status_label = QLabel("Status:")
+        status_label.setStyleSheet(RESULTS_LABEL_FILTER_STYLE)
+        self.status_combo = QComboBox()
+        self.status_combo.addItems(["All", "Passed Only", "Failed Only"])
+        self.status_combo.currentTextChanged.connect(self._perform_search)
+        self.status_combo.setStyleSheet(RESULTS_COMBO_STYLE)
+        
+        # Search button
+        search_btn = QPushButton("Search")
+        search_btn.setStyleSheet(RESULTS_BUTTON_STYLE)
+        search_btn.clicked.connect(self._perform_search)
+        
+        # Clear search button
+        clear_btn = QPushButton("Clear")
+        clear_btn.setStyleSheet(RESULTS_BUTTON_STYLE)
+        clear_btn.clicked.connect(self._clear_search)
+        
+        filters_row2.addWidget(project_label)
+        filters_row2.addWidget(self.project_search)
+        filters_row2.addWidget(file_label)
+        filters_row2.addWidget(self.file_search)
+        filters_row2.addWidget(status_label)
+        filters_row2.addWidget(self.status_combo)
+        filters_row2.addWidget(search_btn)
+        filters_row2.addWidget(clear_btn)
+        filters_row2.addStretch()
+        
+        filters_main_layout.addLayout(filters_row1)
+        filters_main_layout.addLayout(filters_row2)
 
         panel_layout.addWidget(filters_panel)
 
@@ -128,9 +182,9 @@ class TestResultsWidget(QWidget):
         
         # Results table
         self.results_table = QTableWidget()
-        self.results_table.setColumnCount(9)
+        self.results_table.setColumnCount(10)  # Phase 4: Added Delete column
         self.results_table.setHorizontalHeaderLabels([
-            "Date", "Type", "File", "Tests", "Passed", "Failed", "Time (s)", "Success Rate", "View Details"
+            "Date", "Type", "File", "Tests", "Passed", "Failed", "Time (s)", "Success Rate", "View Details", "Delete"
         ])
         
         # Configure table
@@ -192,15 +246,8 @@ class TestResultsWidget(QWidget):
             label.setStyleSheet(RESULTS_LABEL_STAT_STYLE)
             overall_layout.addWidget(label)
         
-        # Success rate progress bar
-        progress_label = QLabel("Success Rate:")
-        progress_label.setStyleSheet(f"color: {MATERIAL_COLORS['on_surface']}; font-weight: 500; margin-top: 8px;")
-        overall_layout.addWidget(progress_label)
-        
-        self.success_progress = QProgressBar()
-        self.success_progress.setRange(0, 100)
-        self.success_progress.setStyleSheet(RESULTS_PROGRESS_BAR_STYLE)
-        overall_layout.addWidget(self.success_progress)
+        # Phase 3 (Issue #36): Removed success rate progress bar
+        # The text label already shows success rate percentage
         
         stats_layout.addWidget(overall_card)
         
@@ -216,11 +263,12 @@ class TestResultsWidget(QWidget):
         breakdown_title.setStyleSheet(RESULTS_LABEL_TITLE_STYLE)
         breakdown_layout.addWidget(breakdown_title)
         
-        self.compare_tests_label = QLabel("Compare Tests: 0")
+        self.compare_tests_label = QLabel("Comparison Tests: 0")
         self.benchmark_tests_label = QLabel("Benchmark Tests: 0")
+        self.validator_tests_label = QLabel("Validator Tests: 0")
         
         # Style breakdown labels
-        for label in [self.compare_tests_label, self.benchmark_tests_label]:
+        for label in [self.compare_tests_label, self.benchmark_tests_label, self.validator_tests_label]:
             label.setStyleSheet(RESULTS_LABEL_STAT_STYLE)
             breakdown_layout.addWidget(label)
         
@@ -229,42 +277,27 @@ class TestResultsWidget(QWidget):
         
         layout.addLayout(stats_layout)
         
-        # Recent activity card
-        recent_card = QWidget()
-        recent_card.setStyleSheet(RESULTS_CARD_STYLE)
-        recent_layout = QVBoxLayout(recent_card)
-        recent_layout.setContentsMargins(16, 16, 16, 16)
-        recent_layout.setSpacing(12)
-        
-        # Card title
-        recent_title = QLabel("Recent Activity")
-        recent_title.setStyleSheet(RESULTS_LABEL_TITLE_STYLE)
-        recent_layout.addWidget(recent_title)
-        
-        self.recent_table = QTableWidget()
-        self.recent_table.setColumnCount(4)
-        self.recent_table.setHorizontalHeaderLabels(["Date", "Type", "File", "Result"])
-        self.recent_table.setMaximumHeight(200)
-        self.recent_table.setStyleSheet(RESULTS_TABLE_SMALL_STYLE)
-        
-        recent_layout.addWidget(self.recent_table)
-        layout.addWidget(recent_card)
+        # Phase 3 (Issue #35): Removed Recent Activity card
+        # This was redundant with the main Results table tab
         
         return widget
     
     def _load_results(self):
-        """Load test results from database"""
+        """Load test results from database
+        
+        Phase 4 (Issue #10): Optimized to use SQL-based date filtering
+        instead of Python post-processing for better performance.
+        """
         # Get filter values
         test_type = self._get_test_type_filter()
         days_filter = self._get_days_filter()
         
-        # Load results
-        results = self.db_manager.get_test_results(test_type=test_type, limit=100)
-        
-        # Apply date filter
-        if days_filter:
-            cutoff_date = datetime.now() - timedelta(days=days_filter)
-            results = [r for r in results if datetime.fromisoformat(r.timestamp) >= cutoff_date]
+        # Load results with SQL-based filtering
+        results = self.db_manager.get_test_results(
+            test_type=test_type, 
+            days=days_filter,  # Phase 4: Pass days to SQL query
+            limit=100
+        )
         
         self._populate_results_table(results)
         self._update_statistics(results)
@@ -273,10 +306,11 @@ class TestResultsWidget(QWidget):
         """Get the test type filter value"""
         type_text = self.test_type_combo.currentText()
         if type_text == "Comparison Tests":
-            return "stress"  # Still use "stress" for backward compatibility with existing data
+            return "comparison"  # Phase 1: Using new standardized naming
         elif type_text == "Benchmark Tests":
-            return "tle"     # Still use "tle" for backward compatibility with existing data
-            return "tle"
+            return "benchmark"  # Phase 1: Using new standardized naming
+        elif type_text == "Validator Tests":
+            return "validator"  # Phase 3 (Issue #18): Added validator support
         return None
     
     def _get_days_filter(self):
@@ -290,6 +324,55 @@ class TestResultsWidget(QWidget):
             return 90
         return None
     
+    def _get_status_filter(self):
+        """Get the status filter value
+        
+        Phase 4 (Issue #12): Added status filtering support
+        Returns: 'passed', 'failed', or None for all results
+        """
+        status_text = self.status_combo.currentText()
+        if status_text == "Passed Only":
+            return "passed"
+        elif status_text == "Failed Only":
+            return "failed"
+        return None
+    
+    def _perform_search(self):
+        """Perform comprehensive search with all filters
+        
+        Phase 4 (Issue #12): Comprehensive search functionality
+        combining test type, date range, project name, file name, and status filters.
+        """
+        # Get all filter values
+        test_type = self._get_test_type_filter()
+        days_filter = self._get_days_filter()
+        project_name = self.project_search.text().strip() or None
+        file_name = self.file_search.text().strip() or None
+        status = self._get_status_filter()
+        
+        # Load results with all filters
+        results = self.db_manager.get_test_results(
+            test_type=test_type,
+            project_name=project_name,
+            days=days_filter,
+            file_name=file_name,
+            status=status,
+            limit=100
+        )
+        
+        self._populate_results_table(results)
+        self._update_statistics(results)
+    
+    def _clear_search(self):
+        """Clear all search filters and reload
+        
+        Phase 4 (Issue #12): Clear search functionality
+        """
+        self.project_search.clear()
+        self.file_search.clear()
+        self.status_combo.setCurrentIndex(0)  # Reset to "All"
+        self._load_results()
+    
     def _populate_results_table(self, results: list):
         """Populate the results table with data"""
         self.results_table.setRowCount(len(results))
@@ -297,7 +380,9 @@ class TestResultsWidget(QWidget):
         for row, result in enumerate(results):
             # Format date
             date_str = datetime.fromisoformat(result.timestamp).strftime("%Y-%m-%d %H:%M")
-            self.results_table.setItem(row, 0, QTableWidgetItem(date_str))
+            date_item = QTableWidgetItem(date_str)
+            date_item.setData(1, result.id)  # Phase 4: Store result ID for export/delete
+            self.results_table.setItem(row, 0, date_item)
             
             # Test type
             type_display = ("Comparison Test" if result.test_type in ["stress", "comparison"] else
@@ -331,55 +416,86 @@ class TestResultsWidget(QWidget):
             detail_btn.setStyleSheet(RESULTS_BUTTON_STYLE)
             detail_btn.clicked.connect(lambda checked, r=result: self._show_detailed_view(r))
             self.results_table.setCellWidget(row, 8, detail_btn)
+            
+            # Delete button (Phase 4 Issue #14)
+            delete_btn = QPushButton("Delete")
+            delete_btn.setStyleSheet(RESULTS_BUTTON_STYLE)
+            delete_btn.clicked.connect(lambda checked, r_id=result.id: self._delete_selected_result(r_id))
+            self.results_table.setCellWidget(row, 9, delete_btn)
         
         # Store results for detail view
         self.current_results = results
     
     def _show_detailed_view(self, test_result):
-        """Show detailed view for a specific test result"""
+        """Show detailed view for a specific test result
+        
+        Phase 5 (Issue #34): Integrates into parent window's display area
+        following the same pattern as status views in comparator/validator/benchmarker
+        """
         try:
-            # Create the detailed view widget
-            self.detailed_widget = DetailedResultsWidget(test_result)
+            # Get parent window using stored reference (not self.parent() which returns splitter)
+            parent_window = getattr(self, 'results_window', None)
             
-            # Create a new tab for the detailed view
-            detail_tab_index = self.tab_widget.addTab(self.detailed_widget, f"Details - {test_result.test_type.upper()}")
-            self.tab_widget.setCurrentIndex(detail_tab_index)
+            if parent_window is None:
+                raise AttributeError("Results window reference not set - widget not properly initialized")
             
-            # Add a close button to the tab
-            close_btn = QPushButton("×")
-            close_btn.setStyleSheet("""
-                QPushButton {
-                    background: transparent;
-                    border: none;
-                    font-size: 16px;
-                    font-weight: bold;
-                    color: #999;
-                    padding: 2px 6px;
-                    margin: 0px;
-                }
-                QPushButton:hover {
-                    background-color: rgba(255, 255, 255, 0.1);
-                    border-radius: 3px;
-                }
-            """)
-            close_btn.clicked.connect(lambda: self._close_detailed_view(detail_tab_index))
+            if not hasattr(parent_window, 'show_detailed_view'):
+                parent_type = type(parent_window).__name__
+                raise AttributeError(f"Parent window (type: {parent_type}) does not have show_detailed_view method")
             
-            # Add close button to tab bar
-            self.tab_widget.tabBar().setTabButton(detail_tab_index, QTabBar.ButtonPosition.RightSide, close_btn)
+            parent_window.show_detailed_view(test_result)
             
         except Exception as e:
             # Show error dialog instead of crashing
-            from PySide6.QtWidgets import QMessageBox
             error_msg = QMessageBox(self)
-            error_msg.setIcon(QMessageBox.Critical)
+            error_msg.setIcon(QMessageBox.Icon.Critical)
             error_msg.setWindowTitle("Error Loading Details")
             error_msg.setText("Failed to load detailed test results")
             error_msg.setDetailedText(f"Error: {str(e)}\n\nTest Result ID: {getattr(test_result, 'id', 'Unknown')}")
             error_msg.exec()
     
-    def _close_detailed_view(self, tab_index):
-        """Close the detailed view tab"""
-        self.tab_widget.removeTab(tab_index)
+    def _delete_selected_result(self, result_id: int):
+        """Delete a selected test result with confirmation
+        
+        Phase 4 (Issue #14): Delete functionality for individual test results
+        
+        Args:
+            result_id: The ID of the test result to delete
+        """
+        # Confirmation dialog
+        reply = QMessageBox.question(
+            self,
+            "Confirm Deletion",
+            "Are you sure you want to delete this test result?\n\nThis action cannot be undone.",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No  # Default to No for safety
+        )
+        
+        if reply == QMessageBox.Yes:
+            try:
+                # Attempt deletion
+                success = self.db_manager.delete_test_result(result_id)
+                
+                if success:
+                    # Refresh the results table
+                    self._load_results()
+                    QMessageBox.information(
+                        self,
+                        "Success",
+                        "Test result deleted successfully."
+                    )
+                else:
+                    QMessageBox.warning(
+                        self,
+                        "Not Found",
+                        "Test result not found. It may have already been deleted."
+                    )
+            except Exception as e:
+                QMessageBox.critical(
+                    self,
+                    "Error",
+                    f"Failed to delete test result:\n{str(e)}"
+                )
     
     def _update_statistics(self, results: list):
         """Update the statistics view"""
@@ -387,9 +503,10 @@ class TestResultsWidget(QWidget):
             self.total_tests_label.setText("Total Tests: 0")
             self.success_rate_label.setText("Success Rate: 0%")
             self.avg_time_label.setText("Average Time: 0s")
-            self.success_progress.setValue(0)
-            self.compare_tests_label.setText("Compare Tests: 0")
+            # Phase 3 (Issue #36): Removed success_progress.setValue(0)
+            self.compare_tests_label.setText("Comparison Tests: 0")
             self.benchmark_tests_label.setText("Benchmark Tests: 0")
+            self.validator_tests_label.setText("Validator Tests: 0")
             return
         
         # Calculate statistics
@@ -400,42 +517,24 @@ class TestResultsWidget(QWidget):
         
         success_rate = (total_passed / total_attempted * 100) if total_attempted > 0 else 0
         
-        compare_count = sum(1 for r in results if r.test_type == "compare")
+        comparison_count = sum(1 for r in results if r.test_type == "comparison")
         benchmark_count = sum(1 for r in results if r.test_type == "benchmark")
+        validator_count = sum(1 for r in results if r.test_type == "validator")
         
         # Update labels
         self.total_tests_label.setText(f"Total Tests: {total_tests}")
         self.success_rate_label.setText(f"Success Rate: {success_rate:.1f}%")
         self.avg_time_label.setText(f"Average Time: {avg_time:.2f}s")
-        self.success_progress.setValue(int(success_rate))
-        self.compare_tests_label.setText(f"Compare Tests: {compare_count}")
+        # Phase 3 (Issue #36): Removed success_progress.setValue(int(success_rate))
+        self.compare_tests_label.setText(f"Comparison Tests: {comparison_count}")
         self.benchmark_tests_label.setText(f"Benchmark Tests: {benchmark_count}")
+        self.validator_tests_label.setText(f"Validator Tests: {validator_count}")
         
-        # Update recent activity table
-        self._update_recent_activity(results[:10])  # Show last 10
+        # Phase 3 (Issue #35): Removed _update_recent_activity call
+        # Recent Activity card was removed as redundant
     
-    def _update_recent_activity(self, recent_results: list):
-        """Update the recent activity table"""
-        self.recent_table.setRowCount(len(recent_results))
-        
-        for row, result in enumerate(recent_results):
-            date_str = datetime.fromisoformat(result.timestamp).strftime("%m-%d %H:%M")
-            self.recent_table.setItem(row, 0, QTableWidgetItem(date_str))
-            
-            type_display = ("Comparison" if result.test_type in ["stress", "comparison"] else
-                           "Benchmark" if result.test_type in ["tle", "benchmark"] else
-                           "Validator")
-            self.recent_table.setItem(row, 1, QTableWidgetItem(type_display))
-            
-            file_name = result.file_path.split('/')[-1] if result.file_path else "Unknown"
-            self.recent_table.setItem(row, 2, QTableWidgetItem(file_name))
-            
-            if result.test_count > 0:
-                success_rate = (result.passed_tests / result.test_count) * 100
-                result_text = f"{result.passed_tests}/{result.test_count} ({success_rate:.0f}%)"
-            else:
-                result_text = "No tests"
-            self.recent_table.setItem(row, 3, QTableWidgetItem(result_text))
+    # Phase 3 (Issue #35): Removed _update_recent_activity() method
+    # Recent Activity table was removed as redundant with main Results table
     
     def _filter_results(self):
         """Handle filter changes"""

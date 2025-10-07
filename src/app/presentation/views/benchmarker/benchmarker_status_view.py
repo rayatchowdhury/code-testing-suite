@@ -42,7 +42,8 @@ class BenchmarkerStatusView(BaseStatusView):
         self.test_data = {}  # {test_number: {test_name, time, memory, time_passed, memory_passed, input, output}}
         
     def on_test_completed(self, test_name: str, test_number: int, passed: bool,
-                         execution_time: float, memory_used: float, memory_passed: bool):
+                         execution_time: float, memory_used: float, memory_passed: bool,
+                         input_data: str = "", output_data: str = "", test_size: int = 0):
         """
         Handle benchmarker test completion.
         
@@ -53,6 +54,9 @@ class BenchmarkerStatusView(BaseStatusView):
             execution_time: Execution time in seconds
             memory_used: Memory usage in MB
             memory_passed: Whether memory limit was met
+            input_data: Input data for the test
+            output_data: Output data from the test
+            test_size: Size of test input (number of lines)
         """
         # Update counters and progress (base class)
         # Convert time to milliseconds for display
@@ -73,7 +77,10 @@ class BenchmarkerStatusView(BaseStatusView):
             'time_passed': passed,  # In benchmarker, passed means time limit met
             'memory_passed': memory_passed,
             'time_limit_ms': self.time_limit_ms,
-            'memory_limit_mb': self.memory_limit_mb
+            'memory_limit_mb': self.memory_limit_mb,
+            'input_data': input_data,
+            'output_data': output_data,
+            'test_size': test_size
         }
         
         # Create benchmarker-specific card
@@ -100,14 +107,15 @@ class BenchmarkerStatusView(BaseStatusView):
         
         data = self.test_data[test_number]
         
-        # Create and show detail dialog
-        # Map benchmarker data to dialog parameters
+        # Create and show detail dialog with input/output sections
         dialog = BenchmarkerDetailDialog(
             test_number=test_number,
             passed=data['passed'],
-            time=data.get('time_ms', 0) / 1000.0,  # Convert ms to seconds
+            time=data.get('execution_time', 0),
             memory=data.get('memory_used', 0),
-            test_size=data.get('test_size', 0),  # May need to add this to test_data
+            test_size=data.get('test_size', 0),
+            input_data=data.get('input_data', ''),
+            output_data=data.get('output_data', ''),
             parent=self
         )
         
