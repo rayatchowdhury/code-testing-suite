@@ -10,7 +10,7 @@ Tests the new structure that stores files with full metadata including:
 
 import pytest
 import json
-from src.app.persistence.database.database_manager import FilesSnapshot
+from src.app.persistence.database import FilesSnapshot
 
 
 class TestNewFilesSnapshotStructure:

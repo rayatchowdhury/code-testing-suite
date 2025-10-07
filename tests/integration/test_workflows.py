@@ -9,7 +9,7 @@ from unittest.mock import patch, MagicMock, mock_open
 from PySide6.QtTest import QTest
 
 from src.app.core.config.core.config_handler import ConfigManager
-from src.app.persistence.database.database_manager import DatabaseManager, TestResult
+from src.app.persistence.database import DatabaseManager, TestResult
 from src.app.shared.utils.file_operations import FileOperations
 
 
@@ -214,7 +214,7 @@ class TestDatabaseWorkflow:
         """Test complete session management workflow."""
         db_manager = DatabaseManager(mock_database)
         
-        from src.app.persistence.database.database_manager import Session
+        from src.app.persistence.database import Session
         
         # Step 1: Create session
         session = Session(

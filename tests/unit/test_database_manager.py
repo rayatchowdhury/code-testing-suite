@@ -7,7 +7,7 @@ import pytest
 from datetime import datetime
 from unittest.mock import patch, MagicMock
 
-from src.app.persistence.database.database_manager import (
+from src.app.persistence.database import (
     DatabaseManager, TestResult, FilesSnapshot, 
     Session, ProjectData
 )
@@ -19,27 +19,48 @@ class TestDataClasses:
     # Phase 6 (Issue #7): Removed test_test_case_result_creation - TestCaseResult class removed
 
     def test_files_snapshot_creation(self):
-        """Test FilesSnapshot data class creation."""
+        """Test FilesSnapshot data class creation with NEW format."""
         snapshot = FilesSnapshot(
-            generator_code="// generator",
-            correct_code="// correct",
-            test_code="// test",
-            additional_files={"helper.h": "// helper"}
+            files={
+                "generator.cpp": {
+                    "content": "// generator",
+                    "language": "cpp",
+                    "role": "generator"
+                },
+                "correct.cpp": {
+                    "content": "// correct",
+                    "language": "cpp",
+                    "role": "correct"
+                },
+                "test.cpp": {
+                    "content": "// test",
+                    "language": "cpp",
+                    "role": "test"
+                },
+                "helper.h": {
+                    "content": "// helper",
+                    "language": "cpp",
+                    "role": "additional"
+                }
+            },
+            test_type="comparison",
+            primary_language="cpp"
         )
         
-        assert snapshot.generator_code == "// generator"
-        assert snapshot.correct_code == "// correct"
-        assert snapshot.test_code == "// test"
-        assert snapshot.additional_files == {"helper.h": "// helper"}
+        assert "generator.cpp" in snapshot.files
+        assert snapshot.files["generator.cpp"]["content"] == "// generator"
+        assert snapshot.files["correct.cpp"]["content"] == "// correct"
+        assert snapshot.files["test.cpp"]["content"] == "// test"
+        assert snapshot.files["helper.h"]["content"] == "// helper"
 
     def test_files_snapshot_default_factory(self):
-        """Test FilesSnapshot with default factory for additional_files."""
+        """Test FilesSnapshot with default factory for files dict."""
         snapshot1 = FilesSnapshot()
         snapshot2 = FilesSnapshot()
         
         # Should have separate dict instances (not shared)
-        snapshot1.additional_files["file1.cpp"] = "content1"
-        assert "file1.cpp" not in snapshot2.additional_files
+        snapshot1.files["file1.cpp"] = {"content": "content1", "language": "cpp", "role": "test"}
+        assert "file1.cpp" not in snapshot2.files
 
     def test_test_result_creation(self):
         """Test TestResult data class creation."""
@@ -129,7 +150,7 @@ class TestDatabaseManager:
     @patch('sqlite3.connect', side_effect=sqlite3.Error("Connection failed"))
     def test_connect_failure(self, mock_connect, mock_database):
         """Test database connection failure."""
-        from src.app.persistence.database.database_manager import DatabaseError
+        from src.app.persistence.database import DatabaseError
         
         # DatabaseManager.__init__ calls _initialize_database which calls connect()
         # So the exception is raised during initialization
@@ -304,7 +325,7 @@ class TestDatabaseManager:
     @patch('sqlite3.connect', side_effect=sqlite3.Error("Database error"))
     def test_database_error_handling(self, mock_connect, mock_database):
         """Test that database errors are raised as DatabaseError exceptions."""
-        from src.app.persistence.database.database_manager import DatabaseError
+        from src.app.persistence.database import DatabaseError
         
         # DatabaseManager now raises DatabaseError instead of returning None
         with pytest.raises(DatabaseError, match="Failed to connect to database"):

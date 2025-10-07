@@ -18,7 +18,7 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from src.app.persistence.database.database_manager import (
+from src.app.persistence.database import (
     DatabaseManager,
     TestResult
 )

@@ -6,7 +6,7 @@ import os
 from unittest.mock import Mock, MagicMock, patch
 from pathlib import Path
 
-from src.app.persistence.database.database_manager import FilesSnapshot
+from src.app.persistence.database import FilesSnapshot
 
 
 class TestFilesSnapshotOptimization:
@@ -95,7 +95,7 @@ class TestOnDemandSaving:
             runner.test_start_time = datetime.now()
             
             # Mock _create_test_result
-            from src.app.persistence.database.database_manager import TestResult
+            from src.app.persistence.database import TestResult
             runner._create_test_result = Mock(return_value=TestResult(
                 test_type='comparison',
                 file_path='test.py',

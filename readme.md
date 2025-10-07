@@ -132,10 +132,54 @@ BaseRunner (Template Method Pattern)
 - **✅ Easy extensibility** for new test types
 - **✅ Improved maintainability** with centralized logic
 
+### �️ Database Architecture
+
+The application features a **modern, refactored database layer** with clean separation of concerns:
+
+<div align="center">
+<table>
+<tr>
+<td width="50%" align="center">
+
+### 🏛️ Design Patterns
+
+- **Repository Pattern**: Data access abstraction
+- **Facade Pattern**: Simplified API interface
+- **Singleton Pattern**: Connection management
+- **Service Layer**: Business logic separation
+
+</td>
+<td width="50%" align="center">
+
+### 📊 Key Benefits
+
+- **✅ 12 focused modules** (vs 1 monolithic class)
+- **✅ 151 targeted tests** (100% passing)
+- **✅ Full type safety** with type hints
+- **✅ Thread-safe operations** with proper locking
+
+</td>
+</tr>
+</table>
+</div>
+
+**Quick Start:**
+```python
+from src.app.persistence.database import DatabaseManager, TestResult
+
+db = DatabaseManager()
+
+# Query test results
+results = db.get_test_results(test_type='comparison', limit=100)
+
+# Get statistics
+stats = db.get_test_statistics()
+print(f"Total tests: {stats['total_tests']}")
+```
+
 ### 📖 For Developers
 
-Want to add a new test type? Simply inherit from `BaseRunner`:
-
+**Adding a new test type:**
 ```python
 from src.app.core.tools.base.base_runner import BaseRunner
 
@@ -148,13 +192,42 @@ class MyCustomRunner(BaseRunner):
         pass
 ```
 
+**Working with the database:**
+```python
+from src.app.persistence.database import DatabaseManager, TestResult
+
+db = DatabaseManager()
+
+# Create test result
+result = TestResult(
+    test_type='comparison',
+    file_path='solution.cpp',
+    test_count=10,
+    passed_tests=10,
+    failed_tests=0,
+    total_time=0.5,
+    timestamp=datetime.now().isoformat(),
+    project_name='my_project',
+    test_details='{}',
+    files_snapshot='{}',
+    mismatch_analysis=''
+)
+test_id = db.save_test_result(result)
+```
+
 <details>
 <summary>📚 View Architecture Documentation</summary>
 
+**Testing Architecture:**
 - [Migration Plan](MIGRATION_PLAN_DETAILED.md) - Complete migration strategy
 - [Architecture Patterns](ARCHITECTURE_PATTERNS.md) - Template method implementation  
 - [Phase 5 Summary](PHASE_5_COMPLETION_SUMMARY.md) - Cleanup and optimization
 - [Phase 6 Results](PHASE_6_VALIDATION_RESULTS.md) - Final validation
+
+**Database Architecture:**
+- [Database Architecture](DATABASE_ARCHITECTURE.md) - Comprehensive database documentation
+- [Phase 8 Complete](PHASE8_COMPLETE.md) - Database refactoring summary
+- [Migration Playbook](MIGRATION_PLAYBOOK.md) - Step-by-step migration guide
 
 </details>
 

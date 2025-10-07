@@ -13,7 +13,7 @@ import pytest
 import os
 import tempfile
 import shutil
-from src.app.persistence.database.database_manager import DatabaseManager, FilesSnapshot
+from src.app.persistence.database import DatabaseManager, FilesSnapshot
 
 
 class TestCreateFilesSnapshotFiltering:

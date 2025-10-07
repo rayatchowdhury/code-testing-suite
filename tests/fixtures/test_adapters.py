@@ -382,7 +382,7 @@ class TestDataFactory:
     @staticmethod
     def create_test_result(**kwargs):
         """Create TestResult for testing."""
-        from src.app.persistence.database.database_manager import TestResult
+        from src.app.persistence.database import TestResult
         
         defaults = {
             'test_type': 'stress',
@@ -403,7 +403,7 @@ class TestDataFactory:
     @staticmethod
     def create_session(**kwargs):
         """Create Session for testing."""
-        from src.app.persistence.database.database_manager import Session
+        from src.app.persistence.database import Session
         
         defaults = {
             'session_name': 'Test Session',

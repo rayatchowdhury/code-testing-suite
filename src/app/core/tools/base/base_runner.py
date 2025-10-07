@@ -333,7 +333,7 @@ class BaseRunner(QObject):
         Returns:
             Dict[str, Any]: Files snapshot dict in new format
         """
-        from src.app.persistence.database.database_manager import DatabaseManager
+        from src.app.persistence.database import DatabaseManager
         
         # Call static method with workspace_dir and test_type
         snapshot = DatabaseManager.create_files_snapshot(

@@ -15,8 +15,7 @@ import tempfile
 import shutil
 import json
 from unittest.mock import Mock, patch, MagicMock
-from src.app.persistence.database import TestResult
-from src.app.persistence.database.database_manager import FilesSnapshot
+from src.app.persistence.database import TestResult, FilesSnapshot
 
 
 class TestLoadToTestFeature:

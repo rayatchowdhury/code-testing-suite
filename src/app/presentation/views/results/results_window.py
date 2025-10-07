@@ -106,7 +106,7 @@ class ResultsWindow(SidebarWindowBase):
             with zipfile.ZipFile(file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
                 # 1. Extract and save source code files
                 if result.files_snapshot:
-                    from src.app.persistence.database.database_manager import FilesSnapshot
+                    from src.app.persistence.database import FilesSnapshot
                     
                     # Parse snapshot (handles both old and new formats)
                     snapshot = FilesSnapshot.from_json(result.files_snapshot)

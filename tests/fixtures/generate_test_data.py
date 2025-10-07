@@ -2,7 +2,7 @@
 from datetime import datetime, timedelta
 import random
 from typing import List
-from src.app.persistence.database.database_manager import TestResult
+from src.app.persistence.database import TestResult
 
 
 def generate_old_format_results(count: int = 10) -> List[TestResult]:

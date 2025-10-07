@@ -529,7 +529,7 @@ class DetailedResultsWidget(QWidget):
         No complex widget navigation needed - windows automatically load from workspace.
         """
         try:
-            from src.app.persistence.database.database_manager import FilesSnapshot
+            from src.app.persistence.database import FilesSnapshot
             from src.app.shared.constants import WORKSPACE_DIR
             
             # Parse files_snapshot using new FilesSnapshot class (handles old format automatically)

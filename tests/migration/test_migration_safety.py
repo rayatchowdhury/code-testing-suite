@@ -5,7 +5,7 @@ import tempfile
 from datetime import datetime
 from pathlib import Path
 
-from src.app.persistence.database.database_manager import (
+from src.app.persistence.database import (
     DatabaseManager, TestResult, FilesSnapshot
 )
 
@@ -267,7 +267,7 @@ class TestMigrationPreChecks:
     def test_database_module_imports(self):
         """Verify database module imports work"""
         try:
-            from src.app.persistence.database.database_manager import (
+            from src.app.persistence.database import (
                 DatabaseManager, TestResult, FilesSnapshot
             )
         except ImportError as e:

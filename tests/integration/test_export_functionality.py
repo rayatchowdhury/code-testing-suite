@@ -16,8 +16,7 @@ import tempfile
 import shutil
 import zipfile
 import json
-from src.app.persistence.database import DatabaseManager, TestResult
-from src.app.persistence.database.database_manager import FilesSnapshot
+from src.app.persistence.database import DatabaseManager, TestResult, FilesSnapshot
 
 
 @pytest.fixture
