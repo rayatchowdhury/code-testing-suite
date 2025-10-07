@@ -225,7 +225,58 @@ class Sidebar(QWidget):
         results_btn.clicked.connect(
             lambda: self.button_clicked.emit("Results"))
         self.footer.layout().addWidget(results_btn)
+        self.results_button = results_btn  # Store reference
+        self.results_button_index = self.footer.layout().count() - 1  # Store position
         return results_btn
+    
+    def replace_results_with_save_button(self):
+        """Replace Results button with Save button for status view (Issue #39)"""
+        # Get the position of results button before hiding it
+        results_index = 0
+        if hasattr(self, 'results_button') and self.results_button:
+            # Find the index of the results button in the layout
+            for i in range(self.footer.layout().count()):
+                if self.footer.layout().itemAt(i).widget() == self.results_button:
+                    results_index = i
+                    break
+            self.results_button.hide()
+        
+        # Add save button at the same position with results_button style
+        save_btn = QPushButton("Tests Running...")
+        save_btn.setObjectName("results_button")  # Use same style as results button
+        save_btn.setEnabled(False)  # Disabled until tests complete
+        save_btn.clicked.connect(
+            lambda: self.button_clicked.emit("Save"))
+        self.footer.layout().insertWidget(results_index, save_btn)
+        self.save_button = save_btn
+        return save_btn
+    
+    def enable_save_button(self):
+        """Enable save button when tests complete"""
+        if hasattr(self, 'save_button') and self.save_button:
+            self.save_button.setEnabled(True)
+            self.save_button.setText("💾 Save Results")
+    
+    def mark_results_saved(self):
+        """Update save button to show results are saved"""
+        if hasattr(self, 'save_button') and self.save_button:
+            self.save_button.setText("✓ Saved")
+            self.save_button.setEnabled(False)
+    
+    def restore_results_button(self):
+        """Restore Results button when leaving status view"""
+        # Remove save button if it exists
+        if hasattr(self, 'save_button') and self.save_button:
+            self.footer.layout().removeWidget(self.save_button)
+            self.save_button.deleteLater()
+            self.save_button = None
+        
+        # Restore results button if not already there
+        if not hasattr(self, 'results_button') or not self.results_button:
+            self.add_results_button()
+        else:
+            # Show existing results button
+            self.results_button.show()
     
     def add_footer_button_divider(self):
         """Add a simple divider between footer buttons"""

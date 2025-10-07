@@ -199,7 +199,7 @@ class Benchmarker(BaseRunner):
         
         # Create and return TestResult object
         return TestResult(
-            test_type="tle",
+            test_type="benchmark",
             file_path=test_file_path,
             test_count=self.test_count,
             passed_tests=passed_tests,

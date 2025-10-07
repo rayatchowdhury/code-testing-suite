@@ -590,6 +590,11 @@ class ConfigView(QDialog):
         self.cleanup_btn.clicked.connect(self.db_operations.cleanup_old_data)
         buttons_layout1.addWidget(self.cleanup_btn)
 
+        self.optimize_btn = QPushButton("🔧 Optimize Database")
+        self.optimize_btn.setObjectName("secondary_button")
+        self.optimize_btn.clicked.connect(self.db_operations.optimize_database)
+        buttons_layout1.addWidget(self.optimize_btn)
+
         buttons_layout1.addStretch(1)
         layout.addWidget(buttons_row1)
 

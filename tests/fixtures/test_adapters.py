@@ -398,23 +398,7 @@ class TestDataFactory:
         defaults.update(kwargs)
         return TestResult(**defaults)
     
-    @staticmethod
-    def create_test_case_result(**kwargs):
-        """Create TestCaseResult for testing."""
-        from src.app.persistence.database.database_manager import TestCaseResult
-        
-        defaults = {
-            'test_number': 1,
-            'passed': True,
-            'input_data': '5 3',
-            'expected_output': '8',
-            'actual_output': '8',
-            'execution_time': 0.001,
-            'timestamp': '2023-01-01T12:00:01'
-        }
-        
-        defaults.update(kwargs)
-        return TestCaseResult(**defaults)
+    # Phase 6 (Issue #7): Removed create_test_case_result - TestCaseResult class removed
     
     @staticmethod
     def create_session(**kwargs):

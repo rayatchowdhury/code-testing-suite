@@ -179,8 +179,8 @@ class BaseRunner(QObject):
         # Connect worker signals to external listeners (including presentation layer)
         self._connect_worker_signals(self.worker)
         
-        # Connect database saving
-        self.worker.allTestsCompleted.connect(self._save_test_results)
+        # Note: Auto-save removed (Issue #39) - now saved on-demand via Save button
+        # self.worker.allTestsCompleted.connect(self._save_test_results)  # REMOVED
         
         # Set up thread lifecycle
         self.thread.started.connect(self.worker.run_tests)
@@ -232,16 +232,19 @@ class BaseRunner(QObject):
         
         # Subclasses can override to connect additional signals
     
-    def _save_test_results(self, all_passed: bool) -> None:
+    def save_test_results_to_database(self) -> int:
         """
-        Save test results to database using template method pattern.
+        Save test results on-demand (called by user via Save button).
         
-        Args:
-            all_passed: Whether all tests passed
+        This fixes Issue #39 - changed from automatic saving to on-demand.
+        Now only saves when user explicitly clicks the Save button.
+        
+        Returns:
+            int: Database result ID if successful, -1 on error
         """
         if not hasattr(self, 'worker') or not self.worker:
             logger.warning("No worker available for result saving")
-            return
+            return -1
         
         try:
             # Get test results from worker
@@ -252,9 +255,14 @@ class BaseRunner(QObject):
                 test_results = getattr(self.worker, 'test_results', [])
             
             # Calculate statistics
+            if not self.test_start_time:
+                logger.error("test_start_time not set - cannot calculate total_time")
+                return -1
+                
             total_time = (datetime.now() - self.test_start_time).total_seconds()
             passed_tests = sum(1 for result in test_results if result.get('passed', False))
             failed_tests = len(test_results) - passed_tests
+            all_passed = (failed_tests == 0) and (len(test_results) > 0)
             
             # Create test result object using template method
             test_result = self._create_test_result(
@@ -268,15 +276,15 @@ class BaseRunner(QObject):
             # Save to database
             result_id = self.db_manager.save_test_result(test_result)
             if result_id > 0:
-                logger.info(f"Test results saved to database with ID: {result_id}")
+                logger.info(f"User saved test results to database (ID: {result_id})")
             else:
                 logger.error("Failed to save test results to database")
+            
+            return result_id
                 
         except Exception as e:
-            logger.error(f"Error saving test results: {e}")
-        
-        # Note: No testingCompleted signal emitted here - status view should remain
-        # open for user to review results. Only user clicking Back button should close it.
+            logger.error(f"Error saving test results: {e}", exc_info=True)
+            return -1
     
     def _create_test_result(self, all_passed: bool, test_results: list, 
                            passed_tests: int, failed_tests: int, total_time: float) -> TestResult:
@@ -314,12 +322,27 @@ class BaseRunner(QObject):
     
     def _create_files_snapshot(self) -> Dict[str, Any]:
         """
-        Create a snapshot of workspace files for database storage.
+        Create a snapshot using the new FilesSnapshot structure with file extensions.
+        
+        Uses DatabaseManager.create_files_snapshot() which:
+        - Filters files by test type (comparator=3, validator=3, benchmarker=2)
+        - Stores full filenames with extensions  
+        - Includes per-file language information
+        - Supports mixed-language projects
         
         Returns:
-            Dict[str, Any]: Files snapshot
+            Dict[str, Any]: Files snapshot dict in new format
         """
-        return DatabaseManager.create_files_snapshot(self.workspace_dir).__dict__
+        from src.app.persistence.database.database_manager import DatabaseManager
+        
+        # Call static method with workspace_dir and test_type
+        snapshot = DatabaseManager.create_files_snapshot(
+            workspace_dir=self.workspace_dir,
+            test_type=self.test_type
+        )
+        
+        # Convert to dict for database storage
+        return json.loads(snapshot.to_json())
     
     def stop(self) -> None:
         """Stop any running processes and clean up resources."""

@@ -159,6 +159,12 @@ class BenchmarkerWindow(SidebarWindowBase):
                 self._on_back_requested()
                 return
         
+        # Handle Save button (Phase 2: Issue #39)
+        if button_text == 'Save':
+            if self.status_view:
+                self.status_view.save_to_database()
+            return
+        
         if button_text == 'Help Center':
             if self.can_close():
                 self.parent.window_manager.show_window('help_center')
@@ -197,6 +203,12 @@ class BenchmarkerWindow(SidebarWindowBase):
             memory_limit_mb=self.limits_widget.get_memory_limit(),
             parent=self
         )
+        
+        # Set runner for on-demand saving (Issue #39)
+        status_view.set_runner(self.benchmarker)
+        
+        # Replace Results button with Save button (Phase 2: Issue #39)
+        self.sidebar.replace_results_with_save_button()
         
         # Store reference
         self.status_view = status_view
@@ -287,6 +299,9 @@ class BenchmarkerWindow(SidebarWindowBase):
         """Full restoration when returning to test window - show all buttons"""
         self.status_view_active = False
         
+        # Restore Results button (Phase 2: Issue #39)
+        self.sidebar.restore_results_button()
+        
         # Show Compile button (back in test window)
         if self.compile_btn:
             self.compile_btn.show()
@@ -305,6 +320,14 @@ class BenchmarkerWindow(SidebarWindowBase):
         
         # Refresh AI panels with current configuration
         self.refresh_ai_panels()
+    
+    def enable_save_button(self):
+        """Enable the Save button after tests complete (Phase 2: Issue #39)"""
+        self.sidebar.enable_save_button()
+    
+    def mark_results_saved(self):
+        """Mark results as saved in the UI (Phase 2: Issue #39)"""
+        self.sidebar.mark_results_saved()
 
     def refresh_ai_panels(self):
         """Refresh AI panel visibility based on current configuration"""

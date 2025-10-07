@@ -258,77 +258,8 @@ class TestDatabaseWorkflow:
         # Verify we now have 2 sessions
         assert len(final_sessions) == 2
 
-    @pytest.mark.integration
-    @pytest.mark.database
-    @pytest.mark.skip(reason="save_test_case_result and get_test_cases_for_result methods not implemented in DatabaseManager")
-    def test_test_case_result_workflow(self, mock_database):
-        """Test test case results storage workflow."""
-        db_manager = DatabaseManager(mock_database)
-        
-        from src.app.persistence.database.database_manager import TestCaseResult
-        
-        # Create parent test result first
-        test_result = TestResult(
-            test_type="stress",
-            file_path="/test/case_test.cpp",
-            test_count=3,
-            passed_tests=2,
-            failed_tests=1,
-            total_time=0.5,
-            timestamp="2023-01-01T12:00:00",
-            project_name="CaseTestProject"
-        )
-        
-        test_result_id = db_manager.save_test_result(test_result)
-        
-        # Create and save test cases
-        test_cases = [
-            TestCaseResult(
-                test_number=1,
-                passed=True,
-                input_data="5 3",
-                expected_output="8",
-                actual_output="8",
-                execution_time=0.001,
-                timestamp="2023-01-01T12:00:01"
-            ),
-            TestCaseResult(
-                test_number=2,
-                passed=True,
-                input_data="10 15",
-                expected_output="25",
-                actual_output="25",
-                execution_time=0.002,
-                timestamp="2023-01-01T12:00:02"
-            ),
-            TestCaseResult(
-                test_number=3,
-                passed=False,
-                input_data="100 200",
-                expected_output="300",
-                actual_output="299",
-                execution_time=0.003,
-                error_message="Output mismatch",
-                timestamp="2023-01-01T12:00:03"
-            )
-        ]
-        
-        # Save all test cases
-        for test_case in test_cases:
-            case_id = db_manager.save_test_case_result(test_case, test_result_id)
-            assert case_id is not None
-        
-        # Retrieve and verify test cases
-        retrieved_cases = db_manager.get_test_cases_for_result(test_result_id)
-        assert len(retrieved_cases) == 3
-        
-        # Verify specific test case results
-        passed_cases = [case for case in retrieved_cases if case.passed]
-        failed_cases = [case for case in retrieved_cases if not case.passed]
-        
-        assert len(passed_cases) == 2
-        assert len(failed_cases) == 1
-        assert failed_cases[0].error_message == "Output mismatch"
+    # Phase 6 (Issue #7): Removed test_test_case_result_workflow - TestCaseResult functionality removed
+    # Test case results are now stored as JSON in TestResult.test_details
 
 
 class TestCompilationWorkflow:

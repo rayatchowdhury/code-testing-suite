@@ -3,7 +3,7 @@ Unified Status View - Base widget for all test executions.
 Embedded in display area, not a popup dialog.
 """
 
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QMessageBox
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QMessageBox
 from PySide6.QtCore import Signal
 from src.app.presentation.styles.components.status_view_styles import STATUS_VIEW_CONTAINER_STYLE
 
@@ -60,7 +60,7 @@ class BaseStatusView(QWidget):
         # Test cards section
         self.cards_section = CardsSection()
         
-        # Add to layout
+        # Add to layout (no footer - sidebar handles save button)
         layout.addWidget(self.progress_section)
         layout.addWidget(self.cards_section, stretch=1)
 
@@ -159,9 +159,49 @@ class BaseStatusView(QWidget):
         pass  # Override in subclasses
         
     def on_all_tests_completed(self, all_passed: bool):
-        """Called when all tests complete"""
+        """Called when all tests complete - notify parent to enable save button"""
         self.tests_running = False
         self.progress_section.mark_complete(all_passed)
+        
+        # Notify parent window to enable save button in sidebar (Issue #39)
+        if self.parent_window and hasattr(self.parent_window, 'enable_save_button'):
+            self.parent_window.enable_save_button()
+        
+    def save_to_database(self):
+        """Save current test results to database (Issue #39 - on-demand saving)"""
+        # Get runner from parent window
+        runner = None
+        if hasattr(self, 'runner'):
+            runner = self.runner
+        elif self.parent_window and hasattr(self.parent_window, 'runner'):
+            runner = self.parent_window.runner
+        elif self.parent_window and hasattr(self.parent_window, f'{self.test_type}_runner'):
+            runner = getattr(self.parent_window, f'{self.test_type}_runner')
+        
+        if not runner:
+            QMessageBox.critical(self, "Error", "Runner not found - cannot save results")
+            return -1
+        
+        try:
+            result_id = runner.save_test_results_to_database()
+            
+            if result_id > 0:
+                QMessageBox.information(self, "Success", f"Results saved successfully!\nDatabase ID: {result_id}")
+                # Notify parent to update button text
+                if self.parent_window and hasattr(self.parent_window, 'mark_results_saved'):
+                    self.parent_window.mark_results_saved()
+            else:
+                QMessageBox.critical(self, "Error", "Failed to save results to database")
+            
+            return result_id
+                
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Error saving results:\n{str(e)}")
+            return -1
+    
+    def set_runner(self, runner):
+        """Set the runner instance for saving results"""
+        self.runner = runner
         
     def is_tests_running(self) -> bool:
         """Check if tests are currently running"""
