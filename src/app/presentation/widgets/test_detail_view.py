@@ -16,6 +16,7 @@ class TestDetailDialog(QDialog):
     
     Shows test number, status, time, memory, and test-specific content.
     """
+    __test__ = False  # Prevent pytest collection
     
     def __init__(self, test_number: int, passed: bool, time: float, memory: float, parent=None):
         """

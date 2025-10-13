@@ -204,6 +204,7 @@ class BaseCompiler(QObject):
             self.compilationOutput.emit("\n🎉 All files compiled successfully with optimizations!\n", 'success')
             self.compilationFinished.emit(True)
         else:
+            self.compilation_failed = True
             self.compilationOutput.emit("\n❌ Some files failed to compile.\n", 'error')
             self.compilationFinished.emit(False)
     

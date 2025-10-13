@@ -41,7 +41,10 @@ class TestResultRepository(BaseRepository[TestResult]):
         
         # Delete
         repo.delete(result_id)
+    
+    Note: Not a test class - prevents pytest collection warning.
     """
+    __test__ = False  # Prevent pytest collection
     
     def save(self, result: TestResult) -> int:
         """

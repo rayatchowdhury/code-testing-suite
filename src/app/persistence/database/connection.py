@@ -55,19 +55,21 @@ class DatabaseConnection:
     
     def __init__(self, db_path: str = None):
         """Initialize connection manager (only once)."""
-        if self._initialized:
-            return
-        
-        if db_path is None:
-            os.makedirs(USER_DATA_DIR, exist_ok=True)
-            db_path = os.path.join(USER_DATA_DIR, "code_testing_suite.db")
-        
-        self.db_path = db_path
-        self._connection: Optional[sqlite3.Connection] = None
-        self._init_database()
-        self._initialized = True
-        
-        logger.info(f"DatabaseConnection initialized (singleton): {self.db_path}")
+        # Thread-safe initialization check
+        with self._lock:
+            if self._initialized:
+                return
+            
+            if db_path is None:
+                os.makedirs(USER_DATA_DIR, exist_ok=True)
+                db_path = os.path.join(USER_DATA_DIR, "code_testing_suite.db")
+            
+            self.db_path = db_path
+            self._connection: Optional[sqlite3.Connection] = None
+            self._init_database()
+            self._initialized = True
+            
+            logger.info(f"DatabaseConnection initialized (singleton): {self.db_path}")
     
     def _init_database(self):
         """Create database and tables if they don't exist."""
@@ -144,6 +146,11 @@ class DatabaseConnection:
             
             try:
                 yield self._connection
+            except sqlite3.DatabaseError as e:
+                # Corrupted database raises DatabaseError, convert to ConnectionError
+                self._connection.rollback()
+                logger.error(f"Transaction rolled back (corrupted database): {e}")
+                raise ConnectionError(f"Database operation failed (corrupted database): {e}") from e
             except Exception as e:
                 self._connection.rollback()
                 logger.error(f"Transaction rolled back: {e}")

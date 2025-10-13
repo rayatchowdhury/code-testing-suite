@@ -24,7 +24,7 @@ class ValidatorRunner(BaseRunner):
     """
     
     # Validation-specific signal signature (must match original)
-    testCompleted = Signal(int, bool, str, str, str, str, int)  # test number, passed, input, test_output, validation_message, error_details, validator_exit_code
+    testCompleted = Signal(int, bool, str, str, str, str, int, float, float)  # test number, passed, input, test_output, validation_message, error_details, validator_exit_code, exec_time, memory
 
     def __init__(self, workspace_dir, files=None, config=None):
         """

@@ -107,6 +107,8 @@ class LanguageDetector:
             config: Optional configuration dictionary to override defaults
         """
         self.config = config or {}
+        # Create instance-level copy of DEFAULT_CONFIGS to avoid modifying class attribute
+        self.language_configs = {}
         self._load_custom_configs()
     
     def _load_custom_configs(self):
@@ -119,12 +121,15 @@ class LanguageDetector:
                 continue
             
             lang_key = lang.value
+            default_config = self.DEFAULT_CONFIGS.get(lang, {}).copy()
+            
             if lang_key in languages_config:
                 custom_config = languages_config[lang_key]
-                default_config = self.DEFAULT_CONFIGS.get(lang, {})
                 # Merge custom config with defaults
                 merged_config = {**default_config, **custom_config}
-                self.DEFAULT_CONFIGS[lang] = merged_config
+                self.language_configs[lang] = merged_config
+            else:
+                self.language_configs[lang] = default_config
     
     def detect_from_extension(self, file_path: str) -> Language:
         """
@@ -238,7 +243,7 @@ class LanguageDetector:
         if language == Language.UNKNOWN:
             raise ValueError("Cannot get config for UNKNOWN language")
         
-        config = self.DEFAULT_CONFIGS.get(language)
+        config = self.language_configs.get(language)
         if not config:
             raise ValueError(f"No configuration found for language: {language}")
         

@@ -416,6 +416,6 @@ class BaseRunner(QObject):
         """Ensure proper cleanup on destruction."""
         try:
             self.stop()
-        except RuntimeError:
-            # Skip cleanup if Qt objects are already deleted
+        except (RuntimeError, AttributeError):
+            # Skip cleanup if Qt objects are already deleted or worker not initialized
             pass

@@ -435,7 +435,7 @@ class DatabaseManager:
             
             cursor.execute(success_query, params)
             result = cursor.fetchone()
-            if result and result['total_attempted'] > 0:
+            if result and result['total_attempted'] and result['total_attempted'] > 0:
                 stats['success_rate'] = (result['total_passed'] / result['total_attempted']) * SUCCESS_RATE_PERCENTAGE_MULTIPLIER
             else:
                 stats['success_rate'] = 0

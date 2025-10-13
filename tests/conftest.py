@@ -1,194 +1,280 @@
-"""Test configuration and shared fixtures."""
+"""
+Root conftest.py - Shared fixtures for all tests.
 
+This module provides common fixtures, test configuration, and utilities
+used across unit, integration, and e2e tests.
+"""
+
+import pytest
 import os
 import sys
 import tempfile
-import pytest
+import shutil
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from typing import Generator
+from unittest.mock import Mock, MagicMock
 
-# Add src directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+# Add src to path for imports
+src_path = Path(__file__).parent.parent / "src"
+if str(src_path) not in sys.path:
+    sys.path.insert(0, str(src_path))
 
-from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import QSettings
-from PySide6.QtTest import QTest
+# ============================================================================
+# Pytest Configuration Hooks
+# ============================================================================
 
-# Test data directory
-TEST_DATA_DIR = Path(__file__).parent / "fixtures" / "data"
-TEST_DATA_DIR.mkdir(parents=True, exist_ok=True)
-
-
-@pytest.fixture(scope="session")
-def qapp():
-    """Create QApplication for GUI tests."""
-    if not QApplication.instance():
-        app = QApplication([])
-        app.setOrganizationName("TestCodeSuite")
-        app.setApplicationName("TestCodeSuite")
-        yield app
-        app.quit()
-    else:
-        yield QApplication.instance()
-
-
-@pytest.fixture
-def qtbot(qapp, qtbot):
-    """Enhanced qtbot with application context."""
-    return qtbot
-
-
-@pytest.fixture
-def temp_config_dir():
-    """Create temporary directory for config tests."""
-    with tempfile.TemporaryDirectory() as temp_dir:
-        yield temp_dir
-
-
-@pytest.fixture
-def sample_config():
-    """Sample configuration data for testing."""
-    return {
-        'cpp_version': 'c++17',
-        'gemini': {
-            'enabled': True,
-            'api_key': 'test-api-key',
-            'model': 'gemini-2.5-flash'
-        },
-        'editor_settings': {
-            'autosave': True,
-            'autosave_interval': 5,
-            'tab_width': 4,
-            'font_size': 12,
-            'font_family': 'Consolas',
-            'bracket_matching': True
-        }
-    }
-
-
-@pytest.fixture
-def invalid_config():
-    """Invalid configuration data for error testing."""
-    return {
-        'cpp_version': 123,  # Should be string
-        'gemini': 'invalid',  # Should be dict
-        'editor_settings': {
-            'autosave': 'yes',  # Should be bool
-            'tab_width': 'four'  # Should be int
-        }
-    }
-
-
-@pytest.fixture
-def mock_database():
-    """Mock database for testing."""
-    with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as temp_db:
-        temp_db_path = temp_db.name
+def pytest_configure(config):
+    """Configure pytest environment before tests run."""
+    # Set Qt platform for headless testing
+    os.environ['QT_QPA_PLATFORM'] = 'offscreen'
+    os.environ['QT_API'] = 'pyside6'
     
-    yield temp_db_path
+    # Disable AI by default in tests
+    os.environ['GEMINI_ENABLED'] = 'false'
     
-    # Cleanup
-    try:
-        os.unlink(temp_db_path)
-    except OSError:
-        pass
+    # Set test mode flag
+    os.environ['TESTING'] = 'true'
+
+
+def pytest_collection_modifyitems(config, items):
+    """Modify test collection to add markers automatically."""
+    for item in items:
+        # Auto-mark based on path
+        if "unit" in str(item.fspath):
+            item.add_marker(pytest.mark.unit)
+        elif "integration" in str(item.fspath):
+            item.add_marker(pytest.mark.integration)
+        elif "e2e" in str(item.fspath):
+            item.add_marker(pytest.mark.e2e)
+        
+        # Mark GUI tests
+        if "gui" in str(item.fspath) or "widget" in str(item.fspath):
+            item.add_marker(pytest.mark.gui)
+        
+        # Mark database tests
+        if "database" in str(item.fspath) or "repository" in str(item.fspath):
+            item.add_marker(pytest.mark.database)
+
+
+# ============================================================================
+# Temporary Directory Fixtures
+# ============================================================================
+
+@pytest.fixture
+def temp_dir() -> Generator[Path, None, None]:
+    """
+    Create a temporary directory for test isolation.
+    
+    Yields:
+        Path to temporary directory
+        
+    Usage:
+        def test_file_creation(temp_dir):
+            file_path = temp_dir / "test.txt"
+            file_path.write_text("content")
+            assert file_path.exists()
+    """
+    temp_path = Path(tempfile.mkdtemp())
+    yield temp_path
+    shutil.rmtree(temp_path, ignore_errors=True)
 
 
 @pytest.fixture
-def sample_code_files():
-    """Sample code files for testing."""
-    return {
-        'generator.cpp': '''
-#include <iostream>
-#include <random>
+def temp_workspace(temp_dir) -> Path:
+    """
+    Create a temporary workspace with nested directory structure.
+    
+    Creates:
+        workspace/
+        ├── comparator/
+        │   ├── inputs/
+        │   └── outputs/
+        ├── validator/
+        │   ├── inputs/
+        │   └── outputs/
+        └── benchmarker/
+            ├── inputs/
+            └── outputs/
+    
+    Yields:
+        Path to workspace root
+    """
+    workspace = temp_dir / "workspace"
+    
+    # Create nested structure
+    for test_type in ['comparator', 'validator', 'benchmarker']:
+        test_dir = workspace / test_type
+        (test_dir / 'inputs').mkdir(parents=True, exist_ok=True)
+        (test_dir / 'outputs').mkdir(parents=True, exist_ok=True)
+    
+    return workspace
 
+
+@pytest.fixture
+def temp_db(temp_dir) -> Generator[Path, None, None]:
+    """
+    Create a temporary SQLite database for testing.
+    
+    Yields:
+        Path to temporary database file
+    """
+    db_path = temp_dir / "test.db"
+    yield db_path
+    if db_path.exists():
+        db_path.unlink()
+
+
+# ============================================================================
+# Sample Source Code Fixtures
+# ============================================================================
+
+@pytest.fixture
+def sample_cpp_generator() -> str:
+    """Simple C++ generator code for testing."""
+    return """#include <iostream>
 int main() {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(1, 100);
-    
-    std::cout << dis(gen) << " " << dis(gen) << std::endl;
+    std::cout << "5\\n";
     return 0;
 }
-''',
-        'correct.cpp': '''
-#include <iostream>
-
-int main() {
-    int a, b;
-    std::cin >> a >> b;
-    std::cout << a + b << std::endl;
-    return 0;
-}
-''',
-        'test.cpp': '''
-#include <iostream>
-
-int main() {
-    int a, b;
-    std::cin >> a >> b;
-    std::cout << a - b << std::endl;  // Intentional bug
-    return 0;
-}
-'''
-    }
+"""
 
 
 @pytest.fixture
-def mock_gemini_response():
-    """Mock Gemini API response."""
-    return {
-        "candidates": [{
-            "content": {
-                "parts": [{
-                    "text": "This is a mock response from Gemini API."
-                }]
-            }
-        }]
-    }
+def sample_cpp_test() -> str:
+    """Simple C++ test solution for testing."""
+    return """#include <iostream>
+int main() {
+    int n;
+    std::cin >> n;
+    std::cout << n * 2 << std::endl;
+    return 0;
+}
+"""
 
+
+@pytest.fixture
+def sample_cpp_correct() -> str:
+    """Simple C++ correct solution for testing."""
+    return """#include <iostream>
+int main() {
+    int n;
+    std::cin >> n;
+    std::cout << n * 2 << std::endl;
+    return 0;
+}
+"""
+
+
+@pytest.fixture
+def sample_python_code() -> str:
+    """Simple Python code for testing."""
+    return """def main():
+    n = int(input())
+    print(n * 2)
+
+if __name__ == '__main__':
+    main()
+"""
+
+
+@pytest.fixture
+def sample_java_code() -> str:
+    """Simple Java code for testing."""
+    return """import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        System.out.println(n * 2);
+        sc.close();
+    }
+}
+"""
+
+
+# ============================================================================
+# Mock Fixtures
+# ============================================================================
+
+@pytest.fixture
+def mock_qapplication(monkeypatch):
+    """Mock QApplication for tests that don't need real Qt."""
+    mock_app = MagicMock()
+    monkeypatch.setattr('PySide6.QtWidgets.QApplication.instance', 
+                       lambda: mock_app)
+    return mock_app
+
+
+@pytest.fixture
+def mock_database_manager():
+    """Mock DatabaseManager for tests that don't need real database."""
+    mock_db = Mock()
+    mock_db.save_test_result.return_value = 1
+    mock_db.get_test_results.return_value = []
+    mock_db.get_test_result_by_id.return_value = None
+    mock_db.delete_test_result.return_value = True
+    return mock_db
+
+
+@pytest.fixture
+def mock_compiler():
+    """Mock compiler for tests that don't need real compilation."""
+    mock = Mock()
+    mock.compile.return_value = (True, "Compilation successful")
+    mock.get_executable_path.return_value = Path("test.exe")
+    return mock
+
+
+# ============================================================================
+# Skip Conditions
+# ============================================================================
+
+@pytest.fixture
+def requires_compiler():
+    """Skip test if C++ compiler is not available."""
+    import shutil
+    if not shutil.which('g++') and not shutil.which('cl'):
+        pytest.skip("C++ compiler (g++/cl) not found in PATH")
+
+
+@pytest.fixture
+def requires_python():
+    """Skip test if Python is not available."""
+    import shutil
+    if not shutil.which('python'):
+        pytest.skip("Python interpreter not found in PATH")
+
+
+@pytest.fixture
+def requires_java():
+    """Skip test if Java compiler is not available."""
+    import shutil
+    if not (shutil.which('javac') and shutil.which('java')):
+        pytest.skip("Java compiler/runtime not found in PATH")
+
+
+# ============================================================================
+# Cleanup Fixtures
+# ============================================================================
 
 @pytest.fixture(autouse=True)
-def clean_qt_settings():
-    """Clean Qt settings before each test."""
-    QSettings().clear()
+def cleanup_test_files():
+    """
+    Automatically cleanup test artifacts after each test.
+    
+    Removes common test file patterns to prevent pollution.
+    """
     yield
-    QSettings().clear()
-
-
-@pytest.fixture
-def mock_file_system():
-    """Mock file system operations."""
-    with patch('pathlib.Path.exists') as mock_exists, \
-         patch('pathlib.Path.read_text') as mock_read, \
-         patch('pathlib.Path.write_text') as mock_write:
-        mock_exists.return_value = True
-        mock_read.return_value = "mock file content"
-        mock_write.return_value = None
-        yield {
-            'exists': mock_exists,
-            'read_text': mock_read,
-            'write_text': mock_write
-        }
-
-
-class TestHelper:
-    """Helper utilities for tests."""
     
-    @staticmethod
-    def create_test_file(path: Path, content: str) -> Path:
-        """Create a test file with given content."""
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(content)
-        return path
-    
-    @staticmethod
-    def wait_for_condition(condition, timeout=1000):
-        """Wait for a condition to become true."""
-        import time
-        start_time = time.time()
-        while time.time() - start_time < timeout / 1000:
-            if condition():
-                return True
-            QTest.qWait(10)
-        return False
+    # Cleanup patterns
+    patterns = ['*.exe', '*.o', '*.class', '__pycache__']
+    for pattern in patterns:
+        for file in Path('.').glob(pattern):
+            try:
+                if file.is_file():
+                    file.unlink()
+                elif file.is_dir():
+                    shutil.rmtree(file, ignore_errors=True)
+            except (PermissionError, OSError):
+                pass  # Ignore cleanup errors

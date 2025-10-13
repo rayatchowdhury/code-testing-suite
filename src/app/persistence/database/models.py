@@ -205,6 +205,7 @@ class FilesSnapshot:
 @dataclass
 class TestResult:
     """Data class for test results"""
+    __test__ = False  # Prevent pytest collection
     id: Optional[int] = None
     test_type: str = ""  # 'stress' or 'benchmark'
     file_path: str = ""

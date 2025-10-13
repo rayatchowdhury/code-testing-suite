@@ -25,6 +25,7 @@ class TestCountSlider(QWidget):
     - comparator: Range (1-999), default 50
     - benchmarker: Range (1-999), default 50
     """
+    __test__ = False  # Prevent pytest collection
     valueChanged = Signal(int)
     
     def __init__(self, parent=None, mode="validator"):

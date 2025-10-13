@@ -287,4 +287,8 @@ class BaseTestWorker(QObject):
     
     def __del__(self):
         """Ensure cleanup on destruction."""
-        self.stop()
+        try:
+            self.stop()
+        except RuntimeError:
+            # Skip cleanup if Qt Signal objects are already deleted
+            pass
