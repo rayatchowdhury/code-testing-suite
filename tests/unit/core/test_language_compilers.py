@@ -780,8 +780,10 @@ class TestCppCompilerAdvanced:
         assert mock_run.called, "subprocess.run should have been called"
         call_kwargs = mock_run.call_args[1]
         assert "creationflags" in call_kwargs
-        # Verify the flag value is CREATE_NO_WINDOW (0x08000000)
-        assert call_kwargs["creationflags"] == subprocess.CREATE_NO_WINDOW
+        # Verify the flag value is CREATE_NO_WINDOW (0x08000000 on Windows)
+        # Use numeric value since subprocess.CREATE_NO_WINDOW may not exist on non-Windows platforms
+        CREATE_NO_WINDOW = 0x08000000
+        assert call_kwargs["creationflags"] == CREATE_NO_WINDOW
 
     @patch("subprocess.run")
     def test_compile_with_zero_timeout(self, mock_run, compiler, tmp_path):
