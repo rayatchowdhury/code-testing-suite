@@ -1,0 +1,10 @@
+# This file lists commits that should be ignored by git blame
+# to preserve meaningful history when viewing code archaeology.
+#
+# Configure git to use this file:
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+#
+# Format: commit hash followed by optional comment
+
+# Format all Python files with Black (2025-10-14)
+462465f
