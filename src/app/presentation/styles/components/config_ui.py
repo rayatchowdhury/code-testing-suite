@@ -84,7 +84,7 @@ QMessageBox QPushButton {
 }
 """
 
-# Info Message Dialog Styles  
+# Info Message Dialog Styles
 INFO_MESSAGE_STYLE = """
 QMessageBox {
     background-color: #1976D2;
@@ -101,28 +101,34 @@ QMessageBox QPushButton {
 """
 
 # Section Builder Info Label Style
-SECTION_INFO_LABEL_STYLE = f"color: {MATERIAL_COLORS['on_surface_variant']}; font-size: 12px;"
+SECTION_INFO_LABEL_STYLE = (
+    f"color: {MATERIAL_COLORS['on_surface_variant']}; font-size: 12px;"
+)
+
 
 # Dynamic styles for status colors in validators
 def get_error_status_style():
     """Get style for error status"""
     return f"color: {MATERIAL_COLORS['error']}"
 
+
 def get_neutral_status_style():
     """Get style for neutral/info status"""
     return f"color: {MATERIAL_COLORS['on_surface_variant']}"
+
 
 def get_success_status_style():
     """Get style for success status"""
     return f"color: {MATERIAL_COLORS['primary']}"
 
+
 __all__ = [
-    'ERROR_DIALOG_STYLE',
-    'CONFIG_DIALOG_TITLE_STYLE', 
-    'SUCCESS_MESSAGE_STYLE',
-    'INFO_MESSAGE_STYLE',
-    'SECTION_INFO_LABEL_STYLE',
-    'get_error_status_style',
-    'get_neutral_status_style', 
-    'get_success_status_style'
+    "ERROR_DIALOG_STYLE",
+    "CONFIG_DIALOG_TITLE_STYLE",
+    "SUCCESS_MESSAGE_STYLE",
+    "INFO_MESSAGE_STYLE",
+    "SECTION_INFO_LABEL_STYLE",
+    "get_error_status_style",
+    "get_neutral_status_style",
+    "get_success_status_style",
 ]

@@ -5,4 +5,4 @@ Core AI module components.
 
 from src.app.core.ai.core.editor_ai import EditorAI
 
-__all__ = ['EditorAI']
+__all__ = ["EditorAI"]

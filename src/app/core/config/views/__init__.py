@@ -8,7 +8,4 @@ This module contains UI components for configuration management:
 
 from src.app.core.config.views.config_dialog import ConfigView, ErrorDialog
 
-__all__ = [
-    'ConfigView', 
-    'ErrorDialog'
-]
+__all__ = ["ConfigView", "ErrorDialog"]

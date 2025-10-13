@@ -5,9 +5,10 @@ Prompt Templates for AI interactions.
 Contains all prompts and templates used for different AI operations.
 """
 
+
 class PromptTemplates:
     """Collection of prompt templates for various AI operations."""
-    
+
     # Base prompts
     BASE_PROMPT = """
     CRITICAL INSTRUCTION:
@@ -16,11 +17,14 @@ class PromptTemplates:
     - NO additional explanations or descriptions
     """
 
-    CODE_BASE_PROMPT = BASE_PROMPT + """
+    CODE_BASE_PROMPT = (
+        BASE_PROMPT
+        + """
     - NO markdown code blocks (```cpp, etc.)
     - Return ONLY working code
     - Must compile and run as-is
     """
+    )
 
     # Explanation templates structure
     EXPLANATION_BASE = """
@@ -46,9 +50,9 @@ class PromptTemplates:
 
     # Explanation templates for different types of analysis
     EXPLANATION_TEMPLATES = {
-        'analysis': {
-            'title': 'Code Analysis',
-            'content': """
+        "analysis": {
+            "title": "Code Analysis",
+            "content": """
             ## Overview 🎯
             **Primary Purpose:** Main functionality and goals
             **Input/Output Flow:**
@@ -93,11 +97,11 @@ class PromptTemplates:
             **Potential Issues:**
             - Common failure points
             - Debugging suggestions
-            """
+            """,
         },
-        'issues': {
-            'title': 'Potential Issues & Edge Cases',
-            'content': """
+        "issues": {
+            "title": "Potential Issues & Edge Cases",
+            "content": """
             ## Critical Issues 🚨
             **Immediate Concerns:**
             
@@ -118,11 +122,11 @@ class PromptTemplates:
             
             ## Security Considerations 🔒
             **Vulnerability Assessment:**
-            """
+            """,
         },
-        'tips': {
-            'title': 'Improvement Tips & Suggestions',
-            'content': """
+        "tips": {
+            "title": "Improvement Tips & Suggestions",
+            "content": """
             ## Quick Wins 🚀
             **Immediate Improvements:**
             
@@ -143,32 +147,32 @@ class PromptTemplates:
             
             ## Testing & Debugging 🔍
             **Quality Assurance:**
-            """
-        }
+            """,
+        },
     }
 
     # Code modification templates
     CODE_TEMPLATES = {
-        'document': {
-            'instruction': "Add comprehensive documentation to this code.",
-            'guidelines': """
+        "document": {
+            "instruction": "Add comprehensive documentation to this code.",
+            "guidelines": """
             1. File header with purpose and usage
             2. Function documentation (parameters, returns, edge cases)
             3. Important variable descriptions
             4. Complex logic explanations
-            """
+            """,
         },
-        'custom': {
-            'instruction': "Modify this code according to: {command}",
-            'guidelines': """
+        "custom": {
+            "instruction": "Modify this code according to: {command}",
+            "guidelines": """
             1. Apply only requested changes
             2. Keep all working functionality
             3. Add comments for significant changes
             4. Preserve existing code structure
-            """
+            """,
         },
-        'generator': {
-            'instruction': """
+        "generator": {
+            "instruction": """
             Create a C++ test case generator based on the provided code/problem.
             
             TASK: Generate ONE random test case that matches the input pattern from the code.
@@ -176,7 +180,7 @@ class PromptTemplates:
             
             CRITICAL: Return ONLY the generator.cpp code - NO solutions, NO explanations, NO markdown blocks.
             """,
-            'guidelines': """
+            "guidelines": """
             GENERATOR REQUIREMENTS:
             1. #include "generator.h" at the top
             2. Write main() function that generates ONE test case to stdout
@@ -227,10 +231,10 @@ class PromptTemplates:
             
             Library Documentation:
             {docs}
-            """
+            """,
         },
-        'validator': {
-            'instruction': """
+        "validator": {
+            "instruction": """
             Create a minimal C++ validator that checks if test output is valid for given input.
             
             TASK: Write clean validator.cpp that reads input.txt and output.txt, validates correctness silently.
@@ -238,7 +242,7 @@ class PromptTemplates:
             
             CRITICAL: Return ONLY clean validator.cpp code - NO explanations, NO debug prints, NO verbose comments.
             """,
-            'guidelines': """
+            "guidelines": """
             VALIDATOR RULES:
             1. Use argc/argv for file paths: argv[1]=input.txt, argv[2]=output.txt
             2. Exit codes: 0=invalid, 1=valid, 2=error
@@ -291,8 +295,8 @@ class PromptTemplates:
             - No verbose error messages
             - Focus on core validation logic
             - Minimal necessary code only
-            """
-        }
+            """,
+        },
     }
 
     @classmethod
@@ -301,51 +305,51 @@ class PromptTemplates:
         template = cls.EXPLANATION_TEMPLATES.get(template_type)
         if not template:
             raise ValueError(f"Unknown explanation template: {template_type}")
-        
+
         return cls.EXPLANATION_BASE.format(
-            title=template['title'],
-            content=template['content'],
-            code=code
+            title=template["title"], content=template["content"], code=code
         )
 
     @classmethod
     def get_code_prompt(cls, action: str, code: str, **kwargs) -> str:
         """Get a formatted code modification prompt."""
-        if action == 'generate':
-            file_type = kwargs.get('type', 'solution')
+        if action == "generate":
+            file_type = kwargs.get("type", "solution")
             # Check if this is a generator file request
-            if (file_type.lower().endswith('generator.cpp') or 
-                file_type.lower().endswith('generator') or
-                'generator' in file_type.lower()):
-                template = cls.CODE_TEMPLATES['generator']
-                docs = kwargs.get('docs', '')
+            if (
+                file_type.lower().endswith("generator.cpp")
+                or file_type.lower().endswith("generator")
+                or "generator" in file_type.lower()
+            ):
+                template = cls.CODE_TEMPLATES["generator"]
+                docs = kwargs.get("docs", "")
                 return cls.CODE_BASE.format(
-                    instruction=template['instruction'],
-                    guidelines=template['guidelines'].format(docs=docs),
-                    code=code
+                    instruction=template["instruction"],
+                    guidelines=template["guidelines"].format(docs=docs),
+                    code=code,
                 )
             else:
                 return f"{cls.CODE_BASE_PROMPT}\nCreate a {file_type} solution.\n\nCODE:\n{code}"
-        elif action == 'validator':
+        elif action == "validator":
             # Handle validator template directly
-            template = cls.CODE_TEMPLATES['validator']
+            template = cls.CODE_TEMPLATES["validator"]
             return cls.CODE_BASE.format(
-                instruction=template['instruction'],
-                guidelines=template['guidelines'],
-                code=code
+                instruction=template["instruction"],
+                guidelines=template["guidelines"],
+                code=code,
             )
         else:
             template = cls.CODE_TEMPLATES.get(action)
             if not template:
                 raise ValueError(f"Unknown code action: {action}")
-            
+
             return cls.CODE_BASE.format(
-                instruction=template['instruction'].format(**kwargs),
-                guidelines=template['guidelines'],
-                code=code
+                instruction=template["instruction"].format(**kwargs),
+                guidelines=template["guidelines"],
+                code=code,
             )
 
     @classmethod
     def get_custom_prompt(cls, command: str, code: str) -> str:
         """Get a prompt for custom commands."""
-        return cls.get_code_prompt('custom', code, command=command)
+        return cls.get_code_prompt("custom", code, command=command)

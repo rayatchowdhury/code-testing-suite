@@ -12,12 +12,12 @@ from src.app.presentation.views.main_window.main_window import (
     MainWindow,
     MainWindowContent,
     MainWindowConfig,
-    UnsavedChangesHandler
+    UnsavedChangesHandler,
 )
 
 __all__ = [
-    'MainWindow',
-    'MainWindowContent',
-    'MainWindowConfig',
-    'UnsavedChangesHandler'
+    "MainWindow",
+    "MainWindowContent",
+    "MainWindowConfig",
+    "UnsavedChangesHandler",
 ]

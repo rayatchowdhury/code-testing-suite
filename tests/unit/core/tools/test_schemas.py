@@ -23,7 +23,7 @@ class TestBaseTestDetail:
         """BaseTestDetail should have all common fields"""
         # Arrange & Act
         hints = get_type_hints(BaseTestDetail)
-        
+
         # Assert
         assert "test_number" in BaseTestDetail.__annotations__
         assert "passed" in BaseTestDetail.__annotations__
@@ -37,7 +37,7 @@ class TestBaseTestDetail:
         """BaseTestDetail fields should be optional (total=False)"""
         # Arrange & Act
         detail: BaseTestDetail = {}
-        
+
         # Assert - should not raise error with empty dict
         assert isinstance(detail, dict)
 
@@ -48,7 +48,7 @@ class TestBaseTestDetail:
             "test_number": 1,
             "passed": True,
         }
-        
+
         # Assert
         assert detail["test_number"] == 1
         assert detail["passed"] is True
@@ -65,7 +65,7 @@ class TestBaseTestDetail:
             "status": "fail",
             "test": 5,
         }
-        
+
         # Assert
         assert detail["test_number"] == 5
         assert detail["passed"] is False
@@ -83,7 +83,7 @@ class TestValidatorTestDetail:
         """ValidatorTestDetail should have all BaseTestDetail fields"""
         # Arrange & Act
         annotations = ValidatorTestDetail.__annotations__
-        
+
         # Assert
         assert "test_number" in annotations
         assert "passed" in annotations
@@ -93,7 +93,7 @@ class TestValidatorTestDetail:
         """ValidatorTestDetail should have validator-specific fields"""
         # Arrange & Act
         annotations = ValidatorTestDetail.__annotations__
-        
+
         # Assert
         assert "input" in annotations
         assert "test_output" in annotations
@@ -121,7 +121,7 @@ class TestValidatorTestDetail:
             "total_time": 0.08,
             "status": "pass",
         }
-        
+
         # Assert
         assert detail["test_number"] == 1
         assert detail["passed"] is True
@@ -141,7 +141,7 @@ class TestValidatorTestDetail:
             "output": "result",  # Alternative to test_output
             "execution_time": 1.0,  # Alternative to total_time
         }
-        
+
         # Assert
         assert detail["test"] == 2
         assert detail["output"] == "result"
@@ -155,7 +155,7 @@ class TestComparisonTestDetail:
         """ComparisonTestDetail should have all BaseTestDetail fields"""
         # Arrange & Act
         annotations = ComparisonTestDetail.__annotations__
-        
+
         # Assert
         assert "test_number" in annotations
         assert "passed" in annotations
@@ -165,7 +165,7 @@ class TestComparisonTestDetail:
         """ComparisonTestDetail should have comparison-specific fields"""
         # Arrange & Act
         annotations = ComparisonTestDetail.__annotations__
-        
+
         # Assert
         assert "input" in annotations
         assert "test_output" in annotations
@@ -193,7 +193,7 @@ class TestComparisonTestDetail:
             "status": "fail",
             "error_details": "Output mismatch",
         }
-        
+
         # Assert
         assert detail["test_number"] == 3
         assert detail["passed"] is False
@@ -214,7 +214,7 @@ class TestComparisonTestDetail:
             "output": "result3",  # Another alternative
             "execution_time": 2.0,  # Alternative to total_time
         }
-        
+
         # Assert
         assert detail["actual_output"] == "result1"
         assert detail["expected_output"] == "result2"
@@ -229,7 +229,7 @@ class TestBenchmarkTestDetail:
         """BenchmarkTestDetail should have all BaseTestDetail fields"""
         # Arrange & Act
         annotations = BenchmarkTestDetail.__annotations__
-        
+
         # Assert
         assert "test_number" in annotations
         assert "passed" in annotations
@@ -239,7 +239,7 @@ class TestBenchmarkTestDetail:
         """BenchmarkTestDetail should have benchmark-specific fields"""
         # Arrange & Act
         annotations = BenchmarkTestDetail.__annotations__
-        
+
         # Assert
         assert "test_name" in annotations
         assert "execution_time" in annotations
@@ -270,7 +270,7 @@ class TestBenchmarkTestDetail:
             "test_size": 1000000,
             "status": "pass",
         }
-        
+
         # Assert
         assert detail["test_number"] == 5
         assert detail["passed"] is True
@@ -296,7 +296,7 @@ class TestBenchmarkTestDetail:
             "status": "fail",
             "error": "Time limit exceeded",
         }
-        
+
         # Assert
         assert detail["passed"] is False
         assert detail["memory_passed"] is False
@@ -315,10 +315,10 @@ class TestTestDetailUnion:
             "passed": True,
             "validation_message": "Valid",
         }
-        
+
         # Act
         detail: TestDetail = validator_detail
-        
+
         # Assert
         assert detail["test_number"] == 1
         assert "validation_message" in detail
@@ -331,10 +331,10 @@ class TestTestDetailUnion:
             "passed": True,
             "correct_output": "expected",
         }
-        
+
         # Act
         detail: TestDetail = comparison_detail
-        
+
         # Assert
         assert detail["test_number"] == 2
         assert "correct_output" in detail
@@ -348,10 +348,10 @@ class TestTestDetailUnion:
             "time_passed": True,
             "memory_passed": True,
         }
-        
+
         # Act
         detail: TestDetail = benchmark_detail
-        
+
         # Assert
         assert detail["test_number"] == 3
         assert "time_passed" in detail
@@ -368,7 +368,7 @@ class TestSchemaIntegration:
         validator: ValidatorTestDetail = {}
         comparison: ComparisonTestDetail = {}
         benchmark: BenchmarkTestDetail = {}
-        
+
         assert isinstance(base, dict)
         assert isinstance(validator, dict)
         assert isinstance(comparison, dict)
@@ -380,7 +380,7 @@ class TestSchemaIntegration:
         validator: ValidatorTestDetail = {"test_number": 1}
         comparison: ComparisonTestDetail = {"test_number": 2}
         benchmark: BenchmarkTestDetail = {"test_number": 3}
-        
+
         # Assert
         assert validator.get("test_number") == 1
         assert comparison.get("test_number") == 2
@@ -398,7 +398,7 @@ class TestSchemaIntegration:
             "test_number": 1,
             "status": status_value,
         }
-        
+
         # Assert
         assert detail["status"] == status_value
 
@@ -418,7 +418,7 @@ class TestSchemaIntegration:
             "execution_time": time_value,
             "memory_used": memory_value,
         }
-        
+
         # Assert
         assert detail["execution_time"] == time_value
         assert detail["memory_used"] == memory_value
@@ -427,13 +427,13 @@ class TestSchemaIntegration:
         """ValidatorTestDetail should handle multiline input strings"""
         # Arrange
         multiline_input = "3\nline1\nline2\nline3"
-        
+
         # Act
         detail: ValidatorTestDetail = {
             "input": multiline_input,
             "test_output": "result",
         }
-        
+
         # Assert
         assert detail["input"] == multiline_input
         assert "\n" in detail["input"]
@@ -442,13 +442,13 @@ class TestSchemaIntegration:
         """ComparisonTestDetail should handle large output strings"""
         # Arrange
         large_output = "output\n" * 1000
-        
+
         # Act
         detail: ComparisonTestDetail = {
             "test_output": large_output,
             "correct_output": large_output,
         }
-        
+
         # Assert
         assert len(detail["test_output"]) > 5000
         assert detail["test_output"] == detail["correct_output"]
@@ -461,7 +461,7 @@ class TestSchemaIntegration:
             "memory_used": 0.0,  # No memory
             "test_size": 0,  # Empty test
         }
-        
+
         # Assert
         assert detail["execution_time"] == 0.0
         assert detail["memory_used"] == 0.0
@@ -476,7 +476,7 @@ class TestSchemaIntegration:
             ComparisonTestDetail(test_number=3, correct_output="expected"),
             BenchmarkTestDetail(test_number=4, time_passed=True),
         ]
-        
+
         # Act & Assert
         for detail in details:
             assert isinstance(detail, dict)

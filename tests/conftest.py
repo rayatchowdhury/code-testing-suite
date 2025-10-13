@@ -23,17 +23,18 @@ if str(src_path) not in sys.path:
 # Pytest Configuration Hooks
 # ============================================================================
 
+
 def pytest_configure(config):
     """Configure pytest environment before tests run."""
     # Set Qt platform for headless testing
-    os.environ['QT_QPA_PLATFORM'] = 'offscreen'
-    os.environ['QT_API'] = 'pyside6'
-    
+    os.environ["QT_QPA_PLATFORM"] = "offscreen"
+    os.environ["QT_API"] = "pyside6"
+
     # Disable AI by default in tests
-    os.environ['GEMINI_ENABLED'] = 'false'
-    
+    os.environ["GEMINI_ENABLED"] = "false"
+
     # Set test mode flag
-    os.environ['TESTING'] = 'true'
+    os.environ["TESTING"] = "true"
 
 
 def pytest_collection_modifyitems(config, items):
@@ -46,11 +47,11 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(pytest.mark.integration)
         elif "e2e" in str(item.fspath):
             item.add_marker(pytest.mark.e2e)
-        
+
         # Mark GUI tests
         if "gui" in str(item.fspath) or "widget" in str(item.fspath):
             item.add_marker(pytest.mark.gui)
-        
+
         # Mark database tests
         if "database" in str(item.fspath) or "repository" in str(item.fspath):
             item.add_marker(pytest.mark.database)
@@ -60,14 +61,15 @@ def pytest_collection_modifyitems(config, items):
 # Temporary Directory Fixtures
 # ============================================================================
 
+
 @pytest.fixture
 def temp_dir() -> Generator[Path, None, None]:
     """
     Create a temporary directory for test isolation.
-    
+
     Yields:
         Path to temporary directory
-        
+
     Usage:
         def test_file_creation(temp_dir):
             file_path = temp_dir / "test.txt"
@@ -83,7 +85,7 @@ def temp_dir() -> Generator[Path, None, None]:
 def temp_workspace(temp_dir) -> Path:
     """
     Create a temporary workspace with nested directory structure.
-    
+
     Creates:
         workspace/
         ├── comparator/
@@ -95,18 +97,18 @@ def temp_workspace(temp_dir) -> Path:
         └── benchmarker/
             ├── inputs/
             └── outputs/
-    
+
     Yields:
         Path to workspace root
     """
     workspace = temp_dir / "workspace"
-    
+
     # Create nested structure
-    for test_type in ['comparator', 'validator', 'benchmarker']:
+    for test_type in ["comparator", "validator", "benchmarker"]:
         test_dir = workspace / test_type
-        (test_dir / 'inputs').mkdir(parents=True, exist_ok=True)
-        (test_dir / 'outputs').mkdir(parents=True, exist_ok=True)
-    
+        (test_dir / "inputs").mkdir(parents=True, exist_ok=True)
+        (test_dir / "outputs").mkdir(parents=True, exist_ok=True)
+
     return workspace
 
 
@@ -114,7 +116,7 @@ def temp_workspace(temp_dir) -> Path:
 def temp_db(temp_dir) -> Generator[Path, None, None]:
     """
     Create a temporary SQLite database for testing.
-    
+
     Yields:
         Path to temporary database file
     """
@@ -127,6 +129,7 @@ def temp_db(temp_dir) -> Generator[Path, None, None]:
 # ============================================================================
 # Sample Source Code Fixtures
 # ============================================================================
+
 
 @pytest.fixture
 def sample_cpp_generator() -> str:
@@ -197,12 +200,12 @@ public class Main {
 # Mock Fixtures
 # ============================================================================
 
+
 @pytest.fixture
 def mock_qapplication(monkeypatch):
     """Mock QApplication for tests that don't need real Qt."""
     mock_app = MagicMock()
-    monkeypatch.setattr('PySide6.QtWidgets.QApplication.instance', 
-                       lambda: mock_app)
+    monkeypatch.setattr("PySide6.QtWidgets.QApplication.instance", lambda: mock_app)
     return mock_app
 
 
@@ -230,11 +233,13 @@ def mock_compiler():
 # Skip Conditions
 # ============================================================================
 
+
 @pytest.fixture
 def requires_compiler():
     """Skip test if C++ compiler is not available."""
     import shutil
-    if not shutil.which('g++') and not shutil.which('cl'):
+
+    if not shutil.which("g++") and not shutil.which("cl"):
         pytest.skip("C++ compiler (g++/cl) not found in PATH")
 
 
@@ -242,7 +247,8 @@ def requires_compiler():
 def requires_python():
     """Skip test if Python is not available."""
     import shutil
-    if not shutil.which('python'):
+
+    if not shutil.which("python"):
         pytest.skip("Python interpreter not found in PATH")
 
 
@@ -250,7 +256,8 @@ def requires_python():
 def requires_java():
     """Skip test if Java compiler is not available."""
     import shutil
-    if not (shutil.which('javac') and shutil.which('java')):
+
+    if not (shutil.which("javac") and shutil.which("java")):
         pytest.skip("Java compiler/runtime not found in PATH")
 
 
@@ -258,19 +265,20 @@ def requires_java():
 # Cleanup Fixtures
 # ============================================================================
 
+
 @pytest.fixture(autouse=True)
 def cleanup_test_files():
     """
     Automatically cleanup test artifacts after each test.
-    
+
     Removes common test file patterns to prevent pollution.
     """
     yield
-    
+
     # Cleanup patterns
-    patterns = ['*.exe', '*.o', '*.class', '__pycache__']
+    patterns = ["*.exe", "*.o", "*.class", "__pycache__"]
     for pattern in patterns:
-        for file in Path('.').glob(pattern):
+        for file in Path(".").glob(pattern):
             try:
                 if file.is_file():
                     file.unlink()

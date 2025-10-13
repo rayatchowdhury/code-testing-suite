@@ -1,13 +1,31 @@
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QPushButton, QSpacerItem,
-                               QSizePolicy, QLabel, QFrame, QScrollArea, QComboBox,
-                               QSpinBox, QSlider, QHBoxLayout)
+from PySide6.QtWidgets import (
+    QWidget,
+    QVBoxLayout,
+    QPushButton,
+    QSpacerItem,
+    QSizePolicy,
+    QLabel,
+    QFrame,
+    QScrollArea,
+    QComboBox,
+    QSpinBox,
+    QSlider,
+    QHBoxLayout,
+)
 from PySide6.QtCore import Qt, Signal
-from src.app.presentation.styles import SIDEBAR_STYLE, SIDEBAR_BUTTON_STYLE, SCROLLBAR_STYLE
+from src.app.presentation.styles import (
+    SIDEBAR_STYLE,
+    SIDEBAR_BUTTON_STYLE,
+    SCROLLBAR_STYLE,
+)
 from src.app.presentation.styles.components.sidebar_dividers import (
-    SIDEBAR_DIVIDER_CONTAINER_STYLE, SIDEBAR_DIVIDER_SPACE_STYLE, 
-    SIDEBAR_MAIN_DIVIDER_STYLE, SIDEBAR_FOOTER_CONTAINER_STYLE,
-    SIDEBAR_FOOTER_SPACE_STYLE, SIDEBAR_FOOTER_DIVIDER_STYLE,
-    SIDEBAR_VERTICAL_FOOTER_DIVIDER_STYLE
+    SIDEBAR_DIVIDER_CONTAINER_STYLE,
+    SIDEBAR_DIVIDER_SPACE_STYLE,
+    SIDEBAR_MAIN_DIVIDER_STYLE,
+    SIDEBAR_FOOTER_CONTAINER_STYLE,
+    SIDEBAR_FOOTER_SPACE_STYLE,
+    SIDEBAR_FOOTER_DIVIDER_STYLE,
+    SIDEBAR_VERTICAL_FOOTER_DIVIDER_STYLE,
 )
 
 
@@ -52,7 +70,7 @@ class Sidebar(QWidget):
         header_layout = QVBoxLayout(self.header)
         header_layout.setContentsMargins(0, 0, 0, 0)
         header_layout.setSpacing(0)
-        
+
         # Add title widget for compatibility with tests
         self.windowTitleWidget = None
         if title:
@@ -60,12 +78,11 @@ class Sidebar(QWidget):
             title_label.setObjectName("sidebar_title")
             header_layout.addWidget(title_label)
             self.windowTitleWidget = title_label
-        
+
         main_layout.addWidget(self.header)
 
         # Add divider after header
         self.add_divider(main_layout)
-        
 
         # 2. Scrollable Content Section
         scroll = QScrollArea()
@@ -176,22 +193,23 @@ class Sidebar(QWidget):
         layout = QHBoxLayout(container)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
-        
+
         # Add left button with 2/3 stretch
         layout.addWidget(left_btn, stretch=2)
-        
+
         # Add vertical divider with no stretch
         layout.addWidget(self.add_vertical_footer_divider(), stretch=0)
-        
+
         # Add right button with 1/3 stretch
         layout.addWidget(right_btn, stretch=1)
-        
+
         self.footer.layout().addWidget(container)
 
     def add_section(self, title=None):
         section = SidebarSection(title)
-        section.setSizePolicy(QSizePolicy.Preferred,
-                              QSizePolicy.Maximum)  # Add this line
+        section.setSizePolicy(
+            QSizePolicy.Preferred, QSizePolicy.Maximum
+        )  # Add this line
         self.content_layout.addWidget(section)
         return section
 
@@ -207,77 +225,73 @@ class Sidebar(QWidget):
         return btn
 
     def add_spacer(self):
-        spacer = QSpacerItem(20, 40, QSizePolicy.Minimum,
-                             QSizePolicy.Expanding)
+        spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
         self.content_layout.addItem(spacer)
 
     def add_back_button(self):
         self.back_button = QPushButton("Back")
         self.back_button.setObjectName("footer_button")  # Changed from back_button
-        self.back_button.clicked.connect(
-            lambda: self.button_clicked.emit("Back"))
+        self.back_button.clicked.connect(lambda: self.button_clicked.emit("Back"))
         self.footer.layout().addWidget(self.back_button)
         return self.back_button
 
     def add_results_button(self):
         results_btn = QPushButton("Results")
         results_btn.setObjectName("results_button")
-        results_btn.clicked.connect(
-            lambda: self.button_clicked.emit("Results"))
+        results_btn.clicked.connect(lambda: self.button_clicked.emit("Results"))
         self.footer.layout().addWidget(results_btn)
         self.results_button = results_btn  # Store reference
         self.results_button_index = self.footer.layout().count() - 1  # Store position
         return results_btn
-    
+
     def replace_results_with_save_button(self):
         """Replace Results button with Save button for status view (Issue #39)"""
         # Get the position of results button before hiding it
         results_index = 0
-        if hasattr(self, 'results_button') and self.results_button:
+        if hasattr(self, "results_button") and self.results_button:
             # Find the index of the results button in the layout
             for i in range(self.footer.layout().count()):
                 if self.footer.layout().itemAt(i).widget() == self.results_button:
                     results_index = i
                     break
             self.results_button.hide()
-        
+
         # Add save button at the same position with results_button style
         save_btn = QPushButton("Tests Running...")
         save_btn.setObjectName("results_button")  # Use same style as results button
         save_btn.setEnabled(False)  # Disabled until tests complete
-        save_btn.clicked.connect(
-            lambda: self.button_clicked.emit("Save"))
+        save_btn.clicked.connect(lambda: self.button_clicked.emit("Save"))
         self.footer.layout().insertWidget(results_index, save_btn)
         self.save_button = save_btn
         return save_btn
-    
+
     def enable_save_button(self):
         """Enable save button when tests complete"""
-        if hasattr(self, 'save_button') and self.save_button:
+        if hasattr(self, "save_button") and self.save_button:
             self.save_button.setEnabled(True)
             self.save_button.setText("💾 Save Results")
-    
+
     def mark_results_saved(self):
         """Update save button to show results are saved"""
-        if hasattr(self, 'save_button') and self.save_button:
+        if hasattr(self, "save_button") and self.save_button:
             self.save_button.setText("✓ Saved")
             self.save_button.setEnabled(False)
-    
+
     def restore_results_button(self):
         """Restore Results button when leaving status view"""
         # Remove save button if it exists
-        if hasattr(self, 'save_button') and self.save_button:
+        if hasattr(self, "save_button") and self.save_button:
             self.footer.layout().removeWidget(self.save_button)
             self.save_button.deleteLater()
             self.save_button = None
-        
+
         # Restore results button if not already there
-        if not hasattr(self, 'results_button') or not self.results_button:
+        if not hasattr(self, "results_button") or not self.results_button:
             self.add_results_button()
         else:
             # Show existing results button
             self.results_button.show()
-    
+
     def add_footer_button_divider(self):
         """Add a simple divider between footer buttons"""
         self.add_footer_divider()
@@ -285,7 +299,6 @@ class Sidebar(QWidget):
     def add_help_button(self):
         help_btn = QPushButton("Help Center")
         help_btn.setObjectName("footer_button")  # Changed from back_button
-        help_btn.clicked.connect(
-            lambda: self.button_clicked.emit("Help Center"))
+        help_btn.clicked.connect(lambda: self.button_clicked.emit("Help Center"))
         self.footer.layout().addWidget(help_btn)
         return help_btn

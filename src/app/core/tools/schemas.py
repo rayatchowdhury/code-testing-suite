@@ -10,10 +10,11 @@ from typing import TypedDict, Optional
 
 class BaseTestDetail(TypedDict, total=False):
     """Base fields for all test types
-    
+
     Common fields shared across all test result types.
     Using total=False to make all fields optional for flexibility.
     """
+
     test_number: int
     passed: bool
     error_details: str
@@ -25,10 +26,11 @@ class BaseTestDetail(TypedDict, total=False):
 
 class ValidatorTestDetail(BaseTestDetail, total=False):
     """Validator-specific test details
-    
+
     Phase 5 (Issue #5): Type definition for validator test results.
     Includes input generation, test execution, and validation steps.
     """
+
     input: str
     test_output: str
     validation_message: str
@@ -42,10 +44,11 @@ class ValidatorTestDetail(BaseTestDetail, total=False):
 
 class ComparisonTestDetail(BaseTestDetail, total=False):
     """Comparison test details (formerly stress tests)
-    
+
     Phase 5 (Issue #5): Type definition for comparison test results.
     Compares test solution output against correct solution output.
     """
+
     input: str
     test_output: str
     correct_output: str
@@ -61,10 +64,11 @@ class ComparisonTestDetail(BaseTestDetail, total=False):
 
 class BenchmarkTestDetail(BaseTestDetail, total=False):
     """Benchmark test details (formerly TLE tests)
-    
+
     Phase 5 (Issue #5): Type definition for benchmark test results.
     Measures execution time and memory usage against thresholds.
     """
+
     test_name: str
     execution_time: float
     memory_used: float

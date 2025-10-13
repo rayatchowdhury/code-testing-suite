@@ -6,7 +6,7 @@ This package contains reusable sidebar widgets used across different views:
 - LimitsInputWidget: Widget for configuring time and memory limits
 - Other specialized sidebar components
 
-All widgets in this package are designed to be reusable across validator, 
+All widgets in this package are designed to be reusable across validator,
 comparator, and benchmarker views.
 """
 

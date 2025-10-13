@@ -8,6 +8,4 @@ This module handles database-related configuration operations:
 
 from src.app.core.config.database.database_operations import DatabaseOperations
 
-__all__ = [
-    'DatabaseOperations'
-]
+__all__ = ["DatabaseOperations"]

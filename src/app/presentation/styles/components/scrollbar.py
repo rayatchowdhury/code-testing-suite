@@ -1,4 +1,3 @@
-
 SCROLLBAR_STYLE = """
 QScrollBar:vertical {
     background: transparent;

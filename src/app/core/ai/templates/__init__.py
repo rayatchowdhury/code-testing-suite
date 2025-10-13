@@ -5,4 +5,4 @@ Template management module.
 
 from src.app.core.ai.templates.prompt_templates import PromptTemplates
 
-__all__ = ['PromptTemplates']
+__all__ = ["PromptTemplates"]

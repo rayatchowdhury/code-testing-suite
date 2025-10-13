@@ -11,11 +11,11 @@ from src.app.core.tools.validator import ValidatorRunner
 from src.app.core.tools.comparator import Comparator
 
 __all__ = [
-    'CompilerRunner',
-    'ValidatorCompilerRunner', 
-    'ComparisonCompilerRunner',
-    'BenchmarkCompilerRunner',
-    'ValidatorRunner',
-    'Comparator',
-    'Benchmarker'
+    "CompilerRunner",
+    "ValidatorCompilerRunner",
+    "ComparisonCompilerRunner",
+    "BenchmarkCompilerRunner",
+    "ValidatorRunner",
+    "Comparator",
+    "Benchmarker",
 ]

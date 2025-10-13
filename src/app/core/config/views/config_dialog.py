@@ -2,16 +2,29 @@
 
 import os
 from PySide6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QScrollArea, QWidget,
-    QLabel, QPushButton, QFrame, QComboBox, QLineEdit, QSpinBox, 
-    QCheckBox, QFileDialog, QTextEdit, QMessageBox
+    QDialog,
+    QVBoxLayout,
+    QHBoxLayout,
+    QScrollArea,
+    QWidget,
+    QLabel,
+    QPushButton,
+    QFrame,
+    QComboBox,
+    QLineEdit,
+    QSpinBox,
+    QCheckBox,
+    QFileDialog,
+    QTextEdit,
+    QMessageBox,
 )
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIcon, QFont
 
 from src.app.presentation.styles.components.config_styles import CONFIG_DIALOG_STYLE
 from src.app.presentation.styles.components.config_ui import (
-    CONFIG_DIALOG_TITLE_STYLE, SECTION_INFO_LABEL_STYLE
+    CONFIG_DIALOG_TITLE_STYLE,
+    SECTION_INFO_LABEL_STYLE,
 )
 from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
 from src.app.shared.constants import SETTINGS_ICON
@@ -19,18 +32,18 @@ from src.app.shared.constants import SETTINGS_ICON
 
 class ErrorDialog(QDialog):
     """A styled error dialog for displaying error messages with optional details."""
-    
+
     def __init__(self, title, message, details=None, parent=None):
         super().__init__(parent)
         self.setWindowTitle(title)
         self.setMinimumSize(400, 200)
         self.setMaximumWidth(600)
         self.setWindowFlag(Qt.WindowContextHelpButtonHint, False)
-        
+
         self.title_text = title
         self.message_text = message
         self.details_text = details
-        
+
         self._setup_ui()
         self._setup_styles()
 
@@ -95,6 +108,7 @@ class ErrorDialog(QDialog):
     def _setup_styles(self):
         """Apply styling to the dialog."""
         from src.app.presentation.styles.components.config_ui import ERROR_DIALOG_STYLE
+
         self.setStyleSheet(ERROR_DIALOG_STYLE)
 
     @staticmethod
@@ -176,7 +190,7 @@ class ConfigView(QDialog):
         content_layout.addWidget(self._create_ai_section())
         content_layout.addWidget(self._create_editor_section())
         content_layout.addWidget(self._create_database_section())
-        
+
         # Add stretch to push content to top
         content_layout.addStretch(1)
 
@@ -188,38 +202,38 @@ class ConfigView(QDialog):
         button_container = QWidget()
         button_container.setObjectName("button_container")
         button_container.setFixedHeight(72)
-        
+
         button_layout = QHBoxLayout(button_container)
         button_layout.setContentsMargins(0, 16, 0, 16)
         button_layout.setSpacing(12)
-        
+
         # Reset button
         reset_btn = QPushButton("Reset to Defaults")
         reset_btn.setObjectName("secondary_button")
         reset_btn.clicked.connect(self.config_persistence.reset_to_defaults)
         button_layout.addWidget(reset_btn)
-        
+
         button_layout.addStretch(1)
-        
+
         # Cancel and Save buttons
         cancel_btn = QPushButton("Cancel")
         cancel_btn.setObjectName("secondary_button")
         cancel_btn.clicked.connect(self.reject)
         button_layout.addWidget(cancel_btn)
-        
+
         save_btn = QPushButton("Save")
         save_btn.setObjectName("primary_button")
         save_btn.setDefault(True)
         save_btn.clicked.connect(self._save_and_close)
         button_layout.addWidget(save_btn)
-        
+
         main_layout.addWidget(button_container)
 
     def _create_section_frame(self, title_text):
         """Create section frame using original app patterns."""
         frame = QFrame()
         frame.setObjectName("section_frame")
-        
+
         layout = QVBoxLayout(frame)
         layout.setSpacing(8)
         layout.setContentsMargins(0, 0, 0, 8)
@@ -240,204 +254,228 @@ class ConfigView(QDialog):
     def _create_languages_section(self):
         """Create multi-language compiler flags configuration section."""
         frame, layout = self._create_section_frame("🌐 Language Compilers")
-        
+
         # Info label
-        info_label = QLabel("Configure compilers, interpreters, and flags for each language.")
+        info_label = QLabel(
+            "Configure compilers, interpreters, and flags for each language."
+        )
         info_label.setStyleSheet(SECTION_INFO_LABEL_STYLE)
         info_label.setWordWrap(True)
         layout.addWidget(info_label)
-        
+
         # ===== C++ Configuration =====
         cpp_widget = QWidget()
         cpp_layout = QVBoxLayout(cpp_widget)
         cpp_layout.setContentsMargins(0, 8, 0, 8)
         cpp_layout.setSpacing(6)
-        
+
         cpp_header = QLabel("C++")
-        cpp_header.setStyleSheet(f"font-weight: 600; font-size: 13px; color: {MATERIAL_COLORS['primary']};")
+        cpp_header.setStyleSheet(
+            f"font-weight: 600; font-size: 13px; color: {MATERIAL_COLORS['primary']};"
+        )
         cpp_layout.addWidget(cpp_header)
-        
+
         # C++ Compiler selection
         cpp_compiler_row = QWidget()
         cpp_compiler_layout = QHBoxLayout(cpp_compiler_row)
         cpp_compiler_layout.setContentsMargins(0, 0, 0, 0)
         cpp_compiler_layout.setSpacing(8)
-        
+
         cpp_compiler_label = QLabel("Compiler:")
         cpp_compiler_label.setFixedWidth(100)
         cpp_compiler_layout.addWidget(cpp_compiler_label)
-        
+
         self.cpp_compiler_combo = QComboBox()
         self.cpp_compiler_combo.addItems(["g++", "clang++", "gcc", "clang"])
         self.cpp_compiler_combo.setFixedHeight(28)
-        self.cpp_compiler_combo.setToolTip("Select C++ compiler (g++ recommended for competitive programming)")
+        self.cpp_compiler_combo.setToolTip(
+            "Select C++ compiler (g++ recommended for competitive programming)"
+        )
         cpp_compiler_layout.addWidget(self.cpp_compiler_combo)
-        
+
         cpp_layout.addWidget(cpp_compiler_row)
-        
+
         # C++ Standard selection
         cpp_std_row = QWidget()
         cpp_std_layout = QHBoxLayout(cpp_std_row)
         cpp_std_layout.setContentsMargins(0, 0, 0, 0)
         cpp_std_layout.setSpacing(8)
-        
+
         cpp_std_label = QLabel("C++ Standard:")
         cpp_std_label.setFixedWidth(100)
         cpp_std_layout.addWidget(cpp_std_label)
-        
+
         self.cpp_std_combo = QComboBox()
         self.cpp_std_combo.addItems(["c++11", "c++14", "c++17", "c++20", "c++23"])
         self.cpp_std_combo.setFixedHeight(28)
         self.cpp_std_combo.setToolTip("C++ language standard version")
         cpp_std_layout.addWidget(self.cpp_std_combo)
-        
+
         cpp_layout.addWidget(cpp_std_row)
-        
+
         # C++ Optimization level
         cpp_opt_row = QWidget()
         cpp_opt_layout = QHBoxLayout(cpp_opt_row)
         cpp_opt_layout.setContentsMargins(0, 0, 0, 0)
         cpp_opt_layout.setSpacing(8)
-        
+
         cpp_opt_label = QLabel("Optimization:")
         cpp_opt_label.setFixedWidth(100)
         cpp_opt_layout.addWidget(cpp_opt_label)
-        
+
         self.cpp_opt_combo = QComboBox()
         self.cpp_opt_combo.addItems(["O0", "O1", "O2", "O3", "Ofast", "Os", "Oz"])
         self.cpp_opt_combo.setFixedHeight(28)
-        self.cpp_opt_combo.setToolTip("Compiler optimization level (O2 recommended for competitive programming)")
+        self.cpp_opt_combo.setToolTip(
+            "Compiler optimization level (O2 recommended for competitive programming)"
+        )
         cpp_opt_layout.addWidget(self.cpp_opt_combo)
-        
+
         cpp_layout.addWidget(cpp_opt_row)
-        
+
         # C++ Flags
         cpp_flags_label = QLabel("Additional Flags:")
-        cpp_flags_label.setStyleSheet(f"font-weight: 500; color: {MATERIAL_COLORS['on_surface']}; margin-top: 4px;")
+        cpp_flags_label.setStyleSheet(
+            f"font-weight: 500; color: {MATERIAL_COLORS['on_surface']}; margin-top: 4px;"
+        )
         cpp_layout.addWidget(cpp_flags_label)
-        
+
         self.cpp_flags_input = QLineEdit()
         self.cpp_flags_input.setPlaceholderText("e.g., -Wall, -march=native, -pipe")
         self.cpp_flags_input.setFixedHeight(28)
         self.cpp_flags_input.setToolTip("Additional compiler flags (comma-separated)")
         cpp_layout.addWidget(self.cpp_flags_input)
-        
+
         layout.addWidget(cpp_widget)
-        
+
         # Separator
         separator1 = QFrame()
         separator1.setFrameShape(QFrame.HLine)
-        separator1.setStyleSheet(f"background-color: {MATERIAL_COLORS['outline_variant']};")
+        separator1.setStyleSheet(
+            f"background-color: {MATERIAL_COLORS['outline_variant']};"
+        )
         separator1.setFixedHeight(1)
         layout.addWidget(separator1)
-        
+
         # ===== Python Configuration =====
         py_widget = QWidget()
         py_layout = QVBoxLayout(py_widget)
         py_layout.setContentsMargins(0, 8, 0, 8)
         py_layout.setSpacing(6)
-        
+
         py_header = QLabel("Python")
-        py_header.setStyleSheet(f"font-weight: 600; font-size: 13px; color: {MATERIAL_COLORS['primary']};")
+        py_header.setStyleSheet(
+            f"font-weight: 600; font-size: 13px; color: {MATERIAL_COLORS['primary']};"
+        )
         py_layout.addWidget(py_header)
-        
+
         # Python Interpreter selection
         py_interpreter_row = QWidget()
         py_interpreter_layout = QHBoxLayout(py_interpreter_row)
         py_interpreter_layout.setContentsMargins(0, 0, 0, 0)
         py_interpreter_layout.setSpacing(8)
-        
+
         py_interpreter_label = QLabel("Interpreter:")
         py_interpreter_label.setFixedWidth(100)
         py_interpreter_layout.addWidget(py_interpreter_label)
-        
+
         self.py_interpreter_combo = QComboBox()
         self.py_interpreter_combo.addItems(["python", "python3", "pypy", "pypy3"])
         self.py_interpreter_combo.setFixedHeight(28)
-        self.py_interpreter_combo.setToolTip("Python interpreter (pypy/pypy3 often faster for competitive programming)")
+        self.py_interpreter_combo.setToolTip(
+            "Python interpreter (pypy/pypy3 often faster for competitive programming)"
+        )
         py_interpreter_layout.addWidget(self.py_interpreter_combo)
-        
+
         py_layout.addWidget(py_interpreter_row)
-        
+
         # Python Flags
         py_flags_label = QLabel("Interpreter Flags:")
-        py_flags_label.setStyleSheet(f"font-weight: 500; color: {MATERIAL_COLORS['on_surface']}; margin-top: 4px;")
+        py_flags_label.setStyleSheet(
+            f"font-weight: 500; color: {MATERIAL_COLORS['on_surface']}; margin-top: 4px;"
+        )
         py_layout.addWidget(py_flags_label)
-        
+
         self.py_flags_input = QLineEdit()
         self.py_flags_input.setPlaceholderText("e.g., -u, -B")
         self.py_flags_input.setFixedHeight(28)
         self.py_flags_input.setToolTip("Python interpreter flags (comma-separated)")
         py_layout.addWidget(self.py_flags_input)
-        
+
         layout.addWidget(py_widget)
-        
+
         # Separator
         separator2 = QFrame()
         separator2.setFrameShape(QFrame.HLine)
-        separator2.setStyleSheet(f"background-color: {MATERIAL_COLORS['outline_variant']};")
+        separator2.setStyleSheet(
+            f"background-color: {MATERIAL_COLORS['outline_variant']};"
+        )
         separator2.setFixedHeight(1)
         layout.addWidget(separator2)
-        
+
         # ===== Java Configuration =====
         java_widget = QWidget()
         java_layout = QVBoxLayout(java_widget)
         java_layout.setContentsMargins(0, 8, 0, 8)
         java_layout.setSpacing(6)
-        
+
         java_header = QLabel("Java")
-        java_header.setStyleSheet(f"font-weight: 600; font-size: 13px; color: {MATERIAL_COLORS['primary']};")
+        java_header.setStyleSheet(
+            f"font-weight: 600; font-size: 13px; color: {MATERIAL_COLORS['primary']};"
+        )
         java_layout.addWidget(java_header)
-        
+
         # Java Compiler selection
         java_compiler_row = QWidget()
         java_compiler_layout = QHBoxLayout(java_compiler_row)
         java_compiler_layout.setContentsMargins(0, 0, 0, 0)
         java_compiler_layout.setSpacing(8)
-        
+
         java_compiler_label = QLabel("Compiler:")
         java_compiler_label.setFixedWidth(100)
         java_compiler_layout.addWidget(java_compiler_label)
-        
+
         self.java_compiler_combo = QComboBox()
         self.java_compiler_combo.addItems(["javac", "ecj"])
         self.java_compiler_combo.setFixedHeight(28)
         self.java_compiler_combo.setToolTip("Java compiler (javac is standard)")
         java_compiler_layout.addWidget(self.java_compiler_combo)
-        
+
         java_layout.addWidget(java_compiler_row)
-        
+
         # Java Runtime selection
         java_runtime_row = QWidget()
         java_runtime_layout = QHBoxLayout(java_runtime_row)
         java_runtime_layout.setContentsMargins(0, 0, 0, 0)
         java_runtime_layout.setSpacing(8)
-        
+
         java_runtime_label = QLabel("Runtime:")
         java_runtime_label.setFixedWidth(100)
         java_runtime_layout.addWidget(java_runtime_label)
-        
+
         self.java_runtime_combo = QComboBox()
         self.java_runtime_combo.addItems(["java"])
         self.java_runtime_combo.setFixedHeight(28)
         self.java_runtime_combo.setToolTip("Java runtime executable")
         java_runtime_layout.addWidget(self.java_runtime_combo)
-        
+
         java_layout.addWidget(java_runtime_row)
-        
+
         # Java Flags
         java_flags_label = QLabel("Compiler Flags:")
-        java_flags_label.setStyleSheet(f"font-weight: 500; color: {MATERIAL_COLORS['on_surface']}; margin-top: 4px;")
+        java_flags_label.setStyleSheet(
+            f"font-weight: 500; color: {MATERIAL_COLORS['on_surface']}; margin-top: 4px;"
+        )
         java_layout.addWidget(java_flags_label)
-        
+
         self.java_flags_input = QLineEdit()
         self.java_flags_input.setPlaceholderText("e.g., -encoding UTF-8, -Xlint")
         self.java_flags_input.setFixedHeight(28)
         self.java_flags_input.setToolTip("Java compiler flags (comma-separated)")
         java_layout.addWidget(self.java_flags_input)
-        
+
         layout.addWidget(java_widget)
-        
+
         return frame
 
     def _create_ai_section(self):
@@ -468,7 +506,7 @@ class ConfigView(QDialog):
         self.key_input.setFixedHeight(28)
         self.key_input.textChanged.connect(self.on_key_changed)
         api_key_layout.addWidget(self.key_input)
-        
+
         # Toggle visibility button
         self.toggle_btn = QPushButton("👁")
         self.toggle_btn.setObjectName("small_button")
@@ -476,7 +514,7 @@ class ConfigView(QDialog):
         self.toggle_btn.clicked.connect(self.toggle_visibility)
         self.toggle_btn.setToolTip("Show/Hide API key")
         api_key_layout.addWidget(self.toggle_btn)
-        
+
         # Validate button
         self.validate_btn = QPushButton("🔄")
         self.validate_btn.setObjectName("small_button")
@@ -484,7 +522,7 @@ class ConfigView(QDialog):
         self.validate_btn.clicked.connect(self.force_validation)
         self.validate_btn.setToolTip("Re-validate API key")
         api_key_layout.addWidget(self.validate_btn)
-        
+
         # Validation indicator
         self.status_label = QLabel()
         self.status_label.setFixedWidth(20)
@@ -507,22 +545,28 @@ class ConfigView(QDialog):
         self.model_combo = QComboBox()
         self.model_combo.setEditable(True)  # Allow custom text entry
         self.model_combo.setFixedHeight(28)
-        
+
         # Add only Gemini 2.5 models
         available_models = self.gemini_config.get_available_models()
         self.model_combo.addItems(available_models)
-        self.model_combo.setCurrentText(self.gemini_config.get_default_model())  # Set default
-        
-        self.model_combo.setToolTip("Select from available Gemini 2.5 models or enter a custom model name")
+        self.model_combo.setCurrentText(
+            self.gemini_config.get_default_model()
+        )  # Set default
+
+        self.model_combo.setToolTip(
+            "Select from available Gemini 2.5 models or enter a custom model name"
+        )
         model_layout.addWidget(self.model_combo)
-        
+
         # Keep reference for backward compatibility (some code might reference model_input)
         self.model_input = self.model_combo.lineEdit()
 
         layout.addWidget(model_widget)
 
         # Info label
-        info_label = QLabel("💡 Enable AI Panel to access code assistance features. Valid API key required. Choose from Gemini 2.5 models or enter a custom model name.")
+        info_label = QLabel(
+            "💡 Enable AI Panel to access code assistance features. Valid API key required. Choose from Gemini 2.5 models or enter a custom model name."
+        )
         info_label.setStyleSheet(SECTION_INFO_LABEL_STYLE)
         info_label.setWordWrap(True)
         layout.addWidget(info_label)
@@ -548,20 +592,20 @@ class ConfigView(QDialog):
         font_label = QLabel("Editor font size:")
         font_label.setFixedWidth(120)
         font_layout.addWidget(font_label)
-        
+
         self.font_size_spin = QSpinBox()
         self.font_size_spin.setRange(8, 28)
         self.font_size_spin.setValue(13)
         self.font_size_spin.setFixedHeight(28)
         font_layout.addWidget(self.font_size_spin)
         font_layout.addStretch(1)
-        
+
         layout.addWidget(font_widget)
 
         # Line wrap
         self.wrap_checkbox = QCheckBox("Enable line wrap")
         layout.addWidget(self.wrap_checkbox)
-        
+
         return frame
 
     def _create_database_section(self):
@@ -569,7 +613,9 @@ class ConfigView(QDialog):
         frame, layout = self._create_section_frame("🗄️ Database Management")
 
         # Database statistics display
-        self.db_stats_label = QLabel("Click 'Refresh Stats' to view database information")
+        self.db_stats_label = QLabel(
+            "Click 'Refresh Stats' to view database information"
+        )
         self.db_stats_label.setObjectName("info_label")
         self.db_stats_label.setWordWrap(True)
         layout.addWidget(self.db_stats_label)
@@ -582,7 +628,9 @@ class ConfigView(QDialog):
 
         self.refresh_stats_btn = QPushButton("Refresh Stats")
         self.refresh_stats_btn.setObjectName("secondary_button")
-        self.refresh_stats_btn.clicked.connect(self.db_operations.refresh_database_stats)
+        self.refresh_stats_btn.clicked.connect(
+            self.db_operations.refresh_database_stats
+        )
         buttons_layout1.addWidget(self.refresh_stats_btn)
 
         self.cleanup_btn = QPushButton("Cleanup Old Data (30 days)")
@@ -613,7 +661,9 @@ class ConfigView(QDialog):
         layout.addWidget(buttons_row2)
 
         # Warning text
-        warning_label = QLabel("⚠️ Warning: 'Delete ALL Data' permanently removes all test results and sessions!")
+        warning_label = QLabel(
+            "⚠️ Warning: 'Delete ALL Data' permanently removes all test results and sessions!"
+        )
         warning_label.setObjectName("warning_label")
         warning_label.setWordWrap(True)
         layout.addWidget(warning_label)
@@ -636,7 +686,7 @@ class ConfigView(QDialog):
         enabled = state == Qt.Checked
         # Implementation would go here
         pass
-    
+
     def on_key_changed(self, text):
         """Handle API key text change."""
         # Reset validation state when key changes
@@ -644,7 +694,7 @@ class ConfigView(QDialog):
         self.status_label.setText("")
         # Implementation would go here
         pass
-    
+
     def toggle_visibility(self):
         """Toggle API key visibility."""
         if self.key_input.echoMode() == QLineEdit.Password:
@@ -653,7 +703,7 @@ class ConfigView(QDialog):
         else:
             self.key_input.setEchoMode(QLineEdit.Password)
             self.toggle_btn.setText("👁")
-    
+
     def force_validation(self):
         """Force API key validation."""
         api_key = self.key_input.text().strip()
@@ -673,34 +723,37 @@ class ConfigView(QDialog):
             except Exception as e:
                 self.status_label.setText("?")
                 print(f"Validation error: {e}")
-    
+
     def discover_models(self):
         """Legacy method - no longer needed with dropdown, but kept for compatibility."""
         # Simply refresh dropdown with available models
         current_model = self.model_combo.currentText().strip()
         available_models = self.gemini_config.get_available_models()
-        
+
         self.model_combo.clear()
         self.model_combo.addItems(available_models)
-        
+
         # Restore selection if it was valid
         if current_model in available_models:
             self.model_combo.setCurrentText(current_model)
         else:
             self.model_combo.setCurrentText(self.gemini_config.get_default_model())
-        
-        self.show_success("Models Refreshed", f"Available Gemini 2.5 models loaded. Default: {self.gemini_config.get_default_model()}")
-        
+
+        self.show_success(
+            "Models Refreshed",
+            f"Available Gemini 2.5 models loaded. Default: {self.gemini_config.get_default_model()}",
+        )
+
     def _on_models_discovered(self, models):
         """Handle successful model discovery - DEPRECATED."""
         # This method is no longer used but kept for compatibility
         pass
-        
+
     def _on_discovery_failed(self, error_msg):
-        """Handle model discovery failure - DEPRECATED.""" 
+        """Handle model discovery failure - DEPRECATED."""
         # This method is no longer used but kept for compatibility
         pass
-        
+
     def _on_discovery_finished(self):
         """Handle discovery completion - DEPRECATED."""
         # This method is no longer used but kept for compatibility

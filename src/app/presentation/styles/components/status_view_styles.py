@@ -118,15 +118,16 @@ QFrame {{
 }}
 """
 
+
 def get_segment_style(state: str) -> str:
     """
     Get segment style based on test state.
-    
+
     Args:
         state: 'passed', 'failed', 'mixed_pass', 'mixed_fail', or 'default'
     """
     gradients = {
-        'passed': f"""
+        "passed": f"""
             QFrame {{
                 background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                                          stop:0 {COLORS['primary']},
@@ -135,7 +136,7 @@ def get_segment_style(state: str) -> str:
                 border-radius: 3px;
             }}
         """,
-        'failed': f"""
+        "failed": f"""
             QFrame {{
                 background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                                          stop:0 {MATERIAL_COLORS['error']},
@@ -144,7 +145,7 @@ def get_segment_style(state: str) -> str:
                 border-radius: 3px;
             }}
         """,
-        'mixed_pass': f"""
+        "mixed_pass": f"""
             QFrame {{
                 background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                                          stop:0 rgba(64, 169, 212, 1),
@@ -153,7 +154,7 @@ def get_segment_style(state: str) -> str:
                 border-radius: 3px;
             }}
         """,
-        'mixed_fail': f"""
+        "mixed_fail": f"""
             QFrame {{
                 background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                                          stop:0 rgba(255, 140, 66, 1),
@@ -162,9 +163,10 @@ def get_segment_style(state: str) -> str:
                 border-radius: 3px;
             }}
         """,
-        'default': SEGMENT_DEFAULT_STYLE
+        "default": SEGMENT_DEFAULT_STYLE,
     }
     return gradients.get(state, SEGMENT_DEFAULT_STYLE)
+
 
 STATS_PANEL_STYLE = f"""
 QWidget {{
@@ -289,10 +291,11 @@ QLabel {{
 # TEST CARD STYLES
 # ============================================================================
 
+
 def get_test_card_style(passed: bool, is_hover: bool = False) -> str:
     """
     Get test card style based on pass/fail state and hover.
-    
+
     Args:
         passed: Whether test passed
         is_hover: Whether in hover state
@@ -327,7 +330,7 @@ def get_test_card_style(passed: bool, is_hover: bool = False) -> str:
                                      stop:1 rgba(90, 15, 15, 0.45));
         """
         hover_border = f"border: 3px solid {MATERIAL_COLORS['error']}90;"
-    
+
     if is_hover:
         return f"""
             QFrame {{
@@ -350,6 +353,7 @@ def get_test_card_style(passed: bool, is_hover: bool = False) -> str:
                 padding: 2px;
             }}
         """
+
 
 TEST_CARD_LABEL_HEADER_STYLE = f"""
 font-weight: 700;
@@ -402,24 +406,24 @@ QLabel {{
 # ============================================================================
 
 __all__ = [
-    'STATUS_VIEW_CONTAINER_STYLE',
-    'CONTROLS_PANEL_STYLE',
-    'FILE_BUTTON_STYLE',
-    'PROGRESS_SECTION_CONTAINER_STYLE',
-    'VISUAL_PROGRESS_BAR_STYLE',
-    'SEGMENT_DEFAULT_STYLE',
-    'get_segment_style',
-    'STATS_PANEL_STYLE',
-    'STATS_LABEL_PASSED_STYLE',
-    'STATS_LABEL_FAILED_STYLE',
-    'STATS_PERCENTAGE_STYLE',
-    'CARDS_SECTION_SCROLL_STYLE',
-    'CARDS_SECTION_TITLE_PASSED_STYLE',
-    'CARDS_SECTION_TITLE_FAILED_STYLE',
-    'get_test_card_style',
-    'TEST_CARD_LABEL_HEADER_STYLE',
-    'TEST_CARD_LABEL_STATUS_PASSED_STYLE',
-    'TEST_CARD_LABEL_STATUS_FAILED_STYLE',
-    'TEST_CARD_LABEL_METRIC_STYLE',
-    'SECTION_HEADER_STYLE',
+    "STATUS_VIEW_CONTAINER_STYLE",
+    "CONTROLS_PANEL_STYLE",
+    "FILE_BUTTON_STYLE",
+    "PROGRESS_SECTION_CONTAINER_STYLE",
+    "VISUAL_PROGRESS_BAR_STYLE",
+    "SEGMENT_DEFAULT_STYLE",
+    "get_segment_style",
+    "STATS_PANEL_STYLE",
+    "STATS_LABEL_PASSED_STYLE",
+    "STATS_LABEL_FAILED_STYLE",
+    "STATS_PERCENTAGE_STYLE",
+    "CARDS_SECTION_SCROLL_STYLE",
+    "CARDS_SECTION_TITLE_PASSED_STYLE",
+    "CARDS_SECTION_TITLE_FAILED_STYLE",
+    "get_test_card_style",
+    "TEST_CARD_LABEL_HEADER_STYLE",
+    "TEST_CARD_LABEL_STATUS_PASSED_STYLE",
+    "TEST_CARD_LABEL_STATUS_FAILED_STYLE",
+    "TEST_CARD_LABEL_METRIC_STYLE",
+    "SECTION_HEADER_STYLE",
 ]

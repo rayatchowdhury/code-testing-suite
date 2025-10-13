@@ -13,7 +13,9 @@ QWidget#console_container {
 """
 
 # Update existing CONSOLE_STYLE to include the container style
-CONSOLE_STYLE = CONSOLE_CONTAINER_STYLE + f"""
+CONSOLE_STYLE = (
+    CONSOLE_CONTAINER_STYLE
+    + f"""
 * {{
     background-color: transparent;
 }}
@@ -116,3 +118,4 @@ QPushButton#compile_run_btn:disabled {{
     border: 1.2px solid rgba(60, 60, 60, 0.15);
 }}
 """
+)

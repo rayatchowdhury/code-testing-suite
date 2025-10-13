@@ -1,7 +1,8 @@
 from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
 from src.app.presentation.styles.components.scrollbar import SCROLLBAR_STYLE
 
-CONFIG_DIALOG_STYLE = f"""
+CONFIG_DIALOG_STYLE = (
+    f"""
     QDialog {{
         background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
             stop:0 rgba(18, 18, 20, 0.98),
@@ -398,4 +399,6 @@ CONFIG_DIALOG_STYLE = f"""
         border: 1px solid rgba(244, 67, 54, 0.3);
         border-radius: 6px;
     }}
-""" + SCROLLBAR_STYLE
+"""
+    + SCROLLBAR_STYLE
+)

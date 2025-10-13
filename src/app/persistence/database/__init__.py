@@ -5,27 +5,19 @@ Refactored architecture with backward compatibility.
 """
 
 # Models
-from .models import (
-    FilesSnapshot,
-    TestResult,
-    Session,
-    ProjectData
-)
+from .models import FilesSnapshot, TestResult, Session, ProjectData
 
 # Connection
 from .connection import DatabaseConnection
 
 # Repositories
-from .repositories import (
-    BaseRepository,
-    TestResultRepository
-)
+from .repositories import BaseRepository, TestResultRepository
 
 # Services
 from .services import (
     FilesSnapshotService,
     DatabaseStatsService,
-    DatabaseMaintenanceService
+    DatabaseMaintenanceService,
 )
 
 # Exceptions
@@ -33,7 +25,7 @@ from .exceptions import (
     DatabaseError,
     ConnectionError as DBConnectionError,
     RepositoryError,
-    ValidationError
+    ValidationError,
 )
 
 # Constants
@@ -44,16 +36,16 @@ from . import constants
 class DatabaseManager:
     """
     Backward-compatible facade for old code.
-    
+
     Delegates to new architecture but maintains old API.
     This allows existing code to continue working while
     new code can use repositories and services directly.
     """
-    
+
     def __init__(self, db_path: str = None):
         """
         Initialize with new architecture.
-        
+
         Args:
             db_path: Optional database path (uses default if None)
         """
@@ -64,24 +56,30 @@ class DatabaseManager:
         # Store db_path for compatibility
         self.db_path = self.db.db_path
         self.connection = None  # For backward compatibility
-    
+
     # Connection management (for backward compatibility)
     def connect(self):
         """Get connection (deprecated - use context manager)."""
         return self.db._connection
-    
+
     def close(self):
         """Close connection (deprecated - handled automatically)."""
         pass  # Connection is managed by singleton
-    
+
     # TestResult operations - delegate to repository
     def save_test_result(self, result: TestResult) -> int:
         """Save test result."""
         return self.test_repo.save(result)
-    
-    def get_test_results(self, test_type: str = None, project_name: str = None,
-                        days: int = None, file_name: str = None, 
-                        status: str = None, limit: int = 100):
+
+    def get_test_results(
+        self,
+        test_type: str = None,
+        project_name: str = None,
+        days: int = None,
+        file_name: str = None,
+        status: str = None,
+        limit: int = 100,
+    ):
         """Get test results with filters."""
         return self.test_repo.get_all(
             test_type=test_type,
@@ -89,66 +87,68 @@ class DatabaseManager:
             days=days,
             file_name=file_name,
             status=status,
-            limit=limit
+            limit=limit,
         )
-    
+
     def delete_test_result(self, result_id: int) -> bool:
         """Delete test result by ID."""
         return self.test_repo.delete(result_id)
-    
+
     def delete_all_data(self, confirm: bool = False) -> bool:
         """Delete all test results (requires confirmation)."""
         return self.test_repo.delete_all(confirm=confirm)
-    
+
     # Session operations - stub for backward compatibility
     def save_session(self, session: Session) -> int:
         """Save session (stub - not yet implemented)."""
         raise NotImplementedError("Session repository not yet migrated")
-    
+
     def get_sessions(self, project_name: str = None, limit: int = 100):
         """Get sessions (stub - not yet implemented)."""
         raise NotImplementedError("Session repository not yet migrated")
-    
+
     # Project operations - stub for backward compatibility
     def save_project_data(self, project: ProjectData) -> int:
         """Save project data (stub - not yet implemented)."""
         raise NotImplementedError("Project repository not yet migrated")
-    
+
     def get_projects(self, limit: int = 100):
         """Get projects (stub - not yet implemented)."""
         raise NotImplementedError("Project repository not yet migrated")
-    
+
     # Statistics - delegate to service
     def get_database_stats(self):
         """Get database statistics."""
         return self.stats_service.get_database_stats()
-    
+
     def get_test_statistics(self, project_name: str = None):
         """Get test statistics and analytics."""
         return self.stats_service.get_test_statistics(project_name=project_name)
-    
+
     # Maintenance - delegate to service
     def cleanup_old_data(self, days: int = None):
         """Clean up old data."""
         if days is None:
             days = constants.DEFAULT_CLEANUP_DAYS
         return self.maintenance_service.cleanup_old_data(days=days)
-    
+
     def optimize_database(self):
         """Optimize database by running VACUUM."""
         return self.maintenance_service.optimize_database()
-    
+
     # Migration (deprecated - no longer needed)
     def migrate_old_results_to_new_format(self, dry_run: bool = False):
         """Migration (deprecated - no longer needed)."""
         return {"status": "skipped", "message": "Migration no longer needed"}
-    
+
     # Static methods - delegate to service
     @staticmethod
-    def create_files_snapshot(workspace_dir: str, test_type: str = constants.TEST_TYPE_COMPARISON):
+    def create_files_snapshot(
+        workspace_dir: str, test_type: str = constants.TEST_TYPE_COMPARISON
+    ):
         """Create files snapshot."""
         return FilesSnapshotService.create_snapshot(workspace_dir, test_type)
-    
+
     @staticmethod
     def analyze_output_mismatch(expected: str, actual: str):
         """Analyze output mismatch."""
@@ -157,32 +157,26 @@ class DatabaseManager:
 
 __all__ = [
     # Models
-    'FilesSnapshot',
-    'TestResult',
-    'Session',
-    'ProjectData',
-    
+    "FilesSnapshot",
+    "TestResult",
+    "Session",
+    "ProjectData",
     # Connection
-    'DatabaseConnection',
-    
+    "DatabaseConnection",
     # Repositories
-    'BaseRepository',
-    'TestResultRepository',
-    
+    "BaseRepository",
+    "TestResultRepository",
     # Services
-    'FilesSnapshotService',
-    'DatabaseStatsService',
-    'DatabaseMaintenanceService',
-    
+    "FilesSnapshotService",
+    "DatabaseStatsService",
+    "DatabaseMaintenanceService",
     # Exceptions
-    'DatabaseError',
-    'DBConnectionError',
-    'RepositoryError',
-    'ValidationError',
-    
+    "DatabaseError",
+    "DBConnectionError",
+    "RepositoryError",
+    "ValidationError",
     # Constants module
-    'constants',
-    
+    "constants",
     # Backward compatibility
-    'DatabaseManager',
+    "DatabaseManager",
 ]

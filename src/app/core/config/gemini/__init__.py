@@ -9,7 +9,4 @@ This module handles all Gemini AI-related configuration:
 
 from src.app.core.config.gemini.gemini_handler import GeminiConfig, GeminiConfigUI
 
-__all__ = [
-    'GeminiConfig', 
-    'GeminiConfigUI'
-]
+__all__ = ["GeminiConfig", "GeminiConfigUI"]

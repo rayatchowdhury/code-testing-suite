@@ -575,7 +575,7 @@ class TestFileConstantsIntegration:
         """Test that source and executable paths are in same directory."""
         source = get_source_file_path(temp_dir, "comparator", "generator", "cpp")
         executable = get_executable_path(temp_dir, "comparator", "generator", "cpp")
-        
+
         # Should be in same directory
         assert os.path.dirname(source) == os.path.dirname(executable)
 
@@ -583,11 +583,11 @@ class TestFileConstantsIntegration:
         """Test that filename functions work together."""
         # Generate filename
         filename = get_source_filename("generator", "cpp")
-        
+
         # Detect language and role
         language = get_language_from_filename(filename)
         role = get_role_from_filename(filename)
-        
+
         assert language == "cpp"
         assert role == "generator"
 
@@ -597,7 +597,7 @@ class TestFileConstantsIntegration:
         assert validate_file_for_test_type("generator.cpp", "comparator") is True
         assert validate_file_for_test_type("correct.cpp", "comparator") is True
         assert validate_file_for_test_type("test.cpp", "comparator") is True
-        
+
         # Benchmarker has generator, test (no correct)
         assert validate_file_for_test_type("generator.cpp", "benchmarker") is True
         assert validate_file_for_test_type("test.cpp", "benchmarker") is True
@@ -606,16 +606,16 @@ class TestFileConstantsIntegration:
     def test_all_languages_supported_consistently(self):
         """Test that all supported languages work across functions."""
         languages = get_supported_languages()
-        
+
         for lang in languages:
             # Should generate valid filenames
             source = get_source_filename("generator", lang)
             assert source is not None
-            
+
             # Should detect language
             detected = get_language_from_filename(source)
             assert detected == lang
-            
+
             # Should generate display name
             display = get_file_display_name("generator", lang)
             assert display is not None

@@ -48,32 +48,24 @@ def valid_config():
                 "compiler": "g++",
                 "std_version": "c++17",
                 "optimization": "O2",
-                "flags": ["-Wall", "-O2"]
+                "flags": ["-Wall", "-O2"],
             },
-            "py": {
-                "interpreter": "python",
-                "version": "3",
-                "flags": ["-u"]
-            },
+            "py": {"interpreter": "python", "version": "3", "flags": ["-u"]},
             "java": {
                 "compiler": "javac",
                 "version": "11",
                 "flags": [],
-                "runtime": "java"
-            }
+                "runtime": "java",
+            },
         },
-        "gemini": {
-            "enabled": False,
-            "api_key": "",
-            "model": "gemini-2.5-flash"
-        },
+        "gemini": {"enabled": False, "api_key": "", "model": "gemini-2.5-flash"},
         "editor_settings": {
             "autosave": True,
             "autosave_interval": 5,
             "tab_width": 4,
             "font_size": 12,
-            "bracket_matching": True
-        }
+            "bracket_matching": True,
+        },
     }
 
 
@@ -100,7 +92,7 @@ class TestConfigManagerInitialization:
 
     def test_has_config_dir_attribute(self):
         """Test that ConfigManager has CONFIG_DIR class attribute."""
-        assert hasattr(ConfigManager, 'CONFIG_DIR')
+        assert hasattr(ConfigManager, "CONFIG_DIR")
         assert isinstance(ConfigManager.CONFIG_DIR, str)
 
 
@@ -110,9 +102,9 @@ class TestLoadConfig:
     def test_loads_valid_config(self, config_manager, valid_config):
         """Test loading valid configuration from file."""
         # Write valid config to file
-        with open(config_manager.config_file, 'w') as f:
+        with open(config_manager.config_file, "w") as f:
             json.dump(valid_config, f)
-        
+
         # Load and verify
         loaded = config_manager.load_config()
         assert loaded == valid_config
@@ -122,43 +114,45 @@ class TestLoadConfig:
         # Ensure file doesn't exist
         if os.path.exists(config_manager.config_file):
             os.remove(config_manager.config_file)
-        
+
         loaded = config_manager.load_config()
         default = config_manager.get_default_config()
         assert loaded == default
 
-    def test_raises_permission_error_for_unreadable_file(self, config_manager, valid_config):
+    def test_raises_permission_error_for_unreadable_file(
+        self, config_manager, valid_config
+    ):
         """Test ConfigPermissionError for unreadable file."""
         # Write config file
-        with open(config_manager.config_file, 'w') as f:
+        with open(config_manager.config_file, "w") as f:
             json.dump(valid_config, f)
-        
+
         # Mock os.access to simulate permission denied
-        with patch('os.access', return_value=False):
+        with patch("os.access", return_value=False):
             with pytest.raises(ConfigPermissionError) as exc_info:
                 config_manager.load_config()
-            
+
             assert exc_info.value.operation == "reading"
             assert config_manager.config_file in exc_info.value.file_path
 
     def test_raises_format_error_for_invalid_json(self, config_manager):
         """Test ConfigFormatError for invalid JSON."""
         # Write invalid JSON
-        with open(config_manager.config_file, 'w') as f:
+        with open(config_manager.config_file, "w") as f:
             f.write("{invalid json content")
-        
+
         with pytest.raises(ConfigFormatError) as exc_info:
             config_manager.load_config()
-        
+
         assert exc_info.value.line_number is not None
 
     def test_raises_validation_error_for_invalid_structure(self, config_manager):
         """Test ConfigMissingError for missing required keys."""
         # Write config missing required keys
         invalid_config = {"cpp_version": "c++17"}  # Missing gemini, editor_settings
-        with open(config_manager.config_file, 'w') as f:
+        with open(config_manager.config_file, "w") as f:
             json.dump(invalid_config, f)
-        
+
         # Should raise ConfigMissingError (not ConfigValidationError)
         with pytest.raises(ConfigMissingError):
             config_manager.load_config()
@@ -168,22 +162,18 @@ class TestLoadConfig:
         # Config without languages key (should be auto-populated)
         config_without_languages = {
             "cpp_version": "c++17",
-            "gemini": {
-                "enabled": False,
-                "api_key": "",
-                "model": "gemini-2.5-flash"
-            },
+            "gemini": {"enabled": False, "api_key": "", "model": "gemini-2.5-flash"},
             "editor_settings": {
                 "autosave": True,
                 "autosave_interval": 5,
                 "tab_width": 4,
                 "font_size": 12,
-                "bracket_matching": True
-            }
+                "bracket_matching": True,
+            },
         }
-        with open(config_manager.config_file, 'w') as f:
+        with open(config_manager.config_file, "w") as f:
             json.dump(config_without_languages, f)
-        
+
         # Should load successfully (languages is optional)
         loaded = config_manager.load_config()
         assert loaded is not None
@@ -195,10 +185,10 @@ class TestSaveConfig:
     def test_saves_config_to_file(self, config_manager, valid_config):
         """Test saving configuration to file."""
         config_manager.save_config(valid_config)
-        
+
         # Verify file exists and contains correct data
         assert os.path.exists(config_manager.config_file)
-        with open(config_manager.config_file, 'r') as f:
+        with open(config_manager.config_file, "r") as f:
             saved = json.load(f)
         assert saved == valid_config
 
@@ -207,10 +197,10 @@ class TestSaveConfig:
         nested_dir = os.path.join(temp_dir, "nested", "path")
         config_file = os.path.join(nested_dir, "config.json")
         manager = ConfigManager(config_file)
-        
+
         config = {"test": "data"}
         manager.save_config(config)
-        
+
         # Verify directory and file exist
         assert os.path.exists(nested_dir)
         assert os.path.exists(config_file)
@@ -219,55 +209,55 @@ class TestSaveConfig:
         """Test that existing config is backed up before saving."""
         # Save initial config
         initial_config = {"version": 1}
-        with open(config_manager.config_file, 'w') as f:
+        with open(config_manager.config_file, "w") as f:
             json.dump(initial_config, f)
-        
+
         # Save new config (should create backup)
         config_manager.save_config(valid_config)
-        
+
         # Verify backup exists
         backup_file = f"{config_manager.config_file}.bak"
         assert os.path.exists(backup_file)
-        
+
         # Verify backup contains initial config
-        with open(backup_file, 'r') as f:
+        with open(backup_file, "r") as f:
             backup = json.load(f)
         assert backup == initial_config
 
     def test_ignores_backup_failure(self, config_manager, valid_config):
         """Test that save succeeds even if backup fails."""
         # Create initial config
-        with open(config_manager.config_file, 'w') as f:
+        with open(config_manager.config_file, "w") as f:
             json.dump({"old": "config"}, f)
-        
+
         # Mock shutil.copy2 to raise exception
-        with patch('shutil.copy2', side_effect=Exception("Backup failed")):
+        with patch("shutil.copy2", side_effect=Exception("Backup failed")):
             # Should not raise exception
             config_manager.save_config(valid_config)
-        
+
         # Verify new config was saved
-        with open(config_manager.config_file, 'r') as f:
+        with open(config_manager.config_file, "r") as f:
             saved = json.load(f)
         assert saved == valid_config
 
     def test_raises_save_error_on_failure(self, config_manager, valid_config):
         """Test ConfigSaveError when save fails."""
         # Mock open to raise exception
-        with patch('builtins.open', side_effect=PermissionError("Cannot write")):
+        with patch("builtins.open", side_effect=PermissionError("Cannot write")):
             with pytest.raises(ConfigSaveError):
                 config_manager.save_config(valid_config)
 
     def test_saves_with_proper_formatting(self, config_manager, valid_config):
         """Test that JSON is saved with indentation."""
         config_manager.save_config(valid_config)
-        
+
         # Read file and verify it's formatted
-        with open(config_manager.config_file, 'r') as f:
+        with open(config_manager.config_file, "r") as f:
             content = f.read()
-        
+
         # Should have indentation (newlines indicate formatting)
-        assert '\n' in content
-        assert '    ' in content  # 4-space indent
+        assert "\n" in content
+        assert "    " in content  # 4-space indent
 
 
 class TestValidateConfigStructure:
@@ -281,11 +271,13 @@ class TestValidateConfigStructure:
     def test_detects_missing_required_keys(self, config_manager):
         """Test detection of missing required keys."""
         incomplete_config = {"cpp_version": "c++17"}
-        
+
         with pytest.raises(ConfigMissingError) as exc_info:
             config_manager._validate_config_structure(incomplete_config)
-        
-        assert "gemini" in str(exc_info.value) or "editor_settings" in str(exc_info.value)
+
+        assert "gemini" in str(exc_info.value) or "editor_settings" in str(
+            exc_info.value
+        )
 
     def test_detects_invalid_type_for_cpp_version(self, config_manager, valid_config):
         """Test detection of invalid type for cpp_version."""
@@ -340,7 +332,7 @@ class TestValidateConfigStructure:
         # Valid cpp config should pass
         errors = config_manager._validate_config_structure(valid_config)
         assert errors == []
-        
+
         # Invalid compiler type
         valid_config["languages"]["cpp"]["compiler"] = 123
         errors = config_manager._validate_config_structure(valid_config)
@@ -359,13 +351,15 @@ class TestValidateConfigStructure:
         valid_config["languages"]["java"]["compiler"] = 123
         errors = config_manager._validate_config_structure(valid_config)
         assert any("java.compiler" in error for error in errors)
-        
+
         # Invalid runtime type
         valid_config["languages"]["java"]["runtime"] = []
         errors = config_manager._validate_config_structure(valid_config)
         assert any("java.runtime" in error for error in errors)
 
-    def test_handles_missing_optional_language_configs(self, config_manager, valid_config):
+    def test_handles_missing_optional_language_configs(
+        self, config_manager, valid_config
+    ):
         """Test that missing language configs are handled gracefully."""
         # Remove one language
         del valid_config["languages"]["java"]
@@ -445,8 +439,12 @@ class TestGetDefaultConfig:
         default = config_manager.get_default_config()
         editor = default["editor_settings"]
         required_settings = [
-            "autosave", "autosave_interval", "tab_width",
-            "font_size", "font_family", "bracket_matching"
+            "autosave",
+            "autosave_interval",
+            "tab_width",
+            "font_size",
+            "font_family",
+            "bracket_matching",
         ]
         for setting in required_settings:
             assert setting in editor
@@ -475,10 +473,10 @@ class TestConfigManagerIntegration:
         """Test that save and load preserve configuration."""
         # Save config
         config_manager.save_config(valid_config)
-        
+
         # Load config
         loaded = config_manager.load_config()
-        
+
         # Should match
         assert loaded == valid_config
 
@@ -486,13 +484,13 @@ class TestConfigManagerIntegration:
         """Test that default config can be saved and reloaded."""
         # Get default config
         default = config_manager.get_default_config()
-        
+
         # Save it
         config_manager.save_config(default)
-        
+
         # Load it back
         loaded = config_manager.load_config()
-        
+
         # Should match
         assert loaded == default
 
@@ -511,19 +509,19 @@ class TestConfigManagerIntegration:
         config1 = config_manager.get_default_config()
         config1["cpp_version"] = "c++17"
         config_manager.save_config(config1)
-        
+
         # Second save (should backup config1)
         config2 = config_manager.get_default_config()
         config2["cpp_version"] = "c++20"
         config_manager.save_config(config2)
-        
+
         # Verify current config
         loaded = config_manager.load_config()
         assert loaded["cpp_version"] == "c++20"
-        
+
         # Verify backup exists with config1
         backup_file = f"{config_manager.config_file}.bak"
-        with open(backup_file, 'r') as f:
+        with open(backup_file, "r") as f:
             backup = json.load(f)
         assert backup["cpp_version"] == "c++17"
 
@@ -531,12 +529,12 @@ class TestConfigManagerIntegration:
         """Test that corrupted backup doesn't prevent saving."""
         # Create corrupted backup file
         backup_file = f"{config_manager.config_file}.bak"
-        with open(backup_file, 'w') as f:
+        with open(backup_file, "w") as f:
             f.write("corrupted backup")
-        
+
         # Should still be able to save
         config_manager.save_config(valid_config)
-        
+
         # Verify new config saved
         loaded = config_manager.load_config()
         assert loaded == valid_config
@@ -545,15 +543,15 @@ class TestConfigManagerIntegration:
         """Test complete workflow with multi-language configuration."""
         # Create config with all languages
         config = config_manager.get_default_config()
-        
+
         # Modify each language config
         config["languages"]["cpp"]["std_version"] = "c++20"
         config["languages"]["py"]["interpreter"] = "python3"
         config["languages"]["java"]["version"] = "17"
-        
+
         # Save
         config_manager.save_config(config)
-        
+
         # Load and verify
         loaded = config_manager.load_config()
         assert loaded["languages"]["cpp"]["std_version"] == "c++20"

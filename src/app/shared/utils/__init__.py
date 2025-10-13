@@ -7,6 +7,4 @@ logging configuration, and other common functionality.
 
 from .file_operations import FileOperations
 
-__all__ = [
-    'FileOperations'
-]
+__all__ = ["FileOperations"]

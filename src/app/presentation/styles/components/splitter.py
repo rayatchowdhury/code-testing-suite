@@ -1,4 +1,3 @@
-
 SPLITTER_STYLE = """
 QSplitter::handle {
     background: qlineargradient(x1:0, y1:0, x2:1, y2:0,

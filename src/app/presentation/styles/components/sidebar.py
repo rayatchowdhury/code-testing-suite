@@ -1,7 +1,8 @@
 from src.app.presentation.styles.constants.colors import COLORS
 from src.app.presentation.styles.components.scrollbar import SCROLLBAR_STYLE
 
-SIDEBAR_STYLE = f"""
+SIDEBAR_STYLE = (
+    f"""
 QWidget {{
     background:  '#1B1B1E';
 }}
@@ -213,7 +214,9 @@ QComboBox:hover, QSpinBox:hover, QSlider:hover {{
                 stop:0 {COLORS['primary']}22,
                 stop:1 rgba(255, 255, 255, 0.05));
 }}
-""" + SCROLLBAR_STYLE + """
+"""
+    + SCROLLBAR_STYLE
+    + """
 QScrollArea#sidebar_scroll {{
     border: none;
 }}
@@ -230,6 +233,7 @@ QWidget#sidebar > QWidget {{
     background: 1b1b1e;
 }}
 """
+)
 
 SIDEBAR_BUTTON_STYLE = f"""
 QPushButton {{

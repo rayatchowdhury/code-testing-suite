@@ -203,6 +203,7 @@ QWidget#editor_widget {{
 }}
 """
 
+
 def get_editor_style():
     return f"""
     QPlainTextEdit {{
@@ -213,6 +214,7 @@ def get_editor_style():
         selection-color: {EDITOR_COLORS['text']};
     }}
     """
+
 
 def get_tab_style():
     return f"""
@@ -249,5 +251,11 @@ def get_tab_style():
     }}
     """
 
+
 # Export all styles
-__all__ = ['EDITOR_WIDGET_STYLE', 'get_editor_style', 'get_tab_style', 'AI_DIALOG_STYLE']
+__all__ = [
+    "EDITOR_WIDGET_STYLE",
+    "get_editor_style",
+    "get_tab_style",
+    "AI_DIALOG_STYLE",
+]

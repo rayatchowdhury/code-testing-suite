@@ -315,36 +315,36 @@ public class Main {
 # ============================================================================
 
 CPP_COMPARATOR_MATCHING = {
-    'generator': CPP_GENERATOR_SIMPLE,
-    'correct': CPP_CORRECT_SORT_ASC,
-    'test': CPP_TEST_SORT_ASC,
+    "generator": CPP_GENERATOR_SIMPLE,
+    "correct": CPP_CORRECT_SORT_ASC,
+    "test": CPP_TEST_SORT_ASC,
 }
 
 CPP_COMPARATOR_MISMATCHED = {
-    'generator': CPP_GENERATOR_SIMPLE,
-    'correct': CPP_CORRECT_SORT_ASC,
-    'test': CPP_TEST_SORT_DESC,
+    "generator": CPP_GENERATOR_SIMPLE,
+    "correct": CPP_CORRECT_SORT_ASC,
+    "test": CPP_TEST_SORT_DESC,
 }
 
 CPP_VALIDATOR_SET = {
-    'generator': CPP_GENERATOR_SIMPLE,
-    'validator': CPP_VALIDATOR_SORTED,
-    'test': CPP_TEST_SORT_ASC,
+    "generator": CPP_GENERATOR_SIMPLE,
+    "validator": CPP_VALIDATOR_SORTED,
+    "test": CPP_TEST_SORT_ASC,
 }
 
 CPP_BENCHMARKER_SET = {
-    'generator': CPP_GENERATOR_SIMPLE,  # Use simple generator for consistent benchmarking
-    'test': CPP_BENCHMARK_SOLUTION,
+    "generator": CPP_GENERATOR_SIMPLE,  # Use simple generator for consistent benchmarking
+    "test": CPP_BENCHMARK_SOLUTION,
 }
 
 PYTHON_COMPARATOR_MATCHING = {
-    'generator': PYTHON_GENERATOR_SIMPLE,
-    'correct': PYTHON_CORRECT_SUM,
-    'test': PYTHON_TEST_SUM,
+    "generator": PYTHON_GENERATOR_SIMPLE,
+    "correct": PYTHON_CORRECT_SUM,
+    "test": PYTHON_TEST_SUM,
 }
 
 PYTHON_VALIDATOR_SET = {
-    'generator': PYTHON_GENERATOR_SIMPLE,
-    'validator': PYTHON_VALIDATOR_POSITIVE,
-    'test': PYTHON_TEST_SUM,
+    "generator": PYTHON_GENERATOR_SIMPLE,
+    "validator": PYTHON_VALIDATOR_POSITIVE,
+    "test": PYTHON_TEST_SUM,
 }

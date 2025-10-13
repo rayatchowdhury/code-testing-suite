@@ -57,20 +57,16 @@ TEST_TYPE_VALIDATOR = "validator"
 TEST_TYPE_BENCHMARK = "benchmark"
 """Benchmark test type - measures performance and execution time"""
 
-VALID_TEST_TYPES = [
-    TEST_TYPE_COMPARISON,
-    TEST_TYPE_VALIDATOR,
-    TEST_TYPE_BENCHMARK
-]
+VALID_TEST_TYPES = [TEST_TYPE_COMPARISON, TEST_TYPE_VALIDATOR, TEST_TYPE_BENCHMARK]
 """List of all valid test types"""
 
 
 # Legacy test type mappings for backward compatibility
 LEGACY_TEST_TYPE_MAP = {
-    'stress': TEST_TYPE_COMPARISON,
-    'tle': TEST_TYPE_BENCHMARK,
-    'stress_test': TEST_TYPE_COMPARISON,
-    'time_limit': TEST_TYPE_BENCHMARK,
+    "stress": TEST_TYPE_COMPARISON,
+    "tle": TEST_TYPE_BENCHMARK,
+    "stress_test": TEST_TYPE_COMPARISON,
+    "time_limit": TEST_TYPE_BENCHMARK,
 }
 """Maps old test type names to current standard names"""
 
@@ -99,7 +95,7 @@ VALID_FILE_ROLES = [
     FILE_ROLE_CORRECT,
     FILE_ROLE_TEST,
     FILE_ROLE_VALIDATOR,
-    FILE_ROLE_CHECKER
+    FILE_ROLE_CHECKER,
 ]
 """List of all valid file roles"""
 
@@ -131,7 +127,7 @@ SUPPORTED_LANGUAGES = [
     LANGUAGE_PYTHON,
     LANGUAGE_JAVA,
     LANGUAGE_C,
-    LANGUAGE_JAVASCRIPT
+    LANGUAGE_JAVASCRIPT,
 ]
 """List of all supported programming languages"""
 
@@ -141,11 +137,11 @@ SUPPORTED_LANGUAGES = [
 # ============================================================================
 
 EXTENSION_MAP = {
-    LANGUAGE_CPP: ['.cpp', '.cc', '.cxx', '.h', '.hpp'],
-    LANGUAGE_PYTHON: ['.py'],
-    LANGUAGE_JAVA: ['.java'],
-    LANGUAGE_C: ['.c', '.h'],
-    LANGUAGE_JAVASCRIPT: ['.js'],
+    LANGUAGE_CPP: [".cpp", ".cc", ".cxx", ".h", ".hpp"],
+    LANGUAGE_PYTHON: [".py"],
+    LANGUAGE_JAVA: [".java"],
+    LANGUAGE_C: [".c", ".h"],
+    LANGUAGE_JAVASCRIPT: [".js"],
 }
 """Maps languages to their file extensions"""
 
@@ -166,12 +162,7 @@ STATUS_ERROR = "error"
 STATUS_SKIPPED = "skipped"
 """Test status: Test was skipped"""
 
-VALID_STATUS_VALUES = [
-    STATUS_PASSED,
-    STATUS_FAILED,
-    STATUS_ERROR,
-    STATUS_SKIPPED
-]
+VALID_STATUS_VALUES = [STATUS_PASSED, STATUS_FAILED, STATUS_ERROR, STATUS_SKIPPED]
 """List of all valid test status values"""
 
 
@@ -216,9 +207,5 @@ EXPORT_FORMAT_JSON = "json"
 EXPORT_FORMAT_HTML = "html"
 """Export format: HTML"""
 
-VALID_EXPORT_FORMATS = [
-    EXPORT_FORMAT_CSV,
-    EXPORT_FORMAT_JSON,
-    EXPORT_FORMAT_HTML
-]
+VALID_EXPORT_FORMATS = [EXPORT_FORMAT_CSV, EXPORT_FORMAT_JSON, EXPORT_FORMAT_HTML]
 """List of all valid export formats"""

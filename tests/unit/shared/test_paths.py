@@ -262,13 +262,13 @@ class TestGetWorkspaceFilePath:
     def test_handles_all_test_types(self, temp_dir):
         """Test file path construction for all test types."""
         filename = "generator.cpp"
-        
+
         result = get_workspace_file_path(temp_dir, "comparator", filename)
         assert result == os.path.join(temp_dir, "comparator", filename)
-        
+
         result = get_workspace_file_path(temp_dir, "validator", filename)
         assert result == os.path.join(temp_dir, "validator", filename)
-        
+
         result = get_workspace_file_path(temp_dir, "benchmarker", filename)
         assert result == os.path.join(temp_dir, "benchmarker", filename)
 
@@ -315,13 +315,13 @@ class TestGetInputFilePath:
     def test_handles_all_test_types(self, temp_dir):
         """Test input file path for all test types."""
         filename = "input.txt"
-        
+
         result = get_input_file_path(temp_dir, "comparator", filename)
         assert result == os.path.join(temp_dir, "comparator", "inputs", filename)
-        
+
         result = get_input_file_path(temp_dir, "validator", filename)
         assert result == os.path.join(temp_dir, "validator", "inputs", filename)
-        
+
         result = get_input_file_path(temp_dir, "benchmarker", filename)
         assert result == os.path.join(temp_dir, "benchmarker", "inputs", filename)
 
@@ -368,13 +368,13 @@ class TestGetOutputFilePath:
     def test_handles_all_test_types(self, temp_dir):
         """Test output file path for all test types."""
         filename = "output.txt"
-        
+
         result = get_output_file_path(temp_dir, "comparator", filename)
         assert result == os.path.join(temp_dir, "comparator", "outputs", filename)
-        
+
         result = get_output_file_path(temp_dir, "validator", filename)
         assert result == os.path.join(temp_dir, "validator", "outputs", filename)
-        
+
         result = get_output_file_path(temp_dir, "benchmarker", filename)
         assert result == os.path.join(temp_dir, "benchmarker", "outputs", filename)
 
@@ -505,12 +505,12 @@ class TestPathsIntegration:
         """Test complete path hierarchy from workspace to input file."""
         test_type = "comparator"
         filename = "input_1.txt"
-        
+
         # Build path step by step
         test_type_dir = get_test_type_dir(temp_dir, test_type)
         inputs_dir = get_inputs_dir(temp_dir, test_type)
         input_file = get_input_file_path(temp_dir, test_type, filename)
-        
+
         # Verify hierarchy
         assert test_type_dir in input_file
         assert inputs_dir in input_file
@@ -519,15 +519,15 @@ class TestPathsIntegration:
     def test_input_and_output_paths_parallel(self, temp_dir):
         """Test that input and output paths are parallel."""
         test_type = "validator"
-        
+
         input_file = get_input_file_path(temp_dir, test_type, "1.txt")
         output_file = get_output_file_path(temp_dir, test_type, "1.txt")
-        
+
         # Both should be under test_type directory
         test_type_dir = get_test_type_dir(temp_dir, test_type)
         assert test_type_dir in input_file
         assert test_type_dir in output_file
-        
+
         # Should be in different subdirectories
         assert "inputs" in input_file
         assert "outputs" in output_file
@@ -537,12 +537,12 @@ class TestPathsIntegration:
         alias = "comparison"
         canonical = "comparator"
         filename = "test.cpp"
-        
+
         test_type_dir = get_test_type_dir(temp_dir, alias)
         workspace_file = get_workspace_file_path(temp_dir, alias, filename)
         inputs_dir = get_inputs_dir(temp_dir, alias)
         outputs_dir = get_outputs_dir(temp_dir, alias)
-        
+
         # All should contain canonical name
         assert canonical in test_type_dir
         assert canonical in workspace_file
@@ -552,6 +552,6 @@ class TestPathsIntegration:
     def test_paths_are_os_independent(self, temp_dir):
         """Test that paths use os.path.join for OS independence."""
         result = get_input_file_path(temp_dir, "comparator", "test.txt")
-        
+
         # Should use proper path separator for OS
         assert os.path.sep in result or len(result.split(os.path.sep)) > 1

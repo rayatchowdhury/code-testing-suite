@@ -1,8 +1,27 @@
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QPlainTextEdit, QLineEdit,
-                              QTextEdit, QFileDialog, QHBoxLayout, QPushButton,
-                              QMessageBox, QDialog, QScrollArea, QLabel, QFrame)
-from PySide6.QtGui import (QFont, QColor, QPainter, QTextFormat, QTextCursor, 
-                          QKeySequence, QShortcut)
+from PySide6.QtWidgets import (
+    QWidget,
+    QVBoxLayout,
+    QPlainTextEdit,
+    QLineEdit,
+    QTextEdit,
+    QFileDialog,
+    QHBoxLayout,
+    QPushButton,
+    QMessageBox,
+    QDialog,
+    QScrollArea,
+    QLabel,
+    QFrame,
+)
+from PySide6.QtGui import (
+    QFont,
+    QColor,
+    QPainter,
+    QTextFormat,
+    QTextCursor,
+    QKeySequence,
+    QShortcut,
+)
 from PySide6.QtCore import Qt, QRect, QSize, QTimer, Signal, QObject, QThread
 import os
 import asyncio
@@ -11,8 +30,11 @@ from qasync import asyncSlot, QEventLoop
 
 from src.app.presentation.styles.constants.editor_colors import EDITOR_COLORS
 from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
-from src.app.presentation.styles.components.editor import (EDITOR_WIDGET_STYLE, get_editor_style,
-                                    AI_DIALOG_STYLE)
+from src.app.presentation.styles.components.editor import (
+    EDITOR_WIDGET_STYLE,
+    get_editor_style,
+    AI_DIALOG_STYLE,
+)
 from src.app.presentation.styles.components.ai_panel import AI_PANEL_STYLE
 from src.app.shared.utils.file_operations import FileOperations
 
@@ -25,18 +47,22 @@ _syntax_highlighters = None
 _editor_ai = None
 _ai_panel = None
 
+
 def _import_markdown():
     global _markdown
     if _markdown is None:
         try:
             from markdown import markdown
+
             _markdown = markdown
         except ImportError:
             # Fallback: return plain text function if markdown not available
             def plain_text_fallback(text, **kwargs):
                 return f"<pre>{text}</pre>"
+
             _markdown = plain_text_fallback
     return _markdown
+
 
 def _import_pygments():
     global _pygments_highlight, _pygments_formatter, _pygments_lexer
@@ -44,93 +70,115 @@ def _import_pygments():
         from pygments import highlight
         from pygments.formatters import HtmlFormatter
         from pygments.lexers import get_lexer_by_name
+
         _pygments_highlight = highlight
         _pygments_formatter = HtmlFormatter
         _pygments_lexer = get_lexer_by_name
     return _pygments_highlight, _pygments_formatter, _pygments_lexer
 
+
 def _import_syntax_highlighters():
     global _syntax_highlighters
     if _syntax_highlighters is None:
-        from src.app.presentation.styles.syntaxhighlighter import (CPPSyntaxHighlighter, PythonSyntaxHighlighter, 
-                                       JavaSyntaxHighlighter)
+        from src.app.presentation.styles.syntaxhighlighter import (
+            CPPSyntaxHighlighter,
+            PythonSyntaxHighlighter,
+            JavaSyntaxHighlighter,
+        )
+
         _syntax_highlighters = {
-            'cpp': CPPSyntaxHighlighter,
-            'python': PythonSyntaxHighlighter,
-            'java': JavaSyntaxHighlighter
+            "cpp": CPPSyntaxHighlighter,
+            "python": PythonSyntaxHighlighter,
+            "java": JavaSyntaxHighlighter,
         }
     return _syntax_highlighters
+
 
 def _import_editor_ai():
     global _editor_ai
     if _editor_ai is None:
         from src.app.core.ai.core.editor_ai import EditorAI
+
         _editor_ai = EditorAI
     return _editor_ai
+
 
 def _import_ai_panel():
     global _ai_panel
     if _ai_panel is None:
         from src.app.presentation.widgets.display_area_widgets.ai_panel import AIPanel
+
         _ai_panel = AIPanel
     return _ai_panel
 
 
 class AIWorkerThread(QThread):
     """Thread for processing AI requests without blocking the UI."""
-    
+
     # Signals to communicate with main thread
     responseReady = Signal(str, str)  # response, title
     errorOccurred = Signal(str, str)  # error_message, title
-    
+
     def __init__(self, action, code, title, **kwargs):
         super().__init__()
         self.action = action
         self.code = code
         self.title = title
         self.kwargs = kwargs
-        
+
     def run(self):
         """Run AI processing in background thread."""
         try:
             # Import EditorAI in the thread to avoid issues
             from src.app.core.ai.core.editor_ai import EditorAI
+
             editor_ai = EditorAI()
-            
+
             # Process the AI request
-            if hasattr(self.action, '__call__'):
+            if hasattr(self.action, "__call__"):
                 # Action is a callable (lambda function)
                 response = self.action(self.code)
             else:
                 # Action is a string method name
-                if self.action == 'analysis':
+                if self.action == "analysis":
                     response = editor_ai.explain_code(self.code)
-                elif self.action == 'issues':
+                elif self.action == "issues":
                     response = editor_ai.debug_code(self.code)
-                elif self.action == 'tips':
+                elif self.action == "tips":
                     response = editor_ai.suggest_optimizations(self.code)
-                elif self.action == 'document':
+                elif self.action == "document":
                     response = editor_ai.generate_documentation(self.code)
                 else:
                     # Generic process_code call
-                    response = editor_ai.process_code(self.action, self.code, **self.kwargs)
-            
+                    response = editor_ai.process_code(
+                        self.action, self.code, **self.kwargs
+                    )
+
             if not response:
-                response = "AI service not available. Please check your API key configuration."
-                
+                response = (
+                    "AI service not available. Please check your API key configuration."
+                )
+
             self.responseReady.emit(response, self.title)
-            
+
         except ImportError as e:
-            self.errorOccurred.emit(f"AI module import failed: {str(e)}", "Import Error")
+            self.errorOccurred.emit(
+                f"AI module import failed: {str(e)}", "Import Error"
+            )
         except ConnectionError as e:
-            self.errorOccurred.emit(f"Network connection failed: {str(e)}", "Connection Error")
+            self.errorOccurred.emit(
+                f"Network connection failed: {str(e)}", "Connection Error"
+            )
         except TimeoutError as e:
             self.errorOccurred.emit(f"Request timed out: {str(e)}", "Timeout Error")
         except Exception as e:
             # Log full error details for debugging
             import traceback
+
             error_details = traceback.format_exc()
-            self.errorOccurred.emit(f"AI processing failed: {str(e)}\n\nDetails:\n{error_details}", "Error")
+            self.errorOccurred.emit(
+                f"AI processing failed: {str(e)}\n\nDetails:\n{error_details}", "Error"
+            )
 
 
 class CodeEditor(QPlainTextEdit):
@@ -142,13 +190,13 @@ class CodeEditor(QPlainTextEdit):
 
     def _setup_editor(self):
         # Default values
-        self.setFont(QFont('Consolas', 12))
+        self.setFont(QFont("Consolas", 12))
         self.tab_spaces = 4
         self.auto_indent = True
         self.bracket_matching = True
         self.setStyleSheet(get_editor_style())
-        
-        self.bracket_pairs = {'{': '}', '[': ']', '(': ')', '"': '"', "'": "'"}
+
+        self.bracket_pairs = {"{": "}", "[": "]", "(": ")", '"': '"', "'": "'"}
 
     def _setup_line_numbers(self):
         self.lineNumberArea = LineNumberArea(self)
@@ -163,27 +211,27 @@ class CodeEditor(QPlainTextEdit):
         if self.current_highlighter:
             self.current_highlighter.setDocument(None)
             self.current_highlighter = None
-            
+
         if not file_path:
             return
 
         # Lazy load syntax highlighters
         highlighters = _import_syntax_highlighters()
         highlighter_map = {
-            'cpp': highlighters['cpp'],
-            'h': highlighters['cpp'],
-            'hpp': highlighters['cpp'],
-            'py': highlighters['python'],
-            'java': highlighters['java']
+            "cpp": highlighters["cpp"],
+            "h": highlighters["cpp"],
+            "hpp": highlighters["cpp"],
+            "py": highlighters["python"],
+            "java": highlighters["java"],
         }
-        
-        ext = file_path.lower().split('.')[-1]
+
+        ext = file_path.lower().split(".")[-1]
         if ext in highlighter_map:
             self.current_highlighter = highlighter_map[ext](self.document())
 
     def lineNumberAreaWidth(self):
         digits = len(str(max(1, self.blockCount())))
-        space = 10 + self.fontMetrics().horizontalAdvance('9') * digits
+        space = 10 + self.fontMetrics().horizontalAdvance("9") * digits
         return space
 
     def updateLineNumberAreaWidth(self, _):
@@ -193,13 +241,14 @@ class CodeEditor(QPlainTextEdit):
         super().resizeEvent(event)
         cr = self.contentsRect()
         self.lineNumberArea.setGeometry(
-            QRect(cr.left(), cr.top(), self.lineNumberAreaWidth(), cr.height()))
+            QRect(cr.left(), cr.top(), self.lineNumberAreaWidth(), cr.height())
+        )
 
     def highlightCurrentLine(self):
         extraSelections = []
         if not self.isReadOnly():
             selection = QTextEdit.ExtraSelection()
-            selection.format.setBackground(QColor(EDITOR_COLORS['current_line']))
+            selection.format.setBackground(QColor(EDITOR_COLORS["current_line"]))
             selection.format.setProperty(QTextFormat.FullWidthSelection, True)
             selection.cursor = self.textCursor()
             selection.cursor.clearSelection()
@@ -210,26 +259,35 @@ class CodeEditor(QPlainTextEdit):
         if dy:
             self.lineNumberArea.scroll(0, dy)
         else:
-            self.lineNumberArea.update(0, rect.y(), self.lineNumberArea.width(), rect.height())
+            self.lineNumberArea.update(
+                0, rect.y(), self.lineNumberArea.width(), rect.height()
+            )
         if rect.contains(self.viewport().rect()):
             self.updateLineNumberAreaWidth(0)
 
     def lineNumberAreaPaintEvent(self, event):
         painter = QPainter(self.lineNumberArea)
-        painter.fillRect(event.rect(), QColor(EDITOR_COLORS['background_darker']))
+        painter.fillRect(event.rect(), QColor(EDITOR_COLORS["background_darker"]))
 
         block = self.firstVisibleBlock()
         blockNumber = block.blockNumber()
-        top = round(self.blockBoundingGeometry(
-            block).translated(self.contentOffset()).top())
+        top = round(
+            self.blockBoundingGeometry(block).translated(self.contentOffset()).top()
+        )
         bottom = top + round(self.blockBoundingRect(block).height())
 
         while block.isValid() and top <= event.rect().bottom():
             if block.isVisible() and bottom >= event.rect().top():
                 number = str(blockNumber + 1)
-                painter.setPen(QColor(EDITOR_COLORS['line_number']))
-                painter.drawText(0, top, self.lineNumberArea.width() - 5,
-                                 self.fontMetrics().height(), Qt.AlignRight, number)
+                painter.setPen(QColor(EDITOR_COLORS["line_number"]))
+                painter.drawText(
+                    0,
+                    top,
+                    self.lineNumberArea.width() - 5,
+                    self.fontMetrics().height(),
+                    Qt.AlignRight,
+                    number,
+                )
             block = block.next()
             top = bottom
             bottom = top + round(self.blockBoundingRect(block).height())
@@ -237,28 +295,27 @@ class CodeEditor(QPlainTextEdit):
 
     def keyPressEvent(self, event):
         # Special handling for curly braces with multi-line formatting
-        if self.bracket_matching and event.text() == '{':
+        if self.bracket_matching and event.text() == "{":
             cursor = self.textCursor()
             pos = cursor.positionInBlock()
             current_line = cursor.block().text()
             indent = self.get_line_indentation(current_line)
-            
+
             # Insert opening brace
             super().keyPressEvent(event)
-            
+
             # Create formatted structure
             cursor = self.textCursor()
-            cursor.insertText('\n' + indent + ' ' * self.tab_spaces)  # Middle line
+            cursor.insertText("\n" + indent + " " * self.tab_spaces)  # Middle line
             middle_line_position = cursor.position()
-            cursor.insertText('\n' + indent + '}')  # Closing brace
-            
+            cursor.insertText("\n" + indent + "}")  # Closing brace
+
             # Move cursor to middle line
             cursor.setPosition(middle_line_position)
             self.setTextCursor(cursor)
             return
-            
-        if (self.bracket_matching and
-                event.text() in ['[', '(', '"', "'"]):
+
+        if self.bracket_matching and event.text() in ["[", "(", '"', "'"]:
             # Regular single-line bracket handling for other types
             cursor = self.textCursor()
             super().keyPressEvent(event)
@@ -276,8 +333,7 @@ class CodeEditor(QPlainTextEdit):
             self.insertPlainText(indent)
             return
 
-        if (event.key() == Qt.Key_Tab and
-                not event.modifiers() & Qt.ShiftModifier):
+        if event.key() == Qt.Key_Tab and not event.modifiers() & Qt.ShiftModifier:
             # Insert spaces instead of tab
             self.insertPlainText(" " * self.tab_spaces)
             return
@@ -288,7 +344,10 @@ class CodeEditor(QPlainTextEdit):
             if not cursor.hasSelection():
                 pos = cursor.positionInBlock()
                 current_line = cursor.block().text()
-                if pos > 0 and all(current_line[pos-i-1] == ' ' for i in range(min(self.tab_spaces, pos))):
+                if pos > 0 and all(
+                    current_line[pos - i - 1] == " "
+                    for i in range(min(self.tab_spaces, pos))
+                ):
                     # If previous characters are spaces, delete up to tab width
                     for _ in range(min(self.tab_spaces, pos)):
                         cursor.deletePreviousChar()
@@ -300,12 +359,11 @@ class CodeEditor(QPlainTextEdit):
         """Return the indentation string of the given line"""
         indent = ""
         for char in line:
-            if char in [' ', '\t']:
+            if char in [" ", "\t"]:
                 indent += char
             else:
                 break
         return indent
-
 
 
 class LineNumberArea(QWidget):
@@ -333,17 +391,17 @@ class EditorWidget(QWidget):
         self.ai_worker = None  # Keep track of AI worker thread
         self._setup_ui()
         self._setup_file_handling()
-        
+
         # Remove _connect_ai_buttons() call from here
 
     def closeEvent(self, event):
         """Handle widget cleanup when closing."""
         self._cleanup_ai_worker()
         super().closeEvent(event)
-        
+
     def _cleanup_ai_worker(self):
         """Clean up AI worker thread if running."""
-        if hasattr(self, 'ai_worker') and self.ai_worker is not None:
+        if hasattr(self, "ai_worker") and self.ai_worker is not None:
             if self.ai_worker.isRunning():
                 self.ai_worker.quit()
                 self.ai_worker.wait()  # Wait for thread to finish
@@ -364,15 +422,17 @@ class EditorWidget(QWidget):
 
         # Map AI actions to methods
         self.ai_actions = {
-            'analysis': ('Code Explanation', self._process_explanation),
-            'issues': ('Potential Issues', self._process_explanation),
-            'tips': ('Improvement Tips', self._process_explanation),
-            'document': ('Documentation', self._process_code),
-            'generate': ('Generated Code', self._process_code),
-            'custom': ('Custom Command', self._process_code)
+            "analysis": ("Code Explanation", self._process_explanation),
+            "issues": ("Potential Issues", self._process_explanation),
+            "tips": ("Improvement Tips", self._process_explanation),
+            "document": ("Documentation", self._process_code),
+            "generate": ("Generated Code", self._process_code),
+            "custom": ("Custom Command", self._process_code),
         }
 
-        self.codeEditor.document().modificationChanged.connect(self._handle_modification_changed)
+        self.codeEditor.document().modificationChanged.connect(
+            self._handle_modification_changed
+        )
 
     def _init_ai_panel(self):
         """Initialize AI panel when first needed"""
@@ -387,11 +447,11 @@ class EditorWidget(QWidget):
             self.ai_panel.customCommandRequested.connect(self._handle_custom_command)
             self.layout().addWidget(self.ai_panel)
             self._ai_panel_initialized = True
-            
+
             # Fix: Ensure AI panel visibility is properly refreshed after being added to layout
             # The panel might be hidden if parent wasn't visible during construction
             self.ai_panel.refresh_visibility()
-            
+
             # Force layout update
             self.update()
 
@@ -424,64 +484,74 @@ class EditorWidget(QWidget):
         """Handle custom AI command"""
         if code is None:
             code = self.getCode()
-        self._process_code('custom', code, command=command)
+        self._process_code("custom", code, command=command)
 
     def _clean_code_response(self, text: str) -> str:
         """Strip everything but the actual code."""
         # First, clean any markdown artifacts
         markdown_patterns = [
-            '```python', '```cpp', '```java', '```c', '```',
-            '```c++', '```javascript', '```txt',
-            '---', '===', '###'
+            "```python",
+            "```cpp",
+            "```java",
+            "```c",
+            "```",
+            "```c++",
+            "```javascript",
+            "```txt",
+            "---",
+            "===",
+            "###",
         ]
-        
+
         cleaned = text.strip()
         for pattern in markdown_patterns:
-            cleaned = cleaned.replace(pattern, '')
-        
+            cleaned = cleaned.replace(pattern, "")
+
         # Clean up whitespace and empty lines
-        cleaned = '\n'.join(line.rstrip() for line in cleaned.splitlines())
-        while '\n\n\n' in cleaned:
-            cleaned = cleaned.replace('\n\n\n', '\n\n')
-            
+        cleaned = "\n".join(line.rstrip() for line in cleaned.splitlines())
+        while "\n\n\n" in cleaned:
+            cleaned = cleaned.replace("\n\n\n", "\n\n")
+
         return cleaned.strip()
 
     def _apply_changes(self, text: str, dialog: QDialog):
         """Apply code changes with undo support."""
         cleaned_code = self._clean_code_response(text)
-        
+
         # Verify we have actual code
         if not cleaned_code or cleaned_code.isspace():
             return
-        
+
         # Create a cursor and preserve selection/position
         cursor = self.codeEditor.textCursor()
         position = cursor.position()
-        
+
         # Begin editing block for undo
         cursor.beginEditBlock()
         cursor.select(QTextCursor.Document)
         cursor.insertText(cleaned_code)
         cursor.endEditBlock()
-        
+
         # Restore cursor position if possible
         if position < len(cleaned_code):
             cursor.setPosition(position)
         self.codeEditor.setTextCursor(cursor)
-        
+
         # Setup syntax highlighting
         self.codeEditor._setup_syntax_highlighting(self.currentFilePath)
-        
+
         # Automatically save the file
         self.saveFile()
-        
+
         dialog.accept()
 
     def _format_ai_response(self, response: str, title: str) -> str:
         """Format AI response with proper styling."""
         # Only wrap code responses in code blocks for display
         if title in ["Documentation", "Generated Code", "Custom Command"]:
-            file_type = self.currentFilePath.split('.')[-1] if self.currentFilePath else 'cpp'
+            file_type = (
+                self.currentFilePath.split(".")[-1] if self.currentFilePath else "cpp"
+            )
             return f"```{file_type}\n{self._clean_code_response(response)}\n```"
         return response
 
@@ -510,27 +580,25 @@ class EditorWidget(QWidget):
 
         # Format content and add to layout
         formatted_response = self._format_ai_response(response, title)
-        
+
         # Lazy load markdown and pygments
         markdown_func = _import_markdown()
         highlight, formatter_class, lexer = _import_pygments()
-        
+
         html_content = markdown_func(
-            formatted_response,
-            extensions=['fenced_code', 'codehilite', 'tables']
+            formatted_response, extensions=["fenced_code", "codehilite", "tables"]
         )
-        
+
         # Add syntax highlighting CSS
-        formatter = formatter_class(style='monokai')
-        css = formatter.get_style_defs('.codehilite')
+        formatter = formatter_class(style="monokai")
+        css = formatter.get_style_defs(".codehilite")
         html_content = f"<style>{css}</style>{html_content}"
 
         # Create and setup content label
         content_label = QLabel(html_content)
         content_label.setTextFormat(Qt.RichText)
         content_label.setTextInteractionFlags(
-            Qt.TextSelectableByMouse | 
-            Qt.TextSelectableByKeyboard
+            Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard
         )
         content_layout.addWidget(content_label)
 
@@ -556,54 +624,52 @@ class EditorWidget(QWidget):
             apply_button = QPushButton("Apply Changes")
             apply_button.setObjectName("apply_button")
             apply_button.setDefault(True)
-            apply_button.clicked.connect(
-                lambda: self._apply_changes(response, dialog)
-            )
+            apply_button.clicked.connect(lambda: self._apply_changes(response, dialog))
             button_layout.addWidget(apply_button)
 
         layout.addWidget(button_container)
-        
+
         dialog.exec()
 
     def _process_ai_request(self, action, title):
         """Process AI request with loading state using background thread"""
         # Ensure AI panel exists and disable it during processing
-        if hasattr(self, 'ai_panel') and self.ai_panel is not None:
+        if hasattr(self, "ai_panel") and self.ai_panel is not None:
             self.ai_panel.set_enabled(False)
-        
+
         # Get current code and optimize it for faster processing
         code = self.getCode()
-        
+
         # Show immediate feedback to user
-        if hasattr(self, 'ai_panel') and self.ai_panel is not None:
+        if hasattr(self, "ai_panel") and self.ai_panel is not None:
             # Could add a progress indicator here if needed
             pass
-        
+
         # Clean up any existing worker thread first
         self._cleanup_ai_worker()
-        
+
         # Create and start worker thread
         self.ai_worker = AIWorkerThread(action, code, title)
         self.ai_worker.responseReady.connect(self._on_ai_response_ready)
         self.ai_worker.errorOccurred.connect(self._on_ai_error)
         self.ai_worker.finished.connect(self._on_ai_finished)
         self.ai_worker.start()
-    
+
     def _on_ai_response_ready(self, response: str, title: str):
         """Handle successful AI response"""
         self._show_ai_response(response, title)
-        
+
     def _on_ai_error(self, error_message: str, title: str):
         """Handle AI error"""
         self._show_ai_response(error_message, title)
-        
+
     def _on_ai_finished(self):
         """Handle AI thread completion"""
         # Re-enable AI panel
-        if hasattr(self, 'ai_panel') and self.ai_panel is not None:
+        if hasattr(self, "ai_panel") and self.ai_panel is not None:
             self.ai_panel.set_enabled(True)
         # Clean up thread reference safely
-        if hasattr(self, 'ai_worker') and self.ai_worker is not None:
+        if hasattr(self, "ai_worker") and self.ai_worker is not None:
             self.ai_worker.deleteLater()
             self.ai_worker = None
 
@@ -618,39 +684,42 @@ class EditorWidget(QWidget):
         """Handle code-modification AI requests."""
         if code is None:
             code = self.getCode()
-        
+
         # Create a lambda that captures the kwargs for the worker thread
-        action_lambda = lambda c: self._get_editor_ai().process_code(action, c, **kwargs)
+        action_lambda = lambda c: self._get_editor_ai().process_code(
+            action, c, **kwargs
+        )
         self._process_ai_request(action_lambda, self.ai_actions[action][0])
 
     # Simplified action methods
     def _analysis_code(self, code=None):
         self._init_ai_panel()  # Ensure AI panel is initialized
-        self._process_explanation('analysis', code)
+        self._process_explanation("analysis", code)
 
     def _find_issues(self, code=None):
         self._init_ai_panel()  # Ensure AI panel is initialized
-        self._process_explanation('issues', code)
+        self._process_explanation("issues", code)
 
     def _get_tips(self, code=None):
         self._init_ai_panel()  # Ensure AI panel is initialized
-        self._process_explanation('tips', code)
+        self._process_explanation("tips", code)
 
     def _document_code(self, code=None):
         self._init_ai_panel()  # Ensure AI panel is initialized
-        self._process_code('document', code)
+        self._process_code("document", code)
 
     def _generate_code(self, code=None):
         self._init_ai_panel()  # Ensure AI panel is initialized
-        self._process_code('generate', code, 
-                               type=self.currentFilePath or "generator.cpp")
+        self._process_code(
+            "generate", code, type=self.currentFilePath or "generator.cpp"
+        )
 
     def _custom_ai_command(self, command: str, code: str = None):
         """Handle custom AI command."""
         self._init_ai_panel()  # Ensure AI panel is initialized
         if code is None:
             code = self.getCode()
-        self._process_code('custom', code, command=command)
+        self._process_code("custom", code, command=command)
 
     def _setup_file_handling(self):
         self.currentFilePath = None
@@ -669,7 +738,7 @@ class EditorWidget(QWidget):
             self.current_button.setProperty("isActive", False)
             self.current_button.style().unpolish(self.current_button)
             self.current_button.style().polish(self.current_button)
-        
+
         clicked_button = self.file_buttons[button_name]
         clicked_button.setProperty("isActive", True)
         clicked_button.style().unpolish(clicked_button)
@@ -680,27 +749,29 @@ class EditorWidget(QWidget):
         # Default to comparator for backward compatibility
         from src.app.shared.constants.paths import get_workspace_file_path
         from src.app.shared.utils.workspace_utils import ensure_test_type_directory
-        
-        test_type = getattr(self, 'test_type', 'comparator')  # Get test type from editor if set
-        
+
+        test_type = getattr(
+            self, "test_type", "comparator"
+        )  # Get test type from editor if set
+
         file_map = {
-            'Generator': 'generator.cpp',
-            'Correct Code': 'correct.cpp',
-            'Test Code': 'test.cpp'
+            "Generator": "generator.cpp",
+            "Correct Code": "correct.cpp",
+            "Test Code": "test.cpp",
         }
-        
+
         # Get file path using nested structure
         file_name = file_map[button_name]
         file_path = get_workspace_file_path(self.workspace_dir, test_type, file_name)
-        
+
         # Ensure test type directory exists
         ensure_test_type_directory(self.workspace_dir, test_type)
-        
+
         # Create file if it doesn't exist
         if not os.path.exists(file_path):
-            with open(file_path, 'w', encoding='utf-8') as f:
-                f.write('// Add your code here\n')
-        
+            with open(file_path, "w", encoding="utf-8") as f:
+                f.write("// Add your code here\n")
+
         # Load file content
         content = FileOperations.load_file(file_path, self)
         if content is not None:
@@ -722,7 +793,9 @@ class EditorWidget(QWidget):
         return False
 
     def _openFilePicker(self):
-        file_path, _ = QFileDialog.getOpenFileName(self, "Insert File Content", "", "All Files (*)")
+        file_path, _ = QFileDialog.getOpenFileName(
+            self, "Insert File Content", "", "All Files (*)"
+        )
         if file_path:
             content = FileOperations.load_file(file_path, self)
             if content is not None:
@@ -737,7 +810,9 @@ class EditorWidget(QWidget):
 
     def saveFileAs(self):
         """Always prompt for new save location"""
-        new_path = FileOperations.save_file_as(self, self.getCode(), self.currentFilePath)
+        new_path = FileOperations.save_file_as(
+            self, self.getCode(), self.currentFilePath
+        )
         if new_path:
             self.currentFilePath = new_path
             self.filePathChanged.emit()
@@ -747,7 +822,9 @@ class EditorWidget(QWidget):
     def _save_to_path(self, path):
         """Internal method to save file and update editor state"""
         if FileOperations.save_file(path, self.getCode(), self):
-            self.codeEditor.document().setModified(False)  # This will trigger modificationChanged
+            self.codeEditor.document().setModified(
+                False
+            )  # This will trigger modificationChanged
             self.codeEditor._setup_syntax_highlighting(path)
             self.fileSaved.emit()  # Emit signal when file is saved
             return True

@@ -4,16 +4,21 @@ Presentation module for the Code Testing Suite.
 This module contains the user interface components and view logic.
 """
 
+
 # Lazy imports to avoid circular dependencies
 def get_main_window():
     """Lazy import of MainWindow"""
     from src.app.presentation.views.main_window.main_window import MainWindow
+
     return MainWindow
 
+
 def get_sidebar_window_base():
-    """Lazy import of SidebarWindowBase"""  
+    """Lazy import of SidebarWindowBase"""
     from src.app.presentation.window_controller.base_window import SidebarWindowBase
+
     return SidebarWindowBase
+
 
 # Styles module - this is safe to import directly
 from src.app.presentation import styles
@@ -21,9 +26,4 @@ from src.app.presentation import styles
 # Widgets module - this is safe to import directly
 from src.app.presentation import widgets
 
-__all__ = [
-    "get_main_window",
-    "get_sidebar_window_base",
-    "styles",
-    "widgets"
-]
+__all__ = ["get_main_window", "get_sidebar_window_base", "styles", "widgets"]

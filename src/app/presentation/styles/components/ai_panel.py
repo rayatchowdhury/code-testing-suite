@@ -165,4 +165,4 @@ QPushButton:pressed {{
 }}
 """
 
-__all__ = ['AI_PANEL_STYLE', 'CUSTOM_COMMAND_STYLE', 'AI_DIALOG_STYLE']
+__all__ = ["AI_PANEL_STYLE", "CUSTOM_COMMAND_STYLE", "AI_DIALOG_STYLE"]

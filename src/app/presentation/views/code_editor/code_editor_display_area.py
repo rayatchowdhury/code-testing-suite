@@ -1,19 +1,32 @@
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QSplitter, QHBoxLayout, 
-                              QTabWidget, QPushButton, QMessageBox)
+from PySide6.QtWidgets import (
+    QWidget,
+    QVBoxLayout,
+    QSplitter,
+    QHBoxLayout,
+    QTabWidget,
+    QPushButton,
+    QMessageBox,
+)
 from PySide6.QtCore import Qt, Signal
 import os
 
 from src.app.presentation.widgets.display_area_widgets.editor import EditorWidget
-from src.app.presentation.widgets.display_area_widgets.console import ConsoleOutput 
+from src.app.presentation.widgets.display_area_widgets.console import ConsoleOutput
 from src.app.presentation.widgets.display_area_widgets.ai_panel import AIPanel
-from src.app.presentation.widgets.display_area_widgets.editor_tab_widget import EditorTabWidget
+from src.app.presentation.widgets.display_area_widgets.editor_tab_widget import (
+    EditorTabWidget,
+)
 from src.app.core.tools.compiler_runner import CompilerRunner
 from src.app.presentation.styles.style import MATERIAL_COLORS
-from src.app.presentation.styles.components.code_editor_display_area import SPLITTER_STYLE, OUTER_PANEL_STYLE
+from src.app.presentation.styles.components.code_editor_display_area import (
+    SPLITTER_STYLE,
+    OUTER_PANEL_STYLE,
+)
+
 
 class CodeEditorDisplay(QWidget):
     filePathChanged = Signal()
-    
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self._setup_ui()
@@ -40,10 +53,12 @@ class CodeEditorDisplay(QWidget):
 
         # Create inner panel for content
         left_panel = QWidget()
-        left_panel.setStyleSheet(f"""
+        left_panel.setStyleSheet(
+            f"""
           background-color: {MATERIAL_COLORS['surface']};
-        """)
-        
+        """
+        )
+
         left_layout = QVBoxLayout(left_panel)
         left_layout.setContentsMargins(0, 0, 0, 0)
         left_layout.setSpacing(0)
@@ -58,15 +73,15 @@ class CodeEditorDisplay(QWidget):
         # Setup console
         self.console = ConsoleOutput()
         self.console.setMinimumWidth(200)
-        
+
         # Add panels to splitter
         self.splitter.addWidget(outer_panel)
         self.splitter.addWidget(self.console)
 
         # Configure splitter
         self.splitter.setCollapsible(0, False)  # Left panel (editor) not collapsible
-        self.splitter.setCollapsible(1, True)   # Right panel (console) collapsible
-        
+        self.splitter.setCollapsible(1, True)  # Right panel (console) collapsible
+
         # Set initial sizes (editor: 70%, console: 30%)
         self.splitter.setSizes([700, 300])
 
@@ -80,25 +95,25 @@ class CodeEditorDisplay(QWidget):
         # Connect editor tab widget signals
         self.editor_tabs.filePathChanged.connect(self.filePathChanged.emit)
         self.editor_tabs.currentTabChanged.connect(self._on_current_tab_changed)
-        
+
         # Connect console compile & run button
         self.console.compile_run_btn.clicked.connect(self.compile_and_run_code)
-        
+
     def _on_current_tab_changed(self, index):
         """Handle current tab change to update signals."""
         # Emit file path changed for external listeners
         self.filePathChanged.emit()
 
-    @property 
+    @property
     def editor(self):
         """Get the current editor widget for backward compatibility."""
         return self.editor_tabs.current_editor
-    
+
     @property
     def has_editor(self):
         """Check if there's an active editor (always True for editor tabs)."""
         return self.editor_tabs.current_editor is not None
-    
+
     @property
     def tab_widget(self):
         """Get the tab widget for backward compatibility."""
@@ -107,11 +122,11 @@ class CodeEditorDisplay(QWidget):
     def add_new_tab(self, title="Untitled"):
         """Add a new editor tab."""
         return self.editor_tabs.add_new_tab(title)
-    
+
     def close_tab(self, index):
         """Close tab at specified index."""
         self.editor_tabs.close_tab(index)
-    
+
     def open_file_in_new_tab(self, file_path):
         """Open a file in a new tab."""
         return self.editor_tabs.open_file_in_new_tab(file_path)
@@ -128,9 +143,9 @@ class CodeEditorDisplay(QWidget):
                 self,
                 "Unsaved Changes",
                 "Do you want to save changes before compiling?",
-                QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel
+                QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel,
             )
-            
+
             if reply == QMessageBox.Save:
                 if not current_editor.saveFile():
                     return
@@ -138,11 +153,11 @@ class CodeEditorDisplay(QWidget):
                 return
 
         self.console.compile_run_btn.setEnabled(False)
-        
+
         def on_complete():
             self.console.compile_run_btn.setEnabled(True)
             self.compiler_runner.finished.disconnect(on_complete)
-        
+
         self.compiler_runner.finished.connect(on_complete)
         self.compiler_runner.compile_and_run_code(current_editor.currentFilePath)
 

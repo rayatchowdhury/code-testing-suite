@@ -24,7 +24,7 @@ from src.app.core.ai.gemini_client import (
     is_ai_ready,
     should_show_ai_panel,
     generate_ai_response,
-    reload_ai_config
+    reload_ai_config,
 )
 
 # EditorAI Processing
@@ -44,10 +44,11 @@ def initialize_ai(config_file: str = None) -> bool:
     """Initialize the AI system from configuration."""
     if config_file:
         return initialize_gemini(config_file)
-    
+
     # Try to initialize with default config
     try:
         from src.app.shared.constants import CONFIG_FILE
+
         return initialize_gemini(CONFIG_FILE)
     except Exception:
         return False
@@ -72,7 +73,7 @@ def process_code(action: str, code: str, config_file: str = None) -> str:
 def check_ai_status() -> dict:
     """Get comprehensive AI status information."""
     is_ready, message = is_ai_ready()
-    
+
     return {
         "ready": is_ready,
         "message": message,
@@ -81,7 +82,7 @@ def check_ai_status() -> dict:
         "show_panel": should_show_ai_panel(),
         "status_text": message,
         "has_api_key": bool(get_ai_key()),
-        "selected_model": get_ai_model()
+        "selected_model": get_ai_model(),
     }
 
 
@@ -104,10 +105,11 @@ def get_gemini_ai(config_file: str = None) -> GeminiAI:
 
 # Hide internal modules from public API
 import sys
+
 _current_module = sys.modules[__name__]
 
 # Remove internal modules from public interface
-for _internal in ['core', 'gemini_client', 'templates']:
+for _internal in ["core", "gemini_client", "templates"]:
     if hasattr(_current_module, _internal):
         delattr(_current_module, _internal)
 
@@ -116,34 +118,30 @@ del sys, _current_module, _internal
 # Export all public functions
 __all__ = [
     # Core Classes
-    'GeminiAI',
-    'EditorAI', 
-    'PromptTemplates',
-    
+    "GeminiAI",
+    "EditorAI",
+    "PromptTemplates",
     # Main API Functions
-    'get_ai_client',
-    'initialize_ai',
-    'is_ai_available',
-    'get_editor_ai',
-    'process_code',
-    'check_ai_status',
-    'get_ai_status',
-    'get_prompt_templates',
-    
+    "get_ai_client",
+    "initialize_ai",
+    "is_ai_available",
+    "get_editor_ai",
+    "process_code",
+    "check_ai_status",
+    "get_ai_status",
+    "get_prompt_templates",
     # Status Functions
-    'is_ai_ready',
-    'should_show_ai_panel',
-    'get_ai_key',
-    'get_ai_model',
-    'generate_ai_response',
-    
+    "is_ai_ready",
+    "should_show_ai_panel",
+    "get_ai_key",
+    "get_ai_model",
+    "generate_ai_response",
     # Low-level Functions
-    'get_gemini_client',
-    'initialize_gemini',
-    'is_gemini_available',
-    'is_gemini_ready',
-    'reload_ai_config',
-    
+    "get_gemini_client",
+    "initialize_gemini",
+    "is_gemini_available",
+    "is_gemini_ready",
+    "reload_ai_config",
     # Backward Compatibility
-    'get_gemini_ai'
+    "get_gemini_ai",
 ]

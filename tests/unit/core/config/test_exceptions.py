@@ -88,7 +88,7 @@ class TestConfigPermissionError:
         """Test that exception can be raised and caught."""
         with pytest.raises(ConfigPermissionError) as exc_info:
             raise ConfigPermissionError("reading", "test.json")
-        
+
         assert exc_info.value.operation == "reading"
         assert exc_info.value.file_path == "test.json"
 
@@ -130,7 +130,7 @@ class TestConfigFormatError:
         """Test that exception can be raised and caught."""
         with pytest.raises(ConfigFormatError) as exc_info:
             raise ConfigFormatError("Invalid JSON", 5)
-        
+
         assert exc_info.value.line_number == 5
 
 
@@ -169,7 +169,7 @@ class TestConfigValidationError:
         """Test raising exception with details."""
         with pytest.raises(ConfigValidationError) as exc_info:
             raise ConfigValidationError("config", "Invalid", "Details here")
-        
+
         assert exc_info.value.field == "config"
         assert exc_info.value.details == "Details here"
 
@@ -265,7 +265,7 @@ class TestExceptionHierarchy:
             ConfigSaveError,
             ConfigMissingError,
         ]
-        
+
         for exc_class in exceptions:
             assert issubclass(exc_class, ConfigError)
 
@@ -280,7 +280,7 @@ class TestExceptionHierarchy:
             ConfigSaveError,
             ConfigMissingError,
         ]
-        
+
         for exc_class in exceptions:
             assert issubclass(exc_class, Exception)
 
@@ -294,7 +294,7 @@ class TestExceptionHierarchy:
             ConfigSaveError("Save failed"),
             ConfigMissingError("Missing key"),
         ]
-        
+
         for exc in exceptions_to_test:
             with pytest.raises(ConfigError):
                 raise exc
@@ -309,7 +309,7 @@ class TestExceptionHierarchy:
             ConfigSaveError,
             ConfigMissingError,
         ]
-        
+
         # Each exception type should be distinct
         for i, exc1 in enumerate(exceptions):
             for j, exc2 in enumerate(exceptions):
@@ -324,7 +324,7 @@ class TestExceptionUsage:
         """Test catching specific exception type."""
         with pytest.raises(ConfigPermissionError) as exc_info:
             raise ConfigPermissionError("reading", "config.json")
-        
+
         assert isinstance(exc_info.value, ConfigPermissionError)
         assert isinstance(exc_info.value, ConfigError)
         assert isinstance(exc_info.value, Exception)
@@ -347,6 +347,7 @@ class TestExceptionUsage:
 
     def test_multiple_exception_types_in_try_except(self):
         """Test handling multiple exception types."""
+
         def test_function(exception_type):
             if exception_type == "permission":
                 raise ConfigPermissionError("reading", "file.json")
@@ -354,15 +355,15 @@ class TestExceptionUsage:
                 raise ConfigFormatError("Invalid JSON", 1)
             elif exception_type == "validation":
                 raise ConfigValidationError("field", "Invalid")
-        
+
         # Test permission error
         with pytest.raises(ConfigError):
             test_function("permission")
-        
+
         # Test format error
         with pytest.raises(ConfigError):
             test_function("format")
-        
+
         # Test validation error
         with pytest.raises(ConfigError):
             test_function("validation")

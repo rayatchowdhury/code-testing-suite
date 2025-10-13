@@ -1,10 +1,19 @@
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton, 
-                              QLineEdit, QLabel, QFrame, QSizePolicy)
+from PySide6.QtWidgets import (
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QPushButton,
+    QLineEdit,
+    QLabel,
+    QFrame,
+    QSizePolicy,
+)
 from PySide6.QtCore import Qt, Signal, QTimer
 from src.app.presentation.styles.components import AI_PANEL_STYLE, CUSTOM_COMMAND_STYLE
 import asyncio
 import os
 import threading
+
 
 class AIActionButton(QPushButton):
     def __init__(self, text, parent=None):
@@ -13,9 +22,10 @@ class AIActionButton(QPushButton):
         self.setFixedHeight(24)  # Reduced height
         self.setCursor(Qt.PointingHandCursor)
 
+
 class AICustomCommandInput(QFrame):
     commandSubmitted = Signal(str)
-    
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName("custom_command_frame")
@@ -40,11 +50,12 @@ class AICustomCommandInput(QFrame):
             self.commandSubmitted.emit(command)
             self.input.clear()
 
+
 class AIPanel(QWidget):
     # Define signals for each action
     analysisRequested = Signal(str)
-    issuesRequested = Signal(str)     # Changed from fixRequested
-    tipsRequested = Signal(str)     # Changed from optimizeRequested
+    issuesRequested = Signal(str)  # Changed from fixRequested
+    tipsRequested = Signal(str)  # Changed from optimizeRequested
     documentRequested = Signal(str)
     generateRequested = Signal(str)
     customCommandRequested = Signal(str, str)
@@ -54,10 +65,10 @@ class AIPanel(QWidget):
         self.panel_type = panel_type
         self.setObjectName("ai_panel")
         self.setStyleSheet(AI_PANEL_STYLE)
-        
+
         # Check if AI panel should be shown
         self.refresh_visibility()
-        
+
         # Remove background AI initialization to avoid threading issues
         # AI will be initialized on first use instead
 
@@ -70,7 +81,7 @@ class AIPanel(QWidget):
     def refresh_visibility(self):
         """Refresh panel visibility based on current AI configuration"""
         if self._should_show_ai_panel():
-            if not hasattr(self, 'layout') or self.layout() is None:
+            if not hasattr(self, "layout") or self.layout() is None:
                 self._setup_ui()
             self.show()
             # Removed background AI initialization to avoid threading issues
@@ -86,7 +97,7 @@ class AIPanel(QWidget):
     def _setup_ui(self):
         if self.layout():
             QWidget().setLayout(self.layout())
-            
+
         main_layout = QHBoxLayout(self)
         main_layout.setContentsMargins(8, 6, 8, 6)  # Reduced margins
         main_layout.setSpacing(8)  # Reduced spacing
@@ -95,29 +106,32 @@ class AIPanel(QWidget):
         button_sections = QWidget()
         button_sections.setObjectName("ai_button_sections")
         button_sections.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        
+
         button_layout = QHBoxLayout(button_sections)
         button_layout.setContentsMargins(0, 0, 0, 0)
         button_layout.setSpacing(6)
 
         # Add all buttons in one go
         self.action_buttons = {}
-        
+
         # Define button configurations
         self.button_configs = {
-            'explanation_buttons': [
-                ('Analysis', 'Get complete analysis of your code'),
-                ('Issues', 'List potential issues and edge cases'),
-                ('Tips', 'Get improvement suggestions')
+            "explanation_buttons": [
+                ("Analysis", "Get complete analysis of your code"),
+                ("Issues", "List potential issues and edge cases"),
+                ("Tips", "Get improvement suggestions"),
             ],
-            'code_buttons': {
-                'editor': ('Document', 'Add comprehensive documentation (applies to code)'),
-                'other': ('Generate', 'Generate new code from requirements')
-            }
+            "code_buttons": {
+                "editor": (
+                    "Document",
+                    "Add comprehensive documentation (applies to code)",
+                ),
+                "other": ("Generate", "Generate new code from requirements"),
+            },
         }
 
         # Create explanation buttons
-        for text, tooltip in self.button_configs['explanation_buttons']:
+        for text, tooltip in self.button_configs["explanation_buttons"]:
             btn = self._create_action_button(text, tooltip)
             button_layout.addWidget(btn)
 
@@ -125,14 +139,16 @@ class AIPanel(QWidget):
         button_layout.addWidget(self._create_separator())
 
         # Add context-specific button
-        specific = self.button_configs['code_buttons']['editor' if self.panel_type == 'editor' else 'other']
+        specific = self.button_configs["code_buttons"][
+            "editor" if self.panel_type == "editor" else "other"
+        ]
         btn = self._create_action_button(*specific)
         button_layout.addWidget(btn)
 
         # Add final separator and custom command
         button_layout.addWidget(self._create_separator())
         self.custom_command = AICustomCommandInput()
-        
+
         # Add sections to main layout with proper sizing
         main_layout.addWidget(button_sections)
         main_layout.addWidget(self.custom_command, 1)
@@ -157,37 +173,47 @@ class AIPanel(QWidget):
         """Connect button signals with proper code context"""
         # Connect button signals
         signal_map = {
-            'analysis': self.analysisRequested,
-            'issues': self.issuesRequested,    # Changed from fix
-            'tips': self.tipsRequested,    # Changed from optimize
-            'document': self.documentRequested,
-            'generate': self.generateRequested
+            "analysis": self.analysisRequested,
+            "issues": self.issuesRequested,  # Changed from fix
+            "tips": self.tipsRequested,  # Changed from optimize
+            "document": self.documentRequested,
+            "generate": self.generateRequested,
         }
 
         # Connect all buttons including generate
         for action, btn in self.action_buttons.items():
             if action in signal_map:
                 btn.clicked.connect(
-                    lambda checked, s=signal_map[action]: self._emit_with_current_code(s)
+                    lambda checked, s=signal_map[action]: self._emit_with_current_code(
+                        s
+                    )
                 )
 
         # Connect custom command signal
         self.custom_command.commandSubmitted.connect(
             lambda cmd: self._emit_custom_command_with_current_code(cmd)
         )
-    
+
     def _emit_with_current_code(self, signal):
         """Emit a signal with the current code from parent"""
         try:
-            current_code = self.parent().getCode() if self.parent() and hasattr(self.parent(), 'getCode') else ""
+            current_code = (
+                self.parent().getCode()
+                if self.parent() and hasattr(self.parent(), "getCode")
+                else ""
+            )
         except (AttributeError, RuntimeError):
             current_code = ""
         signal.emit(current_code)
-    
+
     def _emit_custom_command_with_current_code(self, command):
         """Emit custom command signal with current code"""
         try:
-            current_code = self.parent().getCode() if self.parent() and hasattr(self.parent(), 'getCode') else ""
+            current_code = (
+                self.parent().getCode()
+                if self.parent() and hasattr(self.parent(), "getCode")
+                else ""
+            )
         except (AttributeError, RuntimeError):
             current_code = ""
         self.customCommandRequested.emit(command, current_code)
@@ -205,46 +231,46 @@ class AIPanel(QWidget):
                 btn.clicked.disconnect()
             except TypeError:
                 pass  # In case not connected
-                
+
             signal = None
-            if action == 'generate':
+            if action == "generate":
                 signal = self.generateRequested
             else:
                 signal = getattr(self, f"{action}Requested", None)
-                
+
             if signal:
-                btn.clicked.connect(
-                    lambda checked, s=signal, c=code: s.emit(c)
-                )
+                btn.clicked.connect(lambda checked, s=signal, c=code: s.emit(c))
 
     def refresh_from_config(self):
         """Refresh AI panel visibility based on current configuration"""
         should_show = self._should_show_ai_panel()
-        
+
         if should_show and self.isHidden():
             # Show panel and setup UI if needed
-            if not hasattr(self, 'action_buttons'):
+            if not hasattr(self, "action_buttons"):
                 self._setup_ui()
             self.show()
         elif not should_show and self.isVisible():
             # Hide panel
             self.hide()
-            
+
         # Update status if visible
         if self.isVisible():
             self._update_ai_status()
-    
+
     def _update_ai_status(self):
         """Update AI status display"""
         is_ready, message = self._is_ai_ready()
-        
+
         # You could add a status indicator here if needed
         # For now, just update tooltips
-        if hasattr(self, 'action_buttons'):
+        if hasattr(self, "action_buttons"):
             for btn in self.action_buttons.values():
                 if is_ready:
                     btn.setEnabled(True)
-                    btn.setToolTip(btn.toolTip().split('\n')[0])  # Keep original tooltip
+                    btn.setToolTip(
+                        btn.toolTip().split("\n")[0]
+                    )  # Keep original tooltip
                 else:
                     btn.setEnabled(False)
                     btn.setToolTip(f"{btn.toolTip().split('\n')[0]}\n⚠️ {message}")
@@ -253,14 +279,16 @@ class AIPanel(QWidget):
         """Lazy import gemini client to check if AI panel should be shown"""
         try:
             from src.app.core.ai.gemini_client import should_show_ai_panel
+
             return should_show_ai_panel()
         except Exception:
             return False
-    
+
     def _is_ai_ready(self):
         """Lazy import gemini client to check if AI is ready"""
         try:
             from src.app.core.ai.gemini_client import is_ai_ready
+
             return is_ai_ready()
         except Exception:
             return False, "AI configuration not available"

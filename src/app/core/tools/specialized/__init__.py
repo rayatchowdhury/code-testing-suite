@@ -5,8 +5,4 @@ from src.app.core.tools.specialized.validator_test_worker import ValidatorTestWo
 from src.app.core.tools.specialized.benchmark_test_worker import BenchmarkTestWorker
 from src.app.core.tools.specialized.comparison_test_worker import ComparisonTestWorker
 
-__all__ = [
-    'ValidatorTestWorker',
-    'BenchmarkTestWorker', 
-    'ComparisonTestWorker'
-]
+__all__ = ["ValidatorTestWorker", "BenchmarkTestWorker", "ComparisonTestWorker"]
