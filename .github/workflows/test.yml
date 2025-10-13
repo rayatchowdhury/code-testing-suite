@@ -135,7 +135,7 @@ jobs:
         pytest --lf --count=3 --tb=line -q || echo "Flaky test detection completed"
         
     - name: Upload test results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: test-results-${{ matrix.os }}-${{ matrix.python-version }}
@@ -236,7 +236,7 @@ jobs:
         bandit -r src/ -f json -o bandit-report.json || true
         
     - name: Upload security reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: security-reports
         path: |
@@ -287,7 +287,7 @@ jobs:
         pyinstaller --name "CodeTestingSuite" --onedir --windowed --clean --add-data "src/resources;resources" --distpath dist/ --workpath build/ --specpath . src/app/__main__.py
         
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: application-${{ matrix.os }}
         path: dist/
