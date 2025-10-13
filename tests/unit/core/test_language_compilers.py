@@ -764,7 +764,7 @@ class TestCppCompilerAdvanced:
         else:
             assert path == 'test.v2'
     
-    @patch('subprocess.run')
+    @patch('src.app.core.tools.base.language_compilers.subprocess.run')
     def test_compile_creates_no_window_on_windows(self, mock_run, compiler, tmp_path, monkeypatch):
         """Should use CREATE_NO_WINDOW flag on Windows."""
         monkeypatch.setattr(os, 'name', 'nt')
@@ -775,6 +775,8 @@ class TestCppCompilerAdvanced:
         source_file = str(tmp_path / 'test.cpp')
         compiler.compile(source_file)
         
+        # Verify subprocess.run was called
+        assert mock_run.called, "subprocess.run should have been called"
         call_kwargs = mock_run.call_args[1]
         assert 'creationflags' in call_kwargs
     

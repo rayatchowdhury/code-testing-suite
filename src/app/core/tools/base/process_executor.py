@@ -70,7 +70,7 @@ class ProcessExecutor:
             # Start the process
             process = subprocess.Popen(
                 command,
-                stdin=subprocess.PIPE if input_text else None,
+                stdin=subprocess.PIPE if input_text is not None else None,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0,
@@ -86,37 +86,55 @@ class ProcessExecutor:
                 except (psutil.NoSuchProcess, psutil.AccessDenied):
                     pass
             
-            # Send input and monitor process
-            if input_text and process.stdin:
-                process.stdin.write(input_text)
-                process.stdin.close()
-            
-            # Monitor the process
-            while process.poll() is None:
-                # Check timeout
-                if time.time() - start_time > timeout:
+            # For processes with input, use communicate() directly with timeout monitoring
+            # For processes without input, monitor with polling loop
+            if input_text is not None:
+                # Use communicate for input handling - it properly closes stdin
+                try:
+                    stdout, stderr = process.communicate(
+                        input=input_text,
+                        timeout=timeout
+                    )
+                    timed_out = False
+                except subprocess.TimeoutExpired:
                     process.kill()
+                    stdout, stderr = process.communicate()
                     timed_out = True
-                    break
                 
-                # Monitor memory usage
+                # Monitor memory for processes with input (after completion)
                 if monitor_memory and psutil_process:
                     try:
                         memory_info = psutil_process.memory_info()
-                        current_memory_mb = memory_info.rss / (1024 * 1024)
-                        max_memory_usage = max(max_memory_usage, current_memory_mb)
+                        max_memory_usage = memory_info.rss / (1024 * 1024)
                     except (psutil.NoSuchProcess, psutil.AccessDenied):
+                        pass
+            else:
+                # Monitor the process without input
+                while process.poll() is None:
+                    # Check timeout
+                    if time.time() - start_time > timeout:
+                        process.kill()
+                        timed_out = True
                         break
+                    
+                    # Monitor memory usage
+                    if monitor_memory and psutil_process:
+                        try:
+                            memory_info = psutil_process.memory_info()
+                            current_memory_mb = memory_info.rss / (1024 * 1024)
+                            max_memory_usage = max(max_memory_usage, current_memory_mb)
+                        except (psutil.NoSuchProcess, psutil.AccessDenied):
+                            break
+                    
+                    time.sleep(0.005)  # Check every 5ms
                 
-                time.sleep(0.005)  # Check every 5ms
-            
-            # Get final result
-            try:
-                stdout, stderr = process.communicate(timeout=1.0)
-            except subprocess.TimeoutExpired:
-                process.kill()
-                stdout, stderr = process.communicate()
-                timed_out = True
+                # Get final result
+                try:
+                    stdout, stderr = process.communicate(timeout=1.0)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    stdout, stderr = process.communicate()
+                    timed_out = True
             
             execution_time = time.time() - start_time
             

@@ -254,6 +254,11 @@ class BaseRunner(QObject):
             elif hasattr(self.worker, 'test_results'):
                 test_results = getattr(self.worker, 'test_results', [])
             
+            # Check if we have results to save
+            if not test_results:
+                logger.warning("No test results available to save")
+                return -1
+            
             # Calculate statistics
             if not self.test_start_time:
                 logger.error("test_start_time not set - cannot calculate total_time")

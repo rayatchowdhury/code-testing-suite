@@ -84,13 +84,19 @@ def get_test_type_from_path(file_path: str) -> Optional[str]:
         >>> get_test_type_from_path('/workspace/generator.cpp')
         None
     """
-    path_parts = Path(file_path).parts
+    # Normalize path separators for cross-platform compatibility
+    normalized_path = file_path.replace('\\', '/')
+    path_parts = Path(normalized_path).parts
     
-    # Look for test type directory in path
+    # Look for test type directory in path (case-insensitive for cross-platform)
+    test_types = [WORKSPACE_COMPARATOR_SUBDIR, WORKSPACE_VALIDATOR_SUBDIR, 
+                  WORKSPACE_BENCHMARKER_SUBDIR]
+    
     for part in path_parts:
-        if part in [WORKSPACE_COMPARATOR_SUBDIR, WORKSPACE_VALIDATOR_SUBDIR, 
-                    WORKSPACE_BENCHMARKER_SUBDIR]:
-            return part
+        part_lower = part.lower()
+        for test_type in test_types:
+            if part_lower == test_type.lower():
+                return test_type
     
     return None
 
