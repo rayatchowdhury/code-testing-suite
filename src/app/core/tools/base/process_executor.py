@@ -69,12 +69,14 @@ class ProcessExecutor:
 
         try:
             # Start the process
+            # Use numeric constant for CREATE_NO_WINDOW (0x08000000) to avoid
+            # AttributeError on non-Windows platforms during testing
             process = subprocess.Popen(
                 command,
                 stdin=subprocess.PIPE if input_text is not None else None,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+                creationflags=0x08000000 if os.name == "nt" else 0,
                 text=True,
                 cwd=working_dir,
             )

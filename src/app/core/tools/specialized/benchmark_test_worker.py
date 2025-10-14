@@ -211,11 +211,13 @@ class BenchmarkTestWorker(QObject):
             # Stage 1: Generate test input
             generator_start = time.time()
 
+            # Use numeric constant for CREATE_NO_WINDOW (0x08000000) to avoid
+            # AttributeError on non-Windows platforms during testing
             generator_result = subprocess.run(
                 self.execution_commands["generator"],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+                creationflags=0x08000000 if os.name == "nt" else 0,
                 timeout=10,
                 text=True,
             )
@@ -233,12 +235,14 @@ class BenchmarkTestWorker(QObject):
             test_start = time.time()
 
             # Start the test process
+            # Use numeric constant for CREATE_NO_WINDOW (0x08000000) to avoid
+            # AttributeError on non-Windows platforms during testing
             process = subprocess.Popen(
                 self.execution_commands["test"],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+                creationflags=0x08000000 if os.name == "nt" else 0,
                 text=True,
             )
 

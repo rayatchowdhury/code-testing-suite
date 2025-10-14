@@ -209,11 +209,13 @@ class ValidatorTestWorker(QObject):
             generator_start = time.time()
 
             try:
+                # Use numeric constant for CREATE_NO_WINDOW (0x08000000) to avoid
+                # AttributeError on non-Windows platforms during testing
                 generator_process = subprocess.Popen(
                     self.execution_commands["generator"],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
-                    creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+                    creationflags=0x08000000 if os.name == "nt" else 0,
                     text=True,
                 )
             except Exception as e:
@@ -262,12 +264,14 @@ class ValidatorTestWorker(QObject):
             # Stage 2: Run test solution with memory tracking
             test_start = time.time()
 
+            # Use numeric constant for CREATE_NO_WINDOW (0x08000000) to avoid
+            # AttributeError on non-Windows platforms during testing
             test_process = subprocess.Popen(
                 self.execution_commands["test"],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+                creationflags=0x08000000 if os.name == "nt" else 0,
                 text=True,
             )
 
@@ -329,11 +333,13 @@ class ValidatorTestWorker(QObject):
                     output_temp_path,
                 ]
 
+                # Use numeric constant for CREATE_NO_WINDOW (0x08000000) to avoid
+                # AttributeError on non-Windows platforms during testing
                 validator_process = subprocess.Popen(
                     validator_command,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
-                    creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+                    creationflags=0x08000000 if os.name == "nt" else 0,
                     text=True,
                 )
 

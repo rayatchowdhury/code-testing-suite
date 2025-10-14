@@ -214,11 +214,13 @@ class ComparisonTestWorker(QObject):
             # Stage 1: Generate test input
             generator_start = time.time()
 
+            # Use numeric constant for CREATE_NO_WINDOW (0x08000000) to avoid
+            # AttributeError on non-Windows platforms during testing
             generator_process = subprocess.Popen(
                 self.execution_commands["generator"],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+                creationflags=0x08000000 if os.name == "nt" else 0,
                 text=True,
             )
 
@@ -252,12 +254,14 @@ class ComparisonTestWorker(QObject):
             # Stage 2: Run test solution
             test_start = time.time()
 
+            # Use numeric constant for CREATE_NO_WINDOW (0x08000000) to avoid
+            # AttributeError on non-Windows platforms during testing
             test_process = subprocess.Popen(
                 self.execution_commands["test"],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+                creationflags=0x08000000 if os.name == "nt" else 0,
                 text=True,
             )
 
@@ -292,12 +296,14 @@ class ComparisonTestWorker(QObject):
             # Stage 3: Run correct solution
             correct_start = time.time()
 
+            # Use numeric constant for CREATE_NO_WINDOW (0x08000000) to avoid
+            # AttributeError on non-Windows platforms during testing
             correct_process = subprocess.Popen(
                 self.execution_commands["correct"],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+                creationflags=0x08000000 if os.name == "nt" else 0,
                 text=True,
             )
 

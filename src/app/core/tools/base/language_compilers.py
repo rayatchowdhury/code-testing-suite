@@ -193,13 +193,15 @@ class CppCompiler(BaseLanguageCompiler):
         logger.debug(f"C++ compile command: {' '.join(cmd)}")
 
         try:
+            # Use numeric constant for CREATE_NO_WINDOW (0x08000000) to avoid
+            # AttributeError on non-Windows platforms during testing
             result = subprocess.run(
                 cmd,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
                 timeout=timeout,
-                creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+                creationflags=0x08000000 if os.name == "nt" else 0,
             )
 
             if result.returncode == 0:
@@ -353,13 +355,15 @@ class JavaCompiler(BaseLanguageCompiler):
         logger.debug(f"Java compile command: {' '.join(cmd)}")
 
         try:
+            # Use numeric constant for CREATE_NO_WINDOW (0x08000000) to avoid
+            # AttributeError on non-Windows platforms during testing
             result = subprocess.run(
                 cmd,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
                 timeout=timeout,
-                creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+                creationflags=0x08000000 if os.name == "nt" else 0,
             )
 
             if result.returncode == 0:
