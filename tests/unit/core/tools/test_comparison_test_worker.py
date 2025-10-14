@@ -338,13 +338,26 @@ class TestComparisonWorkerMetrics:
     @patch("psutil.Process")
     def test_tracks_execution_time(self, mock_psutil, mock_popen, temp_workspace):
         """Should track execution time for each stage."""
-        # Mock successful execution - create all procs first, then set side_effect
-        procs = []
-        for _ in range(3):
-            proc = Mock(returncode=0, poll=Mock(return_value=0), pid=1001)
-            proc.communicate.return_value = ("output", "")
+        # Mock memory info
+        mock_memory_info = Mock()
+        mock_memory_info.rss = 50 * 1024 * 1024  # 50 MB
+        mock_psutil.return_value.memory_info.return_value = mock_memory_info
+
+        # Mock successful execution with simulated delays
+        def create_proc_with_delay():
+            proc = Mock(returncode=0, pid=1001)
+            # poll() returns None first (process running), then 0 (finished)
+            proc.poll = Mock(side_effect=[None, 0])
+            
+            # Simulate execution time by sleeping in communicate
+            def communicate_with_delay(timeout=None):
+                time.sleep(0.01)  # Simulate 10ms execution
+                return ("output", "")
+            proc.communicate = communicate_with_delay
             proc.stdin = Mock()
-            procs.append(proc)
+            return proc
+
+        procs = [create_proc_with_delay() for _ in range(3)]
         mock_popen.side_effect = procs
 
         executables = {"generator": "", "test": "", "correct": ""}

@@ -96,15 +96,16 @@ class Benchmarker(BaseRunner):
         str, int, bool, float, float, bool, str, str, int
     )  # test name, test number, passed, execution time, memory used, memory passed, input_data, output_data, test_size
 
-    def __init__(self, workspace_dir):
-        # Define files specific to TLE testing
-        files = {
-            "generator": os.path.join(workspace_dir, "generator.cpp"),
-            "test": os.path.join(workspace_dir, "test.cpp"),
-        }
+    def __init__(self, workspace_dir, files=None, config=None):
+        # Define default files specific to TLE testing if not provided
+        if files is None:
+            files = {
+                "generator": os.path.join(workspace_dir, "generator.cpp"),
+                "test": os.path.join(workspace_dir, "test.cpp"),
+            }
 
         # Initialize BaseRunner with benchmark-specific configuration
-        super().__init__(workspace_dir, files, test_type="benchmark")
+        super().__init__(workspace_dir, files, test_type="benchmark", config=config)
 
         # Store TLE-specific parameters
         self.time_limit = 0
