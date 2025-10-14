@@ -1,5 +1,5 @@
-from src.app.presentation.styles.constants.colors import COLORS
 from src.app.presentation.styles.components.scrollbar import SCROLLBAR_STYLE
+from src.app.presentation.styles.constants.colors import COLORS
 
 SIDEBAR_STYLE = (
     f"""

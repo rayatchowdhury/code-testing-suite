@@ -5,13 +5,15 @@ Tests model serialization, validation, and JSON conversion.
 Tests both new format and backward compatibility with old format.
 """
 
-import pytest
 import json
+
+import pytest
+
 from src.app.persistence.database.models import (
     FilesSnapshot,
-    TestResult,
-    Session,
     ProjectData,
+    Session,
+    TestResult,
 )
 
 

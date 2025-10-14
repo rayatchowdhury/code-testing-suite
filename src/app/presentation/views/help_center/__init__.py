@@ -4,7 +4,8 @@ from src.app.presentation.window_controller.qt_doc_engine import (
     HelpDocument,
     HelpSectionData,
 )
-from .help_content import get_document_data, get_available_topics
+
+from .help_content import get_available_topics, get_document_data
 
 __all__ = [
     "HelpCenterWindow",

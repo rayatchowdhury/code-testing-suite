@@ -4,9 +4,11 @@ Test suite for LanguageDetector.
 Tests language detection from file extensions and content analysis.
 """
 
-import pytest
 from pathlib import Path
-from src.app.core.tools.base.language_detector import LanguageDetector, Language
+
+import pytest
+
+from src.app.core.tools.base.language_detector import Language, LanguageDetector
 
 
 class TestLanguageDetectorExtension:

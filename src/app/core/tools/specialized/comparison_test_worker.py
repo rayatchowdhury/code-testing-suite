@@ -10,14 +10,15 @@ This worker implements the 3-stage comparison testing process:
 Maintains exact signal signatures and behavior from the original inline implementation.
 """
 
-import os
-import time
-import threading
 import multiprocessing
+import os
 import subprocess
-import psutil
-from typing import Dict, Any, Optional
+import threading
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Any, Dict, Optional
+
+import psutil
 from PySide6.QtCore import QObject, Signal, Slot
 
 # Import path helpers for nested I/O file organization
@@ -265,11 +266,14 @@ class ComparisonTestWorker(QObject):
                 text=True,
             )
 
+            # Write input to process (non-blocking)
+            if input_text:
+                test_process.stdin.write(input_text)
+                test_process.stdin.flush()
+
             # Track test solution memory
             try:
                 proc = psutil.Process(test_process.pid)
-                test_process.stdin.write(input_text)
-                test_process.stdin.close()
                 while test_process.poll() is None:
                     mem_mb = proc.memory_info().rss / (1024 * 1024)
                     peak_memory_mb = max(peak_memory_mb, mem_mb)
@@ -277,6 +281,8 @@ class ComparisonTestWorker(QObject):
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 pass
 
+            # Close stdin and get output
+            test_process.stdin.close()
             test_stdout, test_stderr = test_process.communicate(timeout=30)
             test_time = time.time() - test_start
 
@@ -307,11 +313,14 @@ class ComparisonTestWorker(QObject):
                 text=True,
             )
 
+            # Write input to process (non-blocking)
+            if input_text:
+                correct_process.stdin.write(input_text)
+                correct_process.stdin.flush()
+
             # Track correct solution memory
             try:
                 proc = psutil.Process(correct_process.pid)
-                correct_process.stdin.write(input_text)
-                correct_process.stdin.close()
                 while correct_process.poll() is None:
                     mem_mb = proc.memory_info().rss / (1024 * 1024)
                     peak_memory_mb = max(peak_memory_mb, mem_mb)
@@ -319,6 +328,8 @@ class ComparisonTestWorker(QObject):
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 pass
 
+            # Close stdin and get output
+            correct_process.stdin.close()
             correct_stdout, correct_stderr = correct_process.communicate(timeout=30)
             correct_time = time.time() - correct_start
 

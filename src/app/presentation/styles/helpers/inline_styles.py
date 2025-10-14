@@ -5,8 +5,8 @@ Common inline style helpers for frequently used style combinations
 from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
 from src.app.presentation.styles.constants.status_colors import (
     ERROR_COLOR_HEX,
-    FONT_WEIGHTS,
     FONT_SIZES,
+    FONT_WEIGHTS,
 )
 
 # Common error label styles

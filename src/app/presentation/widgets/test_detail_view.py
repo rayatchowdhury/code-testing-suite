@@ -4,16 +4,17 @@ Detail view dialogs for test cards.
 Shows detailed information about a specific test when a card is clicked.
 """
 
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QDialog,
-    QVBoxLayout,
+    QFrame,
     QHBoxLayout,
     QLabel,
     QPushButton,
     QTextEdit,
-    QFrame,
+    QVBoxLayout,
 )
-from PySide6.QtCore import Qt
+
 from src.app.presentation.styles.style import MATERIAL_COLORS
 
 

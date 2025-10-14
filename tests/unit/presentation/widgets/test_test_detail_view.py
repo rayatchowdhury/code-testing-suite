@@ -6,15 +6,16 @@ These dialogs show comprehensive test details when a test card is clicked.
 Different dialog types for validator, comparator, and benchmarker.
 """
 
-import pytest
-from PySide6.QtWidgets import QPushButton, QTextEdit, QLabel
 from unittest.mock import Mock
 
+import pytest
+from PySide6.QtWidgets import QLabel, QPushButton, QTextEdit
+
 from src.app.presentation.widgets.test_detail_view import (
-    TestDetailDialog,
-    ComparatorDetailDialog,
-    ValidatorDetailDialog,
     BenchmarkerDetailDialog,
+    ComparatorDetailDialog,
+    TestDetailDialog,
+    ValidatorDetailDialog,
 )
 
 

@@ -1,6 +1,6 @@
 """Database operations for configuration management."""
 
-from PySide6.QtWidgets import QMessageBox, QInputDialog
+from PySide6.QtWidgets import QInputDialog, QMessageBox
 
 
 class DatabaseOperations:

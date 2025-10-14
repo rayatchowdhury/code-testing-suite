@@ -5,38 +5,39 @@ Phase 5 (Issue #34): Redesigned detailed view using sidebar and display area
 Follows the same architecture pattern as other windows in the system.
 """
 
-from PySide6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QPushButton,
-    QLabel,
-    QStackedWidget,
-    QTextEdit,
-    QTabWidget,
-    QScrollArea,
-    QFrame,
-    QMessageBox,
-    QFileDialog,
-)
-from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QFont
 import json
 import os
 import zipfile
 from datetime import datetime
 
-from src.app.persistence.database import TestResult
-from src.app.presentation.widgets.sidebar import Sidebar
-from src.app.presentation.styles.style import MATERIAL_COLORS
-from src.app.presentation.styles.components.results import (
-    RESULTS_TEXT_EDIT_STYLE,
-    RESULTS_CARD_STYLE,
-    RESULTS_LABEL_TITLE_STYLE,
-    RESULTS_LABEL_DETAILS_STYLE,
-    RESULTS_TABLE_SMALL_STYLE,
-    RESULTS_BUTTON_STYLE,
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QFont
+from PySide6.QtWidgets import (
+    QFileDialog,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QMessageBox,
+    QPushButton,
+    QScrollArea,
+    QStackedWidget,
+    QTabWidget,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
 )
+
+from src.app.persistence.database import TestResult
+from src.app.presentation.styles.components.results import (
+    RESULTS_BUTTON_STYLE,
+    RESULTS_CARD_STYLE,
+    RESULTS_LABEL_DETAILS_STYLE,
+    RESULTS_LABEL_TITLE_STYLE,
+    RESULTS_TABLE_SMALL_STYLE,
+    RESULTS_TEXT_EDIT_STYLE,
+)
+from src.app.presentation.styles.style import MATERIAL_COLORS
+from src.app.presentation.widgets.sidebar import Sidebar
 
 
 class DetailedResultsWidget(QWidget):
@@ -510,8 +511,9 @@ class DetailedResultsWidget(QWidget):
         """Export current test result as ZIP"""
         try:
             # Ask user for save location
-            from PySide6.QtWidgets import QFileDialog
             import zipfile
+
+            from PySide6.QtWidgets import QFileDialog
 
             default_name = f"test_export_{self.test_result.project_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip"
             file_path, _ = QFileDialog.getSaveFileName(

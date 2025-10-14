@@ -1,24 +1,25 @@
-import sqlite3
-import json
-import os
 import difflib
+import json
 import logging
+import os
+import sqlite3
 from datetime import datetime
-from typing import List, Dict, Optional, Tuple
-from src.app.shared.constants import USER_DATA_DIR
+from typing import Dict, List, Optional, Tuple
 
-# Import models from separate module (Phase 1 refactoring)
-from .models import FilesSnapshot, TestResult, Session, ProjectData
+from src.app.shared.constants import USER_DATA_DIR
 
 # Import constants (Phase 3 refactoring)
 from .constants import (
+    DEFAULT_PROJECTS_LIMIT,
     DEFAULT_RESULTS_LIMIT,
     DEFAULT_SESSIONS_LIMIT,
-    DEFAULT_PROJECTS_LIMIT,
     OLD_DATA_CLEANUP_DAYS,
-    TEST_TYPE_COMPARISON,
     SUCCESS_RATE_PERCENTAGE_MULTIPLIER,
+    TEST_TYPE_COMPARISON,
 )
+
+# Import models from separate module (Phase 1 refactoring)
+from .models import FilesSnapshot, ProjectData, Session, TestResult
 
 # Set up logger
 logger = logging.getLogger(__name__)

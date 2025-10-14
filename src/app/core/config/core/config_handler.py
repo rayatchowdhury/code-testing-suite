@@ -2,26 +2,26 @@
 
 import json
 import os
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 from PySide6.QtWidgets import QMessageBox
 
 from src.app.core.config.core.exceptions import (
     ConfigError,
-    ConfigPermissionError,
     ConfigFormatError,
-    ConfigValidationError,
     ConfigLoadError,
-    ConfigSaveError,
     ConfigMissingError,
+    ConfigPermissionError,
+    ConfigSaveError,
+    ConfigValidationError,
 )
-from src.app.shared.constants import USER_DATA_DIR, CONFIG_FILE
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
 from src.app.presentation.styles.components.config_ui import (
-    SUCCESS_MESSAGE_STYLE,
     INFO_MESSAGE_STYLE,
+    SUCCESS_MESSAGE_STYLE,
     get_success_status_style,
 )
+from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
+from src.app.shared.constants import CONFIG_FILE, USER_DATA_DIR
 
 
 class ConfigManager:

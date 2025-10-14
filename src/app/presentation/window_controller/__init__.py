@@ -11,20 +11,20 @@ Components:
 """
 
 from src.app.presentation.window_controller.base_window import SidebarWindowBase
+from src.app.presentation.window_controller.qt_doc_engine import (
+    AppTheme,
+    CallToActionSection,
+    DocumentWidget,
+    FeatureCard,
+    FontUtils,
+    GradientText,
+    HelpDocument,
+    HelpSectionData,
+    StyleSheet,
+)
 from src.app.presentation.window_controller.window_management import (
     WindowFactory,
     WindowManager,
-)
-from src.app.presentation.window_controller.qt_doc_engine import (
-    HelpDocument,
-    HelpSectionData,
-    DocumentWidget,
-    AppTheme,
-    StyleSheet,
-    FontUtils,
-    GradientText,
-    FeatureCard,
-    CallToActionSection,
 )
 
 __all__ = [

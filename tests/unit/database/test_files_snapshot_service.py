@@ -8,19 +8,20 @@ Tests file snapshot creation and mismatch analysis including:
 - Error handling
 """
 
-import pytest
 import os
 from pathlib import Path
 
+import pytest
+
+from src.app.persistence.database.models import FilesSnapshot
 from src.app.persistence.database.services.files_snapshot_service import (
     FilesSnapshotService,
 )
-from src.app.persistence.database.models import FilesSnapshot
 from tests.fixtures.database_fixtures import (
     SAMPLE_CPP_CODE,
-    SAMPLE_PYTHON_CODE,
-    SAMPLE_JAVA_CODE,
     SAMPLE_GENERATOR_CODE,
+    SAMPLE_JAVA_CODE,
+    SAMPLE_PYTHON_CODE,
     SAMPLE_VALIDATOR_CODE,
 )
 

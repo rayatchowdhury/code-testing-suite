@@ -1,17 +1,19 @@
-from src.app.presentation.window_controller.base_window import SidebarWindowBase
-from src.app.presentation.widgets.sidebar import Sidebar
+import json
+import os
+import zipfile
+from datetime import datetime
+
 from PySide6.QtWidgets import (
+    QFileDialog,
+    QMessageBox,
     QPushButton,
     QVBoxLayout,
     QWidget,
-    QMessageBox,
-    QFileDialog,
 )
+
 from src.app.presentation.views.results.results_widget import TestResultsWidget
-import zipfile
-import json
-import os
-from datetime import datetime
+from src.app.presentation.widgets.sidebar import Sidebar
+from src.app.presentation.window_controller.base_window import SidebarWindowBase
 
 
 class ResultsWindow(SidebarWindowBase):

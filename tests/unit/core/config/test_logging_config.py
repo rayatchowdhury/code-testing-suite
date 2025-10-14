@@ -10,23 +10,23 @@ Tests cover:
 - Exception classes
 """
 
-import pytest
 import logging
 import logging.handlers
-from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock, call
-import tempfile
 import shutil
+import tempfile
+from pathlib import Path
+from unittest.mock import MagicMock, Mock, call, patch
+
+import pytest
 
 from src.app.core.config.logging_config import (
-    setup_logging,
-    get_logger,
-    setup_migration_logging,
     DatabaseError,
     MigrationError,
     ValidationError,
+    get_logger,
+    setup_logging,
+    setup_migration_logging,
 )
-
 
 # ============================================================================
 # Logging Setup Tests

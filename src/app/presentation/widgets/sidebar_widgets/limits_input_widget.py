@@ -6,16 +6,17 @@ This widget provides input fields for time and memory limits,
 designed to be used across different views (benchmarker, validator, comparator).
 """
 
-from PySide6.QtWidgets import (
-    QWidget,
-    QHBoxLayout,
-    QVBoxLayout,
-    QLabel,
-    QLineEdit,
-    QGroupBox,
-)
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIntValidator
+from PySide6.QtWidgets import (
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QVBoxLayout,
+    QWidget,
+)
+
 from src.app.presentation.styles.style import MATERIAL_COLORS
 
 

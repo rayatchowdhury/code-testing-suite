@@ -3,19 +3,20 @@ Main Window Document - Application-specific main window implementation
 All components now imported from unified qt_doc_engine
 """
 
-from PySide6.QtWidgets import *
+from typing import List, Tuple
+
 from PySide6.QtCore import *
 from PySide6.QtGui import *
-from typing import List, Tuple
+from PySide6.QtWidgets import *
 
 from src.app.presentation.window_controller.qt_doc_engine import (
     AppTheme,
-    StyleSheet,
-    FontUtils,
-    GradientText,
-    FeatureCard,
     CallToActionSection,
     DocumentWidget,
+    FeatureCard,
+    FontUtils,
+    GradientText,
+    StyleSheet,
 )
 
 

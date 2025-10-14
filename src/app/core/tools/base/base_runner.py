@@ -6,14 +6,16 @@ from ValidatorRunner, Benchmarker, and Comparator into a single reusable
 base class with consistent threading, database integration, and lifecycle management.
 """
 
-import os
 import json
-from typing import Dict, Any, Optional
+import logging
+import os
 from datetime import datetime
-from PySide6.QtCore import QObject, Signal, QThread
+from typing import Any, Dict, Optional
+
+from PySide6.QtCore import QObject, QThread, Signal
+
 from src.app.core.tools.base.base_compiler import BaseCompiler
 from src.app.persistence.database import DatabaseManager, TestResult
-import logging
 
 logger = logging.getLogger(__name__)
 

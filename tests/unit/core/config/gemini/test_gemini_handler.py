@@ -11,16 +11,16 @@ Tests cover:
 - GeminiConfigUI helper methods
 """
 
-import pytest
 import json
-import tempfile
 import os
+import tempfile
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock, mock_open
+from unittest.mock import MagicMock, Mock, mock_open, patch
+
+import pytest
 from PySide6.QtWidgets import QComboBox
 
 from src.app.core.config.gemini.gemini_handler import GeminiConfig, GeminiConfigUI
-
 
 # ============================================================================
 # Test Fixtures

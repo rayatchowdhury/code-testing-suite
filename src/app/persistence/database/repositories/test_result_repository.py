@@ -6,14 +6,14 @@ providing a clean abstraction layer with filtering capabilities.
 Phase 5: Migrate TestResult Operations
 """
 
-from typing import List, Optional
-from datetime import datetime, timedelta
 import logging
+from datetime import datetime, timedelta
+from typing import List, Optional
 
-from .base_repository import BaseRepository
-from ..models import TestResult
-from ..constants import DEFAULT_RESULTS_LIMIT, STATUS_PASSED, STATUS_FAILED
+from ..constants import DEFAULT_RESULTS_LIMIT, STATUS_FAILED, STATUS_PASSED
 from ..exceptions import RepositoryError
+from ..models import TestResult
+from .base_repository import BaseRepository
 
 logger = logging.getLogger(__name__)
 

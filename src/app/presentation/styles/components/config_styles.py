@@ -1,5 +1,5 @@
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
 from src.app.presentation.styles.components.scrollbar import SCROLLBAR_STYLE
+from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
 
 CONFIG_DIALOG_STYLE = (
     f"""

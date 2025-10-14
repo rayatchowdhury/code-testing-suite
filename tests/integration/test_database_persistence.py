@@ -12,35 +12,38 @@ Tests end-to-end database operations with real DatabaseManager:
 Per Phase 6.3 requirements: Use real components, minimal mocking.
 """
 
-import pytest
-import os
 import json
+import os
 import time
-from pathlib import Path
 from datetime import datetime, timedelta
+from pathlib import Path
 
-from src.app.persistence.database.database_manager import DatabaseManager, DatabaseError
+import pytest
+
+from src.app.persistence.database.database_manager import DatabaseError, DatabaseManager
 from src.app.persistence.database.models import (
-    TestResult,
-    Session,
-    ProjectData,
     FilesSnapshot,
-)
-from src.app.persistence.database.services.files_snapshot_service import (
-    FilesSnapshotService,
-)
-from src.app.persistence.database.services.database_stats_service import (
-    DatabaseStatsService,
+    ProjectData,
+    Session,
+    TestResult,
 )
 from src.app.persistence.database.services.database_maintenance_service import (
     DatabaseMaintenanceService,
 )
+from src.app.persistence.database.services.database_stats_service import (
+    DatabaseStatsService,
+)
+from src.app.persistence.database.services.files_snapshot_service import (
+    FilesSnapshotService,
+)
 from tests.fixtures.database_fixtures import (
-    ResultBuilder as TestResultBuilder,
-    create_sample_test_result,
     SAMPLE_CPP_CODE,
-    SAMPLE_PYTHON_CODE,
     SAMPLE_JAVA_CODE,
+    SAMPLE_PYTHON_CODE,
+)
+from tests.fixtures.database_fixtures import ResultBuilder as TestResultBuilder
+from tests.fixtures.database_fixtures import (
+    create_sample_test_result,
 )
 
 

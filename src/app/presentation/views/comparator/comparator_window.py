@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
-from src.app.presentation.window_controller.base_window import SidebarWindowBase
-from src.app.presentation.widgets.sidebar import Sidebar
-from PySide6.QtWidgets import QPushButton, QMessageBox
 from PySide6.QtGui import QFont, QShowEvent
+from PySide6.QtWidgets import QMessageBox, QPushButton
+
 from src.app.presentation.views.comparator.comparator_display_area import (
     ComparatorDisplay,
 )
+from src.app.presentation.widgets.sidebar import Sidebar
 from src.app.presentation.widgets.sidebar_widgets import TestCountSlider
+from src.app.presentation.window_controller.base_window import SidebarWindowBase
 
 # Lazy import to avoid circular dependency
 # from src.app.core.tools.comparator import Comparator

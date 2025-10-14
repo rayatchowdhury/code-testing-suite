@@ -9,11 +9,12 @@ Tests verify the validation testing workflow, including:
 - Public API methods (run_validation_test)
 """
 
-import pytest
-from unittest.mock import Mock, MagicMock, patch, call
-from PySide6.QtCore import Signal
-from datetime import datetime
 import json
+from datetime import datetime
+from unittest.mock import MagicMock, Mock, call, patch
+
+import pytest
+from PySide6.QtCore import Signal
 
 from src.app.core.tools.validator import ValidatorRunner
 from src.app.persistence.database.models import TestResult

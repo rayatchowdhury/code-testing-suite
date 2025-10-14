@@ -8,21 +8,22 @@ This worker implements the 2-stage benchmark testing process:
 Maintains exact signal signatures and behavior from the original inline implementation.
 """
 
-import os
-import time
-import threading
 import multiprocessing
+import os
 import subprocess
-import psutil
-from typing import Dict, Any, Optional
+import threading
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Any, Dict, Optional
+
+import psutil
 from PySide6.QtCore import QObject, Signal, Slot
 
 # Import path helpers for nested I/O file organization
 from src.app.shared.constants.paths import (
     get_input_file_path,
-    get_output_file_path,
     get_inputs_dir,
+    get_output_file_path,
     get_outputs_dir,
 )
 from src.app.shared.utils.workspace_utils import ensure_test_type_directory
@@ -254,12 +255,52 @@ class BenchmarkTestWorker(QObject):
                 # Get psutil process object for memory monitoring
                 ps_process = psutil.Process(process.pid)
 
-                # Send input and start monitoring
-                stdout, stderr = process.communicate(
-                    input=input_text, timeout=self.time_limit
-                )
+                # Write input to process (non-blocking)
+                if input_text:
+                    process.stdin.write(input_text)
+                    process.stdin.flush()
 
-                # Get final memory usage
+                # Monitor memory usage while process runs
+                while process.poll() is None:
+                    try:
+                        memory_info = ps_process.memory_info()
+                        memory_used_mb = memory_info.rss / (1024 * 1024)  # Convert to MB
+                        max_memory_used = max(max_memory_used, memory_used_mb)
+                    except (psutil.NoSuchProcess, psutil.AccessDenied):
+                        # Process finished
+                        break
+
+                    # Small sleep to avoid busy-waiting
+                    time.sleep(0.001)
+
+                    # Check if time limit exceeded during monitoring
+                    if time.time() - test_start > self.time_limit:
+                        process.kill()
+                        process.wait()
+                        test_time = time.time() - test_start
+
+                        # Calculate test size
+                        test_size = (
+                            len(input_text.strip().split("\n"))
+                            if input_text.strip()
+                            else 0
+                        )
+
+                        return {
+                            "test_name": f"Test {test_number}",
+                            "test_number": test_number,
+                            "passed": False,
+                            "execution_time": test_time,
+                            "memory_used": max_memory_used,
+                            "memory_passed": max_memory_used <= self.memory_limit,
+                            "error_details": f"Time Limit Exceeded ({self.time_limit:.2f}s)",
+                            "generator_time": generator_time,
+                            "input": input_text,
+                            "output": "",
+                            "test_size": test_size,
+                        }
+
+                # Get final memory reading
                 try:
                     memory_info = ps_process.memory_info()
                     memory_used_mb = memory_info.rss / (1024 * 1024)  # Convert to MB
@@ -268,31 +309,18 @@ class BenchmarkTestWorker(QObject):
                     # Process finished, use last known memory usage
                     pass
 
-            except subprocess.TimeoutExpired:
-                # Time limit exceeded
-                process.kill()
-                process.wait()
+                # Close stdin and get output
+                process.stdin.close()
+                stdout, stderr = process.communicate(timeout=5)
 
-                test_time = time.time() - test_start
-
-                # Calculate test size (number of input lines)
-                test_size = (
-                    len(input_text.strip().split("\n")) if input_text.strip() else 0
-                )
-
-                return {
-                    "test_name": f"Test {test_number}",
-                    "test_number": test_number,
-                    "passed": False,
-                    "execution_time": test_time,
-                    "memory_used": max_memory_used,
-                    "memory_passed": max_memory_used <= self.memory_limit,
-                    "error_details": f"Time Limit Exceeded ({self.time_limit:.2f}s)",
-                    "generator_time": generator_time,
-                    "input": input_text,  # Store full input
-                    "output": "",
-                    "test_size": test_size,
-                }
+            except (psutil.NoSuchProcess, psutil.AccessDenied, Exception) as e:
+                # Handle any errors during memory monitoring
+                # Process may have terminated unexpectedly
+                try:
+                    stdout, stderr = process.communicate(timeout=1)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    stdout, stderr = process.communicate()
 
             test_time = time.time() - test_start
 

@@ -6,11 +6,12 @@ Comparator, Benchmarker). Tests verify template method pattern implementation,
 threading lifecycle, signal management, and database integration.
 """
 
-import pytest
-from unittest.mock import Mock, MagicMock, patch, call
-from PySide6.QtCore import QThread, Signal
 from datetime import datetime
 from pathlib import Path
+from unittest.mock import MagicMock, Mock, call, patch
+
+import pytest
+from PySide6.QtCore import QThread, Signal
 
 from src.app.core.tools.base.base_runner import BaseRunner
 from src.app.persistence.database.models import TestResult

@@ -5,7 +5,7 @@ Phase 5 (Issue #5): TypedDict schemas for type safety
 Provides structured types for different test result formats.
 """
 
-from typing import TypedDict, Optional
+from typing import Optional, TypedDict
 
 
 class BaseTestDetail(TypedDict, total=False):

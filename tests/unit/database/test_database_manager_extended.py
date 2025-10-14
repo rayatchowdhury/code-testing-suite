@@ -10,16 +10,16 @@ Focuses on:
 - Statistics calculation edge cases
 """
 
-import pytest
-import sqlite3
 import os
+import sqlite3
 import tempfile
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
 
-from src.app.persistence.database.database_manager import DatabaseManager, DatabaseError
-from src.app.persistence.database.models import TestResult, Session, ProjectData
+import pytest
 
+from src.app.persistence.database.database_manager import DatabaseError, DatabaseManager
+from src.app.persistence.database.models import ProjectData, Session, TestResult
 
 # ============================================================================
 # Test Fixtures

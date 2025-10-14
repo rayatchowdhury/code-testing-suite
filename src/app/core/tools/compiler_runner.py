@@ -1,17 +1,18 @@
-from PySide6.QtCore import (
-    QObject,
-    Signal,
-    QProcess,
-    QThread,
-    QMutex,
-    QMetaObject,
-    Qt,
-    Q_ARG,
-    Slot,
-)
+import logging
 import os
 import sys
-import logging
+
+from PySide6.QtCore import (
+    Q_ARG,
+    QMetaObject,
+    QMutex,
+    QObject,
+    QProcess,
+    Qt,
+    QThread,
+    Signal,
+    Slot,
+)
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)

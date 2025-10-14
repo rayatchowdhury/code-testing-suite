@@ -6,9 +6,9 @@ This module handles data storage, retrieval, and database operations.
 
 from src.app.persistence.database import (
     DatabaseManager,
-    TestResult,
-    Session,
     ProjectData,
+    Session,
+    TestResult,
 )
 
 __all__ = ["DatabaseManager", "TestResult", "Session", "ProjectData"]

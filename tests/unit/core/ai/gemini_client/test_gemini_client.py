@@ -13,12 +13,13 @@ Tests cover:
 - Response generation with caching
 """
 
-import pytest
 import json
 import os
 import tempfile
 import urllib.error
-from unittest.mock import Mock, patch, MagicMock, mock_open
+from unittest.mock import MagicMock, Mock, mock_open, patch
+
+import pytest
 
 from src.app.core.ai.gemini_client.gemini_client import (
     GeminiAI,
@@ -27,7 +28,6 @@ from src.app.core.ai.gemini_client.gemini_client import (
     is_gemini_available,
     is_gemini_ready,
 )
-
 
 # ============================================================================
 # Test Fixtures

@@ -9,10 +9,11 @@ Tests verify time limit enforcement, memory limit tracking, parallel execution,
 signal emission, and performance metrics collection.
 """
 
-import pytest
 import os
-from unittest.mock import Mock, patch, MagicMock
 from subprocess import TimeoutExpired
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
 from PySide6.QtCore import QObject
 
 from src.app.core.tools.specialized.benchmark_test_worker import BenchmarkTestWorker

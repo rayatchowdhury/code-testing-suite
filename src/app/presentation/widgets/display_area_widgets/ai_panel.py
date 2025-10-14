@@ -1,18 +1,20 @@
-from PySide6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QPushButton,
-    QLineEdit,
-    QLabel,
-    QFrame,
-    QSizePolicy,
-)
-from PySide6.QtCore import Qt, Signal, QTimer
-from src.app.presentation.styles.components import AI_PANEL_STYLE, CUSTOM_COMMAND_STYLE
 import asyncio
 import os
 import threading
+
+from PySide6.QtCore import Qt, QTimer, Signal
+from PySide6.QtWidgets import (
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QSizePolicy,
+    QVBoxLayout,
+    QWidget,
+)
+
+from src.app.presentation.styles.components import AI_PANEL_STYLE, CUSTOM_COMMAND_STYLE
 
 
 class AIActionButton(QPushButton):

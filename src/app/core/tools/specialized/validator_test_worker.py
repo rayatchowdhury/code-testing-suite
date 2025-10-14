@@ -9,16 +9,18 @@ This worker implements the 3-stage validation process:
 Maintains exact signal signatures and behavior from the original inline implementation.
 """
 
-import os
-import time
-import threading
 import multiprocessing
-import tempfile
+import os
 import subprocess
-import psutil
-from typing import Dict, Any, Optional
+import tempfile
+import threading
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Any, Dict, Optional
+
+import psutil
 from PySide6.QtCore import QObject, Signal, Slot
+
 from src.app.core.tools.base.base_test_worker import BaseTestWorker
 
 # Import path helpers for nested I/O file organization
@@ -275,11 +277,14 @@ class ValidatorTestWorker(QObject):
                 text=True,
             )
 
+            # Write input to process (non-blocking)
+            if input_text:
+                test_process.stdin.write(input_text)
+                test_process.stdin.flush()
+
             # Track test solution memory
             try:
                 proc = psutil.Process(test_process.pid)
-                test_process.stdin.write(input_text)
-                test_process.stdin.close()
                 while test_process.poll() is None:
                     mem_mb = proc.memory_info().rss / (1024 * 1024)
                     peak_memory_mb = max(peak_memory_mb, mem_mb)
@@ -287,6 +292,8 @@ class ValidatorTestWorker(QObject):
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 pass
 
+            # Close stdin and get output
+            test_process.stdin.close()
             test_stdout, test_stderr = test_process.communicate(timeout=30)
             test_time = time.time() - test_start
 

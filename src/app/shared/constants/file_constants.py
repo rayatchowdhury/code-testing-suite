@@ -10,7 +10,6 @@ from typing import Dict, List, Optional
 
 from src.app.shared.constants.paths import get_test_type_dir, normalize_test_type
 
-
 # File roles for each test type
 TEST_TYPE_FILES: Dict[str, List[str]] = {
     "comparator": ["generator", "correct", "test"],

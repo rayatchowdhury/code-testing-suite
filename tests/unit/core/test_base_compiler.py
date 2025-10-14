@@ -6,11 +6,12 @@ parallel compilation, and optimization flags. Tests verify language detection,
 compilation delegation, and caching behavior.
 """
 
-import pytest
-from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock, call
 import os
 import time
+from pathlib import Path
+from unittest.mock import MagicMock, Mock, call, patch
+
+import pytest
 
 from src.app.core.tools.base.base_compiler import BaseCompiler
 from src.app.core.tools.base.language_detector import Language

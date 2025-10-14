@@ -10,18 +10,18 @@ Tests cover:
 - Error wrapping and logging
 """
 
-import pytest
 import sqlite3
-from unittest.mock import Mock, patch, MagicMock
-from typing import Optional, List
+from typing import List, Optional
+from unittest.mock import MagicMock, Mock, patch
 
-from src.app.persistence.database.repositories.base_repository import BaseRepository
+import pytest
+
+from src.app.persistence.database.connection import DatabaseConnection
+from src.app.persistence.database.exceptions import DatabaseError as DBError
 from src.app.persistence.database.exceptions import (
     RepositoryError,
-    DatabaseError as DBError,
 )
-from src.app.persistence.database.connection import DatabaseConnection
-
+from src.app.persistence.database.repositories.base_repository import BaseRepository
 
 # ============================================================================
 # Test Implementation of BaseRepository

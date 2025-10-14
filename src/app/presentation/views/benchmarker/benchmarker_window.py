@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
-from src.app.presentation.window_controller.base_window import SidebarWindowBase
-from PySide6.QtWidgets import QPushButton, QMessageBox
 from PySide6.QtGui import QShowEvent
-from src.app.presentation.widgets.sidebar import Sidebar
+from PySide6.QtWidgets import QMessageBox, QPushButton
+
 from src.app.presentation.views.benchmarker.benchmarker_display_area import (
     BenchmarkerDisplay,
 )
+from src.app.presentation.widgets.sidebar import Sidebar
 from src.app.presentation.widgets.sidebar_widgets import (
-    TestCountSlider,
     LimitsInputWidget,
+    TestCountSlider,
 )
+from src.app.presentation.window_controller.base_window import SidebarWindowBase
 
 # Lazy import to avoid circular dependency
 # from src.app.core.tools.benchmarker import Benchmarker

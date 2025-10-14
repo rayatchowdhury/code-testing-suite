@@ -9,12 +9,13 @@ Tests the specialized worker that implements 3-stage validation:
 Tests verify parallel execution, signal emission, and result storage.
 """
 
-import pytest
 import os
-import time
 import tempfile
-from unittest.mock import Mock, patch, MagicMock, call
+import time
 from subprocess import TimeoutExpired
+from unittest.mock import MagicMock, Mock, call, patch
+
+import pytest
 from PySide6.QtCore import QObject
 
 from src.app.core.tools.specialized.validator_test_worker import ValidatorTestWorker

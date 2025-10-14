@@ -6,10 +6,11 @@ This widget provides a slider with editable input for selecting number of test c
 used across all test windows (validator, comparator, benchmarker).
 """
 
-import pytest
-from PySide6.QtWidgets import QSlider, QLineEdit
-from PySide6.QtCore import Qt
 from unittest.mock import Mock
+
+import pytest
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QLineEdit, QSlider
 
 from src.app.presentation.widgets.sidebar_widgets.test_count_slider import (
     TestCountSlider,

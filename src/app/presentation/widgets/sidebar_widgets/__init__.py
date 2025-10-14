@@ -10,7 +10,7 @@ All widgets in this package are designed to be reusable across validator,
 comparator, and benchmarker views.
 """
 
-from .test_count_slider import TestCountSlider
 from .limits_input_widget import LimitsInputWidget
+from .test_count_slider import TestCountSlider
 
 __all__ = ["TestCountSlider", "LimitsInputWidget"]

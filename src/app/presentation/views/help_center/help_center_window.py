@@ -8,12 +8,14 @@
 # - Author description
 # - Back button - goes back to the main window
 
-from src.app.presentation.window_controller.base_window import SidebarWindowBase
-from src.app.presentation.widgets.sidebar import Sidebar
-from src.app.presentation.widgets.display_area import DisplayArea
-from PySide6.QtWidgets import QPushButton
 from PySide6.QtGui import QFont
+from PySide6.QtWidgets import QPushButton
+
+from src.app.presentation.widgets.display_area import DisplayArea
+from src.app.presentation.widgets.sidebar import Sidebar
+from src.app.presentation.window_controller.base_window import SidebarWindowBase
 from src.app.presentation.window_controller.qt_doc_engine import HelpDocument
+
 from .help_content import get_document_data
 
 

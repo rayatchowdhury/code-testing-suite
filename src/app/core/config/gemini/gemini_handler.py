@@ -9,16 +9,16 @@ Simple file to handle Gemini API configuration:
 """
 
 import json
+import logging
 import os
 import threading
 import time
-import logging
-from typing import Tuple, List, Optional
+from typing import List, Optional, Tuple
+
 from PySide6.QtWidgets import QComboBox, QLineEdit
 
 # Import CONFIG_FILE constant
 from src.app.shared.constants import CONFIG_FILE
-
 
 # Model discovery removed - using user input with sensible defaults
 
@@ -67,8 +67,8 @@ class GeminiConfig:
         def validation_worker():
             try:
                 # Simple HTTP validation instead of using google library
-                import urllib.request
                 import json
+                import urllib.request
 
                 # Test API endpoint
                 url = f"https://generativelanguage.googleapis.com/v1beta/models?key={api_key}"

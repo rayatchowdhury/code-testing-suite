@@ -1,25 +1,26 @@
 """Consolidated configuration dialog with all UI components."""
 
 import os
-from PySide6.QtWidgets import (
-    QDialog,
-    QVBoxLayout,
-    QHBoxLayout,
-    QScrollArea,
-    QWidget,
-    QLabel,
-    QPushButton,
-    QFrame,
-    QComboBox,
-    QLineEdit,
-    QSpinBox,
-    QCheckBox,
-    QFileDialog,
-    QTextEdit,
-    QMessageBox,
-)
+
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QIcon, QFont
+from PySide6.QtGui import QFont, QIcon
+from PySide6.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QDialog,
+    QFileDialog,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QPushButton,
+    QScrollArea,
+    QSpinBox,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
 
 from src.app.presentation.styles.components.config_styles import CONFIG_DIALOG_STYLE
 from src.app.presentation.styles.components.config_ui import (
@@ -139,9 +140,9 @@ class ConfigView(QDialog):
 
         # Initialize modules with updated imports (Phase 3)
         from src.app.core.config.core import ConfigManager, ConfigPersistence
-        from src.app.persistence import DatabaseManager
-        from src.app.core.config.gemini import GeminiConfig
         from src.app.core.config.database import DatabaseOperations
+        from src.app.core.config.gemini import GeminiConfig
+        from src.app.persistence import DatabaseManager
 
         # Initialize components
         self.config_manager = ConfigManager()

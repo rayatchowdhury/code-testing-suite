@@ -6,11 +6,12 @@ This widget is used across all test windows (validator, comparator, benchmarker)
 to provide consistent input for execution constraints.
 """
 
+from unittest.mock import Mock
+
 import pytest
-from PySide6.QtWidgets import QLineEdit, QGroupBox
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QValidator
-from unittest.mock import Mock
+from PySide6.QtWidgets import QGroupBox, QLineEdit
 
 from src.app.presentation.widgets.sidebar_widgets.limits_input_widget import (
     LimitsInputWidget,

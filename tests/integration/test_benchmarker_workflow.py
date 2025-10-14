@@ -11,11 +11,13 @@ Tests the complete benchmarker workflow:
 Uses code fixtures from tests/fixtures/code_samples.py for maintainability.
 """
 
-import pytest
 import json
 import time
 from pathlib import Path
+
+import pytest
 from PySide6.QtCore import QCoreApplication
+
 from src.app.core.tools.benchmarker import Benchmarker
 from src.app.persistence.database import DatabaseManager
 from tests.fixtures.code_samples import CPP_BENCHMARKER_SET

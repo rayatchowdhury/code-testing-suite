@@ -11,9 +11,10 @@ Tests cover:
 - Core application components are accessible
 """
 
-import pytest
 import sys
 from pathlib import Path
+
+import pytest
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent

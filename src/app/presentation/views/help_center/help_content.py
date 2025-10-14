@@ -3,7 +3,8 @@ Help Center Content Data - Centralized storage for all help documentation
 All help content defined here using HelpSectionData from qt_doc_engine
 """
 
-from typing import List, Dict
+from typing import Dict, List
+
 from src.app.presentation.window_controller.qt_doc_engine import HelpSectionData
 
 # Alias for backwards compatibility and cleaner code

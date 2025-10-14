@@ -5,9 +5,10 @@ This module provides window factory and manager functionality for creating
 and managing application windows without circular import dependencies.
 """
 
-from typing import Type, Optional, Any
-from PySide6.QtWidgets import QWidget, QStackedWidget
+from typing import Any, Optional, Type
+
 from PySide6.QtCore import Qt, QTimer
+from PySide6.QtWidgets import QStackedWidget, QWidget
 
 
 class WindowFactory:

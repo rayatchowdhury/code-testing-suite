@@ -5,10 +5,12 @@ Phase 8 (Task 4): Comprehensive tests for BaseTestWorker
 Testing parallel test execution, thread safety, and template method pattern.
 """
 
-import pytest
 import time
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
 from PySide6.QtCore import QObject, Signal
+
 from src.app.core.tools.base.base_test_worker import BaseTestWorker
 
 

@@ -8,12 +8,13 @@ This tests the refactored architecture that fixes:
 - Connection lifecycle anti-pattern (#2)
 """
 
-import pytest
 import os
 import sqlite3
 import threading
 import time
 from pathlib import Path
+
+import pytest
 
 from src.app.persistence.database.connection import DatabaseConnection
 from src.app.persistence.database.exceptions import ConnectionError, DatabaseError

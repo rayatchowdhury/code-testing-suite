@@ -8,7 +8,7 @@ Designed to match the app's gradient-based design language with:
 - Smooth transitions and hover effects
 """
 
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS, COLORS
+from src.app.presentation.styles.constants.colors import COLORS, MATERIAL_COLORS
 
 # ============================================================================
 # STATUS VIEW CONTAINER

@@ -6,16 +6,17 @@ Test cards are shown for every test execution result and are core UX components
 used across validator, comparator, and benchmarker views.
 """
 
+from unittest.mock import Mock
+
 import pytest
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel
-from unittest.mock import Mock
 
 from src.app.presentation.widgets.test_cards import (
     BaseTestCard,
+    BenchmarkerTestCard,
     ComparatorTestCard,
     ValidatorTestCard,
-    BenchmarkerTestCard,
 )
 
 

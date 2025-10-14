@@ -11,11 +11,13 @@ Tests the complete validator workflow:
 Uses code fixtures from tests/fixtures/code_samples.py for maintainability.
 """
 
-import pytest
 import json
 import time
 from pathlib import Path
+
+import pytest
 from PySide6.QtCore import QCoreApplication
+
 from src.app.core.tools.validator import ValidatorRunner
 from src.app.persistence.database import DatabaseManager
 from tests.fixtures.code_samples import CPP_VALIDATOR_SET

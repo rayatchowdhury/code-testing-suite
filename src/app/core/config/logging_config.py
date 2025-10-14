@@ -2,8 +2,8 @@
 
 import logging
 import logging.handlers
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 
 def setup_logging(log_level=logging.DEBUG, log_to_console=True, log_to_file=True):

@@ -5,20 +5,18 @@ Core EditorAI class - Simplified with Gemini client.
 Main interface for AI-powered code assistance.
 """
 
-import os
-import logging
-from typing import Optional
-
-from src.app.shared.constants import USER_DATA_DIR, CONFIG_FILE
-from src.app.core.ai.gemini_client import (
-    get_gemini_client,
-    is_gemini_available,
-    initialize_gemini,
-)
-from src.app.core.ai.templates.prompt_templates import PromptTemplates
-
 # Suppress urllib3 noise early
 import logging
+import os
+from typing import Optional
+
+from src.app.core.ai.gemini_client import (
+    get_gemini_client,
+    initialize_gemini,
+    is_gemini_available,
+)
+from src.app.core.ai.templates.prompt_templates import PromptTemplates
+from src.app.shared.constants import CONFIG_FILE, USER_DATA_DIR
 
 logging.getLogger("urllib3.connectionpool").setLevel(logging.ERROR)
 

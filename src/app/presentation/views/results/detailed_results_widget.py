@@ -1,39 +1,40 @@
-from PySide6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QTextEdit,
-    QLabel,
-    QScrollArea,
-    QFrame,
-    QTabWidget,
-    QTableWidget,
-    QTableWidgetItem,
-    QHeaderView,
-    QSplitter,
-    QPushButton,
-    QGroupBox,
-)
-from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QFont, QTextCharFormat, QTextCursor, QColor
 import json
 from datetime import datetime
 
-from src.app.presentation.styles.components.results import (
-    RESULTS_TEXT_EDIT_STYLE,
-    RESULTS_CARD_STYLE,
-    RESULTS_LABEL_TITLE_STYLE,
-    RESULTS_LABEL_DETAILS_STYLE,
-    RESULTS_TABLE_SMALL_STYLE,
-    RESULTS_BUTTON_STYLE,
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QColor, QFont, QTextCharFormat, QTextCursor
+from PySide6.QtWidgets import (
+    QFrame,
+    QGroupBox,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QPushButton,
+    QScrollArea,
+    QSplitter,
+    QTableWidget,
+    QTableWidgetItem,
+    QTabWidget,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
 )
-from src.app.presentation.styles.style import MATERIAL_COLORS
+
+from src.app.presentation.styles.components.results import (
+    RESULTS_BUTTON_STYLE,
+    RESULTS_CARD_STYLE,
+    RESULTS_LABEL_DETAILS_STYLE,
+    RESULTS_LABEL_TITLE_STYLE,
+    RESULTS_TABLE_SMALL_STYLE,
+    RESULTS_TEXT_EDIT_STYLE,
+)
 from src.app.presentation.styles.helpers.inline_styles import (
     ERROR_LABEL_BOLD_STYLE,
     ERROR_TITLE_STYLE,
     build_status_style,
     get_status_label_style,
 )
+from src.app.presentation.styles.style import MATERIAL_COLORS
 
 
 class TestCaseDetailWidget(QWidget):

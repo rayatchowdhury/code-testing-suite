@@ -5,8 +5,8 @@ Tests sidebar creation, button management, and signal emission using pytest-qt.
 """
 
 import pytest
-from PySide6.QtWidgets import QPushButton, QLabel
 from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QLabel, QPushButton
 
 from src.app.presentation.widgets.sidebar import Sidebar, SidebarSection
 

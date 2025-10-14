@@ -1,26 +1,27 @@
-from PySide6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QSplitter,
-    QHBoxLayout,
-    QTabWidget,
-    QPushButton,
-    QMessageBox,
-)
-from PySide6.QtCore import Qt, Signal
 import os
 
-from src.app.presentation.widgets.display_area_widgets.editor import EditorWidget
-from src.app.presentation.widgets.display_area_widgets.console import ConsoleOutput
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtWidgets import (
+    QHBoxLayout,
+    QMessageBox,
+    QPushButton,
+    QSplitter,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
+
+from src.app.core.tools.compiler_runner import CompilerRunner
+from src.app.presentation.styles.components.code_editor_display_area import (
+    OUTER_PANEL_STYLE,
+    SPLITTER_STYLE,
+)
+from src.app.presentation.styles.style import MATERIAL_COLORS
 from src.app.presentation.widgets.display_area_widgets.ai_panel import AIPanel
+from src.app.presentation.widgets.display_area_widgets.console import ConsoleOutput
+from src.app.presentation.widgets.display_area_widgets.editor import EditorWidget
 from src.app.presentation.widgets.display_area_widgets.editor_tab_widget import (
     EditorTabWidget,
-)
-from src.app.core.tools.compiler_runner import CompilerRunner
-from src.app.presentation.styles.style import MATERIAL_COLORS
-from src.app.presentation.styles.components.code_editor_display_area import (
-    SPLITTER_STYLE,
-    OUTER_PANEL_STYLE,
 )
 
 

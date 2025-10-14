@@ -11,29 +11,30 @@ Tests all database operations including:
 - Mismatch analysis
 """
 
-import pytest
-import sqlite3
 import json
-import tempfile
 import os
+import sqlite3
+import tempfile
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from src.app.persistence.database.database_manager import DatabaseManager, DatabaseError
+import pytest
+
+from src.app.persistence.database.database_manager import DatabaseError, DatabaseManager
 from src.app.persistence.database.models import (
-    TestResult,
-    Session,
-    ProjectData,
     FilesSnapshot,
+    ProjectData,
+    Session,
+    TestResult,
 )
 from tests.fixtures.database_fixtures import (
-    ResultBuilder,
-    create_sample_test_result,
-    create_test_result_series,
-    create_files_snapshot,
-    create_test_details,
     SAMPLE_CPP_CODE,
     SAMPLE_MISMATCH_ANALYSIS,
+    ResultBuilder,
+    create_files_snapshot,
+    create_sample_test_result,
+    create_test_details,
+    create_test_result_series,
 )
 
 

@@ -5,11 +5,11 @@ This module provides language detection from file extensions and content analysi
 mapping to appropriate compiler configurations for C++, Python, and Java.
 """
 
+import logging
 import os
 import re
-from typing import Dict, Any, Optional, List
 from enum import Enum
-import logging
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

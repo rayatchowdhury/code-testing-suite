@@ -10,11 +10,12 @@ Tests the specialized worker that implements 3-stage output comparison:
 Tests verify parallel execution, output comparison logic, signal emission, and result storage.
 """
 
-import pytest
 import os
 import time
-from unittest.mock import Mock, patch, MagicMock
 from subprocess import TimeoutExpired
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
 from PySide6.QtCore import QObject
 
 from src.app.core.tools.specialized.comparison_test_worker import ComparisonTestWorker

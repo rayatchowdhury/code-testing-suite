@@ -4,8 +4,9 @@ Unit tests for UnifiedStatusView base widget.
 Tests status view creation, progress tracking, test card management, and signal emission.
 """
 
+from unittest.mock import MagicMock, Mock
+
 import pytest
-from unittest.mock import Mock, MagicMock
 from PySide6.QtWidgets import QMessageBox
 
 from src.app.presentation.widgets.unified_status_view import BaseStatusView

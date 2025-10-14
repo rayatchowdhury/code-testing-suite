@@ -1,12 +1,12 @@
 """Service for database statistics and analytics."""
 
-import os
 import logging
+import os
 from typing import Dict, Optional
 
 from ..connection import DatabaseConnection
-from ..repositories.test_result_repository import TestResultRepository
 from ..constants import SUCCESS_RATE_PERCENTAGE_MULTIPLIER
+from ..repositories.test_result_repository import TestResultRepository
 
 logger = logging.getLogger(__name__)
 

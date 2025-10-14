@@ -11,14 +11,14 @@ Tests cover:
 - Error handling
 """
 
-import pytest
+import json
 import os
 import tempfile
-import json
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
 
 from src.app.core.ai.core.editor_ai import EditorAI
-
 
 # ============================================================================
 # Test Fixtures

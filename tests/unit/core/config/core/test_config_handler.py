@@ -7,24 +7,24 @@ Tests cover:
 - Exception handling for all config operations
 """
 
-import pytest
 import json
 import os
 import tempfile
-from unittest.mock import Mock, patch, MagicMock, mock_open
+from unittest.mock import MagicMock, Mock, mock_open, patch
+
+import pytest
 from PySide6.QtWidgets import QMessageBox
 
 from src.app.core.config.core.config_handler import ConfigManager, ConfigPersistence
 from src.app.core.config.core.exceptions import (
     ConfigError,
-    ConfigPermissionError,
     ConfigFormatError,
-    ConfigValidationError,
     ConfigLoadError,
-    ConfigSaveError,
     ConfigMissingError,
+    ConfigPermissionError,
+    ConfigSaveError,
+    ConfigValidationError,
 )
-
 
 # ============================================================================
 # Test Fixtures

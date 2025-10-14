@@ -8,15 +8,17 @@ maintaining 100% API compatibility.
 Also contains BenchmarkCompilerRunner for specialized compilation handling.
 """
 
-import os
 import json
 import logging
+import os
 from datetime import datetime
+
 from PySide6.QtCore import QObject, Signal
+
 from src.app.core.tools.base.base_runner import BaseRunner
 from src.app.core.tools.compiler_runner import CompilerRunner
-from src.app.persistence.database import TestResult
 from src.app.core.tools.specialized.benchmark_test_worker import BenchmarkTestWorker
+from src.app.persistence.database import TestResult
 
 logger = logging.getLogger(__name__)
 

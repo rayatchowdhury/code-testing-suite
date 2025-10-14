@@ -5,9 +5,9 @@ Analyzes coverage.json to identify testing gaps and generate detailed reports.
 """
 
 import json
+from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Tuple
-from collections import defaultdict
 
 
 def load_coverage_data(coverage_file: str = "coverage.json") -> Dict:

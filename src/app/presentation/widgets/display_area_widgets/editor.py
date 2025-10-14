@@ -1,41 +1,42 @@
-from PySide6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QPlainTextEdit,
-    QLineEdit,
-    QTextEdit,
-    QFileDialog,
-    QHBoxLayout,
-    QPushButton,
-    QMessageBox,
-    QDialog,
-    QScrollArea,
-    QLabel,
-    QFrame,
-)
-from PySide6.QtGui import (
-    QFont,
-    QColor,
-    QPainter,
-    QTextFormat,
-    QTextCursor,
-    QKeySequence,
-    QShortcut,
-)
-from PySide6.QtCore import Qt, QRect, QSize, QTimer, Signal, QObject, QThread
-import os
 import asyncio
-import qasync
-from qasync import asyncSlot, QEventLoop
+import os
 
-from src.app.presentation.styles.constants.editor_colors import EDITOR_COLORS
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
+import qasync
+from PySide6.QtCore import QObject, QRect, QSize, Qt, QThread, QTimer, Signal
+from PySide6.QtGui import (
+    QColor,
+    QFont,
+    QKeySequence,
+    QPainter,
+    QShortcut,
+    QTextCursor,
+    QTextFormat,
+)
+from PySide6.QtWidgets import (
+    QDialog,
+    QFileDialog,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QPlainTextEdit,
+    QPushButton,
+    QScrollArea,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
+from qasync import QEventLoop, asyncSlot
+
+from src.app.presentation.styles.components.ai_panel import AI_PANEL_STYLE
 from src.app.presentation.styles.components.editor import (
+    AI_DIALOG_STYLE,
     EDITOR_WIDGET_STYLE,
     get_editor_style,
-    AI_DIALOG_STYLE,
 )
-from src.app.presentation.styles.components.ai_panel import AI_PANEL_STYLE
+from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
+from src.app.presentation.styles.constants.editor_colors import EDITOR_COLORS
 from src.app.shared.utils.file_operations import FileOperations
 
 # Lazy imports for heavy components
@@ -82,8 +83,8 @@ def _import_syntax_highlighters():
     if _syntax_highlighters is None:
         from src.app.presentation.styles.syntaxhighlighter import (
             CPPSyntaxHighlighter,
-            PythonSyntaxHighlighter,
             JavaSyntaxHighlighter,
+            PythonSyntaxHighlighter,
         )
 
         _syntax_highlighters = {

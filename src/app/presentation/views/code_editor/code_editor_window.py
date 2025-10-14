@@ -1,17 +1,19 @@
+import json
+import os
+from datetime import datetime
+
+from PySide6.QtCore import QTimer
+from PySide6.QtGui import QCloseEvent, QFont, QShowEvent
 from PySide6.QtWidgets import QFileDialog, QMessageBox, QPushButton
-from PySide6.QtGui import QFont, QCloseEvent, QShowEvent
-from src.app.presentation.widgets.sidebar import Sidebar
-from src.app.presentation.window_controller.base_window import SidebarWindowBase
+
+from src.app.core.tools.compiler_runner import CompilerRunner
 from src.app.presentation.views.code_editor.code_editor_display_area import (
     CodeEditorDisplay,
 )
-from src.app.core.tools.compiler_runner import CompilerRunner
-import os
-from PySide6.QtCore import QTimer
-from src.app.shared.utils.file_operations import FileOperations
-import json
+from src.app.presentation.widgets.sidebar import Sidebar
+from src.app.presentation.window_controller.base_window import SidebarWindowBase
 from src.app.shared.constants import EDITOR_STATE_FILE
-from datetime import datetime
+from src.app.shared.utils.file_operations import FileOperations
 
 
 class CodeEditorWindow(SidebarWindowBase):

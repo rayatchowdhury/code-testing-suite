@@ -7,16 +7,16 @@ structure, including nested test type directories and migration from flat struct
 
 import os
 import shutil
-from typing import Optional, List, Dict
 from pathlib import Path
+from typing import Dict, List, Optional
 
 from src.app.shared.constants.paths import (
-    get_test_type_dir,
-    get_inputs_dir,
-    get_outputs_dir,
+    WORKSPACE_BENCHMARKER_SUBDIR,
     WORKSPACE_COMPARATOR_SUBDIR,
     WORKSPACE_VALIDATOR_SUBDIR,
-    WORKSPACE_BENCHMARKER_SUBDIR,
+    get_inputs_dir,
+    get_outputs_dir,
+    get_test_type_dir,
 )
 
 

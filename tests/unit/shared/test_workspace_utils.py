@@ -5,20 +5,21 @@ Tests workspace directory structure creation, test type detection,
 flat-to-nested migration, and file management utilities.
 """
 
-import pytest
 import os
 from pathlib import Path
 from typing import Dict, List
 
+import pytest
+
 from src.app.shared.utils.workspace_utils import (
-    ensure_workspace_structure,
-    get_test_type_from_path,
-    is_flat_workspace_structure,
-    get_file_language_extension,
-    get_file_role,
-    list_workspace_files,
     clean_workspace_io_files,
     ensure_test_type_directory,
+    ensure_workspace_structure,
+    get_file_language_extension,
+    get_file_role,
+    get_test_type_from_path,
+    is_flat_workspace_structure,
+    list_workspace_files,
 )
 
 

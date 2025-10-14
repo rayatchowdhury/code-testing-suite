@@ -5,14 +5,15 @@ Phase 8 (Task 4): Comprehensive tests for Benchmarker and BenchmarkCompilerRunne
 Testing benchmark workflow, compilation, and result creation.
 """
 
-import pytest
-import os
 import json
-from unittest.mock import Mock, MagicMock, patch, call
+import os
 from datetime import datetime
-from PySide6.QtCore import QObject
-from src.app.core.tools.benchmarker import Benchmarker, BenchmarkCompilerRunner
+from unittest.mock import MagicMock, Mock, call, patch
 
+import pytest
+from PySide6.QtCore import QObject
+
+from src.app.core.tools.benchmarker import BenchmarkCompilerRunner, Benchmarker
 
 # Note: BenchmarkCompilerRunner tests skipped due to complex inheritance setup
 # The class is a thin wrapper around CompilerRunner and is tested via integration tests

@@ -6,13 +6,15 @@ from BaseRunner, eliminating ~100 lines of duplicate runner code while
 maintaining 100% API compatibility.
 """
 
-import os
 import json
+import os
 from datetime import datetime
+
 from PySide6.QtCore import Signal
+
 from src.app.core.tools.base.base_runner import BaseRunner
-from src.app.persistence.database import TestResult
 from src.app.core.tools.specialized.validator_test_worker import ValidatorTestWorker
+from src.app.persistence.database import TestResult
 
 
 class ValidatorRunner(BaseRunner):

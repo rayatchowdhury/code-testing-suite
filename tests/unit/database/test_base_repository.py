@@ -9,14 +9,15 @@ Tests the abstract base repository functionality including:
 - Error wrapping
 """
 
-import pytest
 import sqlite3
-from typing import Optional, List
+from typing import List, Optional
 
-from src.app.persistence.database.repositories.base_repository import BaseRepository
+import pytest
+
 from src.app.persistence.database.connection import DatabaseConnection
 from src.app.persistence.database.exceptions import RepositoryError
 from src.app.persistence.database.models import TestResult
+from src.app.persistence.database.repositories.base_repository import BaseRepository
 
 
 # Create concrete implementation for testing

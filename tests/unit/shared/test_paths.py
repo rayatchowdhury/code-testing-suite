@@ -16,33 +16,32 @@ Test Coverage:
 """
 
 import os
-import pytest
 from pathlib import Path
 
-from src.app.shared.constants.paths import (
-    # Constants
-    PROJECT_ROOT,
-    SRC_ROOT,
-    RESOURCES_DIR,
-    ICONS_DIR,
-    USER_DATA_DIR,
-    WORKSPACE_DIR,
+import pytest
+
+from src.app.shared.constants.paths import (  # Constants; Functions
     CONFIG_FILE,
     EDITOR_STATE_FILE,
-    WORKSPACE_COMPARATOR_SUBDIR,
-    WORKSPACE_VALIDATOR_SUBDIR,
+    ICONS_DIR,
+    PROJECT_ROOT,
+    RESOURCES_DIR,
+    SRC_ROOT,
+    TEST_TYPE_ALIASES,
+    USER_DATA_DIR,
     WORKSPACE_BENCHMARKER_SUBDIR,
+    WORKSPACE_COMPARATOR_SUBDIR,
+    WORKSPACE_DIR,
     WORKSPACE_INPUTS_SUBDIR,
     WORKSPACE_OUTPUTS_SUBDIR,
-    TEST_TYPE_ALIASES,
-    # Functions
-    normalize_test_type,
-    get_test_type_dir,
-    get_inputs_dir,
-    get_outputs_dir,
-    get_workspace_file_path,
+    WORKSPACE_VALIDATOR_SUBDIR,
     get_input_file_path,
+    get_inputs_dir,
     get_output_file_path,
+    get_outputs_dir,
+    get_test_type_dir,
+    get_workspace_file_path,
+    normalize_test_type,
 )
 
 

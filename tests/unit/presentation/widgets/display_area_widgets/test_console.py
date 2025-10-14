@@ -6,10 +6,11 @@ Tests focus on core functionality: output display, formatting, clearing, and ANS
 Full widget integration is tested elsewhere.
 """
 
-import pytest
-from PySide6.QtWidgets import QPlainTextEdit
-from PySide6.QtGui import QTextCursor, QColor
 from unittest.mock import Mock, patch
+
+import pytest
+from PySide6.QtGui import QColor, QTextCursor
+from PySide6.QtWidgets import QPlainTextEdit
 
 from src.app.presentation.widgets.display_area_widgets.console import ConsoleOutput
 

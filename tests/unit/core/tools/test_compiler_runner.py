@@ -8,15 +8,15 @@ Tests based on actual implementation:
 - Thread-safe operations with QMutex
 """
 
-import pytest
 import os
 import tempfile
 from pathlib import Path
-from unittest.mock import Mock, MagicMock, patch, call
-from PySide6.QtCore import QProcess, Signal, QObject, QMutex
+from unittest.mock import MagicMock, Mock, call, patch
 
-from src.app.core.tools.compiler_runner import CompilerWorker, CompilerRunner
+import pytest
+from PySide6.QtCore import QMutex, QObject, QProcess, Signal
 
+from src.app.core.tools.compiler_runner import CompilerRunner, CompilerWorker
 
 # ============================================================================
 # Test Fixtures

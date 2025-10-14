@@ -11,10 +11,11 @@ Tests end-to-end compilation using real BaseCompiler with:
 Per Phase 6.1 requirements: Use real components, minimal mocking.
 """
 
-import pytest
 import os
 import time
 from pathlib import Path
+
+import pytest
 from PySide6.QtCore import QCoreApplication
 
 from src.app.core.tools.base.base_compiler import BaseCompiler

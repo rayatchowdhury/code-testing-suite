@@ -1,30 +1,31 @@
-from PySide6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QPushButton,
-    QSpacerItem,
-    QSizePolicy,
-    QLabel,
-    QFrame,
-    QScrollArea,
-    QComboBox,
-    QSpinBox,
-    QSlider,
-    QHBoxLayout,
-)
 from PySide6.QtCore import Qt, Signal
+from PySide6.QtWidgets import (
+    QComboBox,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QScrollArea,
+    QSizePolicy,
+    QSlider,
+    QSpacerItem,
+    QSpinBox,
+    QVBoxLayout,
+    QWidget,
+)
+
 from src.app.presentation.styles import (
-    SIDEBAR_STYLE,
-    SIDEBAR_BUTTON_STYLE,
     SCROLLBAR_STYLE,
+    SIDEBAR_BUTTON_STYLE,
+    SIDEBAR_STYLE,
 )
 from src.app.presentation.styles.components.sidebar_dividers import (
     SIDEBAR_DIVIDER_CONTAINER_STYLE,
     SIDEBAR_DIVIDER_SPACE_STYLE,
-    SIDEBAR_MAIN_DIVIDER_STYLE,
     SIDEBAR_FOOTER_CONTAINER_STYLE,
-    SIDEBAR_FOOTER_SPACE_STYLE,
     SIDEBAR_FOOTER_DIVIDER_STYLE,
+    SIDEBAR_FOOTER_SPACE_STYLE,
+    SIDEBAR_MAIN_DIVIDER_STYLE,
     SIDEBAR_VERTICAL_FOOTER_DIVIDER_STYLE,
 )
 

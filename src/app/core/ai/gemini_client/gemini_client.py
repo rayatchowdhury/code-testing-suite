@@ -5,16 +5,16 @@ Just needs: API key, model name, and prompt.
 Makes direct HTTP requests to AI service.
 """
 
+import hashlib
 import json
 import logging
 import os
-import hashlib
 import time
-import urllib.request
 import urllib.parse
-from pathlib import Path
-from typing import Dict, Any, Optional, Tuple, List
+import urllib.request
 from functools import lru_cache
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 # Suppress urllib3 noise directly
 logging.getLogger("urllib3.connectionpool").setLevel(logging.ERROR)

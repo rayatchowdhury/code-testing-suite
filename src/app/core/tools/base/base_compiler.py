@@ -9,17 +9,18 @@ Now supports multi-language compilation (C++, Python, Java) with automatic
 language detection and routing to appropriate compilers.
 """
 
-import os
+import logging
 import multiprocessing
+import os
 import subprocess
 import threading
-from typing import Dict, List, Tuple, Optional, Any
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from PySide6.QtCore import QObject, Signal
-import logging
+from typing import Any, Dict, List, Optional, Tuple
 
-from src.app.core.tools.base.language_detector import LanguageDetector, Language
+from PySide6.QtCore import QObject, Signal
+
 from src.app.core.tools.base.language_compilers import LanguageCompilerFactory
+from src.app.core.tools.base.language_detector import Language, LanguageDetector
 
 logger = logging.getLogger(__name__)
 

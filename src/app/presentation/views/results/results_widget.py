@@ -1,50 +1,51 @@
-from PySide6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QTableWidget,
-    QTableWidgetItem,
-    QHeaderView,
-    QPushButton,
-    QLabel,
-    QComboBox,
-    QDateEdit,
-    QSpinBox,
-    QTextEdit,
-    QSplitter,
-    QTabWidget,
-    QGroupBox,
-    QProgressBar,
-    QTabBar,
-    QLineEdit,
-    QMessageBox,
-)
-from PySide6.QtCore import Qt, QDate, Signal
-from PySide6.QtGui import QFont
 import json
 from datetime import datetime, timedelta
 
+from PySide6.QtCore import QDate, Qt, Signal
+from PySide6.QtGui import QFont
+from PySide6.QtWidgets import (
+    QComboBox,
+    QDateEdit,
+    QGroupBox,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QProgressBar,
+    QPushButton,
+    QSpinBox,
+    QSplitter,
+    QTabBar,
+    QTableWidget,
+    QTableWidgetItem,
+    QTabWidget,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
+
 from src.app.persistence.database import DatabaseManager, TestResult
-from src.app.presentation.styles.style import MATERIAL_COLORS
 from src.app.presentation.styles.components.code_editor_display_area import (
-    SPLITTER_STYLE,
     OUTER_PANEL_STYLE,
+    SPLITTER_STYLE,
 )
 from src.app.presentation.styles.components.results import (
-    RESULTS_COMBO_STYLE,
     RESULTS_BUTTON_STYLE,
-    RESULTS_TAB_WIDGET_STYLE,
-    RESULTS_TABLE_STYLE,
-    RESULTS_TABLE_SMALL_STYLE,
-    RESULTS_TEXT_EDIT_STYLE,
-    RESULTS_PROGRESS_BAR_STYLE,
-    RESULTS_FILTERS_PANEL_STYLE,
     RESULTS_CARD_STYLE,
-    RESULTS_LABEL_TITLE_STYLE,
+    RESULTS_COMBO_STYLE,
+    RESULTS_FILTERS_PANEL_STYLE,
+    RESULTS_LABEL_DETAILS_STYLE,
     RESULTS_LABEL_FILTER_STYLE,
     RESULTS_LABEL_STAT_STYLE,
-    RESULTS_LABEL_DETAILS_STYLE,
+    RESULTS_LABEL_TITLE_STYLE,
+    RESULTS_PROGRESS_BAR_STYLE,
+    RESULTS_TAB_WIDGET_STYLE,
+    RESULTS_TABLE_SMALL_STYLE,
+    RESULTS_TABLE_STYLE,
+    RESULTS_TEXT_EDIT_STYLE,
 )
+from src.app.presentation.styles.style import MATERIAL_COLORS
 
 
 class TestResultsWidget(QWidget):

@@ -5,9 +5,9 @@ These tests verify AI integration concepts without instantiating the actual Edit
 to avoid Qt event loop blocking issues.
 """
 
-import pytest
 from unittest.mock import Mock, patch
 
+import pytest
 
 # ============================================================================
 # AI Integration Concept Tests

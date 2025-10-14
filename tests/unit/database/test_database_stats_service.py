@@ -8,18 +8,19 @@ Tests database statistics and analytics including:
 - Error handling
 """
 
-import pytest
 import os
 from datetime import datetime, timedelta
 
-from src.app.persistence.database.services.database_stats_service import (
-    DatabaseStatsService,
-)
+import pytest
+
 from src.app.persistence.database.connection import DatabaseConnection
+from src.app.persistence.database.models import Session, TestResult
 from src.app.persistence.database.repositories.test_result_repository import (
     TestResultRepository,
 )
-from src.app.persistence.database.models import TestResult, Session
+from src.app.persistence.database.services.database_stats_service import (
+    DatabaseStatsService,
+)
 from tests.fixtures.database_fixtures import ResultBuilder, create_sample_test_result
 
 

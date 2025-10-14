@@ -1,14 +1,15 @@
+from PySide6.QtCore import Qt, QTimer, Signal
+from PySide6.QtGui import QColor, QKeyEvent, QTextCharFormat, QTextCursor
 from PySide6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QPlainTextEdit,
     QLabel,
+    QPlainTextEdit,
     QPushButton,
     QScrollBar,
     QSizePolicy,
+    QVBoxLayout,
+    QWidget,
 )
-from PySide6.QtCore import Qt, Signal, QTimer
-from PySide6.QtGui import QKeyEvent, QTextCharFormat, QColor, QTextCursor
+
 from src.app.presentation.styles import CONSOLE_STYLE, MATERIAL_COLORS
 from src.app.presentation.styles.components.console_colors import CONSOLE_COLORS
 from src.app.presentation.styles.components.scrollbar import SCROLLBAR_STYLE

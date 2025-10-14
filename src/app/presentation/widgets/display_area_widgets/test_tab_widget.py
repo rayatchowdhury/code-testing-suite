@@ -6,30 +6,31 @@ This widget provides a consistent tab interface for switching between different
 code files in test windows (Comparator, Validator, Benchmarker).
 """
 
+import os
+
+from PySide6.QtCore import QPoint, Qt, Signal
+from PySide6.QtGui import QCursor
 from PySide6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
     QHBoxLayout,
-    QPushButton,
-    QMessageBox,
     QLabel,
     QMenu,
-    QSpacerItem,
+    QMessageBox,
+    QPushButton,
     QSizePolicy,
+    QSpacerItem,
+    QVBoxLayout,
+    QWidget,
 )
-from PySide6.QtCore import Qt, Signal, QPoint
-from PySide6.QtGui import QCursor
-import os
 
 from src.app.presentation.styles.components.test_view_styles import (
     TEST_VIEW_BUTTON_PANEL_STYLE,
-    TEST_VIEW_FILE_BUTTON_STYLE,
     TEST_VIEW_CONTENT_PANEL_STYLE,
+    TEST_VIEW_FILE_BUTTON_STYLE,
 )
+from src.app.presentation.styles.constants import MATERIAL_COLORS
 from src.app.shared.constants import WORKSPACE_DIR
 from src.app.shared.constants.paths import get_workspace_file_path
 from src.app.shared.utils.workspace_utils import ensure_test_type_directory
-from src.app.presentation.styles.constants import MATERIAL_COLORS
 
 
 class TestTabWidget(QWidget):

@@ -1,6 +1,7 @@
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QSplitter, QPushButton
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
+from PySide6.QtWidgets import QHBoxLayout, QPushButton, QSplitter, QWidget
+
 from src.app.presentation.styles.style import SPLITTER_STYLE
 
 
@@ -27,8 +28,8 @@ class SidebarWindowBase(QWidget):
     def init_sidebar(self, title):
         """Initialize sidebar with title and common features"""
         # Import here to avoid circular imports
-        from src.app.presentation.widgets.sidebar import Sidebar
         from src.app.presentation.widgets.display_area import DisplayArea
+        from src.app.presentation.widgets.sidebar import Sidebar
 
         self.sidebar = Sidebar(title)
         self.display_area = DisplayArea()

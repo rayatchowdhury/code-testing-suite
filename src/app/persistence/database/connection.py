@@ -9,16 +9,17 @@ Fixes issues:
 Created in Phase 2 refactoring.
 """
 
+import logging
+import os
 import sqlite3
 import threading
-import os
-import logging
-from typing import Optional
 from contextlib import contextmanager
 from pathlib import Path
+from typing import Optional
 
 from src.app.shared.constants import USER_DATA_DIR
-from .exceptions import DatabaseError, ConnectionError
+
+from .exceptions import ConnectionError, DatabaseError
 
 logger = logging.getLogger(__name__)
 

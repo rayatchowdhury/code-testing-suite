@@ -5,14 +5,16 @@ Phase 8 (Task 4): Comprehensive tests for TypedDict schemas
 Testing data structure validation and type safety.
 """
 
-import pytest
 from typing import get_type_hints
+
+import pytest
+
 from src.app.core.tools.schemas import (
     BaseTestDetail,
-    ValidatorTestDetail,
-    ComparisonTestDetail,
     BenchmarkTestDetail,
+    ComparisonTestDetail,
     TestDetail,
+    ValidatorTestDetail,
 )
 
 

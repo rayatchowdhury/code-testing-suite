@@ -12,23 +12,23 @@ Public API:
 - Templates: get_prompt_templates()
 """
 
+# EditorAI Processing
+from src.app.core.ai.core.editor_ai import EditorAI
+
 # Core AI Client
 from src.app.core.ai.gemini_client import (
     GeminiAI,
-    get_gemini_client,
-    initialize_gemini,
-    is_gemini_available,
-    is_gemini_ready,
+    generate_ai_response,
     get_ai_key,
     get_ai_model,
+    get_gemini_client,
+    initialize_gemini,
     is_ai_ready,
-    should_show_ai_panel,
-    generate_ai_response,
+    is_gemini_available,
+    is_gemini_ready,
     reload_ai_config,
+    should_show_ai_panel,
 )
-
-# EditorAI Processing
-from src.app.core.ai.core.editor_ai import EditorAI
 
 # Template System
 from src.app.core.ai.templates.prompt_templates import PromptTemplates

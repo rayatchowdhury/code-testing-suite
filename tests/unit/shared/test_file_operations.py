@@ -5,10 +5,11 @@ Tests file saving, loading, extension detection, language mapping,
 error handling, and file dialog operations (mocked).
 """
 
-import pytest
 import os
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
 from PySide6.QtWidgets import QMessageBox
 
 from src.app.shared.utils.file_operations import FileOperations

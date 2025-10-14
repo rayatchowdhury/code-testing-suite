@@ -20,10 +20,8 @@ def get_sidebar_window_base():
     return SidebarWindowBase
 
 
-# Styles module - this is safe to import directly
-from src.app.presentation import styles
-
 # Widgets module - this is safe to import directly
-from src.app.presentation import widgets
+# Styles module - this is safe to import directly
+from src.app.presentation import styles, widgets
 
 __all__ = ["get_main_window", "get_sidebar_window_base", "styles", "widgets"]

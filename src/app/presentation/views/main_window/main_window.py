@@ -11,16 +11,16 @@ Features:
 - Unsaved changes detection on exit
 """
 
-from typing import Optional
-import sys
 import importlib
+import sys
+from typing import Optional
 
-from PySide6.QtWidgets import QMainWindow, QPushButton, QMessageBox
+from PySide6.QtCore import QTimer, Signal
 from PySide6.QtGui import QFont
-from PySide6.QtCore import Signal, QTimer
+from PySide6.QtWidgets import QMainWindow, QMessageBox, QPushButton
 
-from src.app.presentation.widgets.sidebar import Sidebar
 from src.app.presentation.widgets.display_area import DisplayArea
+from src.app.presentation.widgets.sidebar import Sidebar
 from src.app.presentation.window_controller.base_window import SidebarWindowBase
 
 

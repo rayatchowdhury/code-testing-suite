@@ -3,14 +3,15 @@ Unified Status View - Base widget for all test executions.
 Embedded in display area, not a popup dialog.
 """
 
-from PySide6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QPushButton,
-    QMessageBox,
-)
 from PySide6.QtCore import Signal
+from PySide6.QtWidgets import (
+    QHBoxLayout,
+    QMessageBox,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
+
 from src.app.presentation.styles.components.status_view_styles import (
     STATUS_VIEW_CONTAINER_STYLE,
 )
@@ -58,8 +59,8 @@ class BaseStatusView(QWidget):
 
         # Import here to avoid circular imports
         from src.app.presentation.widgets.status_view_widgets import (
-            ProgressSection,
             CardsSection,
+            ProgressSection,
         )
 
         # Progress section

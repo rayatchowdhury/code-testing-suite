@@ -3,11 +3,12 @@ Qt Document Engine - Complete unified document system for main window and help c
 Consolidates all document components, base classes, and utilities in one place
 """
 
-from PySide6.QtWidgets import *
+from dataclasses import dataclass
+from typing import Callable, List, Optional
+
 from PySide6.QtCore import *
 from PySide6.QtGui import *
-from typing import List, Optional, Callable
-from dataclasses import dataclass
+from PySide6.QtWidgets import *
 
 
 class AppTheme:

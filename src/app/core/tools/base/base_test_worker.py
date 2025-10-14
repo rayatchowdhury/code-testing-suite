@@ -6,13 +6,14 @@ from ValidatorTestWorker, BenchmarkTestWorker, and ComparisonTestWorker into a
 single reusable base class with consistent parallel execution and error handling.
 """
 
-import threading
+import logging
 import multiprocessing
-from typing import Dict, Any, Optional, List
+import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 from PySide6.QtCore import QObject, Signal, Slot
-import logging
 
 logger = logging.getLogger(__name__)
 

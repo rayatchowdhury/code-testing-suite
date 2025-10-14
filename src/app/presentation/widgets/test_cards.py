@@ -5,16 +5,17 @@ Cards display individual test results with time/memory metrics.
 Clicking a card shows detailed test information.
 """
 
-from PySide6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QLabel
 from PySide6.QtCore import Qt, Signal
-from src.app.presentation.styles.style import MATERIAL_COLORS
+from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QVBoxLayout
+
 from src.app.presentation.styles.components.status_view_styles import (
-    get_test_card_style,
     TEST_CARD_LABEL_HEADER_STYLE,
-    TEST_CARD_LABEL_STATUS_PASSED_STYLE,
-    TEST_CARD_LABEL_STATUS_FAILED_STYLE,
     TEST_CARD_LABEL_METRIC_STYLE,
+    TEST_CARD_LABEL_STATUS_FAILED_STYLE,
+    TEST_CARD_LABEL_STATUS_PASSED_STYLE,
+    get_test_card_style,
 )
+from src.app.presentation.styles.style import MATERIAL_COLORS
 
 
 class BaseTestCard(QFrame):

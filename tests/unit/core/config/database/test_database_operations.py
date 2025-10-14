@@ -9,12 +9,12 @@ Tests cover:
 - Error handling for all operations
 """
 
+from unittest.mock import Mock, call, patch
+
 import pytest
-from unittest.mock import Mock, patch, call
 from PySide6.QtWidgets import QMessageBox
 
 from src.app.core.config.database.database_operations import DatabaseOperations
-
 
 # ============================================================================
 # Test Fixtures

@@ -12,11 +12,12 @@ Tests end-to-end comparison testing workflow with:
 Per Phase 6.2 requirements: Use real Comparator, BaseCompiler, DatabaseManager.
 """
 
-import pytest
+import json
 import os
 import time
-import json
 from pathlib import Path
+
+import pytest
 from PySide6.QtCore import QCoreApplication
 
 from src.app.core.tools.comparator import Comparator

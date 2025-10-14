@@ -8,29 +8,29 @@ including AI functionality, configuration management, and tools.
 # AI Module exports
 from src.app.core.ai import (
     EditorAI,
-    get_gemini_client,
-    is_gemini_available,
-    initialize_gemini,
-    should_show_ai_panel,
-    is_ai_ready,
     PromptTemplates,
+    get_gemini_client,
+    initialize_gemini,
+    is_ai_ready,
+    is_gemini_available,
+    should_show_ai_panel,
 )
 
 # Configuration Module exports
 from src.app.core.config import (
-    ConfigManager,
-    ConfigPersistence,
     ConfigError,
     ConfigLoadError,
+    ConfigManager,
+    ConfigPersistence,
     ConfigSaveError,
     ConfigView,
-    ErrorDialog,
     DatabaseOperations,
+    ErrorDialog,
     GeminiConfig,
     GeminiConfigUI,
 )
+from src.app.core.tools.benchmarker import BenchmarkCompilerRunner, Benchmarker
+from src.app.core.tools.comparator import Comparator
 
 # Tools Module exports
 from src.app.core.tools.compiler_runner import CompilerRunner
-from src.app.core.tools.benchmarker import BenchmarkCompilerRunner, Benchmarker
-from src.app.core.tools.comparator import Comparator

@@ -6,14 +6,15 @@ Tests focus on panel initialization, button creation, signal emission, and enabl
 API integration is mocked as it depends on external services.
 """
 
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
-from PySide6.QtWidgets import QPushButton, QLineEdit
-from unittest.mock import Mock, patch, MagicMock
+from PySide6.QtWidgets import QLineEdit, QPushButton
 
 from src.app.presentation.widgets.display_area_widgets.ai_panel import (
-    AIPanel,
     AIActionButton,
     AICustomCommandInput,
+    AIPanel,
 )
 
 

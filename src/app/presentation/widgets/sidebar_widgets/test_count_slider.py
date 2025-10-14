@@ -6,21 +6,22 @@ This widget provides a slider interface for selecting the number of test cases,
 with different default configurations for different use cases (validator, comparator, benchmarker).
 """
 
-from PySide6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QLabel,
-    QSlider,
-    QHBoxLayout,
-    QLineEdit,
-)
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIntValidator
-from src.app.presentation.styles.style import MATERIAL_COLORS
+from PySide6.QtWidgets import (
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QSlider,
+    QVBoxLayout,
+    QWidget,
+)
+
 from src.app.presentation.styles.components.test_view_styles import (
     TEST_VIEW_SLIDER_STYLE,
     TEST_VIEW_SLIDER_VALUE_LABEL_STYLE,
 )
+from src.app.presentation.styles.style import MATERIAL_COLORS
 
 
 class TestCountSlider(QWidget):

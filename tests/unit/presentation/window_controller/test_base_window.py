@@ -6,10 +6,11 @@ Tests focus on initialization, sidebar setup, splitter configuration, navigation
 and cleanup functionality.
 """
 
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
-from PySide6.QtWidgets import QWidget, QSplitter, QPushButton
 from PySide6.QtCore import Signal
-from unittest.mock import Mock, patch, MagicMock
+from PySide6.QtWidgets import QPushButton, QSplitter, QWidget
 
 from src.app.presentation.window_controller.base_window import SidebarWindowBase
 

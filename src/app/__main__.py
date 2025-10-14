@@ -11,8 +11,8 @@ The entry point handles proper import path setup and graceful fallbacks
 for different execution contexts during the migration process.
 """
 
-import sys
 import os
+import sys
 from pathlib import Path
 
 # Add project root to path for import compatibility
@@ -101,11 +101,12 @@ def main():
         ensure_workspace_structure(WORKSPACE_DIR)
 
         # Import Qt components
-        from PySide6.QtWidgets import QApplication
+        import asyncio
+
+        import qasync
         from PySide6.QtCore import Qt
         from PySide6.QtGui import QIcon
-        import qasync
-        import asyncio
+        from PySide6.QtWidgets import QApplication
 
         # Set attributes before creating QApplication
         QApplication.setAttribute(Qt.AA_UseDesktopOpenGL)

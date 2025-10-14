@@ -1,12 +1,12 @@
 """Service for FilesSnapshot operations."""
 
-import os
 import difflib
 import logging
-from typing import Dict, Any
+import os
+from typing import Any, Dict
 
-from ..models import FilesSnapshot
 from ..constants import TEST_TYPE_COMPARISON
+from ..models import FilesSnapshot
 
 logger = logging.getLogger(__name__)
 

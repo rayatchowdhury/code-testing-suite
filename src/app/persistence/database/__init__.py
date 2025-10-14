@@ -4,32 +4,32 @@ Database persistence layer.
 Refactored architecture with backward compatibility.
 """
 
-# Models
-from .models import FilesSnapshot, TestResult, Session, ProjectData
+# Constants
+from . import constants
 
 # Connection
 from .connection import DatabaseConnection
+
+# Exceptions
+from .exceptions import ConnectionError as DBConnectionError
+from .exceptions import (
+    DatabaseError,
+    RepositoryError,
+    ValidationError,
+)
+
+# Models
+from .models import FilesSnapshot, ProjectData, Session, TestResult
 
 # Repositories
 from .repositories import BaseRepository, TestResultRepository
 
 # Services
 from .services import (
-    FilesSnapshotService,
-    DatabaseStatsService,
     DatabaseMaintenanceService,
+    DatabaseStatsService,
+    FilesSnapshotService,
 )
-
-# Exceptions
-from .exceptions import (
-    DatabaseError,
-    ConnectionError as DBConnectionError,
-    RepositoryError,
-    ValidationError,
-)
-
-# Constants
-from . import constants
 
 
 # Backward-compatible facade

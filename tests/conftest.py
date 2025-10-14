@@ -5,14 +5,15 @@ This module provides common fixtures, test configuration, and utilities
 used across unit, integration, and e2e tests.
 """
 
-import pytest
 import os
+import shutil
 import sys
 import tempfile
-import shutil
 from pathlib import Path
 from typing import Generator
-from unittest.mock import Mock, MagicMock
+from unittest.mock import MagicMock, Mock
+
+import pytest
 
 # Add src to path for imports
 src_path = Path(__file__).parent.parent / "src"

@@ -1,6 +1,8 @@
-from PySide6.QtGui import QSyntaxHighlighter, QTextCharFormat, QBrush, QColor
-from PySide6.QtCore import Qt, QRegularExpression
 import re
+
+from PySide6.QtCore import QRegularExpression, Qt
+from PySide6.QtGui import QBrush, QColor, QSyntaxHighlighter, QTextCharFormat
+
 from src.app.presentation.styles.components.syntax_highlighting import (
     SYNTAX_HIGHLIGHTING_COLORS,
 )

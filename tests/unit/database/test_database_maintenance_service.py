@@ -8,16 +8,17 @@ Tests database maintenance operations including:
 - Error handling
 """
 
-import pytest
 import os
 from datetime import datetime, timedelta
 
-from src.app.persistence.database.services.database_maintenance_service import (
-    DatabaseMaintenanceService,
-)
+import pytest
+
 from src.app.persistence.database.connection import DatabaseConnection
 from src.app.persistence.database.repositories.test_result_repository import (
     TestResultRepository,
+)
+from src.app.persistence.database.services.database_maintenance_service import (
+    DatabaseMaintenanceService,
 )
 from tests.fixtures.database_fixtures import ResultBuilder
 

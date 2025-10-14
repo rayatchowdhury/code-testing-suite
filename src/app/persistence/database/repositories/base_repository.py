@@ -6,13 +6,14 @@ encapsulating common database operations and patterns.
 Phase 4: Create Base Repository
 """
 
-from abc import ABC, abstractmethod
-from typing import List, Optional, TypeVar, Generic, Any, Union
 import logging
 import sqlite3
+from abc import ABC, abstractmethod
+from typing import Any, Generic, List, Optional, TypeVar, Union
 
 from ..connection import DatabaseConnection
-from ..exceptions import RepositoryError, DatabaseError as DBError
+from ..exceptions import DatabaseError as DBError
+from ..exceptions import RepositoryError
 
 logger = logging.getLogger(__name__)
 

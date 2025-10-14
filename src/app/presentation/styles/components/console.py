@@ -1,4 +1,4 @@
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS, COLORS
+from src.app.presentation.styles.constants.colors import COLORS, MATERIAL_COLORS
 
 CONSOLE_CONTAINER_STYLE = """
 QWidget#console_container {

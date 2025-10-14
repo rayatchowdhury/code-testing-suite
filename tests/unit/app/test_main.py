@@ -5,12 +5,12 @@ Tests focus on testable functions without complex Qt/async dependencies.
 Main() function is mostly integration code that's better tested through E2E tests.
 """
 
-import pytest
-import sys
 import os
+import sys
 from pathlib import Path
 from unittest.mock import Mock, patch
 
+import pytest
 
 # ============================================================================
 # Path Setup Tests
@@ -196,11 +196,10 @@ class TestIntegration:
 
     def test_all_required_imports_available(self):
         """Test all required imports are available."""
-        from PySide6.QtWidgets import QApplication
+        import qasync
         from PySide6.QtCore import Qt
         from PySide6.QtGui import QIcon
-
-        import qasync
+        from PySide6.QtWidgets import QApplication
 
         assert hasattr(qasync, "QEventLoop")
 
@@ -210,16 +209,17 @@ class TestIntegration:
 
     def test_workspace_utils_available(self):
         """Test workspace utils are available."""
-        from src.app.shared.utils.workspace_utils import ensure_workspace_structure
         from src.app.shared.constants import ensure_user_data_dir
+        from src.app.shared.utils.workspace_utils import ensure_workspace_structure
 
         assert callable(ensure_workspace_structure)
         assert callable(ensure_user_data_dir)
 
     def test_logging_setup_works(self):
         """Test logging setup actually works."""
-        from src.app.__main__ import setup_logging
         import logging
+
+        from src.app.__main__ import setup_logging
 
         setup_logging()
 

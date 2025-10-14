@@ -2,31 +2,32 @@
 Sub-widgets for unified status view.
 """
 
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
-    QWidget,
-    QHBoxLayout,
-    QVBoxLayout,
-    QPushButton,
-    QLabel,
     QFrame,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
     QScrollArea,
     QStackedWidget,
+    QVBoxLayout,
+    QWidget,
 )
-from PySide6.QtCore import Qt, Signal
-from src.app.presentation.styles.style import MATERIAL_COLORS
+
 from src.app.presentation.styles.components.status_view_styles import (
-    PROGRESS_SECTION_CONTAINER_STYLE,
-    VISUAL_PROGRESS_BAR_STYLE,
-    SEGMENT_DEFAULT_STYLE,
-    get_segment_style,
-    STATS_PANEL_STYLE,
-    STATS_LABEL_PASSED_STYLE,
-    STATS_LABEL_FAILED_STYLE,
-    STATS_PERCENTAGE_STYLE,
     CARDS_SECTION_SCROLL_STYLE,
-    CARDS_SECTION_TITLE_PASSED_STYLE,
     CARDS_SECTION_TITLE_FAILED_STYLE,
+    CARDS_SECTION_TITLE_PASSED_STYLE,
+    PROGRESS_SECTION_CONTAINER_STYLE,
+    SEGMENT_DEFAULT_STYLE,
+    STATS_LABEL_FAILED_STYLE,
+    STATS_LABEL_PASSED_STYLE,
+    STATS_PANEL_STYLE,
+    STATS_PERCENTAGE_STYLE,
+    VISUAL_PROGRESS_BAR_STYLE,
+    get_segment_style,
 )
+from src.app.presentation.styles.style import MATERIAL_COLORS
 
 
 class ProgressSection(QWidget):

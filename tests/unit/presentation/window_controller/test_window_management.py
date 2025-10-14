@@ -4,8 +4,9 @@ Unit tests for WindowFactory and WindowManager.
 Tests window creation, navigation stack, and lifecycle management.
 """
 
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
 from PySide6.QtWidgets import QWidget
 
 from src.app.presentation.window_controller.window_management import (
