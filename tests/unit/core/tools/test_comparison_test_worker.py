@@ -348,11 +348,12 @@ class TestComparisonWorkerMetrics:
             proc = Mock(returncode=0, pid=1001)
             # poll() returns None first (process running), then 0 (finished)
             proc.poll = Mock(side_effect=[None, 0])
-            
+
             # Simulate execution time by sleeping in communicate
             def communicate_with_delay(timeout=None):
                 time.sleep(0.01)  # Simulate 10ms execution
                 return ("output", "")
+
             proc.communicate = communicate_with_delay
             proc.stdin = Mock()
             return proc

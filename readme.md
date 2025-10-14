@@ -3,7 +3,7 @@
 # 🚀 Code Testing Suite
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org)
+[![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://www.python.org)
 [![Qt](https://img.shields.io/badge/Qt-6.0+-green.svg)](https://www.qt.io)
 [![Tests](https://github.com/rayatchowdhury/code-testing-suite/workflows/Automated%20Tests/badge.svg)](https://github.com/rayatchowdhury/code-testing-suite/actions)
 [![codecov](https://codecov.io/gh/rayatchowdhury/code-testing-suite/branch/main/graph/badge.svg)](https://codecov.io/gh/rayatchowdhury/code-testing-suite)

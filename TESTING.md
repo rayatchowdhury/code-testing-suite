@@ -710,8 +710,8 @@ The project uses GitHub Actions for automated testing. See `.github/workflows/te
 - Pull requests to `main` or `develop`
 
 **Test matrix**:
-- Operating Systems: Windows, Ubuntu
-- Python Versions: 3.9, 3.10, 3.11
+- Operating Systems: Windows, Ubuntu, macOS
+- Python Versions: 3.12, 3.13
 
 **Steps**:
 1. Checkout code
