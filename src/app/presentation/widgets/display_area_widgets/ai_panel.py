@@ -270,7 +270,8 @@ class AIPanel(QWidget):
                     btn.setToolTip(btn.toolTip().split("\n")[0])  # Keep original tooltip
                 else:
                     btn.setEnabled(False)
-                    btn.setToolTip(f"{btn.toolTip().split('\n')[0]}\n⚠️ {message}")
+                    original_tooltip = btn.toolTip().split("\n")[0]
+                    btn.setToolTip(f"{original_tooltip}\n⚠️ {message}")
 
     def _should_show_ai_panel(self):
         """Lazy import gemini client to check if AI panel should be shown"""

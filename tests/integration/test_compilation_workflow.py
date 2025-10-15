@@ -12,6 +12,8 @@ Per Phase 6.1 requirements: Use real components, minimal mocking.
 """
 
 import os
+import shutil
+import subprocess
 import time
 from pathlib import Path
 
@@ -20,6 +22,11 @@ from PySide6.QtCore import QCoreApplication
 
 from src.app.core.tools.base.base_compiler import BaseCompiler
 from src.app.core.tools.base.language_detector import Language
+
+
+def is_java_available():
+    """Check if Java compiler is available."""
+    return shutil.which("javac") is not None
 
 
 @pytest.fixture
@@ -459,6 +466,7 @@ int main() {
 class TestMultiLanguageCompilation:
     """Test compilation of multiple languages."""
 
+    @pytest.mark.skipif(not is_java_available(), reason="Java compiler not available")
     def test_compiles_mixed_languages(self, qapp, mixed_workspace):
         """Should compile C++, Python, and Java files together."""
         files = {
@@ -517,6 +525,7 @@ if __name__ == '__main__':
         assert compiler.get_file_language("script") == Language.PYTHON
         assert compiler.needs_compilation("script") is False
 
+    @pytest.mark.skipif(not is_java_available(), reason="Java compiler not available")
     def test_java_compilation(self, qapp, tmp_path):
         """Should compile Java files to .class files."""
         workspace = tmp_path / "java_test"
@@ -582,6 +591,7 @@ class TestExecutionCommands:
         assert "python" in cmd[0].lower()
         assert str(py_file) in cmd
 
+    @pytest.mark.skipif(not is_java_available(), reason="Java compiler not available")
     def test_java_execution_command(self, qapp, tmp_path):
         """Should generate correct execution command for Java."""
         workspace = tmp_path / "java_test"
