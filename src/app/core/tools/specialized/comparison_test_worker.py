@@ -277,13 +277,7 @@ class ComparisonTestWorker(QObject):
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 pass
 
-            # Get output - close stdin safely before communicate
-            try:
-                if test_process.stdin:
-                    test_process.stdin.close()
-            except Exception:
-                pass  # Ignore if already closed
-
+            # Get output - communicate() will handle closing stdin automatically
             test_stdout, test_stderr = test_process.communicate(timeout=30)
             test_time = time.time() - test_start
 
@@ -329,13 +323,7 @@ class ComparisonTestWorker(QObject):
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 pass
 
-            # Get output - close stdin safely before communicate
-            try:
-                if correct_process.stdin:
-                    correct_process.stdin.close()
-            except Exception:
-                pass  # Ignore if already closed
-
+            # Get output - communicate() will handle closing stdin automatically
             correct_stdout, correct_stderr = correct_process.communicate(timeout=30)
             correct_time = time.time() - correct_start
 

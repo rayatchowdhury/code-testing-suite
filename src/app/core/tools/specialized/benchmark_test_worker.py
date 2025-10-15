@@ -300,12 +300,7 @@ class BenchmarkTestWorker(QObject):
 
                 # Get output - don't call communicate() with input since we already wrote it
                 # Just get remaining output from buffers
-                try:
-                    if process.stdin:
-                        process.stdin.close()
-                except Exception:
-                    pass  # Ignore errors if stdin already closed
-
+                # Note: communicate() will handle closing stdin/stdout/stderr automatically
                 stdout, stderr = process.communicate(timeout=5)
 
             except (psutil.NoSuchProcess, psutil.AccessDenied, Exception) as e:
