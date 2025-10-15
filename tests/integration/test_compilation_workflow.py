@@ -490,7 +490,7 @@ class TestMultiLanguageCompilation:
         assert results[0] is True
 
         # Check executables/files exist
-        assert os.path.exists(compiler.executables["generator"])  # C++ .exe
+        assert os.path.exists(compiler.executables["generator"])  # C++ executable
         assert os.path.exists(compiler.executables["correct"])  # Python .py
         assert os.path.exists(str(mixed_workspace / "Test.class"))  # Java .class
 

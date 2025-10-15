@@ -112,10 +112,10 @@ class TestGetExecutableName:
     @pytest.mark.parametrize(
         "role,language,expected",
         [
-            ("generator", "cpp", "generator.exe"),
-            ("correct", "cpp", "correct.exe"),
-            ("test", "cpp", "test.exe"),
-            ("validator", "cpp", "validator.exe"),
+            ("generator", "cpp", "generator.exe" if os.name == "nt" else "generator"),
+            ("correct", "cpp", "correct.exe" if os.name == "nt" else "correct"),
+            ("test", "cpp", "test.exe" if os.name == "nt" else "test"),
+            ("validator", "cpp", "validator.exe" if os.name == "nt" else "validator"),
             # Python interpreted - returns source filename
             ("generator", "py", "generator.py"),
             ("correct", "py", "correct.py"),
@@ -139,9 +139,10 @@ class TestGetExecutableName:
         assert result == "generator.py"
 
     def test_cpp_adds_exe_extension(self):
-        """Test that C++ adds .exe extension."""
+        """Test that C++ adds platform-appropriate extension."""
         result = get_executable_name("generator", "cpp")
-        assert result.endswith(".exe")
+        expected_ext = ".exe" if os.name == "nt" else ""
+        assert result == f"generator{expected_ext}"
 
     def test_java_uses_class_extension(self):
         """Test that Java uses .class extension."""
@@ -151,12 +152,14 @@ class TestGetExecutableName:
     def test_handles_uppercase_language(self):
         """Test uppercase language normalization."""
         result = get_executable_name("generator", "CPP")
-        assert result == "generator.exe"
+        expected_ext = ".exe" if os.name == "nt" else ""
+        assert result == f"generator{expected_ext}"
 
     def test_handles_uppercase_role(self):
         """Test uppercase role normalization."""
         result = get_executable_name("GENERATOR", "cpp")
-        assert result == "generator.exe"
+        expected_ext = ".exe" if os.name == "nt" else ""
+        assert result == f"generator{expected_ext}"
 
 
 class TestGetSourceFilePath:
@@ -207,7 +210,8 @@ class TestGetExecutablePath:
     def test_constructs_cpp_executable_path(self, temp_dir):
         """Test path construction for C++ executable."""
         result = get_executable_path(temp_dir, "comparator", "generator", "cpp")
-        expected = os.path.join(temp_dir, "comparator", "generator.exe")
+        expected_extension = ".exe" if os.name == "nt" else ""
+        expected = os.path.join(temp_dir, "comparator", f"generator{expected_extension}")
         assert result == expected
 
     def test_constructs_python_executable_path(self, temp_dir):
@@ -528,7 +532,8 @@ class TestExecutableExtensionsConstant:
 
     def test_cpp_has_exe_extension(self):
         """Test C++ executable extension."""
-        assert EXECUTABLE_EXTENSIONS.get("cpp") == ".exe"
+        expected_ext = ".exe" if os.name == "nt" else ""
+        assert EXECUTABLE_EXTENSIONS.get("cpp") == expected_ext
 
     def test_python_has_py_extension(self):
         """Test Python executable is source file."""

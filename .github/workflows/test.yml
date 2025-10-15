@@ -57,15 +57,47 @@ jobs:
         # Install required system libraries for Qt
         brew install pkg-config
         
-    - name: Cache pip dependencies
+    - name: Get pip cache directory
+      id: pip-cache-dir
+      run: |
+        echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
+      shell: bash
+        
+    - name: Cache pip downloads
       uses: actions/cache@v3
       with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+        path: ${{ steps.pip-cache-dir.outputs.dir }}
+        key: ${{ runner.os }}-pip-downloads-${{ hashFiles('**/requirements*.txt') }}
         restore-keys: |
-          ${{ runner.os }}-pip-
+          ${{ runner.os }}-pip-downloads-
+          
+    - name: Get Python site-packages path
+      id: site-packages
+      run: |
+        SITE_PACKAGES=$(python -c "import site; print(site.getsitepackages()[0])")
+        echo "path=$SITE_PACKAGES" >> $GITHUB_OUTPUT
+      shell: bash
+          
+    - name: Cache installed packages
+      id: packages-cache
+      uses: actions/cache@v3
+      with:
+        path: ${{ steps.site-packages.outputs.path }}
+        key: ${{ runner.os }}-python-${{ matrix.python-version }}-packages-${{ hashFiles('**/requirements*.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-python-${{ matrix.python-version }}-packages-
+          
+    - name: Check cache status
+      run: |
+        if [ "${{ steps.packages-cache.outputs.cache-hit }}" == "true" ]; then
+          echo "✅ Using cached packages - skipping installation"
+        else
+          echo "📦 Cache miss - will install packages"
+        fi
+      shell: bash
           
     - name: Install Python dependencies
+      if: steps.packages-cache.outputs.cache-hit != 'true'
       timeout-minutes: 20
       run: |
         python -m pip install --upgrade pip setuptools wheel

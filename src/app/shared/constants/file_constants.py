@@ -30,8 +30,10 @@ LANGUAGE_EXTENSIONS: Dict[str, str] = {
 
 # Executable/output extensions by platform and language
 EXECUTABLE_EXTENSIONS: Dict[str, str] = {
-    "cpp": ".exe",  # Windows (will be '' on Unix)
-    "c++": ".exe",
+    "cpp": (
+        ".exe" if os.name == "nt" else ""
+    ),  # Platform-specific: .exe on Windows, no extension on Unix
+    "c++": ".exe" if os.name == "nt" else "",
     "py": ".py",  # Interpreted, no compilation
     "python": ".py",
     "java": ".class",  # Bytecode
