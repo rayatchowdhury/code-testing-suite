@@ -151,25 +151,17 @@ class AIWorkerThread(QThread):
                     response = editor_ai.generate_documentation(self.code)
                 else:
                     # Generic process_code call
-                    response = editor_ai.process_code(
-                        self.action, self.code, **self.kwargs
-                    )
+                    response = editor_ai.process_code(self.action, self.code, **self.kwargs)
 
             if not response:
-                response = (
-                    "AI service not available. Please check your API key configuration."
-                )
+                response = "AI service not available. Please check your API key configuration."
 
             self.responseReady.emit(response, self.title)
 
         except ImportError as e:
-            self.errorOccurred.emit(
-                f"AI module import failed: {str(e)}", "Import Error"
-            )
+            self.errorOccurred.emit(f"AI module import failed: {str(e)}", "Import Error")
         except ConnectionError as e:
-            self.errorOccurred.emit(
-                f"Network connection failed: {str(e)}", "Connection Error"
-            )
+            self.errorOccurred.emit(f"Network connection failed: {str(e)}", "Connection Error")
         except TimeoutError as e:
             self.errorOccurred.emit(f"Request timed out: {str(e)}", "Timeout Error")
         except Exception as e:
@@ -260,9 +252,7 @@ class CodeEditor(QPlainTextEdit):
         if dy:
             self.lineNumberArea.scroll(0, dy)
         else:
-            self.lineNumberArea.update(
-                0, rect.y(), self.lineNumberArea.width(), rect.height()
-            )
+            self.lineNumberArea.update(0, rect.y(), self.lineNumberArea.width(), rect.height())
         if rect.contains(self.viewport().rect()):
             self.updateLineNumberAreaWidth(0)
 
@@ -272,9 +262,7 @@ class CodeEditor(QPlainTextEdit):
 
         block = self.firstVisibleBlock()
         blockNumber = block.blockNumber()
-        top = round(
-            self.blockBoundingGeometry(block).translated(self.contentOffset()).top()
-        )
+        top = round(self.blockBoundingGeometry(block).translated(self.contentOffset()).top())
         bottom = top + round(self.blockBoundingRect(block).height())
 
         while block.isValid() and top <= event.rect().bottom():
@@ -346,8 +334,7 @@ class CodeEditor(QPlainTextEdit):
                 pos = cursor.positionInBlock()
                 current_line = cursor.block().text()
                 if pos > 0 and all(
-                    current_line[pos - i - 1] == " "
-                    for i in range(min(self.tab_spaces, pos))
+                    current_line[pos - i - 1] == " " for i in range(min(self.tab_spaces, pos))
                 ):
                     # If previous characters are spaces, delete up to tab width
                     for _ in range(min(self.tab_spaces, pos)):
@@ -431,9 +418,7 @@ class EditorWidget(QWidget):
             "custom": ("Custom Command", self._process_code),
         }
 
-        self.codeEditor.document().modificationChanged.connect(
-            self._handle_modification_changed
-        )
+        self.codeEditor.document().modificationChanged.connect(self._handle_modification_changed)
 
     def _init_ai_panel(self):
         """Initialize AI panel when first needed"""
@@ -550,9 +535,7 @@ class EditorWidget(QWidget):
         """Format AI response with proper styling."""
         # Only wrap code responses in code blocks for display
         if title in ["Documentation", "Generated Code", "Custom Command"]:
-            file_type = (
-                self.currentFilePath.split(".")[-1] if self.currentFilePath else "cpp"
-            )
+            file_type = self.currentFilePath.split(".")[-1] if self.currentFilePath else "cpp"
             return f"```{file_type}\n{self._clean_code_response(response)}\n```"
         return response
 
@@ -687,9 +670,7 @@ class EditorWidget(QWidget):
             code = self.getCode()
 
         # Create a lambda that captures the kwargs for the worker thread
-        action_lambda = lambda c: self._get_editor_ai().process_code(
-            action, c, **kwargs
-        )
+        action_lambda = lambda c: self._get_editor_ai().process_code(action, c, **kwargs)
         self._process_ai_request(action_lambda, self.ai_actions[action][0])
 
     # Simplified action methods
@@ -711,9 +692,7 @@ class EditorWidget(QWidget):
 
     def _generate_code(self, code=None):
         self._init_ai_panel()  # Ensure AI panel is initialized
-        self._process_code(
-            "generate", code, type=self.currentFilePath or "generator.cpp"
-        )
+        self._process_code("generate", code, type=self.currentFilePath or "generator.cpp")
 
     def _custom_ai_command(self, command: str, code: str = None):
         """Handle custom AI command."""
@@ -751,9 +730,7 @@ class EditorWidget(QWidget):
         from src.app.shared.constants.paths import get_workspace_file_path
         from src.app.shared.utils.workspace_utils import ensure_test_type_directory
 
-        test_type = getattr(
-            self, "test_type", "comparator"
-        )  # Get test type from editor if set
+        test_type = getattr(self, "test_type", "comparator")  # Get test type from editor if set
 
         file_map = {
             "Generator": "generator.cpp",
@@ -794,9 +771,7 @@ class EditorWidget(QWidget):
         return False
 
     def _openFilePicker(self):
-        file_path, _ = QFileDialog.getOpenFileName(
-            self, "Insert File Content", "", "All Files (*)"
-        )
+        file_path, _ = QFileDialog.getOpenFileName(self, "Insert File Content", "", "All Files (*)")
         if file_path:
             content = FileOperations.load_file(file_path, self)
             if content is not None:
@@ -811,9 +786,7 @@ class EditorWidget(QWidget):
 
     def saveFileAs(self):
         """Always prompt for new save location"""
-        new_path = FileOperations.save_file_as(
-            self, self.getCode(), self.currentFilePath
-        )
+        new_path = FileOperations.save_file_as(self, self.getCode(), self.currentFilePath)
         if new_path:
             self.currentFilePath = new_path
             self.filePathChanged.emit()
@@ -823,9 +796,7 @@ class EditorWidget(QWidget):
     def _save_to_path(self, path):
         """Internal method to save file and update editor state"""
         if FileOperations.save_file(path, self.getCode(), self):
-            self.codeEditor.document().setModified(
-                False
-            )  # This will trigger modificationChanged
+            self.codeEditor.document().setModified(False)  # This will trigger modificationChanged
             self.codeEditor._setup_syntax_highlighting(path)
             self.fileSaved.emit()  # Emit signal when file is saved
             return True

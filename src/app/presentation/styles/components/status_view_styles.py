@@ -14,7 +14,7 @@ from src.app.presentation.styles.constants.colors import COLORS, MATERIAL_COLORS
 # STATUS VIEW CONTAINER
 # ============================================================================
 
-STATUS_VIEW_CONTAINER_STYLE = f"""
+STATUS_VIEW_CONTAINER_STYLE = """
 QWidget {{
     background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
         stop:0 rgba(27, 27, 30, 0.98),
@@ -29,7 +29,7 @@ QWidget {{
 # CONTROLS PANEL (File buttons area at top)
 # ============================================================================
 
-CONTROLS_PANEL_STYLE = f"""
+CONTROLS_PANEL_STYLE = """
 QWidget {{
     background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
                              stop:0 rgba(36, 36, 38, 0.98),
@@ -84,7 +84,7 @@ QPushButton:disabled {{
 # PROGRESS SECTION
 # ============================================================================
 
-PROGRESS_SECTION_CONTAINER_STYLE = f"""
+PROGRESS_SECTION_CONTAINER_STYLE = """
 QWidget {{
     background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
                              stop:0 rgba(36, 36, 38, 0.98),
@@ -96,7 +96,7 @@ QWidget {{
 }}
 """
 
-VISUAL_PROGRESS_BAR_STYLE = f"""
+VISUAL_PROGRESS_BAR_STYLE = """
 QWidget {{
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                              stop:0 rgba(27, 27, 30, 0.98),
@@ -108,7 +108,7 @@ QWidget {{
 """
 
 # Segment styles for different states
-SEGMENT_DEFAULT_STYLE = f"""
+SEGMENT_DEFAULT_STYLE = """
 QFrame {{
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                              stop:0 rgba(31, 31, 33, 0.98),
@@ -154,7 +154,7 @@ def get_segment_style(state: str) -> str:
                 border-radius: 3px;
             }}
         """,
-        "mixed_fail": f"""
+        "mixed_fail": """
             QFrame {{
                 background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                                          stop:0 rgba(255, 140, 66, 1),
@@ -301,14 +301,14 @@ def get_test_card_style(passed: bool, is_hover: bool = False) -> str:
         is_hover: Whether in hover state
     """
     if passed:
-        base_bg = f"""
+        base_bg = """
             background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
                                      stop:0 rgba(0, 75, 99, 0.25),
                                      stop:0.5 rgba(0, 90, 120, 0.20),
                                      stop:1 rgba(0, 75, 99, 0.25));
         """
         border = f"border: 2px solid {COLORS['primary']}60;"
-        hover_bg = f"""
+        hover_bg = """
             background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
                                      stop:0 rgba(0, 100, 135, 0.35),
                                      stop:0.5 rgba(0, 120, 160, 0.28),
@@ -316,14 +316,14 @@ def get_test_card_style(passed: bool, is_hover: bool = False) -> str:
         """
         hover_border = f"border: 3px solid {COLORS['primary']}90;"
     else:
-        base_bg = f"""
+        base_bg = """
             background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
                                      stop:0 rgba(66, 1, 1, 0.35),
                                      stop:0.5 rgba(80, 10, 10, 0.28),
                                      stop:1 rgba(66, 1, 1, 0.35));
         """
         border = f"border: 2px solid {MATERIAL_COLORS['error']}60;"
-        hover_bg = f"""
+        hover_bg = """
             background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
                                      stop:0 rgba(90, 15, 15, 0.45),
                                      stop:0.5 rgba(110, 20, 20, 0.38),
@@ -340,8 +340,8 @@ def get_test_card_style(passed: bool, is_hover: bool = False) -> str:
                 padding: 2px;
             }}
         """
-    else:
-        return f"""
+
+    return f"""
             QFrame {{
                 {base_bg}
                 {border}

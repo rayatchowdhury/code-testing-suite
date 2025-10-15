@@ -194,9 +194,7 @@ class TestFilesSnapshotLanguageDetection:
 
         # Test various Python patterns
         assert snapshot._detect_language_from_content("def main():\n    pass") == "py"
-        assert (
-            snapshot._detect_language_from_content("import sys\nprint('hello')") == "py"
-        )
+        assert snapshot._detect_language_from_content("import sys\nprint('hello')") == "py"
         assert snapshot._detect_language_from_content("x = 5\nprint(x)") == "py"
 
     def test_detects_java_from_content(self):
@@ -214,9 +212,7 @@ class TestFilesSnapshotLanguageDetection:
 
         # Test C++ patterns and fallback
         assert snapshot._detect_language_from_content("#include <iostream>") == "cpp"
-        assert (
-            snapshot._detect_language_from_content("int main() { return 0; }") == "cpp"
-        )
+        assert snapshot._detect_language_from_content("int main() { return 0; }") == "cpp"
 
     def test_detects_language_from_extension(self):
         """Should detect language from file extension."""

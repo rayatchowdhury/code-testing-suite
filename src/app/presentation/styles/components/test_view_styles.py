@@ -143,9 +143,7 @@ QProgressBar::chunk {{
 }}
 """
 
-TEST_VIEW_COMPILATION_DETAIL_LABEL_STYLE = (
-    f"color: {MATERIAL_COLORS['text_secondary']};"
-)
+TEST_VIEW_COMPILATION_DETAIL_LABEL_STYLE = f"color: {MATERIAL_COLORS['text_secondary']};"
 
 TEST_VIEW_COMPILATION_CLOSE_BUTTON_STYLE = f"""
 QPushButton {{
@@ -195,9 +193,7 @@ min-width: 28px;
 """
 
 # Status Label Styles
-TEST_VIEW_STATUS_LABEL_STYLE = (
-    f"color: {MATERIAL_COLORS['on_surface']}; font-weight: bold;"
-)
+TEST_VIEW_STATUS_LABEL_STYLE = f"color: {MATERIAL_COLORS['on_surface']}; font-weight: bold;"
 TEST_VIEW_TIME_LABEL_STYLE = f"color: {MATERIAL_COLORS['primary']}; font-weight: bold;"
 
 

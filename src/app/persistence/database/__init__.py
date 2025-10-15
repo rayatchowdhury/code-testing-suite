@@ -64,7 +64,7 @@ class DatabaseManager:
 
     def close(self):
         """Close connection (deprecated - handled automatically)."""
-        pass  # Connection is managed by singleton
+        # Connection is managed by singleton
 
     # TestResult operations - delegate to repository
     def save_test_result(self, result: TestResult) -> int:
@@ -143,9 +143,7 @@ class DatabaseManager:
 
     # Static methods - delegate to service
     @staticmethod
-    def create_files_snapshot(
-        workspace_dir: str, test_type: str = constants.TEST_TYPE_COMPARISON
-    ):
+    def create_files_snapshot(workspace_dir: str, test_type: str = constants.TEST_TYPE_COMPARISON):
         """Create files snapshot."""
         return FilesSnapshotService.create_snapshot(workspace_dir, test_type)
 

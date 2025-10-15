@@ -8,7 +8,6 @@ from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
     QDialog,
-    QFileDialog,
     QFrame,
     QHBoxLayout,
     QLabel,
@@ -257,9 +256,7 @@ class ConfigView(QDialog):
         frame, layout = self._create_section_frame("🌐 Language Compilers")
 
         # Info label
-        info_label = QLabel(
-            "Configure compilers, interpreters, and flags for each language."
-        )
+        info_label = QLabel("Configure compilers, interpreters, and flags for each language.")
         info_label.setStyleSheet(SECTION_INFO_LABEL_STYLE)
         info_label.setWordWrap(True)
         layout.addWidget(info_label)
@@ -352,9 +349,7 @@ class ConfigView(QDialog):
         # Separator
         separator1 = QFrame()
         separator1.setFrameShape(QFrame.HLine)
-        separator1.setStyleSheet(
-            f"background-color: {MATERIAL_COLORS['outline_variant']};"
-        )
+        separator1.setStyleSheet(f"background-color: {MATERIAL_COLORS['outline_variant']};")
         separator1.setFixedHeight(1)
         layout.addWidget(separator1)
 
@@ -408,9 +403,7 @@ class ConfigView(QDialog):
         # Separator
         separator2 = QFrame()
         separator2.setFrameShape(QFrame.HLine)
-        separator2.setStyleSheet(
-            f"background-color: {MATERIAL_COLORS['outline_variant']};"
-        )
+        separator2.setStyleSheet(f"background-color: {MATERIAL_COLORS['outline_variant']};")
         separator2.setFixedHeight(1)
         layout.addWidget(separator2)
 
@@ -550,9 +543,7 @@ class ConfigView(QDialog):
         # Add only Gemini 2.5 models
         available_models = self.gemini_config.get_available_models()
         self.model_combo.addItems(available_models)
-        self.model_combo.setCurrentText(
-            self.gemini_config.get_default_model()
-        )  # Set default
+        self.model_combo.setCurrentText(self.gemini_config.get_default_model())  # Set default
 
         self.model_combo.setToolTip(
             "Select from available Gemini 2.5 models or enter a custom model name"
@@ -614,9 +605,7 @@ class ConfigView(QDialog):
         frame, layout = self._create_section_frame("🗄️ Database Management")
 
         # Database statistics display
-        self.db_stats_label = QLabel(
-            "Click 'Refresh Stats' to view database information"
-        )
+        self.db_stats_label = QLabel("Click 'Refresh Stats' to view database information")
         self.db_stats_label.setObjectName("info_label")
         self.db_stats_label.setWordWrap(True)
         layout.addWidget(self.db_stats_label)
@@ -629,9 +618,7 @@ class ConfigView(QDialog):
 
         self.refresh_stats_btn = QPushButton("Refresh Stats")
         self.refresh_stats_btn.setObjectName("secondary_button")
-        self.refresh_stats_btn.clicked.connect(
-            self.db_operations.refresh_database_stats
-        )
+        self.refresh_stats_btn.clicked.connect(self.db_operations.refresh_database_stats)
         buttons_layout1.addWidget(self.refresh_stats_btn)
 
         self.cleanup_btn = QPushButton("Cleanup Old Data (30 days)")
@@ -686,7 +673,6 @@ class ConfigView(QDialog):
         # Enable/disable related controls based on checkbox state
         enabled = state == Qt.Checked
         # Implementation would go here
-        pass
 
     def on_key_changed(self, text):
         """Handle API key text change."""
@@ -694,7 +680,6 @@ class ConfigView(QDialog):
         self.is_key_valid = False
         self.status_label.setText("")
         # Implementation would go here
-        pass
 
     def toggle_visibility(self):
         """Toggle API key visibility."""
@@ -748,17 +733,14 @@ class ConfigView(QDialog):
     def _on_models_discovered(self, models):
         """Handle successful model discovery - DEPRECATED."""
         # This method is no longer used but kept for compatibility
-        pass
 
     def _on_discovery_failed(self, error_msg):
         """Handle model discovery failure - DEPRECATED."""
         # This method is no longer used but kept for compatibility
-        pass
 
     def _on_discovery_finished(self):
         """Handle discovery completion - DEPRECATED."""
         # This method is no longer used but kept for compatibility
-        pass
 
     def _save_and_close(self):
         """Save configuration and close dialog."""

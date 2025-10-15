@@ -63,9 +63,7 @@ class TestSetupLogging:
         mock_handler.level = logging.INFO
         mock_file_handler.return_value = mock_handler
 
-        logger = setup_logging(
-            log_level=logging.INFO, log_to_console=True, log_to_file=True
-        )
+        logger = setup_logging(log_level=logging.INFO, log_to_console=True, log_to_file=True)
 
         assert logger is not None
         assert logger == logging.root
@@ -73,9 +71,7 @@ class TestSetupLogging:
     @patch("pathlib.Path.mkdir")
     def test_setup_logging_console_only(self, mock_mkdir):
         """Test setup_logging with console only."""
-        logger = setup_logging(
-            log_level=logging.INFO, log_to_console=True, log_to_file=False
-        )
+        logger = setup_logging(log_level=logging.INFO, log_to_console=True, log_to_file=False)
 
         # Should have console handler
         assert len(logger.handlers) >= 1
@@ -90,9 +86,7 @@ class TestSetupLogging:
         mock_handler.level = logging.DEBUG
         mock_file_handler.return_value = mock_handler
 
-        logger = setup_logging(
-            log_level=logging.DEBUG, log_to_console=False, log_to_file=True
-        )
+        logger = setup_logging(log_level=logging.DEBUG, log_to_console=False, log_to_file=True)
 
         # Should have file handlers
         assert mock_file_handler.call_count >= 1
@@ -100,9 +94,7 @@ class TestSetupLogging:
     @patch("pathlib.Path.mkdir")
     def test_setup_logging_sets_log_level(self, mock_mkdir):
         """Test setup_logging sets correct log level."""
-        logger = setup_logging(
-            log_level=logging.WARNING, log_to_console=True, log_to_file=False
-        )
+        logger = setup_logging(log_level=logging.WARNING, log_to_console=True, log_to_file=False)
 
         assert logger.level == logging.WARNING
 
@@ -120,9 +112,7 @@ class TestSetupLogging:
 
     @patch("pathlib.Path.mkdir")
     @patch("logging.handlers.RotatingFileHandler")
-    def test_setup_logging_creates_rotating_file_handler(
-        self, mock_file_handler, mock_mkdir
-    ):
+    def test_setup_logging_creates_rotating_file_handler(self, mock_file_handler, mock_mkdir):
         """Test setup_logging creates rotating file handler."""
         mock_handler = Mock()
         mock_handler.level = logging.DEBUG
@@ -135,9 +125,7 @@ class TestSetupLogging:
 
     @patch("pathlib.Path.mkdir")
     @patch("logging.handlers.RotatingFileHandler")
-    def test_setup_logging_creates_error_log_handler(
-        self, mock_file_handler, mock_mkdir
-    ):
+    def test_setup_logging_creates_error_log_handler(self, mock_file_handler, mock_mkdir):
         """Test setup_logging creates separate error log handler."""
         mock_handler = Mock()
         mock_handler.level = logging.DEBUG
@@ -213,9 +201,7 @@ class TestSetupMigrationLogging:
 
     @patch("pathlib.Path.mkdir")
     @patch("logging.handlers.RotatingFileHandler")
-    def test_setup_migration_logging_creates_logger(
-        self, mock_file_handler, mock_mkdir
-    ):
+    def test_setup_migration_logging_creates_logger(self, mock_file_handler, mock_mkdir):
         """Test setup_migration_logging creates migration logger."""
         mock_handler = Mock()
         mock_handler.level = logging.DEBUG
@@ -228,9 +214,7 @@ class TestSetupMigrationLogging:
 
     @patch("pathlib.Path.mkdir")
     @patch("logging.handlers.RotatingFileHandler")
-    def test_setup_migration_logging_creates_directory(
-        self, mock_file_handler, mock_mkdir
-    ):
+    def test_setup_migration_logging_creates_directory(self, mock_file_handler, mock_mkdir):
         """Test setup_migration_logging creates log directory."""
         mock_handler = Mock()
         mock_handler.level = logging.DEBUG
@@ -242,9 +226,7 @@ class TestSetupMigrationLogging:
 
     @patch("pathlib.Path.mkdir")
     @patch("logging.handlers.RotatingFileHandler")
-    def test_setup_migration_logging_sets_debug_level(
-        self, mock_file_handler, mock_mkdir
-    ):
+    def test_setup_migration_logging_sets_debug_level(self, mock_file_handler, mock_mkdir):
         """Test setup_migration_logging sets DEBUG level."""
         mock_handler = Mock()
         mock_handler.level = logging.DEBUG
@@ -256,9 +238,7 @@ class TestSetupMigrationLogging:
 
     @patch("pathlib.Path.mkdir")
     @patch("logging.handlers.RotatingFileHandler")
-    def test_setup_migration_logging_creates_file_handler(
-        self, mock_file_handler, mock_mkdir
-    ):
+    def test_setup_migration_logging_creates_file_handler(self, mock_file_handler, mock_mkdir):
         """Test setup_migration_logging creates file handler."""
         mock_handler = Mock()
         mock_handler.level = logging.DEBUG
@@ -271,9 +251,7 @@ class TestSetupMigrationLogging:
 
     @patch("pathlib.Path.mkdir")
     @patch("logging.handlers.RotatingFileHandler")
-    def test_setup_migration_logging_adds_console_handler(
-        self, mock_file_handler, mock_mkdir
-    ):
+    def test_setup_migration_logging_adds_console_handler(self, mock_file_handler, mock_mkdir):
         """Test setup_migration_logging adds console handler."""
         mock_handler = Mock()
         mock_handler.level = logging.DEBUG
@@ -286,9 +264,7 @@ class TestSetupMigrationLogging:
 
     @patch("pathlib.Path.mkdir")
     @patch("logging.handlers.RotatingFileHandler")
-    def test_setup_migration_logging_clears_existing_handlers(
-        self, mock_file_handler, mock_mkdir
-    ):
+    def test_setup_migration_logging_clears_existing_handlers(self, mock_file_handler, mock_mkdir):
         """Test setup_migration_logging clears existing handlers."""
         mock_handler = Mock()
         mock_handler.level = logging.DEBUG
@@ -408,10 +384,7 @@ class TestLoggingIntegration:
 
         # Module logger should inherit level from root
         # (effective level will be WARNING or higher)
-        assert (
-            module_logger.getEffectiveLevel() <= logging.WARNING
-            or module_logger.level == 0
-        )
+        assert module_logger.getEffectiveLevel() <= logging.WARNING or module_logger.level == 0
 
     @patch("pathlib.Path.mkdir")
     @patch("logging.handlers.RotatingFileHandler")
@@ -422,15 +395,11 @@ class TestLoggingIntegration:
         mock_file_handler.return_value = mock_handler
 
         # First configuration
-        logger1 = setup_logging(
-            log_level=logging.DEBUG, log_to_console=True, log_to_file=True
-        )
+        logger1 = setup_logging(log_level=logging.DEBUG, log_to_console=True, log_to_file=True)
         handlers_count_1 = len(logger1.handlers)
 
         # Second configuration (should clear previous)
-        logger2 = setup_logging(
-            log_level=logging.INFO, log_to_console=False, log_to_file=False
-        )
+        logger2 = setup_logging(log_level=logging.INFO, log_to_console=False, log_to_file=False)
 
         # Handlers should be cleared and reconfigured
         assert logger1 is logger2  # Same root logger

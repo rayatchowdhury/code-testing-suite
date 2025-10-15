@@ -5,9 +5,8 @@ This module provides window factory and manager functionality for creating
 and managing application windows without circular import dependencies.
 """
 
-from typing import Any, Optional, Type
+from typing import Optional, Type
 
-from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QStackedWidget, QWidget
 
 
@@ -37,9 +36,7 @@ class WindowFactory:
         cls._window_creators[window_name] = creator_func
 
     @classmethod
-    def create_window(
-        cls, window_name: str, parent: Optional[QWidget] = None
-    ) -> Optional[QWidget]:
+    def create_window(cls, window_name: str, parent: Optional[QWidget] = None) -> Optional[QWidget]:
         """
         Create a window instance by name.
 
@@ -202,10 +199,7 @@ class WindowManager(QStackedWidget):
             # Only add to history if there's a current window and it's different
             if self.current_window and self.current_window != window_name:
                 # Add to history unless it would create a duplicate with the last entry
-                if (
-                    not self.window_history
-                    or self.window_history[-1] != self.current_window
-                ):
+                if not self.window_history or self.window_history[-1] != self.current_window:
                     self.window_history.append(self.current_window)
 
             self.current_window = window_name
@@ -236,9 +230,7 @@ class WindowManager(QStackedWidget):
         try:
             if window_name in self.windows:
                 # Also clean up from history
-                self.window_history = [
-                    w for w in self.window_history if w != window_name
-                ]
+                self.window_history = [w for w in self.window_history if w != window_name]
                 window = self.windows[window_name]
                 if hasattr(window, "cleanup"):
                     window.cleanup()

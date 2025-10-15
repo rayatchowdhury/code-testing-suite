@@ -96,9 +96,7 @@ class TestBaseWindowFooterButtons:
 class TestBaseWindowWithSidebar:
     """Test base window with sidebar initialization."""
 
-    def test_initializes_sidebar_with_title(
-        self, mock_display_class, mock_sidebar_class, qtbot
-    ):
+    def test_initializes_sidebar_with_title(self, mock_display_class, mock_sidebar_class, qtbot):
         """BaseWindow should initialize sidebar when title is provided."""
 
         # Create a mock sidebar that is also a QWidget
@@ -136,9 +134,7 @@ class TestBaseWindowWithSidebar:
 class TestBaseWindowSplitter:
     """Test splitter setup and configuration."""
 
-    def test_setup_splitter_adds_widgets(
-        self, mock_display_class, mock_sidebar_class, qtbot
-    ):
+    def test_setup_splitter_adds_widgets(self, mock_display_class, mock_sidebar_class, qtbot):
         """setup_splitter should add sidebar and content to splitter."""
         window = SidebarWindowBase()
         qtbot.addWidget(window)
@@ -152,9 +148,7 @@ class TestBaseWindowSplitter:
         # Splitter should have 2 widgets
         assert window.splitter.count() == 2
 
-    def test_sidebar_has_minimum_width(
-        self, mock_display_class, mock_sidebar_class, qtbot
-    ):
+    def test_sidebar_has_minimum_width(self, mock_display_class, mock_sidebar_class, qtbot):
         """Sidebar should have minimum width constraint."""
         window = SidebarWindowBase()
         qtbot.addWidget(window)
@@ -167,9 +161,7 @@ class TestBaseWindowSplitter:
         # Check sidebar minimum width
         assert sidebar_widget.minimumWidth() == 250
 
-    def test_content_has_minimum_width(
-        self, mock_display_class, mock_sidebar_class, qtbot
-    ):
+    def test_content_has_minimum_width(self, mock_display_class, mock_sidebar_class, qtbot):
         """Content area should have minimum width constraint."""
         window = SidebarWindowBase()
         qtbot.addWidget(window)

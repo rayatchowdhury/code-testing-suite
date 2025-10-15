@@ -90,9 +90,7 @@ class TestRefreshDatabaseStats:
         assert "1,000" in stats_text
         assert "25.5 MB" in stats_text
 
-    def test_handles_no_stats(
-        self, db_operations, mock_database_manager, mock_parent_dialog
-    ):
+    def test_handles_no_stats(self, db_operations, mock_database_manager, mock_parent_dialog):
         """Test handles None stats."""
         mock_database_manager.get_database_stats.return_value = None
 
@@ -101,9 +99,7 @@ class TestRefreshDatabaseStats:
         error_text = mock_parent_dialog.db_stats_label.setText.call_args[0][0]
         assert "Could not retrieve" in error_text
 
-    def test_handles_exception(
-        self, db_operations, mock_database_manager, mock_parent_dialog
-    ):
+    def test_handles_exception(self, db_operations, mock_database_manager, mock_parent_dialog):
         """Test handles exception gracefully."""
         mock_database_manager.get_database_stats.side_effect = Exception("DB Error")
 
@@ -132,9 +128,7 @@ class TestCleanupOldData:
 
     @patch("src.app.core.config.database.database_operations.QMessageBox.information")
     @patch("src.app.core.config.database.database_operations.QMessageBox.question")
-    def test_cleanup_executes(
-        self, mock_question, mock_info, db_operations, mock_database_manager
-    ):
+    def test_cleanup_executes(self, mock_question, mock_info, db_operations, mock_database_manager):
         """Test cleanup executes when confirmed."""
         mock_question.return_value = QMessageBox.Yes
         mock_database_manager.get_database_stats.side_effect = [
@@ -192,9 +186,7 @@ class TestDeleteAllData:
     """Test delete_all_data method."""
 
     @patch("src.app.core.config.database.database_operations.QMessageBox.warning")
-    def test_first_confirmation_cancelled(
-        self, mock_warning, db_operations, mock_database_manager
-    ):
+    def test_first_confirmation_cancelled(self, mock_warning, db_operations, mock_database_manager):
         """Test delete cancelled at first confirmation."""
         mock_warning.return_value = QMessageBox.No
 
@@ -373,9 +365,7 @@ class TestErrorHandling:
     """Test error handling across all methods."""
 
     @patch("src.app.core.config.database.database_operations.QMessageBox.critical")
-    def test_cleanup_exception(
-        self, mock_critical, db_operations, mock_database_manager
-    ):
+    def test_cleanup_exception(self, mock_critical, db_operations, mock_database_manager):
         """Test cleanup handles exceptions."""
         mock_database_manager.get_database_stats.side_effect = Exception("DB Error")
 
@@ -384,9 +374,7 @@ class TestErrorHandling:
         mock_critical.assert_called_once()
 
     @patch("src.app.core.config.database.database_operations.QMessageBox.critical")
-    def test_delete_exception(
-        self, mock_critical, db_operations, mock_database_manager
-    ):
+    def test_delete_exception(self, mock_critical, db_operations, mock_database_manager):
         """Test delete_all_data handles exceptions."""
         mock_database_manager.get_database_stats.side_effect = Exception("DB Error")
 
@@ -395,9 +383,7 @@ class TestErrorHandling:
         mock_critical.assert_called_once()
 
     @patch("src.app.core.config.database.database_operations.QMessageBox.critical")
-    def test_optimize_exception(
-        self, mock_critical, db_operations, mock_database_manager
-    ):
+    def test_optimize_exception(self, mock_critical, db_operations, mock_database_manager):
         """Test optimize_database handles exceptions."""
         mock_database_manager.get_database_stats.side_effect = Exception("DB Error")
 
@@ -416,9 +402,7 @@ class TestIntegration:
 
     def test_refresh_called_after_cleanup(self, db_operations, mock_parent_dialog):
         """Test stats refresh after cleanup."""
-        with patch(
-            "src.app.core.config.database.database_operations.QMessageBox.information"
-        ):
+        with patch("src.app.core.config.database.database_operations.QMessageBox.information"):
             with patch(
                 "src.app.core.config.database.database_operations.QMessageBox.question",
                 return_value=QMessageBox.Yes,
@@ -434,9 +418,7 @@ class TestIntegration:
         db_operations.refresh_database_stats()
 
         # Cleanup
-        with patch(
-            "src.app.core.config.database.database_operations.QMessageBox.information"
-        ):
+        with patch("src.app.core.config.database.database_operations.QMessageBox.information"):
             with patch(
                 "src.app.core.config.database.database_operations.QMessageBox.question",
                 return_value=QMessageBox.Yes,
@@ -444,9 +426,7 @@ class TestIntegration:
                 db_operations.cleanup_old_data()
 
         # Optimize
-        with patch(
-            "src.app.core.config.database.database_operations.QMessageBox.information"
-        ):
+        with patch("src.app.core.config.database.database_operations.QMessageBox.information"):
             with patch(
                 "src.app.core.config.database.database_operations.QMessageBox.question",
                 return_value=QMessageBox.Yes,

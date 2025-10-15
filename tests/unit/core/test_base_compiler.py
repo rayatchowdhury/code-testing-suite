@@ -237,17 +237,11 @@ class TestBaseCompilerCompilationDelegation:
         compiler = BaseCompiler(str(temp_workspace), files, test_type="comparator")
 
         # Mock the entire compilation to avoid threading issues
-        with patch.object(
-            compiler, "_compile_single_file", return_value=(True, "Success")
-        ):
-            with patch(
-                "src.app.core.tools.base.base_compiler.ThreadPoolExecutor"
-            ) as mock_executor:
+        with patch.object(compiler, "_compile_single_file", return_value=(True, "Success")):
+            with patch("src.app.core.tools.base.base_compiler.ThreadPoolExecutor") as mock_executor:
                 # Configure the mock to work as a context manager
                 mock_executor_instance = MagicMock()
-                mock_executor.return_value.__enter__.return_value = (
-                    mock_executor_instance
-                )
+                mock_executor.return_value.__enter__.return_value = mock_executor_instance
 
                 compiler._parallel_compile_all()
 
@@ -268,13 +262,9 @@ class TestBaseCompilerSignalEmission:
         compiler = BaseCompiler(str(temp_workspace), files, test_type="comparator")
 
         signal_spy = []
-        compiler.compilationOutput.connect(
-            lambda msg, type: signal_spy.append((msg, type))
-        )
+        compiler.compilationOutput.connect(lambda msg, type: signal_spy.append((msg, type)))
 
-        with patch.object(
-            compiler, "_compile_single_file", return_value=(True, "Success")
-        ):
+        with patch.object(compiler, "_compile_single_file", return_value=(True, "Success")):
             compiler._parallel_compile_all()
 
         # Should have emitted some output
@@ -290,9 +280,7 @@ class TestBaseCompilerSignalEmission:
         compiler = BaseCompiler(str(temp_workspace), files, test_type="comparator")
 
         with qtbot.waitSignal(compiler.compilationFinished, timeout=5000) as blocker:
-            with patch.object(
-                compiler, "_compile_single_file", return_value=(True, "OK")
-            ):
+            with patch.object(compiler, "_compile_single_file", return_value=(True, "OK")):
                 compiler._parallel_compile_all()
 
         # Should emit True for successful compilation
@@ -308,9 +296,7 @@ class TestBaseCompilerSignalEmission:
         compiler = BaseCompiler(str(temp_workspace), files, test_type="comparator")
 
         with qtbot.waitSignal(compiler.compilationFinished, timeout=5000) as blocker:
-            with patch.object(
-                compiler, "_compile_single_file", return_value=(False, "Error")
-            ):
+            with patch.object(compiler, "_compile_single_file", return_value=(False, "Error")):
                 compiler._parallel_compile_all()
 
         # Should emit False for failed compilation
@@ -416,9 +402,7 @@ class TestBaseCompilerErrorHandling:
         assert compiler.compilation_failed is False
 
         # Simulate compilation failure
-        with patch.object(
-            compiler, "_compile_single_file", return_value=(False, "Error")
-        ):
+        with patch.object(compiler, "_compile_single_file", return_value=(False, "Error")):
             compiler._parallel_compile_all()
 
         assert compiler.compilation_failed is True
@@ -757,9 +741,7 @@ class TestBaseCompilerLanguageConfigRetrieval:
         cpp_file.parent.mkdir(parents=True, exist_ok=True)
         cpp_file.write_text("int main() { return 0; }")
 
-        custom_config = {
-            "languages": {"cpp": {"compiler": "clang++", "flags": ["-std=c++20"]}}
-        }
+        custom_config = {"languages": {"cpp": {"compiler": "clang++", "flags": ["-std=c++20"]}}}
         files = {"test": str(cpp_file)}
         compiler = BaseCompiler(
             str(temp_workspace), files, test_type="comparator", config=custom_config

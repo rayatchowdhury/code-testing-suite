@@ -90,65 +90,49 @@ class TestCreateSnapshot:
 
     def test_creates_snapshot_for_comparator(self, comparator_workspace):
         """Should create snapshot for comparator test type."""
-        snapshot = FilesSnapshotService.create_snapshot(
-            comparator_workspace, "comparator"
-        )
+        snapshot = FilesSnapshotService.create_snapshot(comparator_workspace, "comparator")
 
         assert isinstance(snapshot, FilesSnapshot)
         assert snapshot.test_type == "comparison"
 
     def test_creates_snapshot_for_validator(self, validator_workspace):
         """Should create snapshot for validator test type."""
-        snapshot = FilesSnapshotService.create_snapshot(
-            validator_workspace, "validator"
-        )
+        snapshot = FilesSnapshotService.create_snapshot(validator_workspace, "validator")
 
         assert isinstance(snapshot, FilesSnapshot)
         assert snapshot.test_type == "validation"
 
     def test_creates_snapshot_for_benchmarker(self, benchmarker_workspace):
         """Should create snapshot for benchmarker test type."""
-        snapshot = FilesSnapshotService.create_snapshot(
-            benchmarker_workspace, "benchmarker"
-        )
+        snapshot = FilesSnapshotService.create_snapshot(benchmarker_workspace, "benchmarker")
 
         assert isinstance(snapshot, FilesSnapshot)
         assert snapshot.test_type == "benchmark"
 
     def test_normalizes_test_type_names(self, comparator_workspace):
         """Should normalize test type names (comparison -> comparator)."""
-        snapshot1 = FilesSnapshotService.create_snapshot(
-            comparator_workspace, "comparison"
-        )
-        snapshot2 = FilesSnapshotService.create_snapshot(
-            comparator_workspace, "comparator"
-        )
+        snapshot1 = FilesSnapshotService.create_snapshot(comparator_workspace, "comparison")
+        snapshot2 = FilesSnapshotService.create_snapshot(comparator_workspace, "comparator")
 
         assert snapshot1.test_type == snapshot2.test_type
         assert snapshot1.test_type == "comparison"
 
     def test_captures_cpp_files(self, comparator_workspace):
         """Should capture C++ source files."""
-        snapshot = FilesSnapshotService.create_snapshot(
-            comparator_workspace, "comparator"
-        )
+        snapshot = FilesSnapshotService.create_snapshot(comparator_workspace, "comparator")
 
         json_str = snapshot.to_json()
         assert "generator" in json_str or "correct" in json_str or "test" in json_str
 
     def test_detects_cpp_language(self, comparator_workspace):
         """Should detect C++ as primary language."""
-        snapshot = FilesSnapshotService.create_snapshot(
-            comparator_workspace, "comparator"
-        )
+        snapshot = FilesSnapshotService.create_snapshot(comparator_workspace, "comparator")
 
         assert snapshot.primary_language == "cpp"
 
     def test_detects_python_language(self, mixed_language_workspace):
         """Should detect Python as primary language."""
-        snapshot = FilesSnapshotService.create_snapshot(
-            mixed_language_workspace, "comparator"
-        )
+        snapshot = FilesSnapshotService.create_snapshot(mixed_language_workspace, "comparator")
 
         assert snapshot.primary_language == "py"
 
@@ -178,9 +162,7 @@ class TestCreateSnapshot:
         inputs_dir.mkdir()
         (inputs_dir / "input.txt").write_text("some input")
 
-        snapshot = FilesSnapshotService.create_snapshot(
-            comparator_workspace, "comparator"
-        )
+        snapshot = FilesSnapshotService.create_snapshot(comparator_workspace, "comparator")
 
         # Should not include files from subdirectories
         json_str = snapshot.to_json()
@@ -192,9 +174,7 @@ class TestCreateSnapshot:
         (comparator_dir / "readme.txt").write_text("readme")
         (comparator_dir / "data.json").write_text("{}")
 
-        snapshot = FilesSnapshotService.create_snapshot(
-            comparator_workspace, "comparator"
-        )
+        snapshot = FilesSnapshotService.create_snapshot(comparator_workspace, "comparator")
 
         json_str = snapshot.to_json()
         assert "readme.txt" not in json_str
@@ -206,36 +186,28 @@ class TestFileRoleDetection:
 
     def test_detects_generator_files(self, comparator_workspace):
         """Should detect generator files."""
-        snapshot = FilesSnapshotService.create_snapshot(
-            comparator_workspace, "comparator"
-        )
+        snapshot = FilesSnapshotService.create_snapshot(comparator_workspace, "comparator")
 
         json_str = snapshot.to_json()
         assert "generator" in json_str.lower()
 
     def test_detects_correct_files(self, comparator_workspace):
         """Should detect correct solution files."""
-        snapshot = FilesSnapshotService.create_snapshot(
-            comparator_workspace, "comparator"
-        )
+        snapshot = FilesSnapshotService.create_snapshot(comparator_workspace, "comparator")
 
         json_str = snapshot.to_json()
         assert "correct" in json_str.lower()
 
     def test_detects_test_files(self, comparator_workspace):
         """Should detect test files."""
-        snapshot = FilesSnapshotService.create_snapshot(
-            comparator_workspace, "comparator"
-        )
+        snapshot = FilesSnapshotService.create_snapshot(comparator_workspace, "comparator")
 
         json_str = snapshot.to_json()
         assert "test" in json_str.lower()
 
     def test_detects_validator_files(self, validator_workspace):
         """Should detect validator files."""
-        snapshot = FilesSnapshotService.create_snapshot(
-            validator_workspace, "validator"
-        )
+        snapshot = FilesSnapshotService.create_snapshot(validator_workspace, "validator")
 
         json_str = snapshot.to_json()
         assert "validator" in json_str.lower()

@@ -247,9 +247,7 @@ class TestGetTestStatistics:
 
     def test_handles_nonexistent_project(self, populated_service):
         """Should handle filtering by nonexistent project."""
-        stats = populated_service.get_test_statistics(
-            project_name="nonexistent_project"
-        )
+        stats = populated_service.get_test_statistics(project_name="nonexistent_project")
 
         assert stats["total_tests"] == 0
 

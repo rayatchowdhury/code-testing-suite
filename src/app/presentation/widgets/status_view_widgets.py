@@ -144,9 +144,7 @@ class VisualProgressBar(QWidget):
             else:
                 # Middle segments - no rounding
                 segment.setStyleSheet(
-                    SEGMENT_DEFAULT_STYLE.replace(
-                        "border-radius: 3px;", "border-radius: 0;"
-                    )
+                    SEGMENT_DEFAULT_STYLE.replace("border-radius: 3px;", "border-radius: 0;")
                 )
 
             # Add tooltip
@@ -165,9 +163,7 @@ class VisualProgressBar(QWidget):
                     "failed": 0,
                     "total": 0,
                     "position": (
-                        "first"
-                        if i == 0
-                        else "last" if i == segment_count - 1 else "middle"
+                        "first" if i == 0 else "last" if i == segment_count - 1 else "middle"
                     ),
                 }
             )
@@ -224,13 +220,9 @@ class VisualProgressBar(QWidget):
         # Get base style and adjust border radius based on position
         base_style = get_segment_style(state)
         if position == "first":
-            style = base_style.replace(
-                "border-radius: 3px;", "border-radius: 3px 0 0 3px;"
-            )
+            style = base_style.replace("border-radius: 3px;", "border-radius: 3px 0 0 3px;")
         elif position == "last":
-            style = base_style.replace(
-                "border-radius: 3px;", "border-radius: 0 3px 3px 0;"
-            )
+            style = base_style.replace("border-radius: 3px;", "border-radius: 0 3px 3px 0;")
         else:
             style = base_style.replace("border-radius: 3px;", "border-radius: 0;")
 
@@ -242,9 +234,7 @@ class VisualProgressBar(QWidget):
         if self.segment_size == 1:
             tooltip = f"Test {start_test}: {'Passed' if passed > 0 else 'Failed'}"
         else:
-            tooltip = (
-                f"Tests {start_test}-{end_test}\nPassed: {passed}, Failed: {failed}"
-            )
+            tooltip = f"Tests {start_test}-{end_test}\nPassed: {passed}, Failed: {failed}"
         widget.setToolTip(tooltip)
 
     def set_current(self, current: int, total: int):
@@ -254,7 +244,6 @@ class VisualProgressBar(QWidget):
     def mark_complete(self, all_passed: bool):
         """Mark as complete"""
         # Visual indication that all tests are done
-        pass
 
     def _clear_layout(self):
         """Clear all widgets from layout"""

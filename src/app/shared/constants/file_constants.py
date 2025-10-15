@@ -73,8 +73,7 @@ def get_source_filename(role: str, language: str) -> str:
     ext = LANGUAGE_EXTENSIONS.get(language)
     if not ext:
         raise ValueError(
-            f"Unknown language: {language}. "
-            f"Supported: {list(LANGUAGE_EXTENSIONS.keys())}"
+            f"Unknown language: {language}. " f"Supported: {list(LANGUAGE_EXTENSIONS.keys())}"
         )
 
     # Java uses capitalized class names
@@ -127,9 +126,7 @@ def get_executable_name(role: str, language: str) -> str:
     return f"{role}{exec_ext}"
 
 
-def get_source_file_path(
-    workspace_dir: str, test_type: str, role: str, language: str
-) -> str:
+def get_source_file_path(workspace_dir: str, test_type: str, role: str, language: str) -> str:
     """
     Get full path for a source file in workspace.
 
@@ -154,9 +151,7 @@ def get_source_file_path(
     return os.path.join(test_dir, filename)
 
 
-def get_executable_path(
-    workspace_dir: str, test_type: str, role: str, language: str
-) -> str:
+def get_executable_path(workspace_dir: str, test_type: str, role: str, language: str) -> str:
     """
     Get full path for an executable file in workspace.
 
@@ -240,11 +235,11 @@ def get_role_from_filename(filename: str) -> Optional[str]:
     # Direct matches
     if name in ["generator", "gen"]:
         return "generator"
-    elif name in ["correct", "solution", "sol"]:
+    if name in ["correct", "solution", "sol"]:
         return "correct"
-    elif name in ["test", "brute"]:
+    if name in ["test", "brute"]:
         return "test"
-    elif name in ["validator", "checker"]:
+    if name in ["validator", "checker"]:
         return "validator"
 
     return None

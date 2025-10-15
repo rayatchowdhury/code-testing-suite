@@ -16,7 +16,7 @@ from src.app.core.ai.gemini_client import (
     is_gemini_available,
 )
 from src.app.core.ai.templates.prompt_templates import PromptTemplates
-from src.app.shared.constants import CONFIG_FILE, USER_DATA_DIR
+from src.app.shared.constants import CONFIG_FILE
 
 logging.getLogger("urllib3.connectionpool").setLevel(logging.ERROR)
 
@@ -56,8 +56,8 @@ class EditorAI:
 
             if response:
                 return response.strip()
-            else:
-                return "❌ Failed to get AI response. Please try again."
+
+            return "❌ Failed to get AI response. Please try again."
 
         except Exception as e:
             logging.error(f"AI response error: {e}")
@@ -150,9 +150,7 @@ class EditorAI:
             elif action == "debug":
                 error_message = kwargs.get("error_message", "")
                 if error_message:
-                    prompt = (
-                        f"Debug this code with error: {error_message}\n\nCode:\n{code}"
-                    )
+                    prompt = f"Debug this code with error: {error_message}\n\nCode:\n{code}"
                 else:
                     prompt = PromptTemplates.get_explanation_prompt("issues", code)
             elif action == "document":
@@ -187,25 +185,25 @@ class EditorAI:
         """Fallback processing without templates."""
         if action == "explain":
             return self.explain_code(code)
-        elif action == "optimize":
+        if action == "optimize":
             return self.suggest_optimizations(code)
-        elif action == "debug":
+        if action == "debug":
             error_message = kwargs.get("error_message", "")
             return self.debug_code(code, error_message)
-        elif action == "document":
+        if action == "document":
             return self.generate_documentation(code)
-        elif action == "generate":
+        if action == "generate":
             requirements = kwargs.get("requirements", "Generate code")
-            prompt = f"Generate code based on requirements: {requirements}\n\nReference code:\n{code}"
+            prompt = (
+                f"Generate code based on requirements: {requirements}\n\nReference code:\n{code}"
+            )
             return self._get_ai_response(prompt) or "❌ Failed to generate code."
-        elif action == "custom":
+        if action == "custom":
             command = kwargs.get("command", "Analyze this code")
             prompt = f"{command}\n\nCode:\n{code}"
-            return (
-                self._get_ai_response(prompt) or "❌ Failed to process custom command."
-            )
-        else:
-            return f"❌ Unknown action: {action}"
+            return self._get_ai_response(prompt) or "❌ Failed to process custom command."
+
+        return f"❌ Unknown action: {action}"
 
     def process_explanation(self, action: str, code: str) -> str:
         """Process code explanation request."""
@@ -218,7 +216,7 @@ class EditorAI:
 
         try:
             prompt = PromptTemplates.get_explanation_prompt("analysis", code)
-        except:
+        except Exception:
             prompt = f"Explain this {language} code in detail:\n\n{code}"
 
         return self._get_ai_response(prompt) or "❌ Failed to explain code."
@@ -230,14 +228,12 @@ class EditorAI:
 
         try:
             prompt = PromptTemplates.get_explanation_prompt("tips", code)
-        except:
+        except Exception:
             prompt = f"Suggest optimizations for this {language} code:\n\n{code}"
 
         return self._get_ai_response(prompt) or "❌ Failed to suggest optimizations."
 
-    def debug_code(
-        self, code: str, error_message: str = "", language: str = "cpp"
-    ) -> str:
+    def debug_code(self, code: str, error_message: str = "", language: str = "cpp") -> str:
         """Help debug issues in the given code."""
         if not self.is_available():
             return "❌ AI service not available. Please configure your Gemini API key."
@@ -247,7 +243,7 @@ class EditorAI:
         else:
             try:
                 prompt = PromptTemplates.get_explanation_prompt("issues", code)
-            except:
+            except Exception:
                 prompt = f"Analyze and find potential issues in this {language} code:\n\n{code}"
 
         return self._get_ai_response(prompt) or "❌ Failed to debug code."
@@ -259,7 +255,7 @@ class EditorAI:
 
         try:
             prompt = PromptTemplates.get_code_prompt("document", code)
-        except:
+        except Exception:
             prompt = f"Generate comprehensive documentation for this {language} code:\n\n{code}"
 
         return self._get_ai_response(prompt) or "❌ Failed to generate documentation."

@@ -85,9 +85,9 @@ class FilesSnapshot:
                 )
 
             # OLD FORMAT: Has generator_code, correct_code, etc - migrate it
-            else:
-                logger.info("Migrating old FilesSnapshot format to new structure")
-                return cls._migrate_old_format(data)
+
+            logger.info("Migrating old FilesSnapshot format to new structure")
+            return cls._migrate_old_format(data)
 
         except (json.JSONDecodeError, TypeError) as e:
             logger.error(f"Error deserializing FilesSnapshot: {e}")
@@ -133,10 +133,7 @@ class FilesSnapshot:
                 }
 
                 # Set primary language from first main file
-                if (
-                    not new_snapshot.primary_language
-                    or new_snapshot.primary_language == "cpp"
-                ):
+                if not new_snapshot.primary_language or new_snapshot.primary_language == "cpp":
                     new_snapshot.primary_language = lang
 
         # Handle additional_files
@@ -162,11 +159,11 @@ class FilesSnapshot:
             # Java files need capitalization
             if base_name == "generator":
                 return "Generator.java"
-            elif base_name == "correct":
+            if base_name == "correct":
                 return "Correct.java"
-            elif base_name == "test":
+            if base_name == "test":
                 return "Test.java"
-            elif base_name == "validator":
+            if base_name == "validator":
                 return "Validator.java"
 
         return base_name + ext
@@ -184,16 +181,12 @@ class FilesSnapshot:
         Returns:
             str: Language code ('cpp', 'py', 'java')
         """
-        if (
-            "import java" in content
-            or "public class" in content
-            or "System.out" in content
-        ):
+        if "import java" in content or "public class" in content or "System.out" in content:
             return "java"
-        elif "def " in content or "import " in content or "print(" in content:
+        if "def " in content or "import " in content or "print(" in content:
             return "py"
-        else:
-            return "cpp"
+
+        return "cpp"
 
     @staticmethod
     def _detect_language_from_extension(filename: str) -> str:
@@ -208,10 +201,10 @@ class FilesSnapshot:
         """
         if filename.endswith(".py"):
             return "py"
-        elif filename.endswith(".java"):
+        if filename.endswith(".java"):
             return "java"
-        else:
-            return "cpp"
+
+        return "cpp"
 
 
 @dataclass

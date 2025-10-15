@@ -67,9 +67,7 @@ class ComparisonTestWorker(QObject):
         self.is_running = True  # Flag to control the worker loop
         self.test_results = []  # Store detailed test results for database
         # Use reasonable default: CPU cores - 1, min 1, max 6 (comparison testing can be I/O intensive)
-        self.max_workers = max_workers or min(
-            6, max(1, multiprocessing.cpu_count() - 1)
-        )
+        self.max_workers = max_workers or min(6, max(1, multiprocessing.cpu_count() - 1))
         self._results_lock = threading.Lock()  # Thread-safe results access
 
         # Multi-language support: use execution commands if provided, otherwise fall back to executable paths
@@ -235,9 +233,7 @@ class ComparisonTestWorker(QObject):
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 pass  # Process finished or can't access
 
-            generator_stdout, generator_stderr = generator_process.communicate(
-                timeout=10
-            )
+            generator_stdout, generator_stderr = generator_process.communicate(timeout=10)
             generator_time = time.time() - generator_start
 
             if generator_process.returncode != 0:
@@ -281,8 +277,13 @@ class ComparisonTestWorker(QObject):
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 pass
 
-            # Close stdin and get output
-            test_process.stdin.close()
+            # Get output - close stdin safely before communicate
+            try:
+                if test_process.stdin:
+                    test_process.stdin.close()
+            except Exception:
+                pass  # Ignore if already closed
+
             test_stdout, test_stderr = test_process.communicate(timeout=30)
             test_time = time.time() - test_start
 
@@ -328,8 +329,13 @@ class ComparisonTestWorker(QObject):
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 pass
 
-            # Close stdin and get output
-            correct_process.stdin.close()
+            # Get output - close stdin safely before communicate
+            try:
+                if correct_process.stdin:
+                    correct_process.stdin.close()
+            except Exception:
+                pass  # Ignore if already closed
+
             correct_stdout, correct_stderr = correct_process.communicate(timeout=30)
             correct_time = time.time() - correct_start
 
@@ -370,17 +376,11 @@ class ComparisonTestWorker(QObject):
                 "test_number": test_number,
                 "passed": outputs_match,
                 "input": input_text.strip()[:300]
-                + (
-                    "..." if len(input_text.strip()) > 300 else ""
-                ),  # Truncate for display
+                + ("..." if len(input_text.strip()) > 300 else ""),  # Truncate for display
                 "test_output": test_output.strip()[:300]
-                + (
-                    "..." if len(test_output.strip()) > 300 else ""
-                ),  # Truncate for display
+                + ("..." if len(test_output.strip()) > 300 else ""),  # Truncate for display
                 "correct_output": correct_output.strip()[:300]
-                + (
-                    "..." if len(correct_output.strip()) > 300 else ""
-                ),  # Truncate for display
+                + ("..." if len(correct_output.strip()) > 300 else ""),  # Truncate for display
                 "generator_time": generator_time,
                 "test_time": test_time,
                 "correct_time": correct_time,
@@ -394,17 +394,11 @@ class ComparisonTestWorker(QObject):
             }
 
         except subprocess.TimeoutExpired as e:
-            error_msg = (
-                f"Timeout in {e.cmd[0] if e.cmd else 'unknown'} after {e.timeout}s"
-            )
-            return self._create_error_result(
-                test_number, error_msg, peak_memory_mb=peak_memory_mb
-            )
+            error_msg = f"Timeout in {e.cmd[0] if e.cmd else 'unknown'} after {e.timeout}s"
+            return self._create_error_result(test_number, error_msg, peak_memory_mb=peak_memory_mb)
         except Exception as e:
             error_msg = f"Unexpected error: {str(e)}"
-            return self._create_error_result(
-                test_number, error_msg, peak_memory_mb=peak_memory_mb
-            )
+            return self._create_error_result(test_number, error_msg, peak_memory_mb=peak_memory_mb)
 
     def _create_error_result(
         self,

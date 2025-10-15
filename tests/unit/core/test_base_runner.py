@@ -49,9 +49,7 @@ class ConcreteRunner(BaseRunner):
         worker.testStarted.connect(self.testStarted)
         worker.allTestsCompleted.connect(lambda passed: None)
 
-    def _create_test_result(
-        self, all_passed, test_results, passed_tests, failed_tests, total_time
-    ):
+    def _create_test_result(self, all_passed, test_results, passed_tests, failed_tests, total_time):
         """Create test result for testing."""
         return TestResult(
             test_type="test",
@@ -97,9 +95,7 @@ class TestBaseRunnerInitialization:
         """Should accept custom compiler optimization level."""
         files = {"test": str(temp_workspace / "comparator" / "test.cpp")}
         runner = BaseRunner.__new__(BaseRunner)
-        runner.__init__(
-            str(temp_workspace), files, test_type="comparator", optimization_level="O3"
-        )
+        runner.__init__(str(temp_workspace), files, test_type="comparator", optimization_level="O3")
 
         # Compiler should be initialized with O3
         assert runner.compiler is not None
@@ -109,9 +105,7 @@ class TestBaseRunnerInitialization:
         files = {"test": str(temp_workspace / "comparator" / "test.cpp")}
         custom_config = {"languages": {"cpp": {"compiler": "clang++"}}}
         runner = BaseRunner.__new__(BaseRunner)
-        runner.__init__(
-            str(temp_workspace), files, test_type="comparator", config=custom_config
-        )
+        runner.__init__(str(temp_workspace), files, test_type="comparator", config=custom_config)
 
         assert runner.config == custom_config
 
@@ -326,9 +320,7 @@ class TestBaseRunnerSignalManagement:
         runner = ConcreteRunner(str(temp_workspace), files)
 
         signal_received = []
-        runner.testStarted.connect(
-            lambda current, total: signal_received.append((current, total))
-        )
+        runner.testStarted.connect(lambda current, total: signal_received.append((current, total)))
 
         runner.run_tests(test_count=5)
 

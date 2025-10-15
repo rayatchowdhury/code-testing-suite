@@ -33,9 +33,7 @@ class ValidatorWindow(SidebarWindowBase):
 
         for button_text in ["Compile", "Run"]:
             btn = self.sidebar.add_button(button_text, self.action_section)
-            btn.clicked.connect(
-                lambda checked, text=button_text: self.handle_action_button(text)
-            )
+            btn.clicked.connect(lambda checked, text=button_text: self.handle_action_button(text))
             if button_text == "Compile":
                 self.compile_btn = btn
             elif button_text == "Run":
@@ -90,9 +88,7 @@ class ValidatorWindow(SidebarWindowBase):
         self.validator_runner = ValidatorRunner(
             workspace_dir=self.display_area.workspace_dir, files=files, config=config
         )
-        self.validator_runner.compilationOutput.connect(
-            self.display_area.console.displayOutput
-        )
+        self.validator_runner.compilationOutput.connect(self.display_area.console.displayOutput)
 
         # Connect runner signals to handle UI state changes
         self.validator_runner.testingStarted.connect(self._on_testing_started)

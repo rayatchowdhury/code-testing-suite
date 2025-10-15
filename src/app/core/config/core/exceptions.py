@@ -4,8 +4,6 @@
 class ConfigError(Exception):
     """Base exception for configuration-related errors."""
 
-    pass
-
 
 class ConfigPermissionError(ConfigError):
     """Raised when there are permission issues with config files."""

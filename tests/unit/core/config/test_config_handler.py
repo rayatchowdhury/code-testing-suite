@@ -120,9 +120,7 @@ class TestLoadConfig:
         default = config_manager.get_default_config()
         assert loaded == default
 
-    def test_raises_permission_error_for_unreadable_file(
-        self, config_manager, valid_config
-    ):
+    def test_raises_permission_error_for_unreadable_file(self, config_manager, valid_config):
         """Test ConfigPermissionError for unreadable file."""
         # Write config file
         with open(config_manager.config_file, "w") as f:
@@ -276,9 +274,7 @@ class TestValidateConfigStructure:
         with pytest.raises(ConfigMissingError) as exc_info:
             config_manager._validate_config_structure(incomplete_config)
 
-        assert "gemini" in str(exc_info.value) or "editor_settings" in str(
-            exc_info.value
-        )
+        assert "gemini" in str(exc_info.value) or "editor_settings" in str(exc_info.value)
 
     def test_detects_invalid_type_for_cpp_version(self, config_manager, valid_config):
         """Test detection of invalid type for cpp_version."""
@@ -358,9 +354,7 @@ class TestValidateConfigStructure:
         errors = config_manager._validate_config_structure(valid_config)
         assert any("java.runtime" in error for error in errors)
 
-    def test_handles_missing_optional_language_configs(
-        self, config_manager, valid_config
-    ):
+    def test_handles_missing_optional_language_configs(self, config_manager, valid_config):
         """Test that missing language configs are handled gracefully."""
         # Remove one language
         del valid_config["languages"]["java"]

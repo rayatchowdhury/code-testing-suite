@@ -114,9 +114,7 @@ class TestResultsWidget(QWidget):
         date_label = QLabel("Date Range:")
         date_label.setStyleSheet(RESULTS_LABEL_FILTER_STYLE)
         self.date_filter = QComboBox()
-        self.date_filter.addItems(
-            ["All Time", "Last 7 Days", "Last 30 Days", "Last 90 Days"]
-        )
+        self.date_filter.addItems(["All Time", "Last 7 Days", "Last 30 Days", "Last 90 Days"])
         self.date_filter.currentTextChanged.connect(self._filter_results)
         self.date_filter.setStyleSheet(RESULTS_COMBO_STYLE)
 
@@ -252,9 +250,7 @@ class TestResultsWidget(QWidget):
 
         self.details_panel = QTextEdit()
         self.details_panel.setMaximumHeight(150)
-        self.details_panel.setPlaceholderText(
-            "Select a test result to view detailed information"
-        )
+        self.details_panel.setPlaceholderText("Select a test result to view detailed information")
         self.details_panel.setStyleSheet(RESULTS_TEXT_EDIT_STYLE)
 
         layout.addWidget(details_label)
@@ -364,9 +360,9 @@ class TestResultsWidget(QWidget):
         type_text = self.test_type_combo.currentText()
         if type_text == "Comparison Tests":
             return "comparison"  # Phase 1: Using new standardized naming
-        elif type_text == "Benchmark Tests":
+        if type_text == "Benchmark Tests":
             return "benchmark"  # Phase 1: Using new standardized naming
-        elif type_text == "Validator Tests":
+        if type_text == "Validator Tests":
             return "validator"  # Phase 3 (Issue #18): Added validator support
         return None
 
@@ -375,9 +371,9 @@ class TestResultsWidget(QWidget):
         filter_text = self.date_filter.currentText()
         if filter_text == "Last 7 Days":
             return 7
-        elif filter_text == "Last 30 Days":
+        if filter_text == "Last 30 Days":
             return 30
-        elif filter_text == "Last 90 Days":
+        if filter_text == "Last 90 Days":
             return 90
         return None
 
@@ -390,7 +386,7 @@ class TestResultsWidget(QWidget):
         status_text = self.status_combo.currentText()
         if status_text == "Passed Only":
             return "passed"
-        elif status_text == "Failed Only":
+        if status_text == "Failed Only":
             return "failed"
         return None
 
@@ -436,13 +432,9 @@ class TestResultsWidget(QWidget):
 
         for row, result in enumerate(results):
             # Format date
-            date_str = datetime.fromisoformat(result.timestamp).strftime(
-                "%Y-%m-%d %H:%M"
-            )
+            date_str = datetime.fromisoformat(result.timestamp).strftime("%Y-%m-%d %H:%M")
             date_item = QTableWidgetItem(date_str)
-            date_item.setData(
-                1, result.id
-            )  # Phase 4: Store result ID for export/delete
+            date_item.setData(1, result.id)  # Phase 4: Store result ID for export/delete
             self.results_table.setItem(row, 0, date_item)
 
             # Test type
@@ -458,42 +450,30 @@ class TestResultsWidget(QWidget):
             self.results_table.setItem(row, 1, QTableWidgetItem(type_display))
 
             # File name (extract from path)
-            file_name = (
-                result.file_path.split("/")[-1] if result.file_path else "Unknown"
-            )
+            file_name = result.file_path.split("/")[-1] if result.file_path else "Unknown"
             if "\\" in file_name:  # Handle Windows paths
                 file_name = file_name.split("\\")[-1]
             self.results_table.setItem(row, 2, QTableWidgetItem(file_name))
 
             # Test counts
             self.results_table.setItem(row, 3, QTableWidgetItem(str(result.test_count)))
-            self.results_table.setItem(
-                row, 4, QTableWidgetItem(str(result.passed_tests))
-            )
-            self.results_table.setItem(
-                row, 5, QTableWidgetItem(str(result.failed_tests))
-            )
+            self.results_table.setItem(row, 4, QTableWidgetItem(str(result.passed_tests)))
+            self.results_table.setItem(row, 5, QTableWidgetItem(str(result.failed_tests)))
 
             # Time
-            self.results_table.setItem(
-                row, 6, QTableWidgetItem(f"{result.total_time:.2f}")
-            )
+            self.results_table.setItem(row, 6, QTableWidgetItem(f"{result.total_time:.2f}"))
 
             # Success rate
             if result.test_count > 0:
                 success_rate = (result.passed_tests / result.test_count) * 100
-                self.results_table.setItem(
-                    row, 7, QTableWidgetItem(f"{success_rate:.1f}%")
-                )
+                self.results_table.setItem(row, 7, QTableWidgetItem(f"{success_rate:.1f}%"))
             else:
                 self.results_table.setItem(row, 7, QTableWidgetItem("N/A"))
 
             # View Details button
             detail_btn = QPushButton("View Details")
             detail_btn.setStyleSheet(RESULTS_BUTTON_STYLE)
-            detail_btn.clicked.connect(
-                lambda checked, r=result: self._show_detailed_view(r)
-            )
+            detail_btn.clicked.connect(lambda checked, r=result: self._show_detailed_view(r))
             self.results_table.setCellWidget(row, 8, detail_btn)
 
             # Delete button (Phase 4 Issue #14)
@@ -566,9 +546,7 @@ class TestResultsWidget(QWidget):
                 if success:
                     # Refresh the results table
                     self._load_results()
-                    QMessageBox.information(
-                        self, "Success", "Test result deleted successfully."
-                    )
+                    QMessageBox.information(self, "Success", "Test result deleted successfully.")
                 else:
                     QMessageBox.warning(
                         self,
@@ -576,9 +554,7 @@ class TestResultsWidget(QWidget):
                         "Test result not found. It may have already been deleted.",
                     )
             except Exception as e:
-                QMessageBox.critical(
-                    self, "Error", f"Failed to delete test result:\n{str(e)}"
-                )
+                QMessageBox.critical(self, "Error", f"Failed to delete test result:\n{str(e)}")
 
     def _update_statistics(self, results: list):
         """Update the statistics view"""
@@ -598,9 +574,7 @@ class TestResultsWidget(QWidget):
         total_attempted = sum(r.test_count for r in results)
         avg_time = sum(r.total_time for r in results) / len(results) if results else 0
 
-        success_rate = (
-            (total_passed / total_attempted * 100) if total_attempted > 0 else 0
-        )
+        success_rate = (total_passed / total_attempted * 100) if total_attempted > 0 else 0
 
         comparison_count = sum(1 for r in results if r.test_type == "comparison")
         benchmark_count = sum(1 for r in results if r.test_type == "benchmark")
@@ -659,13 +633,11 @@ Test Summary:
                 try:
                     details_data = json.loads(result.test_details)
                     details += "Test Details:\n"
-                    for i, test_detail in enumerate(
-                        details_data[:5], 1
-                    ):  # Show first 5
+                    for i, test_detail in enumerate(details_data[:5], 1):  # Show first 5
                         details += f"Test {i}: {'PASSED' if test_detail.get('passed', False) else 'FAILED'}\n"
                     if len(details_data) > 5:
                         details += f"... and {len(details_data) - 5} more tests\n"
-                except:
+                except Exception:
                     details += "Test details: Available but could not parse\n"
 
             self.details_panel.setText(details)

@@ -55,9 +55,7 @@ class TestLoggingSetup:
 
     @patch("logging.basicConfig")
     @patch("logging.getLogger")
-    def test_setup_logging_suppresses_http_logs(
-        self, mock_get_logger, mock_basic_config
-    ):
+    def test_setup_logging_suppresses_http_logs(self, mock_get_logger, mock_basic_config):
         """Test setup_logging suppresses urllib3 logs."""
         from src.app.__main__ import setup_logging
 

@@ -637,9 +637,7 @@ class TestCompilationOptions:
         """Should accept custom configuration."""
         files = {"generator": str(cpp_workspace / "generator.cpp")}
 
-        config = {
-            "cpp": {"compiler": "g++", "std_version": "c++17", "optimization": "O2"}
-        }
+        config = {"cpp": {"compiler": "g++", "std_version": "c++17", "optimization": "O2"}}
 
         compiler = BaseCompiler(str(cpp_workspace), files, config=config)
         compiler.compile_all()
@@ -730,9 +728,7 @@ class TestCompilationSignals:
         compiler = BaseCompiler(str(cpp_workspace), files)
 
         finished_called = []
-        compiler.compilationFinished.connect(
-            lambda success: finished_called.append(success)
-        )
+        compiler.compilationFinished.connect(lambda success: finished_called.append(success))
 
         compiler.compile_all()
 

@@ -14,7 +14,6 @@ import os
 import sqlite3
 import threading
 from contextlib import contextmanager
-from pathlib import Path
 from typing import Optional
 
 from src.app.shared.constants import USER_DATA_DIR
@@ -155,9 +154,7 @@ class DatabaseConnection:
                 # Corrupted database raises DatabaseError, convert to ConnectionError
                 self._connection.rollback()
                 logger.error(f"Transaction rolled back (corrupted database): {e}")
-                raise ConnectionError(
-                    f"Database operation failed (corrupted database): {e}"
-                ) from e
+                raise ConnectionError(f"Database operation failed (corrupted database): {e}") from e
             except Exception as e:
                 self._connection.rollback()
                 logger.error(f"Transaction rolled back: {e}")

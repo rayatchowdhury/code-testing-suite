@@ -77,9 +77,7 @@ class TestBenchmarkWorkerExecution:
     @patch("subprocess.Popen")
     @patch("subprocess.run")
     @patch("psutil.Process")
-    def test_runs_generator_and_test(
-        self, mock_psutil, mock_run, mock_popen, temp_workspace
-    ):
+    def test_runs_generator_and_test(self, mock_psutil, mock_run, mock_popen, temp_workspace):
         """Should execute generator and test solution."""
         # Mock generator execution (subprocess.run)
         gen_result = Mock(returncode=0, stdout="test_input", stderr="")
@@ -115,9 +113,7 @@ class TestBenchmarkWorkerExecution:
     @patch("subprocess.Popen")
     @patch("subprocess.run")
     @patch("psutil.Process")
-    def test_passes_when_within_limits(
-        self, mock_psutil, mock_run, mock_popen, temp_workspace
-    ):
+    def test_passes_when_within_limits(self, mock_psutil, mock_run, mock_popen, temp_workspace):
         """Should pass when execution is within time and memory limits."""
         # Mock generator execution (subprocess.run)
         gen_result = Mock(returncode=0, stdout="input", stderr="")
@@ -256,9 +252,7 @@ class TestBenchmarkWorkerErrorHandling:
 
     @patch("subprocess.Popen")
     @patch("psutil.Process")
-    def test_handles_test_solution_failure(
-        self, mock_psutil, mock_popen, temp_workspace
-    ):
+    def test_handles_test_solution_failure(self, mock_psutil, mock_popen, temp_workspace):
         """Should create error result if test solution fails."""
         gen_proc = Mock(returncode=0, poll=Mock(return_value=0), pid=1001)
         gen_proc.communicate.return_value = ("input", "")
@@ -321,9 +315,7 @@ class TestBenchmarkWorkerMetrics:
     @patch("subprocess.Popen")
     @patch("subprocess.run")
     @patch("psutil.Process")
-    def test_tracks_peak_memory(
-        self, mock_psutil, mock_run, mock_popen, temp_workspace
-    ):
+    def test_tracks_peak_memory(self, mock_psutil, mock_run, mock_popen, temp_workspace):
         """Should track peak memory usage."""
         # Mock generator execution (subprocess.run)
         gen_result = Mock(returncode=0, stdout="input", stderr="")

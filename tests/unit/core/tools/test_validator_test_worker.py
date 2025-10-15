@@ -51,9 +51,7 @@ class TestValidatorWorkerInitialization:
         """Should accept custom max_workers parameter."""
         executables = {"generator": "", "test": "", "validator": ""}
 
-        worker = ValidatorTestWorker(
-            str(temp_workspace), executables, test_count=5, max_workers=3
-        )
+        worker = ValidatorTestWorker(str(temp_workspace), executables, test_count=5, max_workers=3)
 
         assert worker.max_workers == 3
 
@@ -248,9 +246,7 @@ class TestValidatorWorkerSignals:
 
     @patch("subprocess.Popen")
     @patch("psutil.Process")
-    def test_emits_test_started_signal(
-        self, mock_psutil, mock_popen, temp_workspace, qtbot
-    ):
+    def test_emits_test_started_signal(self, mock_psutil, mock_popen, temp_workspace, qtbot):
         """Should emit testStarted for each test."""
         # Mock successful execution - create all procs first, then set side_effect
         procs = []
@@ -265,9 +261,7 @@ class TestValidatorWorkerSignals:
         worker = ValidatorTestWorker(str(temp_workspace), executables, test_count=3)
 
         started_signals = []
-        worker.testStarted.connect(
-            lambda curr, total: started_signals.append((curr, total))
-        )
+        worker.testStarted.connect(lambda curr, total: started_signals.append((curr, total)))
 
         with qtbot.waitSignal(worker.allTestsCompleted, timeout=5000):
             worker.run_tests()
@@ -315,9 +309,7 @@ class TestValidatorWorkerSignals:
 
     @patch("subprocess.Popen")
     @patch("psutil.Process")
-    def test_emits_all_tests_completed_signal(
-        self, mock_psutil, mock_popen, temp_workspace, qtbot
-    ):
+    def test_emits_all_tests_completed_signal(self, mock_psutil, mock_popen, temp_workspace, qtbot):
         """Should emit allTestsCompleted when all tests finish."""
         # Mock successful test - create all procs first, then set side_effect
         procs = []
@@ -359,9 +351,7 @@ class TestValidatorWorkerParallelExecution:
         mock_popen.side_effect = create_mock_proc
 
         executables = {"generator": "", "test": "", "validator": ""}
-        worker = ValidatorTestWorker(
-            str(temp_workspace), executables, test_count=5, max_workers=2
-        )
+        worker = ValidatorTestWorker(str(temp_workspace), executables, test_count=5, max_workers=2)
 
         worker.run_tests()
 
@@ -370,9 +360,7 @@ class TestValidatorWorkerParallelExecution:
 
     @patch("subprocess.Popen")
     @patch("psutil.Process")
-    def test_stores_results_thread_safely(
-        self, mock_psutil, mock_popen, temp_workspace
-    ):
+    def test_stores_results_thread_safely(self, mock_psutil, mock_popen, temp_workspace):
         """Should store test results in thread-safe manner."""
         # Mock successful tests - create all procs first, then set side_effect
         procs = []
@@ -417,9 +405,7 @@ class TestValidatorWorkerErrorHandling:
 
     @patch("subprocess.Popen")
     @patch("psutil.Process")
-    def test_handles_test_solution_failure(
-        self, mock_psutil, mock_popen, temp_workspace
-    ):
+    def test_handles_test_solution_failure(self, mock_psutil, mock_popen, temp_workspace):
         """Should create error result if test solution fails."""
         gen_proc = Mock(returncode=0, poll=Mock(return_value=0), pid=1001)
         gen_proc.communicate.return_value = ("input", "")
@@ -479,9 +465,7 @@ class TestValidatorWorkerMetrics:
     @patch("subprocess.Popen")
     @patch("psutil.Process")
     @patch("time.time")
-    def test_tracks_execution_time(
-        self, mock_time, mock_psutil, mock_popen, temp_workspace
-    ):
+    def test_tracks_execution_time(self, mock_time, mock_psutil, mock_popen, temp_workspace):
         """Should track execution time for each stage."""
         # Mock time progression
         mock_time.side_effect = [
@@ -609,9 +593,7 @@ class TestValidatorWorkerResultStorage:
 
     @patch("subprocess.Popen")
     @patch("psutil.Process")
-    def test_get_test_results_returns_copy(
-        self, mock_psutil, mock_popen, temp_workspace
-    ):
+    def test_get_test_results_returns_copy(self, mock_psutil, mock_popen, temp_workspace):
         """Should return thread-safe copy of test results."""
         # Mock successful execution - create all procs first, then set side_effect
         procs = []

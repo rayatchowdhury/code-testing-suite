@@ -15,9 +15,7 @@ class FilesSnapshotService:
     """Service for creating and managing files snapshots."""
 
     @staticmethod
-    def create_snapshot(
-        workspace_dir: str, test_type: str = TEST_TYPE_COMPARISON
-    ) -> FilesSnapshot:
+    def create_snapshot(workspace_dir: str, test_type: str = TEST_TYPE_COMPARISON) -> FilesSnapshot:
         """
         Create a snapshot of relevant files for the specified test type.
 
@@ -123,9 +121,7 @@ class FilesSnapshotService:
 
             # Determine primary language (most common)
             if language_counts:
-                snapshot.primary_language = max(
-                    language_counts, key=language_counts.get
-                )
+                snapshot.primary_language = max(language_counts, key=language_counts.get)
 
             logger.info(
                 f"Created snapshot for {test_type} ({test_subdir}): {len(snapshot.files)} files, primary language: {snapshot.primary_language}"
@@ -172,9 +168,7 @@ class FilesSnapshotService:
         char_diff = []
         for i, (exp_char, act_char) in enumerate(zip(expected, actual)):
             if exp_char != act_char:
-                char_diff.append(
-                    {"position": i, "expected": exp_char, "actual": act_char}
-                )
+                char_diff.append({"position": i, "expected": exp_char, "actual": act_char})
 
         # Line-by-line analysis
         line_analysis = []

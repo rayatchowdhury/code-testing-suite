@@ -185,9 +185,7 @@ class TestStatusViewDatabaseSaving:
         """Should handle exceptions during save."""
         # Mock runner that raises exception
         mock_runner = Mock()
-        mock_runner.save_test_results_to_database.side_effect = Exception(
-            "Database error"
-        )
+        mock_runner.save_test_results_to_database.side_effect = Exception("Database error")
         status_view.runner = mock_runner
 
         # Mock QMessageBox

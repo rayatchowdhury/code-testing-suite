@@ -376,9 +376,7 @@ class TestTestCardEdgeCases:
 
     def test_benchmarker_card_with_zero_test_size(self, qtbot):
         """BenchmarkerTestCard should handle zero test size."""
-        card = BenchmarkerTestCard(
-            test_number=1, passed=True, time=0.1, memory=32.0, test_size=0
-        )
+        card = BenchmarkerTestCard(test_number=1, passed=True, time=0.1, memory=32.0, test_size=0)
         qtbot.addWidget(card)
 
         assert card.test_size == 0

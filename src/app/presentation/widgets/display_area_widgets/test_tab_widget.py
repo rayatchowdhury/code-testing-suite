@@ -8,7 +8,7 @@ code files in test windows (Comparator, Validator, Benchmarker).
 
 import os
 
-from PySide6.QtCore import QPoint, Qt, Signal
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QCursor
 from PySide6.QtWidgets import (
     QHBoxLayout,
@@ -17,7 +17,6 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QPushButton,
     QSizePolicy,
-    QSpacerItem,
     QVBoxLayout,
     QWidget,
 )
@@ -25,7 +24,6 @@ from PySide6.QtWidgets import (
 from src.app.presentation.styles.components.test_view_styles import (
     TEST_VIEW_BUTTON_PANEL_STYLE,
     TEST_VIEW_CONTENT_PANEL_STYLE,
-    TEST_VIEW_FILE_BUTTON_STYLE,
 )
 from src.app.presentation.styles.constants import MATERIAL_COLORS
 from src.app.shared.constants import WORKSPACE_DIR
@@ -44,12 +42,8 @@ class TestTabWidget(QWidget):
     # Signals
     fileChanged = Signal(str)  # Emitted when switching to a different file
     tabClicked = Signal(str)  # Emitted when any tab is clicked
-    languageChanged = Signal(
-        str, str
-    )  # Emitted when language changes (tab_name, language)
-    filesManifestChanged = (
-        Signal()
-    )  # Emitted when file manifest changes (for compilation)
+    languageChanged = Signal(str, str)  # Emitted when language changes (tab_name, language)
+    filesManifestChanged = Signal()  # Emitted when file manifest changes (for compilation)
 
     def __init__(
         self,
@@ -201,9 +195,7 @@ class TestTabWidget(QWidget):
                 btn.setSizePolicy(
                     QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
                 )  # Allow expansion
-                btn.clicked.connect(
-                    lambda checked, name=tab_name: self._handle_tab_click(name)
-                )
+                btn.clicked.connect(lambda checked, name=tab_name: self._handle_tab_click(name))
 
                 # Modern button styling with connected design (no right border-radius for seamless connection)
                 btn.setStyleSheet(
@@ -291,8 +283,8 @@ class TestTabWidget(QWidget):
                     }}
                 """
                 )
-                lang_label.mousePressEvent = (
-                    lambda event, tab=tab_name: self._show_language_menu(event, tab)
+                lang_label.mousePressEvent = lambda event, tab=tab_name: self._show_language_menu(
+                    event, tab
                 )
                 lang_label.setCursor(QCursor(Qt.PointingHandCursor))
                 lang_label.setToolTip(f"Click to change language for {tab_name}")
@@ -319,9 +311,7 @@ class TestTabWidget(QWidget):
                 btn.setSizePolicy(
                     QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
                 )  # Allow expansion
-                btn.clicked.connect(
-                    lambda checked, name=tab_name: self._handle_tab_click(name)
-                )
+                btn.clicked.connect(lambda checked, name=tab_name: self._handle_tab_click(name))
 
                 # Apply consistent Material Design styling for single-language buttons
                 btn.setStyleSheet(
@@ -439,9 +429,7 @@ class TestTabWidget(QWidget):
             action.setCheckable(True)
             action.setChecked(lang == current_lang)
             action.triggered.connect(
-                lambda checked, language=lang: self._handle_language_change(
-                    tab_name, language
-                )
+                lambda checked, language=lang: self._handle_language_change(tab_name, language)
             )
 
         # Show menu at cursor position
@@ -472,7 +460,7 @@ class TestTabWidget(QWidget):
                 self.tabClicked.emit("save_current")
                 # Note: Parent should handle saving and call this method again
                 return
-            elif reply == QMessageBox.Cancel:
+            if reply == QMessageBox.Cancel:
                 return
 
         # Update current language
@@ -492,9 +480,7 @@ class TestTabWidget(QWidget):
                 os.makedirs(os.path.dirname(file_path), exist_ok=True)
                 with open(file_path, "w", encoding="utf-8") as f:
                     f.write(default_content)
-                print(
-                    f"  → Created new {new_language.upper()} file: {os.path.basename(file_path)}"
-                )
+                print(f"  → Created new {new_language.upper()} file: {os.path.basename(file_path)}")
 
             # Emit signals to reload file content
             self.fileChanged.emit(file_path)
@@ -513,9 +499,7 @@ class TestTabWidget(QWidget):
         """Get file path for specific tab and language using nested structure."""
         if self.multi_language:
             if language is None:
-                language = self.current_language_per_tab.get(
-                    tab_name, self.default_language
-                )
+                language = self.current_language_per_tab.get(tab_name, self.default_language)
             file_name = self.tab_config[tab_name][language]
         else:
             file_name = self.tab_config[tab_name]
@@ -533,9 +517,9 @@ class TestTabWidget(QWidget):
                 current_lang = self.current_language_per_tab.get(
                     current_tab_name, self.default_language
                 )
-                has_changes = self.unsaved_changes_per_tab.get(
-                    current_tab_name, {}
-                ).get(current_lang, False)
+                has_changes = self.unsaved_changes_per_tab.get(current_tab_name, {}).get(
+                    current_lang, False
+                )
             else:
                 has_changes = self.current_button.property("hasUnsavedChanges")
 
@@ -552,7 +536,7 @@ class TestTabWidget(QWidget):
                     self.tabClicked.emit("save_current")
                     # Note: Parent should call this method again with skip_save_prompt=True after saving
                     return
-                elif reply == QMessageBox.Cancel:
+                if reply == QMessageBox.Cancel:
                     return
 
         # Update button states
@@ -570,9 +554,7 @@ class TestTabWidget(QWidget):
 
                 # Check if old tab has unsaved changes
                 has_unsaved = self.unsaved_changes_per_tab.get(old_tab_name, {}).get(
-                    self.current_language_per_tab.get(
-                        old_tab_name, self.default_language
-                    ),
+                    self.current_language_per_tab.get(old_tab_name, self.default_language),
                     False,
                 )
 
@@ -633,9 +615,7 @@ class TestTabWidget(QWidget):
 
         # Get file path
         if self.multi_language:
-            current_lang = self.current_language_per_tab.get(
-                tab_name, self.default_language
-            )
+            current_lang = self.current_language_per_tab.get(tab_name, self.default_language)
             file_path = self._get_current_file_path(tab_name, current_lang)
         else:
             file_name = self.tab_config[tab_name]
@@ -690,9 +670,7 @@ class TestTabWidget(QWidget):
         # Use absolute path relative to this file's location
         current_dir = os.path.dirname(os.path.abspath(__file__))
         # Navigate from widgets/display_area_widgets to resources/templates
-        templates_dir = os.path.join(
-            current_dir, "..", "..", "..", "..", "resources", "templates"
-        )
+        templates_dir = os.path.join(current_dir, "..", "..", "..", "..", "resources", "templates")
         template_path = os.path.normpath(os.path.join(templates_dir, template_filename))
 
         # Try to read template file
@@ -710,13 +688,13 @@ class TestTabWidget(QWidget):
         # Fallback to basic template if file not found or read error
         if language == "cpp":
             return "#include <iostream>\nusing namespace std;\n\nint main() {\n    // Your code here\n    return 0;\n}"
-        elif language == "py":
+        if language == "py":
             return 'def main():\n    # Your code here\n    pass\n\nif __name__ == "__main__":\n    main()\n'
-        elif language == "java":
+        if language == "java":
             class_name = tab_name.replace(" ", "") if tab_name else "Main"
             return f"public class {class_name} {{\n    public static void main(String[] args) {{\n        // Your code here\n    }}\n}}"
-        else:
-            return "// Your code here\n"
+
+        return "// Your code here\n"
 
     def activate_tab(self, tab_name, skip_save_prompt=False):
         """Programmatically activate a tab."""
@@ -795,13 +773,11 @@ class TestTabWidget(QWidget):
         current_tab = self.get_current_tab_name()
         if current_tab:
             if self.multi_language:
-                current_lang = self.current_language_per_tab.get(
-                    current_tab, self.default_language
-                )
+                current_lang = self.current_language_per_tab.get(current_tab, self.default_language)
                 return self._get_current_file_path(current_tab, current_lang)
-            else:
-                file_name = self.tab_config[current_tab]
-                return os.path.join(self.workspace_dir, file_name)
+
+            file_name = self.tab_config[current_tab]
+            return os.path.join(self.workspace_dir, file_name)
         return None
 
     def has_unsaved_changes(self):
@@ -815,8 +791,8 @@ class TestTabWidget(QWidget):
                 return self.unsaved_changes_per_tab.get(current_tab_name, {}).get(
                     current_lang, False
                 )
-            else:
-                return self.current_button.property("hasUnsavedChanges")
+
+            return self.current_button.property("hasUnsavedChanges")
         return False
 
     def get_current_language(self):
@@ -865,9 +841,7 @@ class TestTabWidget(QWidget):
 
         for tab_name in self.tab_config.keys():
             if self.multi_language:
-                current_lang = self.current_language_per_tab.get(
-                    tab_name, self.default_language
-                )
+                current_lang = self.current_language_per_tab.get(tab_name, self.default_language)
                 file_path = self._get_current_file_path(tab_name, current_lang)
             else:
                 current_lang = "cpp"
@@ -951,13 +925,11 @@ class TestTabWidget(QWidget):
         if tool_type == "comparator":
             # Needs: generator, correct, test
             return {k: files[k] for k in ["generator", "correct", "test"] if k in files}
-        elif tool_type == "benchmarker":
+        if tool_type == "benchmarker":
             # Needs: generator, test
             return {k: files[k] for k in ["generator", "test"] if k in files}
-        elif tool_type == "validator":
+        if tool_type == "validator":
             # Needs: generator, test, validator
-            return {
-                k: files[k] for k in ["generator", "test", "validator"] if k in files
-            }
-        else:
-            return files
+            return {k: files[k] for k in ["generator", "test", "validator"] if k in files}
+
+        return files

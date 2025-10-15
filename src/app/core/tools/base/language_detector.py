@@ -164,9 +164,7 @@ class LanguageDetector:
 
         return language
 
-    def detect_from_content(
-        self, content: str, hint_extension: Optional[str] = None
-    ) -> Language:
+    def detect_from_content(self, content: str, hint_extension: Optional[str] = None) -> Language:
         """
         Detect language from file content using pattern matching.
 
@@ -193,9 +191,7 @@ class LanguageDetector:
         # Try all language patterns
         scores = {}
         for language, patterns in self.CONTENT_PATTERNS.items():
-            score = sum(
-                1 for pattern in patterns if re.search(pattern, content, re.MULTILINE)
-            )
+            score = sum(1 for pattern in patterns if re.search(pattern, content, re.MULTILINE))
             scores[language] = score
 
         # Return language with highest score
@@ -211,9 +207,7 @@ class LanguageDetector:
         patterns = self.CONTENT_PATTERNS.get(language, [])
         return any(re.search(pattern, content, re.MULTILINE) for pattern in patterns)
 
-    def detect_language(
-        self, file_path: str, content: Optional[str] = None
-    ) -> Language:
+    def detect_language(self, file_path: str, content: Optional[str] = None) -> Language:
         """
         Detect language using extension first, then content as fallback.
 
@@ -294,13 +288,13 @@ class LanguageDetector:
                 cmd.extend([config["output_flag"], output_file])
             return cmd
 
-        elif language == Language.PYTHON:
+        if language == Language.PYTHON:
             cmd = [config["interpreter"]]
             cmd.extend(custom_flags or config["flags"])
             cmd.append(source_file)
             return cmd
 
-        elif language == Language.JAVA:
+        if language == Language.JAVA:
             cmd = [config["compiler"]]
             cmd.extend(custom_flags or config["flags"])
             if output_file:
@@ -310,8 +304,7 @@ class LanguageDetector:
             cmd.append(source_file)
             return cmd
 
-        else:
-            raise ValueError(f"Unsupported language: {language}")
+        raise ValueError(f"Unsupported language: {language}")
 
     def get_execution_command(
         self, language: Language, executable_path: str, class_name: Optional[str] = None
@@ -343,11 +336,11 @@ class LanguageDetector:
             # Direct execution of compiled binary
             return [executable_path]
 
-        elif language == Language.PYTHON:
+        if language == Language.PYTHON:
             # Run through Python interpreter
             return [config["interpreter"]] + config["flags"] + [executable_path]
 
-        elif language == Language.JAVA:
+        if language == Language.JAVA:
             # Run through Java runtime
             if not class_name:
                 # Extract class name from path
@@ -356,8 +349,7 @@ class LanguageDetector:
             class_dir = os.path.dirname(executable_path)
             return [config["runtime"], "-cp", class_dir, class_name]
 
-        else:
-            raise ValueError(f"Unsupported language: {language}")
+        raise ValueError(f"Unsupported language: {language}")
 
     def needs_compilation(self, language: Language) -> bool:
         """

@@ -332,9 +332,7 @@ class ListItem(QWidget):
         """Handle text hover color changes"""
         if obj == self.text_label:
             if event.type() == QEvent.Type.Enter:
-                obj.setStyleSheet(
-                    StyleSheet.list_item() + f"color: {AppTheme.COLORS['primary']};"
-                )
+                obj.setStyleSheet(StyleSheet.list_item() + f"color: {AppTheme.COLORS['primary']};")
             elif event.type() == QEvent.Type.Leave:
                 obj.setStyleSheet(StyleSheet.list_item())
         return super().eventFilter(obj, event)
@@ -343,9 +341,7 @@ class ListItem(QWidget):
 class FeatureCard(QFrame):
     """Feature card component with icon, title and feature list"""
 
-    def __init__(
-        self, icon: str, title: str, features: List[str], parent: QWidget = None
-    ):
+    def __init__(self, icon: str, title: str, features: List[str], parent: QWidget = None):
         super().__init__(parent)
         self.setObjectName("feature_card")
         self.setAttribute(Qt.WA_Hover, True)
@@ -456,9 +452,7 @@ class CallToActionSection(QFrame):
 
     def _create_description(self) -> QLabel:
         """Create centered description text"""
-        desc = QLabel(
-            "Select any option from the sidebar to begin your coding journey!"
-        )
+        desc = QLabel("Select any option from the sidebar to begin your coding journey!")
         desc.setWordWrap(True)
         desc.setAlignment(Qt.AlignCenter)
         desc.setFont(FontUtils.create("description"))
@@ -690,9 +684,7 @@ class HelpSectionData:
 class HelpDocument(DocumentWidget):
     """Help center document widget - renders help content with sections"""
 
-    def __init__(
-        self, title: str, sections: List[HelpSectionData], parent: QWidget = None
-    ):
+    def __init__(self, title: str, sections: List[HelpSectionData], parent: QWidget = None):
         """
         Initialize help document
 

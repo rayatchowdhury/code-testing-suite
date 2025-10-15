@@ -8,7 +8,6 @@ base class with consistent threading, database integration, and lifecycle manage
 
 import json
 import logging
-import os
 from datetime import datetime
 from typing import Any, Dict, Optional
 
@@ -74,12 +73,8 @@ class BaseRunner(QObject):
     allTestsCompleted = Signal(bool)  # True if all passed
 
     # UI state change signals (for clean separation of concerns)
-    testingStarted = (
-        Signal()
-    )  # Emitted when test execution begins (UI can switch to test mode)
-    testingCompleted = (
-        Signal()
-    )  # Emitted when test execution ends (UI can restore normal mode)
+    testingStarted = Signal()  # Emitted when test execution begins (UI can switch to test mode)
+    testingCompleted = Signal()  # Emitted when test execution ends (UI can restore normal mode)
 
     def __init__(
         self,
@@ -102,9 +97,7 @@ class BaseRunner(QObject):
         super().__init__()
         self.workspace_dir = workspace_dir
         self.files = files_dict
-        self.test_type = (
-            test_type  # Used for both database tracking and file organization
-        )
+        self.test_type = test_type  # Used for both database tracking and file organization
         self.config = config or {}
 
         # Initialize compiler with config for multi-language support and nested structure
@@ -279,9 +272,7 @@ class BaseRunner(QObject):
                 return -1
 
             total_time = (datetime.now() - self.test_start_time).total_seconds()
-            passed_tests = sum(
-                1 for result in test_results if result.get("passed", False)
-            )
+            passed_tests = sum(1 for result in test_results if result.get("passed", False))
             failed_tests = len(test_results) - passed_tests
             all_passed = (failed_tests == 0) and (len(test_results) > 0)
 
@@ -342,10 +333,10 @@ class BaseRunner(QObject):
         # Default: use 'test' file if available, otherwise first file
         if "test" in self.files:
             return self.files["test"]
-        elif self.files:
+        if self.files:
             return next(iter(self.files.values()))
-        else:
-            return ""
+
+        return ""
 
     def _create_files_snapshot(self) -> Dict[str, Any]:
         """
@@ -360,8 +351,6 @@ class BaseRunner(QObject):
         Returns:
             Dict[str, Any]: Files snapshot dict in new format
         """
-        from src.app.persistence.database import DatabaseManager
-
         # Call static method with workspace_dir and test_type
         snapshot = DatabaseManager.create_files_snapshot(
             workspace_dir=self.workspace_dir, test_type=self.test_type
@@ -382,11 +371,7 @@ class BaseRunner(QObject):
 
         # Clean up thread
         try:
-            if (
-                self.thread
-                and hasattr(self.thread, "isRunning")
-                and self.thread.isRunning()
-            ):
+            if self.thread and hasattr(self.thread, "isRunning") and self.thread.isRunning():
                 self.thread.quit()
                 if not self.thread.wait(3000):  # Wait up to 3 seconds
                     self.thread.terminate()

@@ -160,7 +160,7 @@ class BaseStatusView(QWidget):
         Args:
             test_number: Test case number to show details for
         """
-        pass  # Override in subclasses
+        # Override in subclasses
 
     def on_all_tests_completed(self, all_passed: bool):
         """Called when all tests complete - notify parent to enable save button"""
@@ -179,15 +179,11 @@ class BaseStatusView(QWidget):
             runner = self.runner
         elif self.parent_window and hasattr(self.parent_window, "runner"):
             runner = self.parent_window.runner
-        elif self.parent_window and hasattr(
-            self.parent_window, f"{self.test_type}_runner"
-        ):
+        elif self.parent_window and hasattr(self.parent_window, f"{self.test_type}_runner"):
             runner = getattr(self.parent_window, f"{self.test_type}_runner")
 
         if not runner:
-            QMessageBox.critical(
-                self, "Error", "Runner not found - cannot save results"
-            )
+            QMessageBox.critical(self, "Error", "Runner not found - cannot save results")
             return -1
 
         try:
@@ -200,14 +196,10 @@ class BaseStatusView(QWidget):
                     f"Results saved successfully!\nDatabase ID: {result_id}",
                 )
                 # Notify parent to update button text
-                if self.parent_window and hasattr(
-                    self.parent_window, "mark_results_saved"
-                ):
+                if self.parent_window and hasattr(self.parent_window, "mark_results_saved"):
                     self.parent_window.mark_results_saved()
             else:
-                QMessageBox.critical(
-                    self, "Error", "Failed to save results to database"
-                )
+                QMessageBox.critical(self, "Error", "Failed to save results to database")
 
             return result_id
 

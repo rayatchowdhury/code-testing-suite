@@ -295,9 +295,7 @@ class TestResultRepository(BaseRepository[TestResult]):
         """
         return self.get_all(project_name=project_name, limit=limit)
 
-    def get_recent(
-        self, days: int = 7, limit: int = DEFAULT_RESULTS_LIMIT
-    ) -> List[TestResult]:
+    def get_recent(self, days: int = 7, limit: int = DEFAULT_RESULTS_LIMIT) -> List[TestResult]:
         """
         Get recent test results from last N days.
 
@@ -324,10 +322,10 @@ class TestResultRepository(BaseRepository[TestResult]):
         """
         if status == STATUS_PASSED:
             return self.count("test_results", "passed_tests = test_count")
-        elif status == STATUS_FAILED:
+        if status == STATUS_FAILED:
             return self.count("test_results", "failed_tests > 0")
-        else:
-            return 0
+
+        return 0
 
     def _row_to_entity(self, row) -> TestResult:
         """
@@ -353,10 +351,6 @@ class TestResultRepository(BaseRepository[TestResult]):
             timestamp=row["timestamp"],
             test_details=row["test_details"],
             project_name=row["project_name"],
-            files_snapshot=(
-                row["files_snapshot"] if "files_snapshot" in row_keys else ""
-            ),
-            mismatch_analysis=(
-                row["mismatch_analysis"] if "mismatch_analysis" in row_keys else ""
-            ),
+            files_snapshot=(row["files_snapshot"] if "files_snapshot" in row_keys else ""),
+            mismatch_analysis=(row["mismatch_analysis"] if "mismatch_analysis" in row_keys else ""),
         )

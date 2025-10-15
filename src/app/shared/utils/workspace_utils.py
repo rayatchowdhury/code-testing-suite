@@ -6,7 +6,6 @@ structure, including nested test type directories and migration from flat struct
 """
 
 import os
-import shutil
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -174,13 +173,13 @@ def get_file_language_extension(filename: str) -> Optional[str]:
 
     if ext == ".cpp":
         return "cpp"
-    elif ext == ".py":
+    if ext == ".py":
         return "py"
-    elif ext == ".java":
+    if ext == ".java":
         return "java"
-    elif ext == ".exe":
+    if ext == ".exe":
         return "cpp"  # Assume C++ executable
-    elif ext == ".class":
+    if ext == ".class":
         return "java"  # Java bytecode
 
     return None
@@ -208,11 +207,11 @@ def get_file_role(filename: str) -> Optional[str]:
 
     if basename in ["generator", "gen"]:
         return "generator"
-    elif basename in ["correct", "solution", "sol"]:
+    if basename in ["correct", "solution", "sol"]:
         return "correct"
-    elif basename in ["test", "brute"]:
+    if basename in ["test", "brute"]:
         return "test"
-    elif basename in ["validator", "checker"]:
+    if basename in ["validator", "checker"]:
         return "validator"
 
     return None
@@ -241,9 +240,7 @@ def list_workspace_files(
         return {}
 
     result = {}
-    test_types = (
-        [test_type] if test_type else ["comparator", "validator", "benchmarker"]
-    )
+    test_types = [test_type] if test_type else ["comparator", "validator", "benchmarker"]
 
     for ttype in test_types:
         test_dir = get_test_type_dir(workspace_dir, ttype)

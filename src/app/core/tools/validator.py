@@ -45,13 +45,9 @@ class ValidatorRunner(BaseRunner):
         if files is None:
             # Use nested validator directory structure
             files = {
-                "generator": get_workspace_file_path(
-                    workspace_dir, "validator", "generator.cpp"
-                ),
+                "generator": get_workspace_file_path(workspace_dir, "validator", "generator.cpp"),
                 "test": get_workspace_file_path(workspace_dir, "validator", "test.cpp"),
-                "validator": get_workspace_file_path(
-                    workspace_dir, "validator", "validator.cpp"
-                ),
+                "validator": get_workspace_file_path(workspace_dir, "validator", "validator.cpp"),
             }
 
         # Initialize BaseRunner with validator test type for nested structure
@@ -83,9 +79,7 @@ class ValidatorRunner(BaseRunner):
         if hasattr(worker, "testCompleted"):
             worker.testCompleted.connect(self.testCompleted)
 
-    def _create_test_result(
-        self, all_passed, test_results, passed_tests, failed_tests, total_time
-    ):
+    def _create_test_result(self, all_passed, test_results, passed_tests, failed_tests, total_time):
         """
         Create validation-specific TestResult object.
 
@@ -105,26 +99,19 @@ class ValidatorRunner(BaseRunner):
                 "correct_outputs": sum(
                     1 for r in test_results if r.get("validator_exit_code") == 0
                 ),
-                "wrong_answers": sum(
-                    1 for r in test_results if r.get("validator_exit_code") == 1
-                ),
+                "wrong_answers": sum(1 for r in test_results if r.get("validator_exit_code") == 1),
                 "presentation_errors": sum(
                     1 for r in test_results if r.get("validator_exit_code") == 2
                 ),
                 "validator_errors": sum(
                     1 for r in test_results if r.get("validator_exit_code", 0) > 2
                 ),
-                "timeouts": sum(
-                    1 for r in test_results if r.get("validator_exit_code") == -2
-                ),
-                "system_errors": sum(
-                    1 for r in test_results if r.get("validator_exit_code") == -3
-                ),
+                "timeouts": sum(1 for r in test_results if r.get("validator_exit_code") == -2),
+                "system_errors": sum(1 for r in test_results if r.get("validator_exit_code") == -3),
             },
             "execution_times": {
                 "avg_generator": (
-                    sum(r.get("generator_time", 0) for r in test_results)
-                    / len(test_results)
+                    sum(r.get("generator_time", 0) for r in test_results) / len(test_results)
                     if test_results
                     else 0
                 ),
@@ -134,8 +121,7 @@ class ValidatorRunner(BaseRunner):
                     else 0
                 ),
                 "avg_validator": (
-                    sum(r.get("validator_time", 0) for r in test_results)
-                    / len(test_results)
+                    sum(r.get("validator_time", 0) for r in test_results) / len(test_results)
                     if test_results
                     else 0
                 ),

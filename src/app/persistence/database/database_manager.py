@@ -4,7 +4,7 @@ import logging
 import os
 import sqlite3
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List
 
 from src.app.shared.constants import USER_DATA_DIR
 
@@ -27,8 +27,6 @@ logger = logging.getLogger(__name__)
 
 class DatabaseError(Exception):
     """Custom exception for database operations"""
-
-    pass
 
 
 # Phase 6 (Issue #7): Removed TestCaseResult class - unused/dead code
@@ -95,16 +93,12 @@ class DatabaseManager:
 
             # Migrate existing table to add new columns
             try:
-                cursor.execute(
-                    "ALTER TABLE test_results ADD COLUMN files_snapshot TEXT"
-                )
+                cursor.execute("ALTER TABLE test_results ADD COLUMN files_snapshot TEXT")
             except sqlite3.OperationalError:
                 pass  # Column already exists
 
             try:
-                cursor.execute(
-                    "ALTER TABLE test_results ADD COLUMN mismatch_analysis TEXT"
-                )
+                cursor.execute("ALTER TABLE test_results ADD COLUMN mismatch_analysis TEXT")
             except sqlite3.OperationalError:
                 pass  # Column already exists
 
@@ -234,7 +228,7 @@ class DatabaseManager:
                 params.append(f"%{project_name}%")
             if days:
                 # Phase 4 (Issue #10): SQL date filtering
-                from datetime import datetime, timedelta
+                from datetime import timedelta
 
                 cutoff = (datetime.now() - timedelta(days=days)).isoformat()
                 conditions.append("timestamp >= ?")
@@ -275,9 +269,7 @@ class DatabaseManager:
                         row["files_snapshot"] if "files_snapshot" in row.keys() else ""
                     ),
                     mismatch_analysis=(
-                        row["mismatch_analysis"]
-                        if "mismatch_analysis" in row.keys()
-                        else ""
+                        row["mismatch_analysis"] if "mismatch_analysis" in row.keys() else ""
                     ),
                 )
                 results.append(result)
@@ -492,9 +484,7 @@ class DatabaseManager:
             type_query += " GROUP BY test_type"
 
             cursor.execute(type_query, params)
-            stats["by_type"] = {
-                row["test_type"]: row["count"] for row in cursor.fetchall()
-            }
+            stats["by_type"] = {row["test_type"]: row["count"] for row in cursor.fetchall()}
 
             # Success rate
             success_query = """
@@ -608,9 +598,7 @@ class DatabaseManager:
             return True
 
         except sqlite3.Error as e:
-            logger.error(
-                f"Error deleting test result ID {result_id}: {e}", exc_info=True
-            )
+            logger.error(f"Error deleting test result ID {result_id}: {e}", exc_info=True)
             raise DatabaseError(f"Failed to delete test result: {e}") from e
 
         finally:
@@ -623,9 +611,7 @@ class DatabaseManager:
             confirm: Must be True to actually delete data (safety check)
         """
         if not confirm:
-            logger.warning(
-                "delete_all_data called without confirm=True, operation aborted"
-            )
+            logger.warning("delete_all_data called without confirm=True, operation aborted")
             return False
 
         connection = self.connect()
@@ -717,22 +703,16 @@ class DatabaseManager:
                     snapshot_data = json.loads(files_snapshot_json)
 
                     # Detect format - old format has generator_code/correct_code keys
-                    is_old_format = any(
-                        key.endswith("_code") for key in snapshot_data.keys()
-                    )
+                    is_old_format = any(key.endswith("_code") for key in snapshot_data.keys())
 
                     if not is_old_format:
                         # Already new format
                         skipped_count += 1
-                        logger.debug(
-                            f"Result #{result_id}: Already in new format, skipping"
-                        )
+                        logger.debug(f"Result #{result_id}: Already in new format, skipping")
                         continue
 
                     old_format_count += 1
-                    logger.info(
-                        f"Result #{result_id}: Detected old format, migrating..."
-                    )
+                    logger.info(f"Result #{result_id}: Detected old format, migrating...")
 
                     if dry_run:
                         logger.info(f"  [DRY RUN] Would migrate result #{result_id}")
@@ -766,9 +746,7 @@ class DatabaseManager:
                     failed_count += 1
                     error_msg = str(e)
                     failures.append((result_id, error_msg))
-                    logger.error(
-                        f"  ✗ Result #{result_id}: Migration failed - {error_msg}"
-                    )
+                    logger.error(f"  ✗ Result #{result_id}: Migration failed - {error_msg}")
 
             if not dry_run and (migrated_count > 0 or failed_count > 0):
                 connection.commit()
@@ -788,11 +766,11 @@ class DatabaseManager:
             # Log summary
             if dry_run:
                 logger.info(f"\n{'='*60}")
-                logger.info(f"MIGRATION DRY RUN SUMMARY")
+                logger.info("MIGRATION DRY RUN SUMMARY")
                 logger.info(f"{'='*60}")
             else:
                 logger.info(f"\n{'='*60}")
-                logger.info(f"MIGRATION COMPLETE")
+                logger.info("MIGRATION COMPLETE")
                 logger.info(f"{'='*60}")
 
             logger.info(f"Total results checked: {total_results}")
@@ -802,7 +780,7 @@ class DatabaseManager:
             logger.info(f"Failed: {failed_count}")
 
             if failures:
-                logger.warning(f"\nFailed migrations:")
+                logger.warning("\nFailed migrations:")
                 for result_id, error in failures:
                     logger.warning(f"  - Result #{result_id}: {error}")
 
@@ -946,9 +924,7 @@ class DatabaseManager:
         char_diff = []
         for i, (exp_char, act_char) in enumerate(zip(expected, actual)):
             if exp_char != act_char:
-                char_diff.append(
-                    {"position": i, "expected": exp_char, "actual": act_char}
-                )
+                char_diff.append({"position": i, "expected": exp_char, "actual": act_char})
 
         # Line-by-line analysis
         line_analysis = []
@@ -1095,9 +1071,7 @@ class DatabaseManager:
 
             # Determine primary language (most common)
             if language_counts:
-                snapshot.primary_language = max(
-                    language_counts, key=language_counts.get
-                )
+                snapshot.primary_language = max(language_counts, key=language_counts.get)
 
             logger.info(
                 f"Created snapshot for {test_type} ({test_subdir}): {len(snapshot.files)} files, primary language: {snapshot.primary_language}"

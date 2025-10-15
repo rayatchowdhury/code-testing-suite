@@ -12,7 +12,6 @@ language detection and routing to appropriate compilers.
 import logging
 import multiprocessing
 import os
-import subprocess
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, Dict, List, Optional, Tuple
@@ -85,9 +84,7 @@ class BaseCompiler(QObject):
         self.executables = {}
         for key, file_path in self.files.items():
             language = self.file_languages[key]
-            executable_path = self.language_detector.get_executable_path(
-                file_path, language
-            )
+            executable_path = self.language_detector.get_executable_path(file_path, language)
             self.executables[key] = executable_path
 
     def _resolve_file_paths(self, files_dict: Dict[str, str]) -> Dict[str, str]:
@@ -141,9 +138,7 @@ class BaseCompiler(QObject):
         files_to_compile = list(self.files.keys())
         max_workers = min(len(files_to_compile), multiprocessing.cpu_count())
 
-        self.compilationOutput.emit(
-            "🚀 Starting optimized parallel compilation...\n", "info"
-        )
+        self.compilationOutput.emit("🚀 Starting optimized parallel compilation...\n", "info")
 
         # Check which files need recompilation
         files_needing_compilation = []
@@ -161,9 +156,7 @@ class BaseCompiler(QObject):
                     )
                 elif language == Language.JAVA:
                     source_file = self.files[file_key]
-                    class_file = os.path.basename(source_file).replace(
-                        ".java", ".class"
-                    )
+                    class_file = os.path.basename(source_file).replace(".java", ".class")
                     self.compilationOutput.emit(
                         f"✅ {class_file} is up-to-date, skipping compilation\n",
                         "success",
@@ -202,9 +195,7 @@ class BaseCompiler(QObject):
 
                     # Get language for better messaging
                     language = self.file_languages.get(file_key, Language.UNKNOWN)
-                    lang_display = (
-                        language.value.upper() if language != Language.UNKNOWN else ""
-                    )
+                    lang_display = language.value.upper() if language != Language.UNKNOWN else ""
                     file_name = os.path.basename(self.files[file_key])
 
                     if success:
@@ -306,8 +297,8 @@ class BaseCompiler(QObject):
             # Get or create language-specific compiler
             if language not in self.language_compilers:
                 lang_config = self._get_language_config(language)
-                self.language_compilers[language] = (
-                    LanguageCompilerFactory.create_compiler(language, lang_config)
+                self.language_compilers[language] = LanguageCompilerFactory.create_compiler(
+                    language, lang_config
                 )
 
             compiler = self.language_compilers[language]
@@ -457,7 +448,6 @@ class BaseCompiler(QObject):
         """Stop any running compilation process."""
         # This method can be extended by subclasses if they need
         # to stop specific compilation processes
-        pass
 
     def __del__(self):
         """Destructor to ensure proper cleanup."""

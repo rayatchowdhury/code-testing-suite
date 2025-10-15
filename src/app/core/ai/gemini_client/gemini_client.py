@@ -13,8 +13,7 @@ import time
 import urllib.parse
 import urllib.request
 from functools import lru_cache
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Tuple
 
 # Suppress urllib3 noise directly
 logging.getLogger("urllib3.connectionpool").setLevel(logging.ERROR)
@@ -73,9 +72,7 @@ class GeminiAI:
                 ai_settings = config_data.get("ai_settings", {})
                 if ai_settings:
                     self._api_key = ai_settings.get("gemini_api_key")
-                    self._model_name = ai_settings.get(
-                        "preferred_model", "gemini-2.5-flash"
-                    )
+                    self._model_name = ai_settings.get("preferred_model", "gemini-2.5-flash")
                     self._enabled = ai_settings.get("enabled", False)
 
         except Exception as e:
@@ -175,12 +172,12 @@ class GeminiAI:
 
             if e.code == 400:
                 return "❌ Invalid request. Please check your input."
-            elif e.code == 403:
+            if e.code == 403:
                 return "❌ Invalid API key or access denied."
-            elif e.code == 429:
+            if e.code == 429:
                 return "❌ Too many requests. Please try again later."
-            else:
-                return f"❌ API error ({e.code}): Please try again."
+
+            return f"❌ API error ({e.code}): Please try again."
 
         except urllib.error.URLError as e:
             logging.error(f"Connection error: {e}")

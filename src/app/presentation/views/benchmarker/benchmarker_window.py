@@ -44,9 +44,7 @@ class BenchmarkerWindow(SidebarWindowBase):
 
         for button_text in ["Compile", "Run"]:
             btn = self.sidebar.add_button(button_text, self.action_section)
-            btn.clicked.connect(
-                lambda checked, text=button_text: self.handle_action_button(text)
-            )
+            btn.clicked.connect(lambda checked, text=button_text: self.handle_action_button(text))
             if button_text == "Compile":
                 self.compile_btn = btn
             elif button_text == "Run":
@@ -101,9 +99,7 @@ class BenchmarkerWindow(SidebarWindowBase):
         self.benchmarker = Benchmarker(
             workspace_dir=self.display_area.workspace_dir, files=files, config=config
         )
-        self.benchmarker.compilationOutput.connect(
-            self.display_area.console.displayOutput
-        )
+        self.benchmarker.compilationOutput.connect(self.display_area.console.displayOutput)
 
         # Connect runner signals to handle UI state changes
         self.benchmarker.testingStarted.connect(self._on_testing_started)
@@ -142,9 +138,7 @@ class BenchmarkerWindow(SidebarWindowBase):
 
                     if reply == QMessageBox.Save:
                         # Switch to this file (skip save prompt since we already handled it)
-                        self.display_area._handle_file_button(
-                            btn_name, skip_save_prompt=True
-                        )
+                        self.display_area._handle_file_button(btn_name, skip_save_prompt=True)
                         if not self.display_area.editor.saveFile():
                             return
                     elif reply == QMessageBox.Cancel:

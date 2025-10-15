@@ -178,7 +178,7 @@ class ValidatorDisplay(QWidget):
             reply = QMessageBox.question(
                 self,
                 "Unsaved Changes",
-                f"Do you want to save changes before compiling?",
+                "Do you want to save changes before compiling?",
                 QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel,
             )
 

@@ -116,9 +116,7 @@ class TestConfigManagerInitialization:
 class TestConfigManagerLoad:
     """Test load_config method."""
 
-    def test_load_existing_valid_config(
-        self, config_manager, temp_config_file, valid_config
-    ):
+    def test_load_existing_valid_config(self, config_manager, temp_config_file, valid_config):
         """Test loading existing valid configuration."""
         # Write valid config
         with open(temp_config_file, "w") as f:
@@ -140,9 +138,7 @@ class TestConfigManagerLoad:
         assert "gemini" in config
         assert "editor_settings" in config
 
-    def test_load_invalid_json_raises_format_error(
-        self, config_manager, temp_config_file
-    ):
+    def test_load_invalid_json_raises_format_error(self, config_manager, temp_config_file):
         """Test loading invalid JSON raises ConfigFormatError."""
         # Write invalid JSON
         with open(temp_config_file, "w") as f:
@@ -292,9 +288,7 @@ class TestConfigManagerValidation:
 
     def test_validate_invalid_editor_settings(self, config_manager, valid_config):
         """Test validation catches invalid editor settings."""
-        valid_config["editor_settings"] = {
-            "autosave": "not a bool"
-        }  # Missing required keys
+        valid_config["editor_settings"] = {"autosave": "not a bool"}  # Missing required keys
 
         errors = config_manager._validate_config_structure(valid_config)
 
@@ -474,9 +468,7 @@ class TestConfigPersistence:
 class TestIntegration:
     """Integration tests for complete workflows."""
 
-    def test_save_and_load_roundtrip(
-        self, config_manager, temp_config_file, valid_config
-    ):
+    def test_save_and_load_roundtrip(self, config_manager, temp_config_file, valid_config):
         """Test save and load roundtrip preserves data."""
         # Save
         config_manager.save_config(valid_config)

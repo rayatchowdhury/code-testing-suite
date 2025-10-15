@@ -61,9 +61,7 @@ class TestRunWithMonitoring:
     @pytest.mark.skipif(os.name != "nt", reason="Windows-specific test")
     def test_run_simple_command_windows(self):
         """Should execute simple command on Windows."""
-        result = ProcessExecutor.run_with_monitoring(
-            command=["cmd", "/c", "echo", "Hello"]
-        )
+        result = ProcessExecutor.run_with_monitoring(command=["cmd", "/c", "echo", "Hello"])
 
         assert result.returncode == 0
         assert "Hello" in result.stdout
@@ -130,9 +128,7 @@ class TestRunWithMonitoring:
         else:
             cmd = ["ls", "test.txt"]
 
-        result = ProcessExecutor.run_with_monitoring(
-            command=cmd, working_dir=str(tmp_path)
-        )
+        result = ProcessExecutor.run_with_monitoring(command=cmd, working_dir=str(tmp_path))
 
         assert result.returncode == 0
         assert "test.txt" in result.stdout
@@ -152,9 +148,7 @@ class TestRunWithMonitoring:
 
     def test_run_nonexistent_command(self):
         """Should handle nonexistent command gracefully."""
-        result = ProcessExecutor.run_with_monitoring(
-            command=["nonexistent_command_xyz"]
-        )
+        result = ProcessExecutor.run_with_monitoring(command=["nonexistent_command_xyz"])
 
         assert result.returncode == -1
         assert "error" in result.stderr.lower()
@@ -562,9 +556,7 @@ class TestProcessExecutorIntegration:
         assert compile_result.returncode == 0
 
         # Execute
-        run_result = ProcessExecutor.run_with_monitoring(
-            command=["python", str(source_file)]
-        )
+        run_result = ProcessExecutor.run_with_monitoring(command=["python", str(source_file)])
 
         assert run_result.returncode == 0
         assert "Hello, World!" in run_result.stdout
@@ -574,9 +566,7 @@ class TestProcessExecutorIntegration:
         results = []
 
         for i in range(10):
-            result = ProcessExecutor.run_with_monitoring(
-                command=["python", "-c", f"print({i})"]
-            )
+            result = ProcessExecutor.run_with_monitoring(command=["python", "-c", f"print({i})"])
             results.append(result)
 
         assert len(results) == 10

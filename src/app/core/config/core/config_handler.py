@@ -2,7 +2,7 @@
 
 import json
 import os
-from typing import Any, Dict, Optional
+from typing import Dict
 
 from PySide6.QtWidgets import QMessageBox
 
@@ -15,13 +15,8 @@ from src.app.core.config.core.exceptions import (
     ConfigSaveError,
     ConfigValidationError,
 )
-from src.app.presentation.styles.components.config_ui import (
-    INFO_MESSAGE_STYLE,
-    SUCCESS_MESSAGE_STYLE,
-    get_success_status_style,
-)
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
-from src.app.shared.constants import CONFIG_FILE, USER_DATA_DIR
+from src.app.presentation.styles.components.config_ui import get_success_status_style
+from src.app.shared.constants import USER_DATA_DIR
 
 
 class ConfigManager:
@@ -107,9 +102,7 @@ class ConfigManager:
                     continue
                 errors.append(f"Missing required key: {key}")
             elif not isinstance(config[key], expected_type):
-                errors.append(
-                    f"Invalid type for {key}: expected {expected_type.__name__}"
-                )
+                errors.append(f"Invalid type for {key}: expected {expected_type.__name__}")
 
         # Validate multi-language configurations
         if "languages" in config:
@@ -134,9 +127,7 @@ class ConfigManager:
                     required_fields = {"compiler": str, "runtime": str}
 
                 for field, field_type in required_fields.items():
-                    if field in lang_config and not isinstance(
-                        lang_config[field], field_type
-                    ):
+                    if field in lang_config and not isinstance(lang_config[field], field_type):
                         errors.append(
                             f"Invalid type for {lang}.{field}: expected {field_type.__name__}"
                         )
@@ -170,9 +161,7 @@ class ConfigManager:
                     errors.append(f"Invalid type for editor setting {key}")
 
         # Check for truly missing keys (excluding optional 'languages')
-        missing_keys = [
-            k for k in required_keys if k not in config and k != "languages"
-        ]
+        missing_keys = [k for k in required_keys if k not in config and k != "languages"]
         if missing_keys:
             raise ConfigMissingError(f"Required keys: {', '.join(missing_keys)}")
 
@@ -234,18 +223,16 @@ class ConfigPersistence:
                 default_cfg = self.config_manager.get_default_config()
                 self.config_manager.save_config(default_cfg)
                 cfg = default_cfg
-            except:
+            except Exception:
                 cfg = {}
         except Exception as e:
-            self.parent.show_error(
-                "Unexpected Error", "Failed to load configuration", str(e)
-            )
+            self.parent.show_error("Unexpected Error", "Failed to load configuration", str(e))
             cfg = {}
 
         # Populate fields with safe defaults (use actual defaults from get_default_config)
         try:
             default_config = self.config_manager.get_default_config()
-        except:
+        except Exception:
             default_config = {}
 
         # Note: cpp_version_combo removed - C++ version now in Language Compilers section
@@ -257,17 +244,13 @@ class ConfigPersistence:
         # C++ configuration
         cpp_config = languages.get("cpp", {})
         if hasattr(self.parent, "cpp_compiler_combo"):
-            self.parent.cpp_compiler_combo.setCurrentText(
-                cpp_config.get("compiler", "g++")
-            )
+            self.parent.cpp_compiler_combo.setCurrentText(cpp_config.get("compiler", "g++"))
         if hasattr(self.parent, "cpp_std_combo"):
             # Use languages.cpp.std_version as primary, cpp_version as fallback for backward compat
             std_version = cpp_config.get("std_version", cfg.get("cpp_version", "c++17"))
             self.parent.cpp_std_combo.setCurrentText(std_version)
         if hasattr(self.parent, "cpp_opt_combo"):
-            self.parent.cpp_opt_combo.setCurrentText(
-                cpp_config.get("optimization", "O2")
-            )
+            self.parent.cpp_opt_combo.setCurrentText(cpp_config.get("optimization", "O2"))
         cpp_flags = cpp_config.get("flags", [])
         if hasattr(self.parent, "cpp_flags_input"):
             self.parent.cpp_flags_input.setText(
@@ -277,9 +260,7 @@ class ConfigPersistence:
         # Python configuration
         py_config = languages.get("py", {})
         if hasattr(self.parent, "py_interpreter_combo"):
-            self.parent.py_interpreter_combo.setCurrentText(
-                py_config.get("interpreter", "python")
-            )
+            self.parent.py_interpreter_combo.setCurrentText(py_config.get("interpreter", "python"))
         py_flags = py_config.get("flags", [])
         if hasattr(self.parent, "py_flags_input"):
             self.parent.py_flags_input.setText(
@@ -289,25 +270,17 @@ class ConfigPersistence:
         # Java configuration
         java_config = languages.get("java", {})
         if hasattr(self.parent, "java_compiler_combo"):
-            self.parent.java_compiler_combo.setCurrentText(
-                java_config.get("compiler", "javac")
-            )
+            self.parent.java_compiler_combo.setCurrentText(java_config.get("compiler", "javac"))
         if hasattr(self.parent, "java_runtime_combo"):
-            self.parent.java_runtime_combo.setCurrentText(
-                java_config.get("runtime", "java")
-            )
+            self.parent.java_runtime_combo.setCurrentText(java_config.get("runtime", "java"))
         java_flags = java_config.get("flags", [])
         if hasattr(self.parent, "java_flags_input"):
             self.parent.java_flags_input.setText(
-                ", ".join(java_flags)
-                if isinstance(java_flags, list)
-                else str(java_flags)
+                ", ".join(java_flags) if isinstance(java_flags, list) else str(java_flags)
             )
 
         # Updated for new gemini format (Phase 1)
-        gemini_settings = (
-            cfg.get("gemini", {}) if isinstance(cfg.get("gemini"), dict) else {}
-        )
+        gemini_settings = cfg.get("gemini", {}) if isinstance(cfg.get("gemini"), dict) else {}
         enabled = gemini_settings.get("enabled", False)
         api_key = gemini_settings.get("api_key", "")
         model = gemini_settings.get("model", "")
@@ -341,14 +314,10 @@ class ConfigPersistence:
             self.parent.model_input.setText(model)
 
         editor_settings = (
-            cfg.get("editor_settings", {})
-            if isinstance(cfg.get("editor_settings"), dict)
-            else {}
+            cfg.get("editor_settings", {}) if isinstance(cfg.get("editor_settings"), dict) else {}
         )
         self.parent.font_size_spin.setValue(int(editor_settings.get("font_size", 13)))
-        self.parent.wrap_checkbox.setChecked(
-            bool(editor_settings.get("wrap_lines", False))
-        )
+        self.parent.wrap_checkbox.setChecked(bool(editor_settings.get("wrap_lines", False)))
 
     def save_config(self):
         """Save configuration to file from UI values."""
@@ -356,7 +325,7 @@ class ConfigPersistence:
             # Load current config to preserve settings not in the UI
             try:
                 current_config = self.config_manager.load_config()
-            except:
+            except Exception:
                 current_config = self.config_manager.get_default_config()
 
             # Update with UI values using new gemini format (Phase 1)
@@ -364,9 +333,7 @@ class ConfigPersistence:
             cpp_std_version = (
                 self.parent.cpp_std_combo.currentText()
                 if hasattr(self.parent, "cpp_std_combo")
-                else current_config.get("languages", {})
-                .get("cpp", {})
-                .get("std_version", "c++17")
+                else current_config.get("languages", {}).get("cpp", {}).get("std_version", "c++17")
             )
 
             config = {
@@ -395,9 +362,7 @@ class ConfigPersistence:
                                 if f.strip()
                             ]
                             if hasattr(self.parent, "cpp_flags_input")
-                            else current_config.get("languages", {})
-                            .get("cpp", {})
-                            .get("flags", [])
+                            else current_config.get("languages", {}).get("cpp", {}).get("flags", [])
                         ),
                     },
                     "py": {
@@ -418,9 +383,7 @@ class ConfigPersistence:
                                 if f.strip()
                             ]
                             if hasattr(self.parent, "py_flags_input")
-                            else current_config.get("languages", {})
-                            .get("py", {})
-                            .get("flags", [])
+                            else current_config.get("languages", {}).get("py", {}).get("flags", [])
                         ),
                     },
                     "java": {
@@ -465,15 +428,11 @@ class ConfigPersistence:
                 },
                 "editor_settings": {
                     # Preserve existing settings not shown in UI
-                    "autosave": current_config.get("editor_settings", {}).get(
-                        "autosave", True
-                    ),
+                    "autosave": current_config.get("editor_settings", {}).get("autosave", True),
                     "autosave_interval": current_config.get("editor_settings", {}).get(
                         "autosave_interval", 5
                     ),
-                    "tab_width": current_config.get("editor_settings", {}).get(
-                        "tab_width", 4
-                    ),
+                    "tab_width": current_config.get("editor_settings", {}).get("tab_width", 4),
                     "font_family": current_config.get("editor_settings", {}).get(
                         "font_family", "Consolas"
                     ),
@@ -488,9 +447,7 @@ class ConfigPersistence:
             self.config_manager.save_config(config)
 
             # Success message
-            self.parent.show_success(
-                "Configuration Saved", "Settings saved successfully!"
-            )
+            self.parent.show_success("Configuration Saved", "Settings saved successfully!")
 
         except ConfigError as e:
             self.parent.show_error("Configuration Error", str(e))
@@ -515,14 +472,10 @@ class ConfigPersistence:
                 self.load_config()
 
                 # Show success
-                self.parent.show_success(
-                    "Reset Complete", "Configuration reset to defaults."
-                )
+                self.parent.show_success("Reset Complete", "Configuration reset to defaults.")
 
             except Exception as e:
-                self.parent.show_error(
-                    "Reset Error", "Failed to reset configuration", str(e)
-                )
+                self.parent.show_error("Reset Error", "Failed to reset configuration", str(e))
 
     def show_success(self, title, message):
         """Show success message to user."""

@@ -328,9 +328,9 @@ class PromptTemplates:
                     guidelines=template["guidelines"].format(docs=docs),
                     code=code,
                 )
-            else:
-                return f"{cls.CODE_BASE_PROMPT}\nCreate a {file_type} solution.\n\nCODE:\n{code}"
-        elif action == "validator":
+
+            return f"{cls.CODE_BASE_PROMPT}\nCreate a {file_type} solution.\n\nCODE:\n{code}"
+        if action == "validator":
             # Handle validator template directly
             template = cls.CODE_TEMPLATES["validator"]
             return cls.CODE_BASE.format(
@@ -338,10 +338,10 @@ class PromptTemplates:
                 guidelines=template["guidelines"],
                 code=code,
             )
-        else:
-            template = cls.CODE_TEMPLATES.get(action)
-            if not template:
-                raise ValueError(f"Unknown code action: {action}")
+
+        template = cls.CODE_TEMPLATES.get(action)
+        if not template:
+            raise ValueError(f"Unknown code action: {action}")
 
             return cls.CODE_BASE.format(
                 instruction=template["instruction"].format(**kwargs),

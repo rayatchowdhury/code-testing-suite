@@ -265,9 +265,7 @@ class BaseTestWorker(QObject):
                     "pass_rate": 0.0,
                 }
 
-            passed_tests = sum(
-                1 for result in self.test_results if self._test_passed(result)
-            )
+            passed_tests = sum(1 for result in self.test_results if self._test_passed(result))
             failed_tests = len(self.test_results) - passed_tests
 
             # Calculate timing statistics if available
@@ -281,17 +279,14 @@ class BaseTestWorker(QObject):
                 "passed_tests": passed_tests,
                 "failed_tests": failed_tests,
                 "pass_rate": (
-                    (passed_tests / len(self.test_results)) * 100
-                    if self.test_results
-                    else 0.0
+                    (passed_tests / len(self.test_results)) * 100 if self.test_results else 0.0
                 ),
             }
 
             if execution_times:
                 stats.update(
                     {
-                        "avg_execution_time": sum(execution_times)
-                        / len(execution_times),
+                        "avg_execution_time": sum(execution_times) / len(execution_times),
                         "min_execution_time": min(execution_times),
                         "max_execution_time": max(execution_times),
                         "total_execution_time": sum(execution_times),

@@ -101,9 +101,7 @@ QMessageBox QPushButton {
 """
 
 # Section Builder Info Label Style
-SECTION_INFO_LABEL_STYLE = (
-    f"color: {MATERIAL_COLORS['on_surface_variant']}; font-size: 12px;"
-)
+SECTION_INFO_LABEL_STYLE = f"color: {MATERIAL_COLORS['on_surface_variant']}; font-size: 12px;"
 
 
 # Dynamic styles for status colors in validators

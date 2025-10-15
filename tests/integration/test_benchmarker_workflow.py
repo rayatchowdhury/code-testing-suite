@@ -56,9 +56,7 @@ class TestBasicBenchmarking:
 
         # Compile first
         compilation_done = []
-        benchmarker.compilationFinished.connect(
-            lambda success: compilation_done.append(success)
-        )
+        benchmarker.compilationFinished.connect(lambda success: compilation_done.append(success))
         benchmarker.compile_all()
         qtbot.waitUntil(lambda: len(compilation_done) > 0, timeout=30000)
         assert compilation_done[0] is True, "Compilation should succeed"
@@ -135,9 +133,7 @@ class TestBasicBenchmarking:
 
         # Compile first
         compilation_done = []
-        benchmarker.compilationFinished.connect(
-            lambda success: compilation_done.append(success)
-        )
+        benchmarker.compilationFinished.connect(lambda success: compilation_done.append(success))
         benchmarker.compile_all()
         qtbot.waitUntil(lambda: len(compilation_done) > 0, timeout=30000)
 
@@ -189,16 +185,12 @@ class TestDatabaseIntegration:
 
         # Compile first
         compilation_done = []
-        benchmarker.compilationFinished.connect(
-            lambda success: compilation_done.append(success)
-        )
+        benchmarker.compilationFinished.connect(lambda success: compilation_done.append(success))
         benchmarker.compile_all()
         qtbot.waitUntil(lambda: len(compilation_done) > 0, timeout=30000)
 
         all_tests_done = []
-        benchmarker.allTestsCompleted.connect(
-            lambda passed: all_tests_done.append(passed)
-        )
+        benchmarker.allTestsCompleted.connect(lambda passed: all_tests_done.append(passed))
 
         # Run benchmark tests
         benchmarker.run_benchmark_test(test_count=3, time_limit=2000, memory_limit=256)
@@ -218,25 +210,19 @@ class TestDatabaseIntegration:
         assert result.passed_tests == 3
         assert result.failed_tests == 0
 
-    def test_saves_performance_analysis(
-        self, cpp_benchmarker_workspace, temp_db, qtbot
-    ):
+    def test_saves_performance_analysis(self, cpp_benchmarker_workspace, temp_db, qtbot):
         """Test that performance analysis is saved correctly."""
         benchmarker = Benchmarker(str(cpp_benchmarker_workspace))
         benchmarker.db_manager = temp_db
 
         # Compile first
         compilation_done = []
-        benchmarker.compilationFinished.connect(
-            lambda success: compilation_done.append(success)
-        )
+        benchmarker.compilationFinished.connect(lambda success: compilation_done.append(success))
         benchmarker.compile_all()
         qtbot.waitUntil(lambda: len(compilation_done) > 0, timeout=30000)
 
         all_tests_done = []
-        benchmarker.allTestsCompleted.connect(
-            lambda passed: all_tests_done.append(passed)
-        )
+        benchmarker.allTestsCompleted.connect(lambda passed: all_tests_done.append(passed))
 
         benchmarker.run_benchmark_test(test_count=5, time_limit=2000, memory_limit=256)
         qtbot.waitUntil(lambda: len(all_tests_done) > 0, timeout=30000)
@@ -277,16 +263,12 @@ class TestDatabaseIntegration:
 
         # Compile first
         compilation_done = []
-        benchmarker.compilationFinished.connect(
-            lambda success: compilation_done.append(success)
-        )
+        benchmarker.compilationFinished.connect(lambda success: compilation_done.append(success))
         benchmarker.compile_all()
         qtbot.waitUntil(lambda: len(compilation_done) > 0, timeout=30000)
 
         all_tests_done = []
-        benchmarker.allTestsCompleted.connect(
-            lambda passed: all_tests_done.append(passed)
-        )
+        benchmarker.allTestsCompleted.connect(lambda passed: all_tests_done.append(passed))
 
         benchmarker.run_benchmark_test(test_count=2, time_limit=2000, memory_limit=256)
         qtbot.waitUntil(lambda: len(all_tests_done) > 0, timeout=30000)
@@ -312,9 +294,7 @@ class TestMetricsTracking:
 
         # Compile first
         compilation_done = []
-        benchmarker.compilationFinished.connect(
-            lambda success: compilation_done.append(success)
-        )
+        benchmarker.compilationFinished.connect(lambda success: compilation_done.append(success))
         benchmarker.compile_all()
         qtbot.waitUntil(lambda: len(compilation_done) > 0, timeout=30000)
 
@@ -358,9 +338,7 @@ class TestMetricsTracking:
 
         # Compile first
         compilation_done = []
-        benchmarker.compilationFinished.connect(
-            lambda success: compilation_done.append(success)
-        )
+        benchmarker.compilationFinished.connect(lambda success: compilation_done.append(success))
         benchmarker.compile_all()
         qtbot.waitUntil(lambda: len(compilation_done) > 0, timeout=30000)
 
@@ -393,9 +371,7 @@ class TestMetricsTracking:
 
         # Verify memory tracking
         for test in completed_tests:
-            assert (
-                test["memory"] >= 0
-            ), "Should track memory (may be 0 for very fast tests)"
+            assert test["memory"] >= 0, "Should track memory (may be 0 for very fast tests)"
             assert test["memory_passed"] is True, "Should pass memory limit"
 
 
@@ -408,9 +384,7 @@ class TestIOFileManagement:
 
         # Compile first
         compilation_done = []
-        benchmarker.compilationFinished.connect(
-            lambda success: compilation_done.append(success)
-        )
+        benchmarker.compilationFinished.connect(lambda success: compilation_done.append(success))
         benchmarker.compile_all()
         qtbot.waitUntil(lambda: len(compilation_done) > 0, timeout=30000)
 
@@ -437,9 +411,7 @@ class TestIOFileManagement:
             assert input_file.exists(), f"Input file {i} should exist"
             assert output_file.exists(), f"Output file {i} should exist"
             assert input_file.stat().st_size > 0, f"Input file {i} should have content"
-            assert (
-                output_file.stat().st_size > 0
-            ), f"Output file {i} should have content"
+            assert output_file.stat().st_size > 0, f"Output file {i} should have content"
 
 
 class TestParallelExecution:
@@ -451,9 +423,7 @@ class TestParallelExecution:
 
         # Compile first
         compilation_done = []
-        benchmarker.compilationFinished.connect(
-            lambda success: compilation_done.append(success)
-        )
+        benchmarker.compilationFinished.connect(lambda success: compilation_done.append(success))
         benchmarker.compile_all()
         qtbot.waitUntil(lambda: len(compilation_done) > 0, timeout=30000)
 
@@ -510,9 +480,7 @@ int main() {
         benchmarker = Benchmarker(str(workspace))
 
         compilation_results = []
-        benchmarker.compilationFinished.connect(
-            lambda success: compilation_results.append(success)
-        )
+        benchmarker.compilationFinished.connect(lambda success: compilation_results.append(success))
 
         benchmarker.compile_all()
         qtbot.waitUntil(lambda: len(compilation_results) > 0, timeout=30000)
@@ -553,9 +521,7 @@ int main() {
 
         # Compile first
         compilation_done = []
-        benchmarker.compilationFinished.connect(
-            lambda success: compilation_done.append(success)
-        )
+        benchmarker.compilationFinished.connect(lambda success: compilation_done.append(success))
         benchmarker.compile_all()
         qtbot.waitUntil(lambda: len(compilation_done) > 0, timeout=30000)
 
@@ -589,9 +555,7 @@ int main() {
 class TestCompleteWorkflow:
     """Test complete end-to-end workflow."""
 
-    def test_complete_benchmark_workflow(
-        self, cpp_benchmarker_workspace, temp_db, qtbot
-    ):
+    def test_complete_benchmark_workflow(self, cpp_benchmarker_workspace, temp_db, qtbot):
         """Test full workflow: compile → run → save → retrieve → verify."""
         benchmarker = Benchmarker(str(cpp_benchmarker_workspace))
         benchmarker.db_manager = temp_db
@@ -681,9 +645,7 @@ class TestCompleteWorkflow:
 
         # Verify files snapshot
         snapshot = json.loads(result.files_snapshot)
-        assert (
-            "files" in snapshot or "generator.cpp" in snapshot
-        ), "Should have files in snapshot"
+        assert "files" in snapshot or "generator.cpp" in snapshot, "Should have files in snapshot"
         files_dict = snapshot.get("files", snapshot)  # Support both old and new format
         # Just verify snapshot exists and has the expected structure
         assert (

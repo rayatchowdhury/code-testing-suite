@@ -31,13 +31,6 @@ disable = [
     "R0913",  # too-many-arguments
 ]
 
-[tool.mypy]
-python_version = "3.12"
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = false  # Gradually enable
-ignore_missing_imports = true
-
 [build-system]
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
@@ -82,7 +75,6 @@ dev = [
     "pytest-qt>=4.5.0",
     "black>=24.0.0",
     "isort>=5.12.0",
-    "mypy>=1.8.0",
     "pylint>=3.0.0",
 ]
 

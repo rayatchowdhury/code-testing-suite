@@ -9,7 +9,6 @@ import logging
 import os
 import subprocess
 from abc import ABC, abstractmethod
-from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from src.app.core.tools.base.language_detector import Language
@@ -38,12 +37,10 @@ class BaseLanguageCompiler(ABC):
     @abstractmethod
     def get_language(self) -> Language:
         """Return the language this compiler handles."""
-        pass
 
     @abstractmethod
     def needs_compilation(self) -> bool:
         """Return whether this language requires compilation."""
-        pass
 
     @abstractmethod
     def compile(
@@ -65,7 +62,6 @@ class BaseLanguageCompiler(ABC):
         Returns:
             Tuple[bool, str]: (success, output/error_message)
         """
-        pass
 
     @abstractmethod
     def get_executable_command(self, executable_path: str, **kwargs) -> List[str]:
@@ -79,7 +75,6 @@ class BaseLanguageCompiler(ABC):
         Returns:
             List[str]: Command as list of arguments
         """
-        pass
 
     def get_executable_path(self, source_file: str) -> str:
         """
@@ -98,7 +93,6 @@ class BaseLanguageCompiler(ABC):
     @abstractmethod
     def get_executable_extension(self) -> str:
         """Return the executable file extension for this language."""
-        pass
 
     def validate_environment(self) -> Tuple[bool, str]:
         """
@@ -118,8 +112,8 @@ class BaseLanguageCompiler(ABC):
             )
             if result.returncode == 0:
                 return True, f"{compiler} is available"
-            else:
-                return False, f"{compiler} version check failed"
+
+            return False, f"{compiler} version check failed"
         except FileNotFoundError:
             compiler = self.get_compiler_executable()
             return False, f"{compiler} not found in PATH"
@@ -129,7 +123,6 @@ class BaseLanguageCompiler(ABC):
     @abstractmethod
     def get_compiler_executable(self) -> str:
         """Return the compiler/interpreter executable name."""
-        pass
 
 
 class CppCompiler(BaseLanguageCompiler):
@@ -206,8 +199,8 @@ class CppCompiler(BaseLanguageCompiler):
 
             if result.returncode == 0:
                 return True, f"Successfully compiled {os.path.basename(source_file)}"
-            else:
-                return False, result.stderr or result.stdout
+
+            return False, result.stderr or result.stdout
 
         except subprocess.TimeoutExpired:
             return (
@@ -217,7 +210,7 @@ class CppCompiler(BaseLanguageCompiler):
         except FileNotFoundError:
             return (
                 False,
-                f"Compiler '{compiler}' not found. Please install g++ or update configuration.",
+                f"Compiler '{self.get_compiler_executable()}' not found. Please install C++ compiler or update configuration.",
             )
         except Exception as e:
             return False, f"Compilation error: {str(e)}"
@@ -368,8 +361,8 @@ class JavaCompiler(BaseLanguageCompiler):
 
             if result.returncode == 0:
                 return True, f"Successfully compiled {os.path.basename(source_file)}"
-            else:
-                return False, result.stderr or result.stdout
+
+            return False, result.stderr or result.stdout
 
         except subprocess.TimeoutExpired:
             return (

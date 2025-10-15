@@ -66,12 +66,8 @@ class ConcreteRepository(BaseRepository[SampleEntity]):
 
     def get_all(self, limit: int = 100) -> List[SampleEntity]:
         """Get all entities."""
-        cursor = self._execute_query(
-            f"SELECT id, name FROM test_entities LIMIT ?", (limit,)
-        )
-        return [
-            SampleEntity(id=row["id"], name=row["name"]) for row in cursor.fetchall()
-        ]
+        cursor = self._execute_query(f"SELECT id, name FROM test_entities LIMIT ?", (limit,))
+        return [SampleEntity(id=row["id"], name=row["name"]) for row in cursor.fetchall()]
 
     def delete(self, id: int) -> bool:
         """Delete entity by ID."""
@@ -167,9 +163,7 @@ class TestQueryExecution:
         """Test executing query with parameters."""
         _, mock_cursor = mock_db_connection
 
-        repository._execute_query(
-            "INSERT INTO test_entities (name) VALUES (?)", ("test",)
-        )
+        repository._execute_query("INSERT INTO test_entities (name) VALUES (?)", ("test",))
 
         mock_cursor.execute.assert_called_once_with(
             "INSERT INTO test_entities (name) VALUES (?)", ("test",)
@@ -231,9 +225,7 @@ class TestBulkOperations:
 
         params_list = [("test1",), ("test2",), ("test3",)]
 
-        count = repository._execute_many(
-            "INSERT INTO test_entities (name) VALUES (?)", params_list
-        )
+        count = repository._execute_many("INSERT INTO test_entities (name) VALUES (?)", params_list)
 
         assert count == 3
         mock_cursor.executemany.assert_called_once()
@@ -243,9 +235,7 @@ class TestBulkOperations:
         _, mock_cursor = mock_db_connection
         mock_cursor.rowcount = 0
 
-        count = repository._execute_many(
-            "INSERT INTO test_entities (name) VALUES (?)", []
-        )
+        count = repository._execute_many("INSERT INTO test_entities (name) VALUES (?)", [])
 
         assert count == 0
 
@@ -255,9 +245,7 @@ class TestBulkOperations:
         mock_conn.get_connection.side_effect = DBError("Connection failed")
 
         with pytest.raises(RepositoryError) as exc_info:
-            repository._execute_many(
-                "INSERT INTO test_entities (name) VALUES (?)", [("test",)]
-            )
+            repository._execute_many("INSERT INTO test_entities (name) VALUES (?)", [("test",)])
 
         assert "Bulk query failed" in str(exc_info.value)
 
@@ -267,9 +255,7 @@ class TestBulkOperations:
         mock_cursor.executemany.side_effect = sqlite3.Error("SQL error")
 
         with pytest.raises(RepositoryError) as exc_info:
-            repository._execute_many(
-                "INSERT INTO test_entities (name) VALUES (?)", [("test",)]
-            )
+            repository._execute_many("INSERT INTO test_entities (name) VALUES (?)", [("test",)])
 
         assert "Bulk query failed" in str(exc_info.value)
 

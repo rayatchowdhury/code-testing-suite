@@ -6,7 +6,7 @@ This widget provides input fields for time and memory limits,
 designed to be used across different views (benchmarker, validator, comparator).
 """
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Signal
 from PySide6.QtGui import QIntValidator
 from PySide6.QtWidgets import (
     QGroupBox,
@@ -102,7 +102,7 @@ class LimitsInputWidget(QWidget):
 
         # Main widget - subtle background matching sidebar sections
         self.setStyleSheet(
-            f"""
+            """
             LimitsInputWidget {{
                 background: transparent;
             }}

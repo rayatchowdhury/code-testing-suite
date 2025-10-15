@@ -177,9 +177,7 @@ class TestAPIKeyNetworkValidation:
         mock_urlopen.return_value = mock_response
 
         valid_key = "AIzaSyTest1234567890abcdefghijk"
-        is_valid, message = gemini_config.validate_api_key_network(
-            valid_key, timeout=5.0
-        )
+        is_valid, message = gemini_config.validate_api_key_network(valid_key, timeout=5.0)
 
         # Should be valid (either success or timeout which defaults to valid)
         assert is_valid is True
@@ -194,9 +192,7 @@ class TestAPIKeyNetworkValidation:
         )
 
         valid_format_key = "AIzaSyTest1234567890abcdefghijk"
-        is_valid, message = gemini_config.validate_api_key_network(
-            valid_format_key, timeout=5.0
-        )
+        is_valid, message = gemini_config.validate_api_key_network(valid_format_key, timeout=5.0)
 
         assert is_valid is False
         assert "Invalid API key" in message
@@ -211,9 +207,7 @@ class TestAPIKeyNetworkValidation:
         )
 
         valid_format_key = "AIzaSyTest1234567890abcdefghijk"
-        is_valid, message = gemini_config.validate_api_key_network(
-            valid_format_key, timeout=5.0
-        )
+        is_valid, message = gemini_config.validate_api_key_network(valid_format_key, timeout=5.0)
 
         assert is_valid is True
         assert "Rate limit" in message
@@ -231,9 +225,7 @@ class TestAPIKeyNetworkValidation:
         mock_urlopen.side_effect = slow_response
 
         valid_key = "AIzaSyTest1234567890abcdefghijk"
-        is_valid, message = gemini_config.validate_api_key_network(
-            valid_key, timeout=0.5
-        )
+        is_valid, message = gemini_config.validate_api_key_network(valid_key, timeout=0.5)
 
         # Timeout should result in valid with timeout message
         assert is_valid is True
@@ -245,9 +237,7 @@ class TestAPIKeyNetworkValidation:
         mock_urlopen.side_effect = Exception("Network error")
 
         valid_key = "AIzaSyTest1234567890abcdefghijk"
-        is_valid, message = gemini_config.validate_api_key_network(
-            valid_key, timeout=5.0
-        )
+        is_valid, message = gemini_config.validate_api_key_network(valid_key, timeout=5.0)
 
         assert is_valid is False
         assert "error" in message.lower()
@@ -292,9 +282,7 @@ class TestModelManagement:
         api_key = "AIzaSyTest1234567890abcdefghijk"
         custom_model = "gemini-custom-model"
 
-        is_valid, message = gemini_config.validate_model_selection(
-            api_key, custom_model
-        )
+        is_valid, message = gemini_config.validate_model_selection(api_key, custom_model)
 
         assert is_valid is True
         assert "Custom model" in message
@@ -408,9 +396,7 @@ class TestSaveConfiguration:
 class TestLoadConfiguration:
     """Test load_config method."""
 
-    def test_load_config_success(
-        self, gemini_config, temp_config_file, sample_config_data
-    ):
+    def test_load_config_success(self, gemini_config, temp_config_file, sample_config_data):
         """Test successful configuration load."""
         # Write config file
         with open(temp_config_file, "w") as f:
@@ -502,9 +488,7 @@ class TestConfigMigration:
         assert data["gemini"]["model"] == "old-model"
         assert data["gemini"]["enabled"] is True
 
-    def test_migrate_already_new_format(
-        self, gemini_config, temp_config_file, sample_config_data
-    ):
+    def test_migrate_already_new_format(self, gemini_config, temp_config_file, sample_config_data):
         """Test migration skips if already in new format."""
         # Write new format config
         with open(temp_config_file, "w") as f:
@@ -526,9 +510,7 @@ class TestConfigMigration:
 
     def test_migrate_missing_api_key(self, gemini_config, temp_config_file):
         """Test migration fails when old config has no API key."""
-        old_config = {
-            "ai_settings": {"preferred_model": "old-model", "use_ai_panel": True}
-        }
+        old_config = {"ai_settings": {"preferred_model": "old-model", "use_ai_panel": True}}
         with open(temp_config_file, "w") as f:
             json.dump(old_config, f)
 

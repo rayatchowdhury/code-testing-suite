@@ -45,15 +45,9 @@ class Comparator(BaseRunner):
         if files is None:
             # Use nested comparator directory structure
             files = {
-                "generator": get_workspace_file_path(
-                    workspace_dir, "comparator", "generator.cpp"
-                ),
-                "correct": get_workspace_file_path(
-                    workspace_dir, "comparator", "correct.cpp"
-                ),
-                "test": get_workspace_file_path(
-                    workspace_dir, "comparator", "test.cpp"
-                ),
+                "generator": get_workspace_file_path(workspace_dir, "comparator", "generator.cpp"),
+                "correct": get_workspace_file_path(workspace_dir, "comparator", "correct.cpp"),
+                "test": get_workspace_file_path(workspace_dir, "comparator", "test.cpp"),
             }
 
         # Initialize BaseRunner with comparison test type for nested structure
@@ -96,9 +90,7 @@ class Comparator(BaseRunner):
         if hasattr(worker, "testCompleted"):
             worker.testCompleted.connect(self.testCompleted)
 
-    def _create_test_result(
-        self, all_passed, test_results, passed_tests, failed_tests, total_time
-    ):
+    def _create_test_result(self, all_passed, test_results, passed_tests, failed_tests, total_time):
         """
         Create stress-specific TestResult object.
 
@@ -115,37 +107,28 @@ class Comparator(BaseRunner):
         stress_analysis = {
             "test_count": self.test_count,
             "comparison_summary": {
-                "matching_outputs": sum(
-                    1 for r in test_results if r.get("passed", False)
-                ),
+                "matching_outputs": sum(1 for r in test_results if r.get("passed", False)),
                 "mismatched_outputs": sum(
                     1
                     for r in test_results
                     if not r.get("passed", True) and not r.get("error_details")
                 ),
                 "generator_failures": sum(
-                    1
-                    for r in test_results
-                    if "Generator failed" in r.get("error_details", "")
+                    1 for r in test_results if "Generator failed" in r.get("error_details", "")
                 ),
                 "test_failures": sum(
-                    1
-                    for r in test_results
-                    if "Test solution failed" in r.get("error_details", "")
+                    1 for r in test_results if "Test solution failed" in r.get("error_details", "")
                 ),
                 "correct_failures": sum(
                     1
                     for r in test_results
                     if "Correct solution failed" in r.get("error_details", "")
                 ),
-                "timeouts": sum(
-                    1 for r in test_results if "Timeout" in r.get("error_details", "")
-                ),
+                "timeouts": sum(1 for r in test_results if "Timeout" in r.get("error_details", "")),
             },
             "execution_times": {
                 "avg_generator": (
-                    sum(r.get("generator_time", 0) for r in test_results)
-                    / len(test_results)
+                    sum(r.get("generator_time", 0) for r in test_results) / len(test_results)
                     if test_results
                     else 0
                 ),
@@ -155,14 +138,12 @@ class Comparator(BaseRunner):
                     else 0
                 ),
                 "avg_correct": (
-                    sum(r.get("correct_time", 0) for r in test_results)
-                    / len(test_results)
+                    sum(r.get("correct_time", 0) for r in test_results) / len(test_results)
                     if test_results
                     else 0
                 ),
                 "avg_comparison": (
-                    sum(r.get("comparison_time", 0) for r in test_results)
-                    / len(test_results)
+                    sum(r.get("comparison_time", 0) for r in test_results) / len(test_results)
                     if test_results
                     else 0
                 ),

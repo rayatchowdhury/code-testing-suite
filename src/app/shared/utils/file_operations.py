@@ -1,8 +1,7 @@
 import os
 import shutil
-import stat
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import Optional, Union
 
 from PySide6.QtWidgets import QFileDialog, QMessageBox
 
@@ -46,9 +45,9 @@ class FileOperations:
         """Get file extension based on filter selection"""
         if "C++" in selected_filter:
             return ".cpp"
-        elif "Python" in selected_filter:
+        if "Python" in selected_filter:
             return ".py"
-        elif "Java" in selected_filter:
+        if "Java" in selected_filter:
             return ".java"
         return ""
 
@@ -89,17 +88,13 @@ class FileOperations:
                         return str(file_path), file_path.read_text(encoding="utf-8")
                     except UnicodeDecodeError:
                         try:
-                            return str(file_path), file_path.read_text(
-                                encoding="latin-1"
-                            )
+                            return str(file_path), file_path.read_text(encoding="latin-1")
                         except Exception as e:
                             QMessageBox.critical(
                                 parent, "Error", f"Could not decode file: {str(e)}"
                             )
                     except Exception as e:
-                        QMessageBox.critical(
-                            parent, "Error", f"Could not read file: {str(e)}"
-                        )
+                        QMessageBox.critical(parent, "Error", f"Could not read file: {str(e)}")
                 else:
                     QMessageBox.critical(parent, "Error", "File not found")
         except Exception as e:

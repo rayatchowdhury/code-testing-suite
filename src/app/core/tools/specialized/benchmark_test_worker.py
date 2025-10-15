@@ -20,12 +20,7 @@ import psutil
 from PySide6.QtCore import QObject, Signal, Slot
 
 # Import path helpers for nested I/O file organization
-from src.app.shared.constants.paths import (
-    get_input_file_path,
-    get_inputs_dir,
-    get_output_file_path,
-    get_outputs_dir,
-)
+from src.app.shared.constants.paths import get_input_file_path, get_output_file_path
 from src.app.shared.utils.workspace_utils import ensure_test_type_directory
 
 
@@ -76,9 +71,7 @@ class BenchmarkTestWorker(QObject):
         self.is_running = True
         self.test_results = []  # Store detailed test results
         # Use reasonable default for benchmarking (less workers due to memory monitoring overhead)
-        self.max_workers = max_workers or min(
-            4, max(1, multiprocessing.cpu_count() - 1)
-        )
+        self.max_workers = max_workers or min(4, max(1, multiprocessing.cpu_count() - 1))
         self._results_lock = threading.Lock()  # Thread-safe results access
 
         # Multi-language support: use execution commands if provided, otherwise fall back to executable paths
@@ -280,11 +273,7 @@ class BenchmarkTestWorker(QObject):
                         test_time = time.time() - test_start
 
                         # Calculate test size
-                        test_size = (
-                            len(input_text.strip().split("\n"))
-                            if input_text.strip()
-                            else 0
-                        )
+                        test_size = len(input_text.strip().split("\n")) if input_text.strip() else 0
 
                         return {
                             "test_name": f"Test {test_number}",
@@ -309,8 +298,14 @@ class BenchmarkTestWorker(QObject):
                     # Process finished, use last known memory usage
                     pass
 
-                # Close stdin and get output
-                process.stdin.close()
+                # Get output - don't call communicate() with input since we already wrote it
+                # Just get remaining output from buffers
+                try:
+                    if process.stdin:
+                        process.stdin.close()
+                except Exception:
+                    pass  # Ignore errors if stdin already closed
+
                 stdout, stderr = process.communicate(timeout=5)
 
             except (psutil.NoSuchProcess, psutil.AccessDenied, Exception) as e:
@@ -332,9 +327,7 @@ class BenchmarkTestWorker(QObject):
             # Check process result
             if process.returncode != 0:
                 error_msg = f"Test solution failed with exit code {process.returncode}: {stderr}"
-                return self._create_error_result(
-                    test_number, error_msg, test_time, max_memory_used
-                )
+                return self._create_error_result(test_number, error_msg, test_time, max_memory_used)
 
             # Check if both time and memory limits were respected
             time_passed = test_time <= self.time_limit
@@ -367,20 +360,18 @@ class BenchmarkTestWorker(QObject):
             error_msg = f"Unexpected error in test {test_number}: {str(e)}"
             return self._create_error_result(test_number, error_msg)
 
-    def _get_error_details(
-        self, time_passed: bool, memory_passed: bool, exit_code: int
-    ) -> str:
+    def _get_error_details(self, time_passed: bool, memory_passed: bool, exit_code: int) -> str:
         """Generate appropriate error details based on test results."""
         if exit_code != 0:
             return f"Runtime Error (exit code {exit_code})"
-        elif not time_passed and not memory_passed:
+        if not time_passed and not memory_passed:
             return f"Time Limit Exceeded ({self.time_limit:.2f}s) & Memory Limit Exceeded ({self.memory_limit}MB)"
-        elif not time_passed:
+        if not time_passed:
             return f"Time Limit Exceeded ({self.time_limit:.2f}s)"
-        elif not memory_passed:
+        if not memory_passed:
             return f"Memory Limit Exceeded ({self.memory_limit}MB)"
-        else:
-            return "Accepted"
+
+        return "Accepted"
 
     def _create_error_result(
         self,

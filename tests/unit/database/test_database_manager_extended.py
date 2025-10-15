@@ -133,9 +133,7 @@ class TestSaveOperationsEdgeCases:
 
     def test_save_session_with_none_fields(self, db_manager):
         """Test saving session with None optional fields."""
-        session = Session(
-            session_name="test", open_files=None, active_file=None, project_name=None
-        )
+        session = Session(session_name="test", open_files=None, active_file=None, project_name=None)
 
         session_id = db_manager.save_session(session)
 
@@ -509,9 +507,7 @@ class TestSaveResultErrorPaths:
         with patch.object(db_manager, "connect") as mock_connect:
             mock_conn = MagicMock()
             mock_cursor = MagicMock()
-            mock_cursor.execute.side_effect = sqlite3.IntegrityError(
-                "Constraint violation"
-            )
+            mock_cursor.execute.side_effect = sqlite3.IntegrityError("Constraint violation")
             mock_conn.cursor.return_value = mock_cursor
             mock_connect.return_value = mock_conn
 

@@ -542,9 +542,7 @@ class TestMaintenanceOperations:
         # Add recent data
         recent_ids = []
         for i in range(2):
-            result = (
-                TestResultBuilder().with_timestamp(datetime.now().isoformat()).build()
-            )
+            result = TestResultBuilder().with_timestamp(datetime.now().isoformat()).build()
             recent_id = temp_db.save_test_result(result)
             recent_ids.append(recent_id)
 
@@ -589,8 +587,7 @@ class TestComplexWorkflows:
 
         # Step 2: Create test result with snapshot
         test_details = [
-            {"test_number": i, "passed": i % 2 == 0, "time": 0.1 + i * 0.01}
-            for i in range(10)
+            {"test_number": i, "passed": i % 2 == 0, "time": 0.1 + i * 0.01} for i in range(10)
         ]
 
         result = (

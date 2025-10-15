@@ -8,13 +8,13 @@ PANEL_GRADIENT = f"""
         stop:1 {MATERIAL_COLORS['surface_dim']})
 """
 
-BUTTON_GRADIENT = f"""
+BUTTON_GRADIENT = """
     qlineargradient(x1:0, y1:0, x2:0, y2:1,
         stop:0 #2A333B,
         stop:1 #1E2429)
 """
 
-BUTTON_HOVER_GRADIENT = f"""
+BUTTON_HOVER_GRADIENT = """
     qlineargradient(x1:0, y1:0, x2:0, y2:1,
         stop:0 #21272D,
         stop:1 #171A1E)

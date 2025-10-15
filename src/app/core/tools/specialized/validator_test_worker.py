@@ -21,8 +21,6 @@ from typing import Any, Dict, Optional
 import psutil
 from PySide6.QtCore import QObject, Signal, Slot
 
-from src.app.core.tools.base.base_test_worker import BaseTestWorker
-
 # Import path helpers for nested I/O file organization
 from src.app.shared.constants.paths import get_input_file_path, get_output_file_path
 from src.app.shared.utils.workspace_utils import ensure_test_type_directory
@@ -69,9 +67,7 @@ class ValidatorTestWorker(QObject):
         self.is_running = True  # Flag to control the worker loop
         self.test_results = []  # Store detailed test results for database
         # Use reasonable default: CPU cores - 1, min 1, max 8 (to avoid overwhelming system)
-        self.max_workers = max_workers or min(
-            8, max(1, multiprocessing.cpu_count() - 1)
-        )
+        self.max_workers = max_workers or min(8, max(1, multiprocessing.cpu_count() - 1))
         self._results_lock = threading.Lock()  # Thread-safe results access
 
         # Multi-language support: use execution commands if provided, otherwise fall back to executable paths
@@ -123,8 +119,7 @@ class ValidatorTestWorker(QObject):
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             # Submit all test jobs
             future_to_test = {
-                executor.submit(self._run_single_test, i): i
-                for i in range(1, self.test_count + 1)
+                executor.submit(self._run_single_test, i): i for i in range(1, self.test_count + 1)
             }
 
             # Process completed tests as they finish
@@ -242,9 +237,7 @@ class ValidatorTestWorker(QObject):
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 pass
 
-            generator_stdout, generator_stderr = generator_process.communicate(
-                timeout=10
-            )
+            generator_stdout, generator_stderr = generator_process.communicate(timeout=10)
             generator_time = time.time() - generator_start
 
             if generator_process.returncode != 0:
@@ -292,8 +285,13 @@ class ValidatorTestWorker(QObject):
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 pass
 
-            # Close stdin and get output
-            test_process.stdin.close()
+            # Get output - close stdin safely before communicate
+            try:
+                if test_process.stdin:
+                    test_process.stdin.close()
+            except Exception:
+                pass  # Ignore if already closed
+
             test_stdout, test_stderr = test_process.communicate(timeout=30)
             test_time = time.time() - test_start
 
@@ -360,9 +358,7 @@ class ValidatorTestWorker(QObject):
                 except (psutil.NoSuchProcess, psutil.AccessDenied):
                     pass
 
-                validator_stdout, validator_stderr = validator_process.communicate(
-                    timeout=10
-                )
+                validator_stdout, validator_stderr = validator_process.communicate(timeout=10)
                 validator_time = time.time() - validator_start
                 validator_exit_code = validator_process.returncode
 
@@ -376,18 +372,14 @@ class ValidatorTestWorker(QObject):
                     # Validation failed - wrong answer
                     validation_message = "Wrong Answer"
                     error_details = (
-                        validator_stdout
-                        or validator_stderr
-                        or "Output doesn't match expected"
+                        validator_stdout or validator_stderr or "Output doesn't match expected"
                     )
                     passed = False
                 elif validator_exit_code == 2:
                     # Validation failed - presentation error
                     validation_message = "Presentation Error"
                     error_details = (
-                        validator_stdout
-                        or validator_stderr
-                        or "Output format is incorrect"
+                        validator_stdout or validator_stderr or "Output format is incorrect"
                     )
                     passed = False
                 else:
@@ -429,9 +421,7 @@ class ValidatorTestWorker(QObject):
                     pass
 
         except subprocess.TimeoutExpired as e:
-            error_msg = (
-                f"Timeout in {e.cmd[0] if e.cmd else 'unknown'} after {e.timeout}s"
-            )
+            error_msg = f"Timeout in {e.cmd[0] if e.cmd else 'unknown'} after {e.timeout}s"
             return self._create_error_result(
                 test_number, error_msg, "Timeout", -2, peak_memory_mb=peak_memory_mb
             )

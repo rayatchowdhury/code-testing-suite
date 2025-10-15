@@ -21,9 +21,7 @@ def get_status_label_style(color, weight="bold", size="14px"):
 
 
 # Error title styles
-ERROR_TITLE_STYLE = (
-    f"color: {MATERIAL_COLORS['error']}; font-weight: bold; font-size: 16px;"
-)
+ERROR_TITLE_STYLE = f"color: {MATERIAL_COLORS['error']}; font-weight: bold; font-size: 16px;"
 
 # Status-specific styles
 PRIMARY_BOLD_STYLE = f"color: {MATERIAL_COLORS['primary']}; font-weight: bold;"
@@ -36,9 +34,7 @@ INFO_LABEL_STYLE = f"color: {MATERIAL_COLORS['on_surface_variant']}; font-size: 
 LARGE_ICON_STYLE = "font-size: 48px; margin: 10px;"
 
 # Progress label style
-PROGRESS_LABEL_STYLE = (
-    f"color: {MATERIAL_COLORS['on_surface']}; font-weight: 500; margin-top: 8px;"
-)
+PROGRESS_LABEL_STYLE = f"color: {MATERIAL_COLORS['on_surface']}; font-weight: 500; margin-top: 8px;"
 
 
 # Common style builders

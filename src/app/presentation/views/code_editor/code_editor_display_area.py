@@ -165,7 +165,6 @@ class CodeEditorDisplay(QWidget):
     def save_editor_state(self):
         """Save the state of opened files"""
         # Save state implementation can be added here if needed
-        pass
 
     def getCurrentEditor(self):
         """Get the current editor widget with safety checks"""

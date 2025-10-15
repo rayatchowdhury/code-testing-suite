@@ -95,9 +95,7 @@ class TestLanguageDetectorConfiguration:
 
     def test_merges_custom_config(self):
         """Should merge custom config with defaults."""
-        custom_config = {
-            "languages": {"cpp": {"compiler": "clang++", "std_version": "c++20"}}
-        }
+        custom_config = {"languages": {"cpp": {"compiler": "clang++", "std_version": "c++20"}}}
         detector = LanguageDetector(custom_config)
 
         # Should have merged config
@@ -396,9 +394,7 @@ class TestGetCompilerCommand:
         """Should use custom flags for C++ compilation."""
         detector = LanguageDetector()
         custom_flags = ["-g", "-DDEBUG"]
-        cmd = detector.get_compiler_command(
-            Language.CPP, "test.cpp", custom_flags=custom_flags
-        )
+        cmd = detector.get_compiler_command(Language.CPP, "test.cpp", custom_flags=custom_flags)
 
         assert "-g" in cmd
         assert "-DDEBUG" in cmd
@@ -416,9 +412,7 @@ class TestGetCompilerCommand:
         """Should use custom flags for Python execution."""
         detector = LanguageDetector()
         custom_flags = ["-W", "ignore"]
-        cmd = detector.get_compiler_command(
-            Language.PYTHON, "test.py", custom_flags=custom_flags
-        )
+        cmd = detector.get_compiler_command(Language.PYTHON, "test.py", custom_flags=custom_flags)
 
         assert "-W" in cmd
         assert "ignore" in cmd
@@ -426,9 +420,7 @@ class TestGetCompilerCommand:
     def test_java_compiler_command_with_output(self):
         """Should generate correct Java compiler command."""
         detector = LanguageDetector()
-        cmd = detector.get_compiler_command(
-            Language.JAVA, "Main.java", "build/Main.class"
-        )
+        cmd = detector.get_compiler_command(Language.JAVA, "Main.java", "build/Main.class")
 
         assert "javac" in cmd
         assert "Main.java" in cmd
@@ -551,9 +543,7 @@ class TestMatchesLanguagePatterns:
     def test_matches_java_patterns(self):
         """Should match Java patterns in content."""
         detector = LanguageDetector()
-        java_content = (
-            "public class Main {\n    public static void main(String[] args) {}"
-        )
+        java_content = "public class Main {\n    public static void main(String[] args) {}"
 
         assert detector._matches_language_patterns(java_content, Language.JAVA) is True
 
@@ -562,16 +552,9 @@ class TestMatchesLanguagePatterns:
         detector = LanguageDetector()
         random_content = "just some random text"
 
-        assert (
-            detector._matches_language_patterns(random_content, Language.CPP) is False
-        )
-        assert (
-            detector._matches_language_patterns(random_content, Language.PYTHON)
-            is False
-        )
-        assert (
-            detector._matches_language_patterns(random_content, Language.JAVA) is False
-        )
+        assert detector._matches_language_patterns(random_content, Language.CPP) is False
+        assert detector._matches_language_patterns(random_content, Language.PYTHON) is False
+        assert detector._matches_language_patterns(random_content, Language.JAVA) is False
 
 
 class TestDetectFromContentEdgeCases:

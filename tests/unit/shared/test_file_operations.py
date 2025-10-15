@@ -53,9 +53,7 @@ class TestFileOperationsSave:
         mock_parent = Mock()
 
         # Mock Path.write_text to raise exception
-        with patch(
-            "pathlib.Path.write_text", side_effect=PermissionError("Cannot write")
-        ):
+        with patch("pathlib.Path.write_text", side_effect=PermissionError("Cannot write")):
             result = FileOperations.save_file(
                 str(temp_dir / "test.txt"), "content", parent=mock_parent
             )

@@ -71,9 +71,7 @@ def setup_logging(log_level=logging.DEBUG, log_to_console=True, log_to_file=True
 
     # Log startup message
     root_logger.info("=" * 60)
-    root_logger.info(
-        f"Logging initialized at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-    )
+    root_logger.info(f"Logging initialized at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     root_logger.info(f"Log level: {logging.getLevelName(log_level)}")
     root_logger.info(f"Log directory: {log_dir.absolute()}")
     root_logger.info("=" * 60)
@@ -142,19 +140,13 @@ def setup_migration_logging():
 class DatabaseError(Exception):
     """Custom exception for database operations"""
 
-    pass
-
 
 class MigrationError(Exception):
     """Custom exception for migration operations"""
 
-    pass
-
 
 class ValidationError(Exception):
     """Custom exception for validation failures"""
-
-    pass
 
 
 if __name__ == "__main__":
@@ -182,4 +174,4 @@ if __name__ == "__main__":
     migration_logger.warning("Migration warning test")
 
     print("\n✓ Logging configuration test complete!")
-    print(f"✓ Check logs/ directory for log files")
+    print("✓ Check logs/ directory for log files")
