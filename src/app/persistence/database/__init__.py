@@ -12,11 +12,7 @@ from .connection import DatabaseConnection
 
 # Exceptions
 from .exceptions import ConnectionError as DBConnectionError
-from .exceptions import (
-    DatabaseError,
-    RepositoryError,
-    ValidationError,
-)
+from .exceptions import DatabaseError, RepositoryError, ValidationError
 
 # Models
 from .models import FilesSnapshot, ProjectData, Session, TestResult

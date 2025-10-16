@@ -18,9 +18,7 @@ import pytest
 
 from src.app.persistence.database.connection import DatabaseConnection
 from src.app.persistence.database.exceptions import DatabaseError as DBError
-from src.app.persistence.database.exceptions import (
-    RepositoryError,
-)
+from src.app.persistence.database.exceptions import RepositoryError
 from src.app.persistence.database.repositories.base_repository import BaseRepository
 
 # ============================================================================

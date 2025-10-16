@@ -12,9 +12,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.12', '3.13']
     
     env:
       # Force headless mode for GUI tests
@@ -25,10 +25,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python 3.13
       uses: actions/setup-python@v4
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: '3.13'
         
     - name: Setup virtual display (Linux)
       if: runner.os == 'Linux'
@@ -61,9 +61,9 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/requirements*.txt') }}
+        key: ${{ runner.os }}-pip-3.13-${{ hashFiles('**/requirements*.txt') }}
         restore-keys: |
-          ${{ runner.os }}-pip-${{ matrix.python-version }}-
+          ${{ runner.os }}-pip-3.13-
           ${{ runner.os }}-pip-
           
     - name: Install Python dependencies
@@ -78,24 +78,13 @@ jobs:
         python -c "from PySide6.QtWidgets import QApplication; print('PySide6 imported successfully')"
         python -c "from PySide6.QtTest import QTest; print('QtTest imported successfully')"
         
-    - name: Run unit tests
-      run: |
-        pytest tests/unit/ -v --tb=short --junit-xml=unit-test-results.xml
-        
-    - name: Run E2E tests
-      run: |
-        pytest tests/e2e/ -v --tb=short --junit-xml=e2e-test-results.xml
-        
-    - name: Run integration tests
-      run: |
-        pytest tests/integration/ -v --tb=short --junit-xml=integration-test-results.xml
-        
     - name: Run complete test suite with coverage
+      timeout-minutes: 20
       run: |
-        pytest --cov=src --cov-report=xml --cov-report=html --cov-report=term-missing --cov-fail-under=50 --junit-xml=complete-test-results.xml --durations=10 --tb=short
+        pytest --cov=src --cov-report=xml --cov-report=html --cov-report=term-missing --cov-fail-under=50 --junit-xml=test-results.xml --durations=10 --tb=short -n auto
         
     - name: Generate coverage comment data
-      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+      if: matrix.os == 'ubuntu-latest'
       run: |
         python -c "
         import json
@@ -107,7 +96,7 @@ jobs:
         coverage_pct = float(root.attrib['line-rate']) * 100
         
         # Parse test results
-        test_tree = ET.parse('complete-test-results.xml')
+        test_tree = ET.parse('test-results.xml')
         test_root = test_tree.getroot()
         
         data = {
@@ -124,26 +113,19 @@ jobs:
         print(f'Tests: {data[\"tests\"]} (Failures: {data[\"failures\"]}, Errors: {data[\"errors\"]}, Skipped: {data[\"skipped\"]})')
         " || echo "Could not generate coverage summary"
         
-    - name: Check for flaky tests
-      if: success()
-      continue-on-error: true
-      run: |
-        # Run tests multiple times to detect flaky tests
-        pytest --lf --count=3 --tb=line -q || echo "Flaky test detection completed"
-        
     - name: Upload test results
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: test-results-${{ matrix.os }}-${{ matrix.python-version }}
+        name: test-results-${{ matrix.os }}
         path: |
-          *-test-results.xml
+          test-results.xml
           htmlcov/
           coverage.xml
           coverage-summary.json
           
     - name: Upload coverage to Codecov
-      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+      if: matrix.os == 'ubuntu-latest'
       uses: codecov/codecov-action@v3
       with:
         file: ./coverage.xml
@@ -151,26 +133,6 @@ jobs:
         name: codecov-umbrella
         fail_ci_if_error: false
         verbose: true
-        
-    - name: Coverage regression check
-      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12' && github.event_name == 'pull_request'
-      run: |
-        echo "Checking coverage regression..."
-        python -c "
-        import json
-        try:
-          with open('coverage.json', 'r') as f:
-            data = json.load(f)
-            current_coverage = data['totals']['percent_covered']
-            print(f'Current coverage: {current_coverage:.1f}%')
-            if current_coverage < 50.0:
-              print('❌ Coverage below threshold (50%)')
-              exit(1)
-            else:
-              print('✅ Coverage meets threshold')
-        except Exception as e:
-          print(f'Could not check coverage: {e}')
-        " || echo "Coverage check completed with warnings"
 
   lint-and-format:
     runs-on: ubuntu-latest
@@ -178,18 +140,18 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Set up Python 3.12
+    - name: Set up Python 3.13
       uses: actions/setup-python@v4
       with:
-        python-version: '3.12'
+        python-version: '3.13'
         
     - name: Cache pip packages
       uses: actions/cache@v3
       with:
         path: ~/.cache/pip
-        key: ubuntu-pip-lint-${{ hashFiles('**/requirements-dev.txt') }}
+        key: ubuntu-pip-3.13-lint-${{ hashFiles('**/requirements-dev.txt') }}
         restore-keys: |
-          ubuntu-pip-lint-
+          ubuntu-pip-3.13-lint-
         
     - name: Install linting dependencies
       run: |
@@ -216,29 +178,33 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Set up Python 3.12
+    - name: Set up Python 3.13
       uses: actions/setup-python@v4
       with:
-        python-version: '3.12'
+        python-version: '3.13'
         
     - name: Cache pip packages
       uses: actions/cache@v3
       with:
         path: ~/.cache/pip
-        key: ubuntu-pip-security-${{ hashFiles('**/requirements*.txt') }}
+        key: ubuntu-pip-3.13-security-${{ hashFiles('**/requirements.txt') }}
         restore-keys: |
-          ubuntu-pip-security-
+          ubuntu-pip-3.13-security-
         
     - name: Install security scanning tools
       run: |
         python -m pip install --upgrade pip
         pip install bandit==1.8.0
-        pip install -r requirements.txt
-        pip install -r requirements-dev.txt
         
     - name: Scan code for security issues with Bandit
+      continue-on-error: true
       run: |
-        bandit -r src/ -f json -o bandit-report.json || true
+        bandit -r src/ -f json -o bandit-report.json
+        
+    - name: Display bandit summary
+      if: always()
+      run: |
+        bandit -r src/ || true
         
     - name: Upload security reports
       uses: actions/upload-artifact@v4
@@ -249,6 +215,7 @@ jobs:
   build-test:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         
@@ -256,18 +223,18 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Set up Python 3.12
+    - name: Set up Python 3.13
       uses: actions/setup-python@v4
       with:
-        python-version: '3.12'
+        python-version: '3.13'
         
     - name: Cache pip packages
       uses: actions/cache@v3
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-build-${{ hashFiles('**/requirements.txt') }}
+        key: ${{ runner.os }}-pip-3.13-build-${{ hashFiles('**/requirements.txt') }}
         restore-keys: |
-          ${{ runner.os }}-pip-build-
+          ${{ runner.os }}-pip-3.13-build-
         
     - name: Install dependencies
       run: |
@@ -276,11 +243,15 @@ jobs:
         pip install pyinstaller
         
     - name: Test application startup
+      timeout-minutes: 2
+      continue-on-error: true
       env:
         QT_QPA_PLATFORM: offscreen
       run: |
-        # Test that main application can start without errors
-        timeout 10 python -m src.app || true
+        python -m src.app &
+        sleep 5
+        pkill -f "python -m src.app" || true
+      shell: bash
         
     - name: Build application (Linux/macOS)
       if: runner.os != 'Windows'
@@ -289,13 +260,13 @@ jobs:
           --add-data "src/resources:resources" \
           --distpath dist/ \
           --workpath build/ \
-          --specpath . \
+          --specpath build/ \
           src/app/__main__.py
           
     - name: Build application (Windows)
       if: runner.os == 'Windows'
       run: |
-        pyinstaller --name "CodeTestingSuite" --onedir --windowed --clean --add-data "src/resources;resources" --distpath dist/ --workpath build/ --specpath . src/app/__main__.py
+        pyinstaller --name "CodeTestingSuite" --onedir --windowed --clean --add-data "src/resources;resources" --distpath dist/ --workpath build/ --specpath build/ src/app/__main__.py
         
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4

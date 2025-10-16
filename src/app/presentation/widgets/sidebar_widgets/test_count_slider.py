@@ -8,13 +8,7 @@ with different default configurations for different use cases (validator, compar
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIntValidator
-from PySide6.QtWidgets import (
-    QHBoxLayout,
-    QLineEdit,
-    QSlider,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtWidgets import QHBoxLayout, QLineEdit, QSlider, QVBoxLayout, QWidget
 
 from src.app.presentation.styles.components.test_view_styles import (
     TEST_VIEW_SLIDER_STYLE,
