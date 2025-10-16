@@ -71,7 +71,9 @@ class BenchmarkTestWorker(QObject):
         self.is_running = True
         self.test_results = []  # Store detailed test results
         # Use reasonable default for benchmarking (less workers due to memory monitoring overhead)
-        self.max_workers = max_workers or min(4, max(1, multiprocessing.cpu_count() - 1))
+        self.max_workers = max_workers or min(
+            4, max(1, multiprocessing.cpu_count() - 1)
+        )
         self._results_lock = threading.Lock()  # Thread-safe results access
 
         # Multi-language support: use execution commands if provided, otherwise fall back to executable paths
@@ -257,7 +259,9 @@ class BenchmarkTestWorker(QObject):
                 while process.poll() is None:
                     try:
                         memory_info = ps_process.memory_info()
-                        memory_used_mb = memory_info.rss / (1024 * 1024)  # Convert to MB
+                        memory_used_mb = memory_info.rss / (
+                            1024 * 1024
+                        )  # Convert to MB
                         max_memory_used = max(max_memory_used, memory_used_mb)
                     except (psutil.NoSuchProcess, psutil.AccessDenied):
                         # Process finished
@@ -273,7 +277,11 @@ class BenchmarkTestWorker(QObject):
                         test_time = time.time() - test_start
 
                         # Calculate test size
-                        test_size = len(input_text.strip().split("\n")) if input_text.strip() else 0
+                        test_size = (
+                            len(input_text.strip().split("\n"))
+                            if input_text.strip()
+                            else 0
+                        )
 
                         return {
                             "test_name": f"Test {test_number}",
@@ -322,7 +330,9 @@ class BenchmarkTestWorker(QObject):
             # Check process result
             if process.returncode != 0:
                 error_msg = f"Test solution failed with exit code {process.returncode}: {stderr}"
-                return self._create_error_result(test_number, error_msg, test_time, max_memory_used)
+                return self._create_error_result(
+                    test_number, error_msg, test_time, max_memory_used
+                )
 
             # Check if both time and memory limits were respected
             time_passed = test_time <= self.time_limit
@@ -355,7 +365,9 @@ class BenchmarkTestWorker(QObject):
             error_msg = f"Unexpected error in test {test_number}: {str(e)}"
             return self._create_error_result(test_number, error_msg)
 
-    def _get_error_details(self, time_passed: bool, memory_passed: bool, exit_code: int) -> str:
+    def _get_error_details(
+        self, time_passed: bool, memory_passed: bool, exit_code: int
+    ) -> str:
         """Generate appropriate error details based on test results."""
         if exit_code != 0:
             return f"Runtime Error (exit code {exit_code})"

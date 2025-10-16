@@ -599,7 +599,9 @@ class TestGeminiAIIntegration:
         module._gemini_client = None
 
     @patch("urllib.request.urlopen")
-    def test_full_workflow_with_config(self, mock_urlopen, temp_config_file, valid_config):
+    def test_full_workflow_with_config(
+        self, mock_urlopen, temp_config_file, valid_config
+    ):
         """Test complete workflow from config to response."""
         # Setup mock response
         mock_response = MagicMock()

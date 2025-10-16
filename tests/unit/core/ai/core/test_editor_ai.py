@@ -205,7 +205,9 @@ class TestAIResponse:
 
     @patch("src.app.core.ai.core.editor_ai.is_gemini_available")
     @patch("src.app.core.ai.core.editor_ai.get_gemini_client")
-    def test_get_ai_response_success(self, mock_get_client, mock_available, mock_gemini_client):
+    def test_get_ai_response_success(
+        self, mock_get_client, mock_available, mock_gemini_client
+    ):
         """Test successful AI response."""
         mock_available.return_value = True
         mock_get_client.return_value = mock_gemini_client
@@ -218,7 +220,9 @@ class TestAIResponse:
 
     @patch("src.app.core.ai.core.editor_ai.is_gemini_available")
     @patch("src.app.core.ai.core.editor_ai.get_gemini_client")
-    def test_get_ai_response_client_not_available(self, mock_get_client, mock_available):
+    def test_get_ai_response_client_not_available(
+        self, mock_get_client, mock_available
+    ):
         """Test AI response when client not available."""
         mock_available.return_value = True
         mock_client = Mock()
@@ -380,7 +384,9 @@ class TestCodeActions:
         mock_response.return_value = "Debug suggestions"
 
         editor_ai = EditorAI()
-        result = editor_ai.debug_code("int main() {}", error_message="Segmentation fault")
+        result = editor_ai.debug_code(
+            "int main() {}", error_message="Segmentation fault"
+        )
 
         assert result == "Debug suggestions"
         mock_response.assert_called_once()
@@ -496,7 +502,9 @@ class TestProcessCode:
         mock_response.return_value = "Generated code"
 
         editor_ai = EditorAI()
-        result = editor_ai.process_code("generate", "template", requirements="Sort array")
+        result = editor_ai.process_code(
+            "generate", "template", requirements="Sort array"
+        )
 
         assert result == "Generated code"
 
@@ -530,7 +538,9 @@ class TestProcessCode:
         mock_fallback.return_value = "Fallback response"
 
         with patch("src.app.core.ai.core.editor_ai.PromptTemplates") as mock_templates:
-            mock_templates.get_explanation_prompt.side_effect = Exception("Template error")
+            mock_templates.get_explanation_prompt.side_effect = Exception(
+                "Template error"
+            )
 
             editor_ai = EditorAI()
             result = editor_ai.process_code("explain", "code")
@@ -572,7 +582,9 @@ class TestFallbackProcessing:
         mock_debug.return_value = "Debug info"
 
         editor_ai = EditorAI()
-        result = editor_ai._process_code_fallback("debug", "code", error_message="Error")
+        result = editor_ai._process_code_fallback(
+            "debug", "code", error_message="Error"
+        )
 
         mock_debug.assert_called_with("code", "Error")
 
@@ -594,7 +606,9 @@ class TestFallbackProcessing:
         mock_response.return_value = "Generated"
 
         editor_ai = EditorAI()
-        result = editor_ai._process_code_fallback("generate", "code", requirements="Sort")
+        result = editor_ai._process_code_fallback(
+            "generate", "code", requirements="Sort"
+        )
 
         assert result == "Generated"
 
@@ -628,7 +642,9 @@ class TestEditorAIIntegration:
 
     @patch("src.app.core.ai.core.editor_ai.is_gemini_available")
     @patch("src.app.core.ai.core.editor_ai.get_gemini_client")
-    def test_complete_workflow_explain(self, mock_get_client, mock_available, mock_gemini_client):
+    def test_complete_workflow_explain(
+        self, mock_get_client, mock_available, mock_gemini_client
+    ):
         """Test complete workflow for explain action."""
         mock_available.return_value = True
         mock_get_client.return_value = mock_gemini_client

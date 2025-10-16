@@ -71,7 +71,9 @@ def create_main_window():
         # Use relative import within src.app package
         from src.app.presentation.views.main_window.main_window import MainWindow
 
-        print("Creating MainWindow from src.app.presentation.views.main_window.main_window")
+        print(
+            "Creating MainWindow from src.app.presentation.views.main_window.main_window"
+        )
         return MainWindow()
     except ImportError as e:
         # If relative import fails, try absolute import

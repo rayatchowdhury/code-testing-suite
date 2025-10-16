@@ -180,7 +180,9 @@ class TestCleanupOldData:
 
         # Add data at different ages
         repo.save(
-            ResultBuilder().with_timestamp((datetime.now() - timedelta(days=5)).isoformat()).build()
+            ResultBuilder()
+            .with_timestamp((datetime.now() - timedelta(days=5)).isoformat())
+            .build()
         )
         repo.save(
             ResultBuilder()

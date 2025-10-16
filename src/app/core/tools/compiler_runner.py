@@ -90,7 +90,9 @@ class CompilerWorker(QObject):
 
         # Check if recompilation is needed
         if self._is_executable_up_to_date(filepath, exe_name):
-            self._emit_status(f"✅ {exe_basename} is up-to-date, skipping compilation", "success")
+            self._emit_status(
+                f"✅ {exe_basename} is up-to-date, skipping compilation", "success"
+            )
         else:
             self._emit_status(f"🔨 Compiling {basename} with optimizations...")
 
@@ -113,15 +115,21 @@ class CompilerWorker(QObject):
 
             compile_process.setArguments(optimized_args)
             compile_process.start()
-            compile_process.waitForFinished(15000)  # 15 second timeout for optimized compilation
+            compile_process.waitForFinished(
+                15000
+            )  # 15 second timeout for optimized compilation
 
             if compile_process.exitCode() != 0:
                 error_output = compile_process.readAllStandardError().data().decode()
-                self.error.emit((f"Compilation Error in {basename}:\n{error_output}\n", "error"))
+                self.error.emit(
+                    (f"Compilation Error in {basename}:\n{error_output}\n", "error")
+                )
                 self.finished.emit()
                 return
 
-            self._emit_status("✅ Compilation successful with optimizations!", "success")
+            self._emit_status(
+                "✅ Compilation successful with optimizations!", "success"
+            )
 
         self._emit_status(f"🚀 Running optimized program {exe_basename}...", "info", 2)
         self._emit_status("----------------------------", "info", 2)
@@ -189,14 +197,18 @@ class CompilerWorker(QObject):
         self._error_emitted = False
         error = self.process.readAllStandardError().data().decode()
         output = self.process.readAllStandardOutput().data().decode()
-        basename = os.path.basename(self.current_file) if self.current_file else "unknown"
+        basename = (
+            os.path.basename(self.current_file) if self.current_file else "unknown"
+        )
         full_output = (error + output).lower()
 
         # Check for specific runtime errors
         if any(err in full_output for err in ["floating point", "divide by zero"]):
             self._handle_error("Division by zero detected", basename)
         elif "segmentation fault" in full_output:
-            self._handle_error("Memory access violation", basename, "Segmentation Fault")
+            self._handle_error(
+                "Memory access violation", basename, "Segmentation Fault"
+            )
         elif "abort" in full_output:
             self._handle_error("Program terminated abnormally", basename)
         elif error:
@@ -302,11 +314,15 @@ class CompilerWorker(QObject):
             if exit_status is None:
                 exit_status = self.process.exitStatus()
 
-            basename = os.path.basename(self.current_file) if self.current_file else "unknown"
+            basename = (
+                os.path.basename(self.current_file) if self.current_file else "unknown"
+            )
 
             if exit_code != 0 or exit_status == QProcess.CrashExit:
                 if not hasattr(self, "_error_emitted") or not self._error_emitted:
-                    self._handle_error(f"Program terminated with error code {exit_code}", basename)
+                    self._handle_error(
+                        f"Program terminated with error code {exit_code}", basename
+                    )
             else:
                 self._emit_status("\nProgram finished successfully.", "success")
 
@@ -359,10 +375,16 @@ class CompilerRunner(QObject):
             self.worker.stop_execution()
 
         try:
-            if self.thread and hasattr(self.thread, "isRunning") and self.thread.isRunning():
+            if (
+                self.thread
+                and hasattr(self.thread, "isRunning")
+                and self.thread.isRunning()
+            ):
                 self.thread.quit()
                 if not self.thread.wait(5000):  # Wait up to 5 seconds
-                    logger.warning("Thread did not terminate gracefully, forcing termination")
+                    logger.warning(
+                        "Thread did not terminate gracefully, forcing termination"
+                    )
                     self.thread.terminate()
                     self.thread.wait(1000)  # Wait 1 more second after terminate
 

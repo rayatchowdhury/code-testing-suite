@@ -240,7 +240,9 @@ def list_workspace_files(
         return {}
 
     result = {}
-    test_types = [test_type] if test_type else ["comparator", "validator", "benchmarker"]
+    test_types = (
+        [test_type] if test_type else ["comparator", "validator", "benchmarker"]
+    )
 
     for ttype in test_types:
         test_dir = get_test_type_dir(workspace_dir, ttype)

@@ -93,7 +93,9 @@ class TestAICustomCommandInput:
         signal_spy.assert_not_called()
 
 
-@patch("src.app.presentation.widgets.display_area_widgets.ai_panel.AIPanel._should_show_ai_panel")
+@patch(
+    "src.app.presentation.widgets.display_area_widgets.ai_panel.AIPanel._should_show_ai_panel"
+)
 class TestAIPanelInitialization:
     """Test AI panel initialization."""
 
@@ -136,7 +138,9 @@ class TestAIPanelInitialization:
         assert isinstance(panel.custom_command, AICustomCommandInput)
 
 
-@patch("src.app.presentation.widgets.display_area_widgets.ai_panel.AIPanel._should_show_ai_panel")
+@patch(
+    "src.app.presentation.widgets.display_area_widgets.ai_panel.AIPanel._should_show_ai_panel"
+)
 class TestAIPanelButtons:
     """Test AI panel button creation and configuration."""
 
@@ -186,7 +190,9 @@ class TestAIPanelButtons:
         assert "generate" in panel.action_buttons
 
 
-@patch("src.app.presentation.widgets.display_area_widgets.ai_panel.AIPanel._should_show_ai_panel")
+@patch(
+    "src.app.presentation.widgets.display_area_widgets.ai_panel.AIPanel._should_show_ai_panel"
+)
 class TestAIPanelSignals:
     """Test AI panel signal emission."""
 
@@ -250,7 +256,9 @@ class TestAIPanelSignals:
         assert args[0] == "test command"
 
 
-@patch("src.app.presentation.widgets.display_area_widgets.ai_panel.AIPanel._should_show_ai_panel")
+@patch(
+    "src.app.presentation.widgets.display_area_widgets.ai_panel.AIPanel._should_show_ai_panel"
+)
 class TestAIPanelEnableDisable:
     """Test enabling and disabling AI panel."""
 
@@ -303,7 +311,9 @@ class TestAIPanelEnableDisable:
         assert panel.custom_command.input.isEnabled() is True
 
 
-@patch("src.app.presentation.widgets.display_area_widgets.ai_panel.AIPanel._should_show_ai_panel")
+@patch(
+    "src.app.presentation.widgets.display_area_widgets.ai_panel.AIPanel._should_show_ai_panel"
+)
 class TestAIPanelTypeChange:
     """Test changing panel type."""
 

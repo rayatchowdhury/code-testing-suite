@@ -32,7 +32,9 @@ class TestBenchmarker:
     @pytest.fixture
     def benchmarker(self, workspace_dir):
         """Create Benchmarker instance"""
-        with patch("src.app.core.tools.benchmarker.BaseRunner.__init__", return_value=None):
+        with patch(
+            "src.app.core.tools.benchmarker.BaseRunner.__init__", return_value=None
+        ):
             bench = Benchmarker(workspace_dir)
             bench.workspace_dir = workspace_dir
             bench.files = {
@@ -48,7 +50,9 @@ class TestBenchmarker:
     def test_init_sets_workspace_and_files(self, workspace_dir):
         """Benchmarker should initialize with workspace directory"""
         # Arrange & Act
-        with patch("src.app.core.tools.benchmarker.BaseRunner.__init__", return_value=None):
+        with patch(
+            "src.app.core.tools.benchmarker.BaseRunner.__init__", return_value=None
+        ):
             bench = Benchmarker(workspace_dir)
             bench.workspace_dir = workspace_dir
 
@@ -58,7 +62,9 @@ class TestBenchmarker:
     def test_init_sets_default_limits(self, workspace_dir):
         """Benchmarker should set default time and memory limits"""
         # Arrange & Act
-        with patch("src.app.core.tools.benchmarker.BaseRunner.__init__", return_value=None):
+        with patch(
+            "src.app.core.tools.benchmarker.BaseRunner.__init__", return_value=None
+        ):
             bench = Benchmarker(workspace_dir)
             bench.time_limit = 0
             bench.memory_limit = 0
@@ -351,7 +357,9 @@ class TestBenchmarkerIntegration:
     def test_benchmarker_has_correct_file_paths(self, workspace_dir):
         """Benchmarker should set up correct file paths"""
         # Arrange & Act
-        with patch("src.app.core.tools.benchmarker.BaseRunner.__init__", return_value=None):
+        with patch(
+            "src.app.core.tools.benchmarker.BaseRunner.__init__", return_value=None
+        ):
             bench = Benchmarker(workspace_dir)
 
         # Assert
@@ -361,7 +369,9 @@ class TestBenchmarkerIntegration:
     def test_benchmarker_maintains_api_compatibility(self, workspace_dir):
         """Benchmarker should maintain original API methods"""
         # Arrange
-        with patch("src.app.core.tools.benchmarker.BaseRunner.__init__", return_value=None):
+        with patch(
+            "src.app.core.tools.benchmarker.BaseRunner.__init__", return_value=None
+        ):
             bench = Benchmarker(workspace_dir)
 
         # Assert - check that public API methods exist
@@ -371,7 +381,9 @@ class TestBenchmarkerIntegration:
     def test_create_test_result_handles_empty_results(self, workspace_dir):
         """Should handle empty test results gracefully"""
         # Arrange
-        with patch("src.app.core.tools.benchmarker.BaseRunner.__init__", return_value=None):
+        with patch(
+            "src.app.core.tools.benchmarker.BaseRunner.__init__", return_value=None
+        ):
             bench = Benchmarker(workspace_dir)
             bench.workspace_dir = workspace_dir
             bench.test_count = 0
@@ -429,7 +441,9 @@ class TestBenchmarkCompilerRunner:
         # Arrange
         runner = BenchmarkCompilerRunner(mock_console)
         emitted_signals = []
-        runner.outputAvailable.connect(lambda text, fmt: emitted_signals.append((text, fmt)))
+        runner.outputAvailable.connect(
+            lambda text, fmt: emitted_signals.append((text, fmt))
+        )
 
         # Act
         runner._handle_output_for_benchmark(("Test output", "info"))
@@ -443,7 +457,9 @@ class TestBenchmarkCompilerRunner:
         # Arrange
         runner = BenchmarkCompilerRunner(mock_console)
         emitted_signals = []
-        runner.outputAvailable.connect(lambda text, fmt: emitted_signals.append((text, fmt)))
+        runner.outputAvailable.connect(
+            lambda text, fmt: emitted_signals.append((text, fmt))
+        )
 
         # Act
         runner._handle_output_for_benchmark("Simple string")
@@ -458,7 +474,9 @@ class TestBenchmarkCompilerRunner:
         # Arrange
         runner = BenchmarkCompilerRunner(mock_console)
         emitted_signals = []
-        runner.outputAvailable.connect(lambda text, fmt: emitted_signals.append((text, fmt)))
+        runner.outputAvailable.connect(
+            lambda text, fmt: emitted_signals.append((text, fmt))
+        )
 
         # Act
         runner._handle_error_for_benchmark(("Error occurred", "error"))
@@ -472,7 +490,9 @@ class TestBenchmarkCompilerRunner:
         # Arrange
         runner = BenchmarkCompilerRunner(mock_console)
         emitted_signals = []
-        runner.outputAvailable.connect(lambda text, fmt: emitted_signals.append((text, fmt)))
+        runner.outputAvailable.connect(
+            lambda text, fmt: emitted_signals.append((text, fmt))
+        )
 
         # Act
         runner._handle_error_for_benchmark("Simple error")
@@ -520,7 +540,9 @@ class TestBenchmarkerTestResultAnalysis:
         workspace = tmp_path / "workspace"
         workspace.mkdir()
 
-        with patch("src.app.core.tools.benchmarker.BaseRunner.__init__", return_value=None):
+        with patch(
+            "src.app.core.tools.benchmarker.BaseRunner.__init__", return_value=None
+        ):
             bench = Benchmarker(str(workspace))
             bench.workspace_dir = str(workspace)
             bench.test_count = 5
@@ -596,7 +618,9 @@ class TestBenchmarkerTestResultAnalysis:
         workspace = tmp_path / "workspace"
         workspace.mkdir()
 
-        with patch("src.app.core.tools.benchmarker.BaseRunner.__init__", return_value=None):
+        with patch(
+            "src.app.core.tools.benchmarker.BaseRunner.__init__", return_value=None
+        ):
             bench = Benchmarker(str(workspace))
             bench.workspace_dir = str(workspace)
             bench.test_count = 3
@@ -635,7 +659,9 @@ class TestBenchmarkerTestResultAnalysis:
         workspace = tmp_path / "workspace"
         workspace.mkdir()
 
-        with patch("src.app.core.tools.benchmarker.BaseRunner.__init__", return_value=None):
+        with patch(
+            "src.app.core.tools.benchmarker.BaseRunner.__init__", return_value=None
+        ):
             bench = Benchmarker(str(workspace))
             bench.workspace_dir = str(workspace)
             bench.test_count = 2
@@ -681,7 +707,9 @@ class TestBenchmarkerWorkerConnection:
         workspace = tmp_path / "workspace"
         workspace.mkdir()
 
-        with patch("src.app.core.tools.benchmarker.BaseRunner.__init__", return_value=None):
+        with patch(
+            "src.app.core.tools.benchmarker.BaseRunner.__init__", return_value=None
+        ):
             bench = Benchmarker(str(workspace))
             bench.workspace_dir = str(workspace)
 

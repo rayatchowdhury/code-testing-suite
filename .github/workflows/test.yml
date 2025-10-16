@@ -57,55 +57,21 @@ jobs:
         # Install required system libraries for Qt
         brew install pkg-config
         
-    - name: Get pip cache directory
-      id: pip-cache-dir
-      run: |
-        echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
-      shell: bash
-        
-    - name: Cache pip downloads
+    - name: Cache pip packages
       uses: actions/cache@v3
       with:
-        path: ${{ steps.pip-cache-dir.outputs.dir }}
-        key: ${{ runner.os }}-pip-downloads-${{ hashFiles('**/requirements*.txt') }}
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/requirements*.txt') }}
         restore-keys: |
-          ${{ runner.os }}-pip-downloads-
-          
-    - name: Get Python site-packages path
-      id: site-packages
-      run: |
-        SITE_PACKAGES=$(python -c "import site; print(site.getsitepackages()[0])")
-        echo "path=$SITE_PACKAGES" >> $GITHUB_OUTPUT
-      shell: bash
-          
-    - name: Cache installed packages
-      id: packages-cache
-      uses: actions/cache@v3
-      with:
-        path: ${{ steps.site-packages.outputs.path }}
-        key: ${{ runner.os }}-python-${{ matrix.python-version }}-packages-${{ hashFiles('**/requirements*.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-python-${{ matrix.python-version }}-packages-
-          
-    - name: Check cache status
-      run: |
-        if [ "${{ steps.packages-cache.outputs.cache-hit }}" == "true" ]; then
-          echo "✅ Using cached packages - skipping installation"
-        else
-          echo "📦 Cache miss - will install packages"
-        fi
-      shell: bash
+          ${{ runner.os }}-pip-${{ matrix.python-version }}-
+          ${{ runner.os }}-pip-
           
     - name: Install Python dependencies
-      if: steps.packages-cache.outputs.cache-hit != 'true'
-      timeout-minutes: 20
+      timeout-minutes: 15
       run: |
         python -m pip install --upgrade pip setuptools wheel
-        echo "Installing main dependencies..."
-        pip install -r requirements.txt --timeout=600 --retries=3
-        echo "Installing dev dependencies..."
-        pip install -r requirements-dev.txt --timeout=600 --retries=3
-        echo "Dependencies installed successfully"
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
         
     - name: Verify Qt installation
       run: |
@@ -217,18 +183,32 @@ jobs:
       with:
         python-version: '3.12'
         
+    - name: Cache pip packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ubuntu-pip-lint-${{ hashFiles('**/requirements-dev.txt') }}
+        restore-keys: |
+          ubuntu-pip-lint-
+        
     - name: Install linting dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install black isort
+        pip install black==24.10.0 isort==5.13.2
         
     - name: Check code formatting with Black
       run: |
-        black --check --diff src/ tests/
+        black --check --diff --line-length=88 src/ tests/
         
     - name: Check import sorting with isort
       run: |
-        isort --check-only --diff src/ tests/
+        isort --check-only --diff --profile=black --line-length=88 src/ tests/
+        
+    - name: Run pylint (optional quality check)
+      continue-on-error: true
+      run: |
+        pip install pylint==3.3.1
+        pylint src/ --rcfile=pyproject.toml --exit-zero --output-format=colorized
 
   security-scan:
     runs-on: ubuntu-latest
@@ -241,16 +221,20 @@ jobs:
       with:
         python-version: '3.12'
         
+    - name: Cache pip packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ubuntu-pip-security-${{ hashFiles('**/requirements*.txt') }}
+        restore-keys: |
+          ubuntu-pip-security-
+        
     - name: Install security scanning tools
       run: |
         python -m pip install --upgrade pip
-        pip install safety bandit
+        pip install bandit==1.8.0
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
-        
-    - name: Check for security vulnerabilities in dependencies
-      run: |
-        safety check --json --output safety-report.json || true
         
     - name: Scan code for security issues with Bandit
       run: |
@@ -260,9 +244,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: security-reports
-        path: |
-          safety-report.json
-          bandit-report.json
+        path: bandit-report.json
 
   build-test:
     runs-on: ${{ matrix.os }}
@@ -278,6 +260,14 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: '3.12'
+        
+    - name: Cache pip packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-build-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-build-
         
     - name: Install dependencies
       run: |

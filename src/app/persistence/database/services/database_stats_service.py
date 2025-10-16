@@ -83,7 +83,9 @@ class DatabaseStatsService:
                 "oldest_session": oldest_session,
                 "newest_session": newest_session,
                 "database_size_bytes": db_size,
-                "database_size_mb": (round(db_size / (1024 * 1024), 2) if db_size > 0 else 0),
+                "database_size_mb": (
+                    round(db_size / (1024 * 1024), 2) if db_size > 0 else 0
+                ),
             }
 
             logger.info(
@@ -131,7 +133,9 @@ class DatabaseStatsService:
             type_query += " GROUP BY test_type"
 
             cursor.execute(type_query, params)
-            stats["by_type"] = {row["test_type"]: row["count"] for row in cursor.fetchall()}
+            stats["by_type"] = {
+                row["test_type"]: row["count"] for row in cursor.fetchall()
+            }
 
             # Success rate
             success_query = """

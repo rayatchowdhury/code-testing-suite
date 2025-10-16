@@ -52,7 +52,9 @@ class GeminiConfig:
 
         return True, "Format valid"
 
-    def validate_api_key_network(self, api_key: str, timeout: float = 3.0) -> Tuple[bool, str]:
+    def validate_api_key_network(
+        self, api_key: str, timeout: float = 3.0
+    ) -> Tuple[bool, str]:
         """Validate API key with network test."""
         # First check format
         format_valid, format_msg = self.validate_api_key_format(api_key)
@@ -69,7 +71,9 @@ class GeminiConfig:
 
                 # Test API endpoint
                 url = f"https://generativelanguage.googleapis.com/v1beta/models?key={api_key}"
-                req = urllib.request.Request(url, headers={"User-Agent": "CodeTestingSuite/1.0"})
+                req = urllib.request.Request(
+                    url, headers={"User-Agent": "CodeTestingSuite/1.0"}
+                )
 
                 with urllib.request.urlopen(req, timeout=10) as response:
                     if response.status == 200:
@@ -119,7 +123,9 @@ class GeminiConfig:
             "gemini-2.5-flash-lite",
         ]
 
-    def validate_model_selection(self, api_key: str, model_name: str) -> Tuple[bool, str]:
+    def validate_model_selection(
+        self, api_key: str, model_name: str
+    ) -> Tuple[bool, str]:
         """Validate that the selected model works with the API key."""
         if not model_name:
             return False, "No model selected"
@@ -132,7 +138,9 @@ class GeminiConfig:
         # Allow custom models
         return True, f"Custom model: {model_name}"
 
-    def save_config(self, api_key: str, model_name: str = None, enabled: bool = True) -> bool:
+    def save_config(
+        self, api_key: str, model_name: str = None, enabled: bool = True
+    ) -> bool:
         """Save configuration to JSON file."""
         if not self.config_file:
             return False
@@ -142,7 +150,9 @@ class GeminiConfig:
             model_name = self.get_default_model()
 
         try:
-            config_data = {"gemini": {"api_key": api_key, "model": model_name, "enabled": enabled}}
+            config_data = {
+                "gemini": {"api_key": api_key, "model": model_name, "enabled": enabled}
+            }
 
             # Try to load existing config and update
             try:

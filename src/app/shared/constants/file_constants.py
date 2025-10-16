@@ -75,7 +75,8 @@ def get_source_filename(role: str, language: str) -> str:
     ext = LANGUAGE_EXTENSIONS.get(language)
     if not ext:
         raise ValueError(
-            f"Unknown language: {language}. " f"Supported: {list(LANGUAGE_EXTENSIONS.keys())}"
+            f"Unknown language: {language}. "
+            f"Supported: {list(LANGUAGE_EXTENSIONS.keys())}"
         )
 
     # Java uses capitalized class names
@@ -128,7 +129,9 @@ def get_executable_name(role: str, language: str) -> str:
     return f"{role}{exec_ext}"
 
 
-def get_source_file_path(workspace_dir: str, test_type: str, role: str, language: str) -> str:
+def get_source_file_path(
+    workspace_dir: str, test_type: str, role: str, language: str
+) -> str:
     """
     Get full path for a source file in workspace.
 
@@ -153,7 +156,9 @@ def get_source_file_path(workspace_dir: str, test_type: str, role: str, language
     return os.path.join(test_dir, filename)
 
 
-def get_executable_path(workspace_dir: str, test_type: str, role: str, language: str) -> str:
+def get_executable_path(
+    workspace_dir: str, test_type: str, role: str, language: str
+) -> str:
     """
     Get full path for an executable file in workspace.
 

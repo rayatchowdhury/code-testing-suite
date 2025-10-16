@@ -133,7 +133,9 @@ class EditorTabWidget(QWidget):
         self.tab_widget.setTabToolTip(index, tooltip)
 
         # Determine if file was deleted
-        file_deleted = editor.currentFilePath and not os.path.exists(editor.currentFilePath)
+        file_deleted = editor.currentFilePath and not os.path.exists(
+            editor.currentFilePath
+        )
 
         if file_deleted:
             title = f"[Deleted] {os.path.basename(editor.currentFilePath)}"

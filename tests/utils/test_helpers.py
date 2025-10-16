@@ -66,7 +66,9 @@ class WorkspaceHelper:
     """Helper for workspace-related tests."""
 
     @staticmethod
-    def create_test_workspace(base_dir: Path, test_type: str = "comparator") -> Dict[str, Path]:
+    def create_test_workspace(
+        base_dir: Path, test_type: str = "comparator"
+    ) -> Dict[str, Path]:
         """
         Create a test workspace with all required directories.
 
@@ -96,7 +98,9 @@ class WorkspaceHelper:
         """
         workspaces = {}
         for test_type in ["comparator", "validator", "benchmarker"]:
-            workspaces[test_type] = WorkspaceHelper.create_test_workspace(base_dir, test_type)
+            workspaces[test_type] = WorkspaceHelper.create_test_workspace(
+                base_dir, test_type
+            )
         return workspaces
 
     @staticmethod
@@ -128,7 +132,9 @@ class ProcessHelper:
         start = time.time()
         yield
         elapsed = time.time() - start
-        assert elapsed < seconds, f"Operation took {elapsed:.2f}s, expected < {seconds}s"
+        assert (
+            elapsed < seconds
+        ), f"Operation took {elapsed:.2f}s, expected < {seconds}s"
 
     @staticmethod
     def create_temp_executable(directory: Path, name: str = "test") -> Path:
@@ -145,7 +151,9 @@ class ProcessHelper:
         return exe_path
 
     @staticmethod
-    def create_simple_executable(directory: Path, name: str, language: str = "cpp") -> Path:
+    def create_simple_executable(
+        directory: Path, name: str, language: str = "cpp"
+    ) -> Path:
         """
         Create a simple executable that echoes input.
 

@@ -545,7 +545,9 @@ class TestSignalEmission:
         worker = ConcreteTestWorker("/workspace", {}, 3)
 
         signals = []
-        worker.testStarted.connect(lambda current, total: signals.append((current, total)))
+        worker.testStarted.connect(
+            lambda current, total: signals.append((current, total))
+        )
 
         worker.run_tests()
 

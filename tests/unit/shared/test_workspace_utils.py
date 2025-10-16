@@ -292,7 +292,9 @@ class TestListWorkspaceFiles:
 
         # Should not include 'inputs' or 'outputs' directories
         assert all(
-            "inputs" not in f and "outputs" not in f for files in result.values() for f in files
+            "inputs" not in f and "outputs" not in f
+            for files in result.values()
+            for f in files
         )
 
 

@@ -41,12 +41,12 @@ def pytest_configure(config):
 def pytest_runtest_teardown(item, nextitem):
     """Clean up Qt resources after each test to prevent segmentation faults."""
     try:
-        from PySide6.QtWidgets import QApplication
         from PySide6.QtCore import QCoreApplication
+        from PySide6.QtWidgets import QApplication
 
         # Get current app instance
         app = QApplication.instance() or QCoreApplication.instance()
-        
+
         # Process events to clean up before moving to next test
         if app is not None:
             try:

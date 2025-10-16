@@ -190,7 +190,9 @@ class TestExecuteQuery:
 
     def test_executes_delete_query(self, populated_repository):
         """Should execute DELETE query."""
-        cursor = populated_repository._execute_query("DELETE FROM test_entities WHERE id = ?", (1,))
+        cursor = populated_repository._execute_query(
+            "DELETE FROM test_entities WHERE id = ?", (1,)
+        )
 
         assert cursor.rowcount == 1
 
@@ -271,7 +273,9 @@ class TestExecuteMany:
 
         # Force an error by using non-existent table
         with pytest.raises(RepositoryError):
-            repository._execute_query("INSERT INTO nonexistent_table VALUES (?, ?)", ("a", "b"))
+            repository._execute_query(
+                "INSERT INTO nonexistent_table VALUES (?, ?)", ("a", "b")
+            )
 
     def test_logs_batch_size_on_error(self, repository, caplog):
         """Should log batch size when bulk operation fails."""
@@ -357,7 +361,9 @@ class TestHelperMethods:
 
     def test_count_with_complex_where_clause(self, populated_repository):
         """Should handle complex WHERE clauses."""
-        count = populated_repository.count("test_entities", "value > ? AND value < ?", (10, 40))
+        count = populated_repository.count(
+            "test_entities", "value > ? AND value < ?", (10, 40)
+        )
 
         assert count == 2  # entity_2 (20) and entity_3 (30)
 

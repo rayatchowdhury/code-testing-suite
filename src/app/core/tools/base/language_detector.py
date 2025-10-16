@@ -164,7 +164,9 @@ class LanguageDetector:
 
         return language
 
-    def detect_from_content(self, content: str, hint_extension: Optional[str] = None) -> Language:
+    def detect_from_content(
+        self, content: str, hint_extension: Optional[str] = None
+    ) -> Language:
         """
         Detect language from file content using pattern matching.
 
@@ -191,7 +193,9 @@ class LanguageDetector:
         # Try all language patterns
         scores = {}
         for language, patterns in self.CONTENT_PATTERNS.items():
-            score = sum(1 for pattern in patterns if re.search(pattern, content, re.MULTILINE))
+            score = sum(
+                1 for pattern in patterns if re.search(pattern, content, re.MULTILINE)
+            )
             scores[language] = score
 
         # Return language with highest score
@@ -207,7 +211,9 @@ class LanguageDetector:
         patterns = self.CONTENT_PATTERNS.get(language, [])
         return any(re.search(pattern, content, re.MULTILINE) for pattern in patterns)
 
-    def detect_language(self, file_path: str, content: Optional[str] = None) -> Language:
+    def detect_language(
+        self, file_path: str, content: Optional[str] = None
+    ) -> Language:
         """
         Detect language using extension first, then content as fallback.
 

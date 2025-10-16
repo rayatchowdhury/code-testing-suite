@@ -109,12 +109,16 @@ class MainWindowContent(SidebarWindowBase):
     def _setup_display_area(self) -> None:
         """Create and configure the display area"""
         self.display_area = DisplayArea()
-        QTimer.singleShot(MainWindowConfig.CONTENT_INIT_DELAY, self._init_content_widget)
+        QTimer.singleShot(
+            MainWindowConfig.CONTENT_INIT_DELAY, self._init_content_widget
+        )
 
     def _setup_layout(self) -> None:
         """Setup the main layout with splitter"""
         self.setup_splitter(self.sidebar, self.display_area)
-        QTimer.singleShot(MainWindowConfig.SPLITTER_UPDATE_DELAY, self.update_splitter_sizes)
+        QTimer.singleShot(
+            MainWindowConfig.SPLITTER_UPDATE_DELAY, self.update_splitter_sizes
+        )
 
     def _connect_signals(self) -> None:
         """Connect all necessary signals"""

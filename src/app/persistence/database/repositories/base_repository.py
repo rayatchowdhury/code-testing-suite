@@ -95,7 +95,9 @@ class BaseRepository(ABC, Generic[T]):
                 f"Query failed in {self.__class__.__name__}: {query_preview} | "
                 f"Error: {e} | Params: {params}"
             )
-            raise RepositoryError(f"Database query failed in {self.__class__.__name__}: {e}") from e
+            raise RepositoryError(
+                f"Database query failed in {self.__class__.__name__}: {e}"
+            ) from e
         except sqlite3.Error as e:
             # Direct SQLite error (shouldn't happen with context manager)
             query_preview = query[:100] + "..." if len(query) > 100 else query
@@ -103,10 +105,14 @@ class BaseRepository(ABC, Generic[T]):
                 f"Query failed in {self.__class__.__name__}: {query_preview} | "
                 f"Error: {e} | Params: {params}"
             )
-            raise RepositoryError(f"Database query failed in {self.__class__.__name__}: {e}") from e
+            raise RepositoryError(
+                f"Database query failed in {self.__class__.__name__}: {e}"
+            ) from e
         except Exception as e:
             logger.error(f"Unexpected error in {self.__class__.__name__}: {e}")
-            raise RepositoryError(f"Unexpected error during query execution: {e}") from e
+            raise RepositoryError(
+                f"Unexpected error during query execution: {e}"
+            ) from e
 
     def _execute_many(self, query: str, params_list: List[tuple]) -> int:
         """
@@ -147,7 +153,9 @@ class BaseRepository(ABC, Generic[T]):
                 f"Bulk query failed in {self.__class__.__name__}: {query_preview} | "
                 f"Error: {e} | Batch size: {len(params_list)}"
             )
-            raise RepositoryError(f"Bulk query failed in {self.__class__.__name__}: {e}") from e
+            raise RepositoryError(
+                f"Bulk query failed in {self.__class__.__name__}: {e}"
+            ) from e
         except sqlite3.Error as e:
             # Direct SQLite error (shouldn't happen with context manager)
             query_preview = query[:100] + "..." if len(query) > 100 else query
@@ -155,7 +163,9 @@ class BaseRepository(ABC, Generic[T]):
                 f"Bulk query failed in {self.__class__.__name__}: {query_preview} | "
                 f"Error: {e} | Batch size: {len(params_list)}"
             )
-            raise RepositoryError(f"Bulk query failed in {self.__class__.__name__}: {e}") from e
+            raise RepositoryError(
+                f"Bulk query failed in {self.__class__.__name__}: {e}"
+            ) from e
 
     # ========================================================================
     # Abstract Methods - Must be implemented by subclasses

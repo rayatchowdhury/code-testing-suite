@@ -150,7 +150,9 @@ class EditorAI:
             elif action == "debug":
                 error_message = kwargs.get("error_message", "")
                 if error_message:
-                    prompt = f"Debug this code with error: {error_message}\n\nCode:\n{code}"
+                    prompt = (
+                        f"Debug this code with error: {error_message}\n\nCode:\n{code}"
+                    )
                 else:
                     prompt = PromptTemplates.get_explanation_prompt("issues", code)
             elif action == "document":
@@ -194,14 +196,14 @@ class EditorAI:
             return self.generate_documentation(code)
         if action == "generate":
             requirements = kwargs.get("requirements", "Generate code")
-            prompt = (
-                f"Generate code based on requirements: {requirements}\n\nReference code:\n{code}"
-            )
+            prompt = f"Generate code based on requirements: {requirements}\n\nReference code:\n{code}"
             return self._get_ai_response(prompt) or "❌ Failed to generate code."
         if action == "custom":
             command = kwargs.get("command", "Analyze this code")
             prompt = f"{command}\n\nCode:\n{code}"
-            return self._get_ai_response(prompt) or "❌ Failed to process custom command."
+            return (
+                self._get_ai_response(prompt) or "❌ Failed to process custom command."
+            )
 
         return f"❌ Unknown action: {action}"
 
@@ -233,7 +235,9 @@ class EditorAI:
 
         return self._get_ai_response(prompt) or "❌ Failed to suggest optimizations."
 
-    def debug_code(self, code: str, error_message: str = "", language: str = "cpp") -> str:
+    def debug_code(
+        self, code: str, error_message: str = "", language: str = "cpp"
+    ) -> str:
         """Help debug issues in the given code."""
         if not self.is_available():
             return "❌ AI service not available. Please configure your Gemini API key."

@@ -163,7 +163,10 @@ class SidebarWindowBase(QWidget):
             return
 
         # Store original content for restoration (only if not already stored)
-        if not hasattr(self, "_original_display_content") or self._original_display_content is None:
+        if (
+            not hasattr(self, "_original_display_content")
+            or self._original_display_content is None
+        ):
             layout = self.display_area.layout()
             if layout and layout.count() > 0:
                 self._original_display_content = layout.itemAt(0).widget()
@@ -202,7 +205,10 @@ class SidebarWindowBase(QWidget):
                 current_widget.hide()
 
         # Restore original display content
-        if hasattr(self, "_original_display_content") and self._original_display_content:
+        if (
+            hasattr(self, "_original_display_content")
+            and self._original_display_content
+        ):
             self.display_area.layout().addWidget(self._original_display_content)
             self._original_display_content.show()
 
@@ -222,10 +228,14 @@ class SidebarWindowBase(QWidget):
 
         try:
             # Connect to view lifecycle methods
-            if hasattr(worker, "testStarted") and hasattr(status_view, "on_test_running"):
+            if hasattr(worker, "testStarted") and hasattr(
+                status_view, "on_test_running"
+            ):
                 worker.testStarted.connect(status_view.on_test_running)
 
-            if hasattr(worker, "testCompleted") and hasattr(status_view, "on_test_completed"):
+            if hasattr(worker, "testCompleted") and hasattr(
+                status_view, "on_test_completed"
+            ):
                 worker.testCompleted.connect(status_view.on_test_completed)
 
             if hasattr(worker, "allTestsCompleted") and hasattr(

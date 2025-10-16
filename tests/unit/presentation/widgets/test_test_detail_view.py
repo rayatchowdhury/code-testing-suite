@@ -117,7 +117,8 @@ class TestComparatorDetailDialog:
 
         # One should contain correct output
         expected_found = any(
-            "3" in edit.toPlainText() and edit.toPlainText().strip() == "3" for edit in text_edits
+            "3" in edit.toPlainText() and edit.toPlainText().strip() == "3"
+            for edit in text_edits
         )
         assert expected_found
 
@@ -138,7 +139,8 @@ class TestComparatorDetailDialog:
 
         # One should contain test output
         actual_found = any(
-            "5" in edit.toPlainText() and edit.toPlainText().strip() == "5" for edit in text_edits
+            "5" in edit.toPlainText() and edit.toPlainText().strip() == "5"
+            for edit in text_edits
         )
         assert actual_found
 
@@ -239,7 +241,8 @@ class TestValidatorDetailDialog:
         text_edits = dialog.findChildren(QTextEdit)
         # Should have validator log with success message
         log_found = any(
-            "Valid output" in edit.toPlainText() or "correct" in edit.toPlainText().lower()
+            "Valid output" in edit.toPlainText()
+            or "correct" in edit.toPlainText().lower()
             for edit in text_edits
         )
         assert log_found
@@ -262,7 +265,8 @@ class TestValidatorDetailDialog:
         text_edits = dialog.findChildren(QTextEdit)
         # Should have error details in log
         error_found = any(
-            "Wrong Answer" in edit.toPlainText() or "Expected 5, got 3" in edit.toPlainText()
+            "Wrong Answer" in edit.toPlainText()
+            or "Expected 5, got 3" in edit.toPlainText()
             for edit in text_edits
         )
         assert error_found
@@ -308,7 +312,8 @@ class TestValidatorDetailDialog:
         text_edits = dialog.findChildren(QTextEdit)
         # Should mention exit code 2 or Presentation Error
         code_found = any(
-            "Exit Code: 2" in edit.toPlainText() or "Presentation Error" in edit.toPlainText()
+            "Exit Code: 2" in edit.toPlainText()
+            or "Presentation Error" in edit.toPlainText()
             for edit in text_edits
         )
         assert code_found
@@ -348,7 +353,9 @@ class TestBenchmarkerDetailDialog:
         qtbot.addWidget(dialog)
 
         text_edits = dialog.findChildren(QTextEdit)
-        input_found = any("benchmark input" in edit.toPlainText() for edit in text_edits)
+        input_found = any(
+            "benchmark input" in edit.toPlainText() for edit in text_edits
+        )
         assert input_found
 
     def test_displays_output_data_section(self, qtbot):
@@ -365,7 +372,9 @@ class TestBenchmarkerDetailDialog:
         qtbot.addWidget(dialog)
 
         text_edits = dialog.findChildren(QTextEdit)
-        output_found = any("benchmark output" in edit.toPlainText() for edit in text_edits)
+        output_found = any(
+            "benchmark output" in edit.toPlainText() for edit in text_edits
+        )
         assert output_found
 
     def test_displays_performance_summary(self, qtbot):
@@ -416,7 +425,9 @@ class TestDetailDialogCommonFeatures:
         qtbot.addWidget(dialog)
 
         close_buttons = dialog.findChildren(QPushButton)
-        close_button = next((btn for btn in close_buttons if "Close" in btn.text()), None)
+        close_button = next(
+            (btn for btn in close_buttons if "Close" in btn.text()), None
+        )
 
         assert close_button is not None
         assert close_button.isEnabled()
@@ -434,7 +445,11 @@ class TestDetailDialogCommonFeatures:
 
             # Should display time and memory somewhere
             labels = dialog.findChildren(QLabel)
-            has_time = any("0.1" in label.text() or "Time" in label.text() for label in labels)
-            has_memory = any("32" in label.text() or "Memory" in label.text() for label in labels)
+            has_time = any(
+                "0.1" in label.text() or "Time" in label.text() for label in labels
+            )
+            has_memory = any(
+                "32" in label.text() or "Memory" in label.text() for label in labels
+            )
 
             assert has_time or has_memory  # At least one metric displayed

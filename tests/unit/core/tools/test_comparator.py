@@ -76,9 +76,13 @@ def mock_database():
 class TestComparatorInitialization:
     """Test Comparator initialization and setup."""
 
-    def test_init_with_default_files(self, temp_workspace, mock_compiler, mock_database):
+    def test_init_with_default_files(
+        self, temp_workspace, mock_compiler, mock_database
+    ):
         """Should initialize with default nested file structure."""
-        with patch("src.app.shared.constants.paths.get_workspace_file_path") as mock_path:
+        with patch(
+            "src.app.shared.constants.paths.get_workspace_file_path"
+        ) as mock_path:
             mock_path.side_effect = (
                 lambda workspace, test_type, filename: f"{workspace}/{test_type}/{filename}"
             )
@@ -99,11 +103,15 @@ class TestComparatorInitialization:
         assert comparator.workspace_dir == str(temp_workspace)
         assert comparator.test_type == "comparison"
 
-    def test_init_with_config(self, temp_workspace, comparator_files, mock_compiler, mock_database):
+    def test_init_with_config(
+        self, temp_workspace, comparator_files, mock_compiler, mock_database
+    ):
         """Should accept configuration dictionary."""
         config = {"language": "python", "timeout": 5.0, "max_memory": 512}
 
-        comparator = Comparator(str(temp_workspace), files=comparator_files, config=config)
+        comparator = Comparator(
+            str(temp_workspace), files=comparator_files, config=config
+        )
 
         assert comparator.workspace_dir == str(temp_workspace)
 
@@ -211,7 +219,9 @@ class TestComparatorWorkerCreation:
     ):
         """Should pass execution commands from compiler."""
         comparator = Comparator(str(temp_workspace), files=comparator_files)
-        mock_compiler.get_execution_command.side_effect = lambda name: f"python {name}.py"
+        mock_compiler.get_execution_command.side_effect = (
+            lambda name: f"python {name}.py"
+        )
 
         worker = comparator._create_test_worker(test_count=5)
 

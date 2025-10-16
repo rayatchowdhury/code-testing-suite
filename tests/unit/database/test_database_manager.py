@@ -106,15 +106,21 @@ class TestDatabaseManagerInitialization:
         cursor = connection.cursor()
 
         # Check test_results table
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='test_results'")
+        cursor.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='test_results'"
+        )
         assert cursor.fetchone() is not None
 
         # Check sessions table
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='sessions'")
+        cursor.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='sessions'"
+        )
         assert cursor.fetchone() is not None
 
         # Check projects table
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='projects'")
+        cursor.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='projects'"
+        )
         assert cursor.fetchone() is not None
 
         db_manager.close()
@@ -484,7 +490,11 @@ class TestFilesSnapshot:
         assert isinstance(snapshot, FilesSnapshot)
         json_str = snapshot.to_json()
         # Check that files are in snapshot
-        assert "test.cpp" in json_str or "correct.cpp" in json_str or "generator.cpp" in json_str
+        assert (
+            "test.cpp" in json_str
+            or "correct.cpp" in json_str
+            or "generator.cpp" in json_str
+        )
 
     def test_handles_missing_workspace(self, tmp_path):
         """Should handle nonexistent workspace gracefully."""

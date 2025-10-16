@@ -82,7 +82,9 @@ class TestCppCompiler:
     @patch("subprocess.run")
     def test_compile_success(self, mock_run, compiler, tmp_path):
         """Should successfully compile C++ source file."""
-        mock_run.return_value = CompletedProcess(args=["g++"], returncode=0, stdout="", stderr="")
+        mock_run.return_value = CompletedProcess(
+            args=["g++"], returncode=0, stdout="", stderr=""
+        )
 
         source_file = str(tmp_path / "test.cpp")
         success, message = compiler.compile(source_file)
@@ -94,7 +96,9 @@ class TestCppCompiler:
     @patch("subprocess.run")
     def test_compile_with_custom_output(self, mock_run, compiler, tmp_path):
         """Should compile with custom output file."""
-        mock_run.return_value = CompletedProcess(args=["g++"], returncode=0, stdout="", stderr="")
+        mock_run.return_value = CompletedProcess(
+            args=["g++"], returncode=0, stdout="", stderr=""
+        )
 
         source_file = str(tmp_path / "test.cpp")
         output_file = str(tmp_path / "custom_name.exe")
@@ -110,7 +114,9 @@ class TestCppCompiler:
     @patch("subprocess.run")
     def test_compile_with_custom_flags(self, mock_run, compiler, tmp_path):
         """Should use custom compiler flags."""
-        mock_run.return_value = CompletedProcess(args=["g++"], returncode=0, stdout="", stderr="")
+        mock_run.return_value = CompletedProcess(
+            args=["g++"], returncode=0, stdout="", stderr=""
+        )
 
         source_file = str(tmp_path / "test.cpp")
         custom_flags = ["-Wall", "-Werror", "-pedantic"]
@@ -124,7 +130,9 @@ class TestCppCompiler:
     @patch("subprocess.run")
     def test_compile_default_flags(self, mock_run, compiler, tmp_path):
         """Should use default optimization and standard version."""
-        mock_run.return_value = CompletedProcess(args=["g++"], returncode=0, stdout="", stderr="")
+        mock_run.return_value = CompletedProcess(
+            args=["g++"], returncode=0, stdout="", stderr=""
+        )
 
         source_file = str(tmp_path / "test.cpp")
         compiler.compile(source_file)
@@ -329,7 +337,9 @@ class TestJavaCompiler:
     @patch("subprocess.run")
     def test_compile_success(self, mock_run, compiler, tmp_path):
         """Should successfully compile Java source file."""
-        mock_run.return_value = CompletedProcess(args=["javac"], returncode=0, stdout="", stderr="")
+        mock_run.return_value = CompletedProcess(
+            args=["javac"], returncode=0, stdout="", stderr=""
+        )
 
         source_file = str(tmp_path / "Main.java")
         success, message = compiler.compile(source_file)
@@ -340,7 +350,9 @@ class TestJavaCompiler:
     @patch("subprocess.run")
     def test_compile_with_output_directory(self, mock_run, compiler, tmp_path):
         """Should compile with output directory."""
-        mock_run.return_value = CompletedProcess(args=["javac"], returncode=0, stdout="", stderr="")
+        mock_run.return_value = CompletedProcess(
+            args=["javac"], returncode=0, stdout="", stderr=""
+        )
 
         source_file = str(tmp_path / "Main.java")
         output_dir = str(tmp_path / "build")
@@ -355,7 +367,9 @@ class TestJavaCompiler:
     @patch("subprocess.run")
     def test_compile_with_custom_flags(self, mock_run, custom_compiler, tmp_path):
         """Should use custom compiler flags."""
-        mock_run.return_value = CompletedProcess(args=["javac"], returncode=0, stdout="", stderr="")
+        mock_run.return_value = CompletedProcess(
+            args=["javac"], returncode=0, stdout="", stderr=""
+        )
 
         source_file = str(tmp_path / "Main.java")
         custom_compiler.compile(source_file)
@@ -458,7 +472,9 @@ class TestLanguageCompilerFactory:
 
     def test_create_compiler_unknown_language(self):
         """Should raise ValueError for unknown language."""
-        with pytest.raises(ValueError, match="Cannot create compiler for UNKNOWN language"):
+        with pytest.raises(
+            ValueError, match="Cannot create compiler for UNKNOWN language"
+        ):
             LanguageCompilerFactory.create_compiler(Language.UNKNOWN)
 
     def test_get_supported_languages(self):
@@ -657,7 +673,9 @@ class TestCppCompilerAdvanced:
     @patch("subprocess.run")
     def test_compile_with_spaces_in_path(self, mock_run, compiler, tmp_path):
         """Should handle spaces in file paths."""
-        mock_run.return_value = CompletedProcess(args=["g++"], returncode=0, stdout="", stderr="")
+        mock_run.return_value = CompletedProcess(
+            args=["g++"], returncode=0, stdout="", stderr=""
+        )
 
         source_dir = tmp_path / "my folder"
         source_dir.mkdir()
@@ -671,7 +689,9 @@ class TestCppCompilerAdvanced:
     @patch("subprocess.run")
     def test_compile_with_unicode_in_path(self, mock_run, compiler, tmp_path):
         """Should handle Unicode characters in file paths."""
-        mock_run.return_value = CompletedProcess(args=["g++"], returncode=0, stdout="", stderr="")
+        mock_run.return_value = CompletedProcess(
+            args=["g++"], returncode=0, stdout="", stderr=""
+        )
 
         source_file = str(tmp_path / "тест_文件.cpp")
 
@@ -682,7 +702,9 @@ class TestCppCompilerAdvanced:
     @patch("subprocess.run")
     def test_compile_preserves_optimization_flag(self, mock_run, compiler, tmp_path):
         """Should preserve optimization flag in command."""
-        mock_run.return_value = CompletedProcess(args=["g++"], returncode=0, stdout="", stderr="")
+        mock_run.return_value = CompletedProcess(
+            args=["g++"], returncode=0, stdout="", stderr=""
+        )
 
         source_file = str(tmp_path / "test.cpp")
         compiler.compile(source_file)
@@ -739,14 +761,18 @@ class TestCppCompilerAdvanced:
             assert path == "test.v2"
 
     @patch("subprocess.run")
-    def test_compile_creates_no_window_on_windows(self, mock_run, compiler, tmp_path, monkeypatch):
+    def test_compile_creates_no_window_on_windows(
+        self, mock_run, compiler, tmp_path, monkeypatch
+    ):
         """Should use CREATE_NO_WINDOW flag on Windows."""
         # Patch os.name in the language_compilers module where it's checked
         import src.app.core.tools.base.language_compilers as lc_module
 
         monkeypatch.setattr(lc_module.os, "name", "nt")
 
-        mock_run.return_value = CompletedProcess(args=["g++"], returncode=0, stdout="", stderr="")
+        mock_run.return_value = CompletedProcess(
+            args=["g++"], returncode=0, stdout="", stderr=""
+        )
 
         source_file = str(tmp_path / "test.cpp")
         compiler.compile(source_file)
@@ -893,7 +919,9 @@ class TestJavaCompilerAdvanced:
     @patch("subprocess.run")
     def test_compile_without_output_directory(self, mock_run, compiler, tmp_path):
         """Should compile without -d flag if no output directory."""
-        mock_run.return_value = CompletedProcess(args=["javac"], returncode=0, stdout="", stderr="")
+        mock_run.return_value = CompletedProcess(
+            args=["javac"], returncode=0, stdout="", stderr=""
+        )
 
         source_file = str(tmp_path / "Main.java")
         compiler.compile(source_file)
@@ -910,7 +938,9 @@ class TestJavaCompilerAdvanced:
         """Should support custom classpath in flags."""
         config = {"flags": ["-cp", "lib/*"]}
         compiler = JavaCompiler(config)
-        mock_run.return_value = CompletedProcess(args=["javac"], returncode=0, stdout="", stderr="")
+        mock_run.return_value = CompletedProcess(
+            args=["javac"], returncode=0, stdout="", stderr=""
+        )
 
         source_file = str(tmp_path / "Main.java")
         compiler.compile(source_file)
@@ -968,7 +998,9 @@ class TestJavaCompilerAdvanced:
         """Should support encoding flag."""
         config = {"flags": ["-encoding", "UTF-8"]}
         compiler = JavaCompiler(config)
-        mock_run.return_value = CompletedProcess(args=["javac"], returncode=0, stdout="", stderr="")
+        mock_run.return_value = CompletedProcess(
+            args=["javac"], returncode=0, stdout="", stderr=""
+        )
 
         source_file = str(tmp_path / "Main.java")
         compiler.compile(source_file)
@@ -1059,7 +1091,9 @@ class TestCompilerLogging:
     @patch("src.app.core.tools.base.language_compilers.logger")
     def test_cpp_compile_logs_command(self, mock_logger, mock_run, tmp_path):
         """Should log compilation command for debugging."""
-        mock_run.return_value = CompletedProcess(args=["g++"], returncode=0, stdout="", stderr="")
+        mock_run.return_value = CompletedProcess(
+            args=["g++"], returncode=0, stdout="", stderr=""
+        )
 
         compiler = CppCompiler()
         source_file = str(tmp_path / "test.cpp")
@@ -1073,7 +1107,9 @@ class TestCompilerLogging:
     @patch("src.app.core.tools.base.language_compilers.logger")
     def test_java_compile_logs_command(self, mock_logger, mock_run, tmp_path):
         """Should log Java compilation command."""
-        mock_run.return_value = CompletedProcess(args=["javac"], returncode=0, stdout="", stderr="")
+        mock_run.return_value = CompletedProcess(
+            args=["javac"], returncode=0, stdout="", stderr=""
+        )
 
         compiler = JavaCompiler()
         source_file = str(tmp_path / "Main.java")

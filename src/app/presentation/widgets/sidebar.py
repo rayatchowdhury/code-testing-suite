@@ -208,7 +208,9 @@ class Sidebar(QWidget):
 
     def add_section(self, title=None):
         section = SidebarSection(title)
-        section.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)  # Add this line
+        section.setSizePolicy(
+            QSizePolicy.Preferred, QSizePolicy.Maximum
+        )  # Add this line
         self.content_layout.addWidget(section)
         return section
 

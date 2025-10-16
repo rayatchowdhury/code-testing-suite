@@ -131,7 +131,8 @@ class ConsoleOutput(QWidget):
         """Setup different text formats for console output"""
         # Use centralized console colors
         self.formats = {
-            format_type: self._create_format(color) for format_type, color in CONSOLE_COLORS.items()
+            format_type: self._create_format(color)
+            for format_type, color in CONSOLE_COLORS.items()
         }
 
         # Create fallback format
@@ -162,7 +163,9 @@ class ConsoleOutput(QWidget):
         self.text_buffer = self.text_buffer[10:]
 
         cursor = self.output.textCursor()
-        cursor.movePosition(QTextCursor.End)  # Fixed: Use QTextCursor.End instead of cursor.End
+        cursor.movePosition(
+            QTextCursor.End
+        )  # Fixed: Use QTextCursor.End instead of cursor.End
 
         # Batch insert texts
         for text, format_type in batch:
@@ -189,7 +192,9 @@ class ConsoleOutput(QWidget):
             text = text.strip()
             if text:
                 lines = text.split("\n")
-                formatted_text = "\n".join(f"> {line}" for line in lines if line.strip())
+                formatted_text = "\n".join(
+                    f"> {line}" for line in lines if line.strip()
+                )
                 self.input.clear()
                 if self.waiting_for_input:
                     self.waiting_for_input = False
@@ -208,7 +213,9 @@ class ConsoleOutput(QWidget):
         """Called when program is waiting for input"""
         self.waiting_for_input = True
         self.input.clear()  # Clear any existing text
-        self.input.setPlaceholderText("Program is waiting for input... Press Enter to submit")
+        self.input.setPlaceholderText(
+            "Program is waiting for input... Press Enter to submit"
+        )
         self.inputRequested.emit()
         self.input.setFocus()
 

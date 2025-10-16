@@ -117,7 +117,9 @@ class DetailedResultsWidget(QWidget):
 
         # Create display area with stacked widget
         self.content_stack = QStackedWidget()
-        self.content_stack.setStyleSheet(f"background-color: {MATERIAL_COLORS['surface']};")
+        self.content_stack.setStyleSheet(
+            f"background-color: {MATERIAL_COLORS['surface']};"
+        )
         self._create_content_pages()
 
         # Add widgets to layout
@@ -168,14 +170,20 @@ class DetailedResultsWidget(QWidget):
         stats_layout.setSpacing(12)
 
         # Project info
-        stats_layout.addWidget(self._create_info_label("Project:", self.test_result.project_name))
+        stats_layout.addWidget(
+            self._create_info_label("Project:", self.test_result.project_name)
+        )
         stats_layout.addWidget(
             self._create_info_label("Test Type:", self.test_result.test_type.upper())
         )
         stats_layout.addWidget(
-            self._create_info_label("File:", os.path.basename(self.test_result.file_path))
+            self._create_info_label(
+                "File:", os.path.basename(self.test_result.file_path)
+            )
         )
-        stats_layout.addWidget(self._create_info_label("Timestamp:", self.test_result.timestamp))
+        stats_layout.addWidget(
+            self._create_info_label("Timestamp:", self.test_result.timestamp)
+        )
 
         stats_layout.addWidget(self._create_divider())
 
@@ -202,9 +210,13 @@ class DetailedResultsWidget(QWidget):
                 MATERIAL_COLORS["error"],
             )
         )
-        stats_layout.addWidget(self._create_info_label("Success Rate:", f"{success_rate:.1f}%"))
         stats_layout.addWidget(
-            self._create_info_label("Total Time:", f"{self.test_result.total_time:.3f}s")
+            self._create_info_label("Success Rate:", f"{success_rate:.1f}%")
+        )
+        stats_layout.addWidget(
+            self._create_info_label(
+                "Total Time:", f"{self.test_result.total_time:.3f}s"
+            )
         )
 
         layout.addWidget(stats_card)
@@ -368,13 +380,17 @@ class DetailedResultsWidget(QWidget):
         # Parse test details
         try:
             test_details = (
-                json.loads(self.test_result.test_details) if self.test_result.test_details else []
+                json.loads(self.test_result.test_details)
+                if self.test_result.test_details
+                else []
             )
         except json.JSONDecodeError:
             test_details = []
 
         # Filter by status
-        filtered_tests = [t for t in test_details if self._test_passed(t) == passed_only]
+        filtered_tests = [
+            t for t in test_details if self._test_passed(t) == passed_only
+        ]
 
         # Count label
         count_label = QLabel(f"Total: {len(filtered_tests)} tests")
@@ -399,7 +415,9 @@ class DetailedResultsWidget(QWidget):
 
         # Add test case widgets
         for test in filtered_tests:
-            test_widget = self._create_test_case_widget(test, show_errors=not passed_only)
+            test_widget = self._create_test_case_widget(
+                test, show_errors=not passed_only
+            )
             scroll_layout.addWidget(test_widget)
 
         scroll_layout.addStretch()
@@ -479,7 +497,9 @@ class DetailedResultsWidget(QWidget):
             # Error details
             error = test.get("error", test.get("error_details", ""))
             if error:
-                layout.addWidget(self._create_section_label("Error:", MATERIAL_COLORS["error"]))
+                layout.addWidget(
+                    self._create_section_label("Error:", MATERIAL_COLORS["error"])
+                )
                 error_label = QLabel(str(error))
                 error_label.setWordWrap(True)
                 error_label.setStyleSheet(f"color: {MATERIAL_COLORS['error']};")
@@ -528,18 +548,20 @@ class DetailedResultsWidget(QWidget):
                             test_content += f"INPUT:\n{test_case['input']}\n\n"
 
                         if "output" in test_case:
-                            test_content += f"EXPECTED OUTPUT:\n{test_case['output']}\n\n"
+                            test_content += (
+                                f"EXPECTED OUTPUT:\n{test_case['output']}\n\n"
+                            )
 
                         if "actual_output" in test_case:
-                            test_content += f"ACTUAL OUTPUT:\n{test_case['actual_output']}\n\n"
+                            test_content += (
+                                f"ACTUAL OUTPUT:\n{test_case['actual_output']}\n\n"
+                            )
 
                         if "error" in test_case:
                             test_content += f"ERROR:\n{test_case['error']}\n\n"
 
                         if "execution_time" in test_case:
-                            test_content += (
-                                f"Execution Time: {test_case['execution_time']} seconds\n"
-                            )
+                            test_content += f"Execution Time: {test_case['execution_time']} seconds\n"
 
                         # Save to appropriate folder
                         folder = "passed" if status.lower() == "pass" else "failed"
@@ -560,7 +582,9 @@ class DetailedResultsWidget(QWidget):
                 summary += f"  Passed: {self.test_result.passed_tests}\n"
                 summary += f"  Failed: {self.test_result.failed_tests}\n"
                 summary += f"  Success Rate: {(self.test_result.passed_tests/self.test_result.test_count*100) if self.test_result.test_count > 0 else 0:.1f}%\n"
-                summary += f"  Total Time: {self.test_result.total_time:.3f} seconds\n\n"
+                summary += (
+                    f"  Total Time: {self.test_result.total_time:.3f} seconds\n\n"
+                )
 
                 if self.test_result.mismatch_analysis:
                     summary += "\nMismatch Analysis:\n"
@@ -575,7 +599,9 @@ class DetailedResultsWidget(QWidget):
             )
 
         except Exception as e:
-            QMessageBox.critical(self, "Export Failed", f"Failed to export results: {str(e)}")
+            QMessageBox.critical(
+                self, "Export Failed", f"Failed to export results: {str(e)}"
+            )
 
     def _load_to_test(self):
         """Load code files into the appropriate test window.
@@ -624,7 +650,9 @@ class DetailedResultsWidget(QWidget):
                 return
 
             # Confirm with user before overwriting
-            file_list = "\n".join(f"  • {filename}" for filename in snapshot.files.keys())
+            file_list = "\n".join(
+                f"  • {filename}" for filename in snapshot.files.keys()
+            )
             reply = QMessageBox.question(
                 self,
                 "Load to Test",

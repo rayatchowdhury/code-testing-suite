@@ -211,7 +211,9 @@ class TestGetExecutablePath:
         """Test path construction for C++ executable."""
         result = get_executable_path(temp_dir, "comparator", "generator", "cpp")
         expected_extension = ".exe" if os.name == "nt" else ""
-        expected = os.path.join(temp_dir, "comparator", f"generator{expected_extension}")
+        expected = os.path.join(
+            temp_dir, "comparator", f"generator{expected_extension}"
+        )
         assert result == expected
 
     def test_constructs_python_executable_path(self, temp_dir):

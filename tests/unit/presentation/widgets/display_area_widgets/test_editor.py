@@ -60,7 +60,9 @@ class TestEditorAIIntegrationConcepts:
         mock_ai = Mock()
         mock_ai.process_code.return_value = "The error is a NoneType"
 
-        result = mock_ai.process_code("debug", "buggy code", error_message="NoneType error")
+        result = mock_ai.process_code(
+            "debug", "buggy code", error_message="NoneType error"
+        )
 
         assert "NoneType" in result
 
@@ -283,7 +285,9 @@ class TestRealEditorAIIntegration:
         """Test EditorAI availability when configured."""
         from src.app.core.ai.core.editor_ai import EditorAI
 
-        with patch("src.app.core.ai.core.editor_ai.is_gemini_available", return_value=True):
+        with patch(
+            "src.app.core.ai.core.editor_ai.is_gemini_available", return_value=True
+        ):
             ai = EditorAI()
             result = ai.is_available()
 
@@ -293,7 +297,9 @@ class TestRealEditorAIIntegration:
         """Test EditorAI availability when not configured."""
         from src.app.core.ai.core.editor_ai import EditorAI
 
-        with patch("src.app.core.ai.core.editor_ai.is_gemini_available", return_value=False):
+        with patch(
+            "src.app.core.ai.core.editor_ai.is_gemini_available", return_value=False
+        ):
             ai = EditorAI()
             result = ai.is_available()
 
@@ -303,7 +309,9 @@ class TestRealEditorAIIntegration:
         """Test EditorAI explain returns error when unavailable."""
         from src.app.core.ai.core.editor_ai import EditorAI
 
-        with patch("src.app.core.ai.core.editor_ai.is_gemini_available", return_value=False):
+        with patch(
+            "src.app.core.ai.core.editor_ai.is_gemini_available", return_value=False
+        ):
             ai = EditorAI()
             result = ai.explain_code("code", "Python")
 
@@ -313,7 +321,9 @@ class TestRealEditorAIIntegration:
         """Test EditorAI optimize returns error when unavailable."""
         from src.app.core.ai.core.editor_ai import EditorAI
 
-        with patch("src.app.core.ai.core.editor_ai.is_gemini_available", return_value=False):
+        with patch(
+            "src.app.core.ai.core.editor_ai.is_gemini_available", return_value=False
+        ):
             ai = EditorAI()
             result = ai.suggest_optimizations("code", "Python")
 

@@ -177,7 +177,9 @@ class TestBasicValidation:
 
         # Compile first
         compilation_done = []
-        validator.compilationFinished.connect(lambda success: compilation_done.append(success))
+        validator.compilationFinished.connect(
+            lambda success: compilation_done.append(success)
+        )
         validator.compile_all()
         qtbot.waitUntil(lambda: len(compilation_done) > 0, timeout=30000)
         assert compilation_done[0] is True, "Compilation should succeed"
@@ -230,8 +232,12 @@ class TestBasicValidation:
         # Verify each test has "Correct" verdict
         for test in completed_tests:
             assert test["passed"] is True, f"Test {test['test_num']} should pass"
-            assert test["validation_message"] == "Correct", "Should have Correct verdict"
-            assert test["validator_exit_code"] == 0, "Exit code should be 0 for Accepted"
+            assert (
+                test["validation_message"] == "Correct"
+            ), "Should have Correct verdict"
+            assert (
+                test["validator_exit_code"] == 0
+            ), "Exit code should be 0 for Accepted"
             assert test["input_data"], "Should have input data"
             assert test["test_output"], "Should have output data"
             assert test["exec_time"] > 0, "Should track execution time"
@@ -243,7 +249,9 @@ class TestBasicValidation:
 
         # Compile first
         compilation_done = []
-        validator.compilationFinished.connect(lambda success: compilation_done.append(success))
+        validator.compilationFinished.connect(
+            lambda success: compilation_done.append(success)
+        )
         validator.compile_all()
         qtbot.waitUntil(lambda: len(compilation_done) > 0, timeout=30000)
 
@@ -270,7 +278,9 @@ class TestBasicValidation:
             )
 
         validator.testCompleted.connect(on_test_completed)
-        validator.allTestsCompleted.connect(lambda passed: all_tests_done.append(passed))
+        validator.allTestsCompleted.connect(
+            lambda passed: all_tests_done.append(passed)
+        )
 
         # Run tests
         validator.run_validation_test(test_count=3)
@@ -282,7 +292,9 @@ class TestBasicValidation:
 
         for test in completed_tests:
             assert test["passed"] is False, "Test should fail"
-            assert test["validation_message"] == "Wrong Answer", "Should detect wrong answer"
+            assert (
+                test["validation_message"] == "Wrong Answer"
+            ), "Should detect wrong answer"
             assert test["validator_exit_code"] == 1, "Exit code should be 1 for WA"
 
 
@@ -296,12 +308,16 @@ class TestDatabaseIntegration:
 
         # Compile first
         compilation_done = []
-        validator.compilationFinished.connect(lambda success: compilation_done.append(success))
+        validator.compilationFinished.connect(
+            lambda success: compilation_done.append(success)
+        )
         validator.compile_all()
         qtbot.waitUntil(lambda: len(compilation_done) > 0, timeout=30000)
 
         all_tests_done = []
-        validator.allTestsCompleted.connect(lambda passed: all_tests_done.append(passed))
+        validator.allTestsCompleted.connect(
+            lambda passed: all_tests_done.append(passed)
+        )
 
         # Run validation tests
         validator.run_validation_test(test_count=5)
@@ -328,12 +344,16 @@ class TestDatabaseIntegration:
 
         # Compile first
         compilation_done = []
-        validator.compilationFinished.connect(lambda success: compilation_done.append(success))
+        validator.compilationFinished.connect(
+            lambda success: compilation_done.append(success)
+        )
         validator.compile_all()
         qtbot.waitUntil(lambda: len(compilation_done) > 0, timeout=30000)
 
         all_tests_done = []
-        validator.allTestsCompleted.connect(lambda passed: all_tests_done.append(passed))
+        validator.allTestsCompleted.connect(
+            lambda passed: all_tests_done.append(passed)
+        )
 
         validator.run_validation_test(test_count=5)
         qtbot.waitUntil(lambda: len(all_tests_done) > 0, timeout=30000)
@@ -366,19 +386,25 @@ class TestDatabaseIntegration:
         assert times["avg_test"] >= 0
         assert times["avg_validator"] >= 0
 
-    def test_saves_wrong_answer_analysis(self, cpp_wrong_answer_workspace, temp_db, qtbot):
+    def test_saves_wrong_answer_analysis(
+        self, cpp_wrong_answer_workspace, temp_db, qtbot
+    ):
         """Test that wrong answer analysis is saved correctly."""
         validator = ValidatorRunner(str(cpp_wrong_answer_workspace))
         validator.db_manager = temp_db
 
         # Compile first
         compilation_done = []
-        validator.compilationFinished.connect(lambda success: compilation_done.append(success))
+        validator.compilationFinished.connect(
+            lambda success: compilation_done.append(success)
+        )
         validator.compile_all()
         qtbot.waitUntil(lambda: len(compilation_done) > 0, timeout=30000)
 
         all_tests_done = []
-        validator.allTestsCompleted.connect(lambda passed: all_tests_done.append(passed))
+        validator.allTestsCompleted.connect(
+            lambda passed: all_tests_done.append(passed)
+        )
 
         validator.run_validation_test(test_count=3)
         qtbot.waitUntil(lambda: len(all_tests_done) > 0, timeout=30000)
@@ -405,12 +431,16 @@ class TestDatabaseIntegration:
 
         # Compile first
         compilation_done = []
-        validator.compilationFinished.connect(lambda success: compilation_done.append(success))
+        validator.compilationFinished.connect(
+            lambda success: compilation_done.append(success)
+        )
         validator.compile_all()
         qtbot.waitUntil(lambda: len(compilation_done) > 0, timeout=30000)
 
         all_tests_done = []
-        validator.allTestsCompleted.connect(lambda passed: all_tests_done.append(passed))
+        validator.allTestsCompleted.connect(
+            lambda passed: all_tests_done.append(passed)
+        )
 
         validator.run_validation_test(test_count=2)
         qtbot.waitUntil(lambda: len(all_tests_done) > 0, timeout=30000)
@@ -436,7 +466,9 @@ class TestMetricsTracking:
 
         # Compile first
         compilation_done = []
-        validator.compilationFinished.connect(lambda success: compilation_done.append(success))
+        validator.compilationFinished.connect(
+            lambda success: compilation_done.append(success)
+        )
         validator.compile_all()
         qtbot.waitUntil(lambda: len(compilation_done) > 0, timeout=30000)
 
@@ -479,7 +511,9 @@ class TestMetricsTracking:
 
         # Compile first
         compilation_done = []
-        validator.compilationFinished.connect(lambda success: compilation_done.append(success))
+        validator.compilationFinished.connect(
+            lambda success: compilation_done.append(success)
+        )
         validator.compile_all()
         qtbot.waitUntil(lambda: len(compilation_done) > 0, timeout=30000)
 
@@ -519,7 +553,9 @@ class TestIOFileManagement:
 
         # Compile first
         compilation_done = []
-        validator.compilationFinished.connect(lambda success: compilation_done.append(success))
+        validator.compilationFinished.connect(
+            lambda success: compilation_done.append(success)
+        )
         validator.compile_all()
         qtbot.waitUntil(lambda: len(compilation_done) > 0, timeout=30000)
 
@@ -546,7 +582,9 @@ class TestIOFileManagement:
             assert input_file.exists(), f"Input file {i} should exist"
             assert output_file.exists(), f"Output file {i} should exist"
             assert input_file.stat().st_size > 0, f"Input file {i} should have content"
-            assert output_file.stat().st_size > 0, f"Output file {i} should have content"
+            assert (
+                output_file.stat().st_size > 0
+            ), f"Output file {i} should have content"
 
 
 class TestParallelExecution:
@@ -558,7 +596,9 @@ class TestParallelExecution:
 
         # Compile first
         compilation_done = []
-        validator.compilationFinished.connect(lambda success: compilation_done.append(success))
+        validator.compilationFinished.connect(
+            lambda success: compilation_done.append(success)
+        )
         validator.compile_all()
         qtbot.waitUntil(lambda: len(compilation_done) > 0, timeout=30000)
 
@@ -621,7 +661,9 @@ int main() {
         validator = ValidatorRunner(str(workspace))
 
         compilation_results = []
-        validator.compilationFinished.connect(lambda success: compilation_results.append(success))
+        validator.compilationFinished.connect(
+            lambda success: compilation_results.append(success)
+        )
 
         validator.compile_all()
         qtbot.waitUntil(lambda: len(compilation_results) > 0, timeout=30000)
@@ -672,7 +714,9 @@ int main() {
 
         # Compile first
         compilation_done = []
-        validator.compilationFinished.connect(lambda success: compilation_done.append(success))
+        validator.compilationFinished.connect(
+            lambda success: compilation_done.append(success)
+        )
         validator.compile_all()
         qtbot.waitUntil(lambda: len(compilation_done) > 0, timeout=30000)
 
@@ -730,7 +774,9 @@ int main() {
 
         # Compile first
         compilation_done = []
-        validator.compilationFinished.connect(lambda success: compilation_done.append(success))
+        validator.compilationFinished.connect(
+            lambda success: compilation_done.append(success)
+        )
         validator.compile_all()
         qtbot.waitUntil(lambda: len(compilation_done) > 0, timeout=30000)
 
@@ -748,7 +794,9 @@ int main() {
             exec_time,
             memory,
         ):
-            completed_tests.append({"passed": passed, "validation_message": validation_message})
+            completed_tests.append(
+                {"passed": passed, "validation_message": validation_message}
+            )
 
         validator.testCompleted.connect(on_test_completed)
         validator.allTestsCompleted.connect(lambda p: all_tests_done.append(p))
@@ -765,7 +813,9 @@ int main() {
 class TestCompleteWorkflow:
     """Test complete end-to-end workflow."""
 
-    def test_complete_validation_workflow(self, cpp_validator_workspace, temp_db, qtbot):
+    def test_complete_validation_workflow(
+        self, cpp_validator_workspace, temp_db, qtbot
+    ):
         """Test full workflow: compile → run → save → retrieve → verify."""
         validator = ValidatorRunner(str(cpp_validator_workspace))
         validator.db_manager = temp_db

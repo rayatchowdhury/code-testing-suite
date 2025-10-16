@@ -34,7 +34,9 @@ def temp_workspace():
 def sample_cpp_file(temp_workspace):
     """Create a sample C++ file."""
     cpp_file = temp_workspace / "test.cpp"
-    cpp_file.write_text('#include <iostream>\nint main() { std::cout << "Hello"; return 0; }')
+    cpp_file.write_text(
+        '#include <iostream>\nint main() { std::cout << "Hello"; return 0; }'
+    )
     return str(cpp_file)
 
 
@@ -275,7 +277,9 @@ class TestJavaValidation:
         worker = CompilerWorker()
 
         with qtbot.waitSignal(worker.error, timeout=1000):
-            result = worker._check_java_class_name(str(temp_workspace / "missing.java"), "Test")
+            result = worker._check_java_class_name(
+                str(temp_workspace / "missing.java"), "Test"
+            )
 
         assert result is False
 
@@ -616,7 +620,9 @@ class TestCppCompilationErrorHandling:
         with patch.object(QProcess, "waitForFinished", return_value=True):
             with patch.object(QProcess, "exitCode", return_value=1):
                 with patch.object(QProcess, "readAllStandardError") as mock_error:
-                    mock_error.return_value.data.return_value.decode.return_value = "syntax error"
+                    mock_error.return_value.data.return_value.decode.return_value = (
+                        "syntax error"
+                    )
 
                     with qtbot.waitSignal(worker.error, timeout=1000) as error_blocker:
                         with qtbot.waitSignal(worker.finished, timeout=1000):
@@ -692,7 +698,9 @@ class TestJavaErrorHandling:
         subdir = temp_workspace / "java_tests"
         subdir.mkdir()
         java_file = subdir / "Test.java"
-        java_file.write_text("public class Test { public static void main(String[] args) {} }")
+        java_file.write_text(
+            "public class Test { public static void main(String[] args) {} }"
+        )
 
         original_dir = os.getcwd()
 
@@ -735,7 +743,9 @@ class TestProcessErrorHandling:
         worker.process.readAllStandardError.return_value.data.return_value.decode.return_value = (
             "floating point exception: divide by zero"
         )
-        worker.process.readAllStandardOutput.return_value.data.return_value.decode.return_value = ""
+        worker.process.readAllStandardOutput.return_value.data.return_value.decode.return_value = (
+            ""
+        )
 
         # Collect all error signals
         errors = []
@@ -758,7 +768,9 @@ class TestProcessErrorHandling:
         worker.process.readAllStandardError.return_value.data.return_value.decode.return_value = (
             "Segmentation fault (core dumped)"
         )
-        worker.process.readAllStandardOutput.return_value.data.return_value.decode.return_value = ""
+        worker.process.readAllStandardOutput.return_value.data.return_value.decode.return_value = (
+            ""
+        )
 
         # Collect all error signals
         errors = []
@@ -781,7 +793,9 @@ class TestProcessErrorHandling:
         worker.process.readAllStandardError.return_value.data.return_value.decode.return_value = (
             "Program aborted"
         )
-        worker.process.readAllStandardOutput.return_value.data.return_value.decode.return_value = ""
+        worker.process.readAllStandardOutput.return_value.data.return_value.decode.return_value = (
+            ""
+        )
 
         # Collect all error signals
         errors = []
@@ -802,7 +816,9 @@ class TestProcessErrorHandling:
         worker.process.readAllStandardError.return_value.data.return_value.decode.return_value = (
             "Some generic error occurred"
         )
-        worker.process.readAllStandardOutput.return_value.data.return_value.decode.return_value = ""
+        worker.process.readAllStandardOutput.return_value.data.return_value.decode.return_value = (
+            ""
+        )
 
         # Collect all error signals
         errors = []
@@ -915,6 +931,8 @@ class TestExecutableTimestampLogic:
 
         with patch("os.path.exists", return_value=True):
             with patch("os.path.getmtime", side_effect=OSError("Permission denied")):
-                result = worker._is_executable_up_to_date("/test/source.cpp", "/test/exe")
+                result = worker._is_executable_up_to_date(
+                    "/test/source.cpp", "/test/exe"
+                )
 
         assert result is False

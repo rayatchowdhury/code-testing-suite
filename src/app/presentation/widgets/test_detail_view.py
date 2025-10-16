@@ -27,7 +27,9 @@ class TestDetailDialog(QDialog):
 
     __test__ = False  # Prevent pytest collection
 
-    def __init__(self, test_number: int, passed: bool, time: float, memory: float, parent=None):
+    def __init__(
+        self, test_number: int, passed: bool, time: float, memory: float, parent=None
+    ):
         """
         Initialize test detail dialog.
 
@@ -90,7 +92,9 @@ class TestDetailDialog(QDialog):
         )
 
         status_text = "✓ Passed" if self.passed else "✗ Failed"
-        status_color = MATERIAL_COLORS["primary"] if self.passed else MATERIAL_COLORS["error"]
+        status_color = (
+            MATERIAL_COLORS["primary"] if self.passed else MATERIAL_COLORS["error"]
+        )
         status_label = QLabel(status_text)
         status_label.setStyleSheet(
             f"""
@@ -384,9 +388,7 @@ class ValidatorDetailDialog(TestDetailDialog):
             Formatted validator log string
         """
         if self.passed:
-            return (
-                "✅ Valid output\n\nThe test solution produced correct output for the given input."
-            )
+            return "✅ Valid output\n\nThe test solution produced correct output for the given input."
 
         # Failed case - explain why
         log_lines = [f"❌ {self.validation_message}"]
@@ -402,7 +404,9 @@ class ValidatorDetailDialog(TestDetailDialog):
             )
         elif self.validator_exit_code == -1:
             log_lines.append("\nExit Code: -1 (Generator/Test Failed)")
-            log_lines.append("The generator or test solution failed to execute properly.")
+            log_lines.append(
+                "The generator or test solution failed to execute properly."
+            )
         elif self.validator_exit_code == -2:
             log_lines.append("\nExit Code: -2 (Timeout)")
             log_lines.append("The execution exceeded the time limit.")
@@ -507,7 +511,9 @@ class BenchmarkerDetailDialog(TestDetailDialog):
         layout.addWidget(input_label)
 
         input_edit = QTextEdit()
-        input_edit.setPlainText(self.input_data if self.input_data else "No input data available")
+        input_edit.setPlainText(
+            self.input_data if self.input_data else "No input data available"
+        )
         input_edit.setReadOnly(True)
         input_edit.setMaximumHeight(150)
         self._style_text_edit(input_edit)

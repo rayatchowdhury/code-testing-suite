@@ -52,7 +52,9 @@ TEST_TYPE_ALIASES = {
 
 # HTML and CSS files
 # Correct path: Located in src/app/presentation/views/
-MAIN_WINDOW_HTML = PROJECT_ROOT / "src" / "app" / "presentation" / "views" / "main_window.html"
+MAIN_WINDOW_HTML = (
+    PROJECT_ROOT / "src" / "app" / "presentation" / "views" / "main_window.html"
+)
 # Note: EDITOR_WELCOME_HTML removed - file doesn't exist
 # Note: HTML_CSS moved to presentation/styles/html.css
 
@@ -117,7 +119,8 @@ def normalize_test_type(test_type: str) -> str:
     normalized = TEST_TYPE_ALIASES.get(test_type.lower())
     if not normalized:
         raise ValueError(
-            f"Unknown test type: {test_type}. " f"Valid types: {list(TEST_TYPE_ALIASES.keys())}"
+            f"Unknown test type: {test_type}. "
+            f"Valid types: {list(TEST_TYPE_ALIASES.keys())}"
         )
     return normalized
 

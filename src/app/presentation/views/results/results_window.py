@@ -30,7 +30,9 @@ class ResultsWindow(SidebarWindowBase):
         # Add action buttons
         for button_text in ["Refresh Data", "Export Results", "Clear Old Data"]:
             btn = self.sidebar.add_button(button_text, action_section)
-            btn.clicked.connect(lambda checked, text=button_text: self.handle_action_button(text))
+            btn.clicked.connect(
+                lambda checked, text=button_text: self.handle_action_button(text)
+            )
 
         # Phase 3 (Issue #17): Removed redundant "View Options" section
         # Filters are already available in the main results widget
@@ -80,12 +82,16 @@ class ResultsWindow(SidebarWindowBase):
         # Get currently selected result
         selected_rows = self.display_area.results_table.selectedItems()
         if not selected_rows:
-            QMessageBox.warning(self, "No Selection", "Please select a test result to export.")
+            QMessageBox.warning(
+                self, "No Selection", "Please select a test result to export."
+            )
             return
 
         # Get result ID from first column of selected row
         row = selected_rows[0].row()
-        result_id = self.display_area.results_table.item(row, 0).data(1)  # ID stored in UserRole
+        result_id = self.display_area.results_table.item(row, 0).data(
+            1
+        )  # ID stored in UserRole
 
         # Get full result from database
         results = self.display_area.db_manager.get_test_results(limit=1000)
@@ -96,13 +102,13 @@ class ResultsWindow(SidebarWindowBase):
                 break
 
         if not result:
-            QMessageBox.warning(self, "Error", "Could not retrieve test result details.")
+            QMessageBox.warning(
+                self, "Error", "Could not retrieve test result details."
+            )
             return
 
         # Ask user for save location
-        default_name = (
-            f"test_export_{result.project_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip"
-        )
+        default_name = f"test_export_{result.project_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip"
         file_path, _ = QFileDialog.getSaveFileName(
             self, "Export Test Results", default_name, "ZIP Files (*.zip)"
         )
@@ -127,7 +133,9 @@ class ResultsWindow(SidebarWindowBase):
 
                         # Create subfolder based on role for organization
                         subfolder = f"code/{role}" if role != "unknown" else "code"
-                        zipf.writestr(f"{subfolder}/{filename}", content.encode("utf-8"))
+                        zipf.writestr(
+                            f"{subfolder}/{filename}", content.encode("utf-8")
+                        )
 
                     # Also create a metadata file with language info
                     metadata = "Files Snapshot Metadata\n"
@@ -159,18 +167,20 @@ class ResultsWindow(SidebarWindowBase):
                             test_content += f"INPUT:\n{test_case['input']}\n\n"
 
                         if "output" in test_case:
-                            test_content += f"EXPECTED OUTPUT:\n{test_case['output']}\n\n"
+                            test_content += (
+                                f"EXPECTED OUTPUT:\n{test_case['output']}\n\n"
+                            )
 
                         if "actual_output" in test_case:
-                            test_content += f"ACTUAL OUTPUT:\n{test_case['actual_output']}\n\n"
+                            test_content += (
+                                f"ACTUAL OUTPUT:\n{test_case['actual_output']}\n\n"
+                            )
 
                         if "error" in test_case:
                             test_content += f"ERROR:\n{test_case['error']}\n\n"
 
                         if "execution_time" in test_case:
-                            test_content += (
-                                f"Execution Time: {test_case['execution_time']} seconds\n"
-                            )
+                            test_content += f"Execution Time: {test_case['execution_time']} seconds\n"
 
                         # Save to appropriate folder
                         folder = "passed" if status.lower() == "pass" else "failed"
@@ -206,7 +216,9 @@ class ResultsWindow(SidebarWindowBase):
             )
 
         except Exception as e:
-            QMessageBox.critical(self, "Export Failed", f"Failed to export results: {str(e)}")
+            QMessageBox.critical(
+                self, "Export Failed", f"Failed to export results: {str(e)}"
+            )
 
     def clear_old_data(self):
         """Clear old data from database"""
@@ -335,9 +347,13 @@ class ResultsWindow(SidebarWindowBase):
             print(f"  - Has parent: {hasattr(self, 'parent')}")
             if hasattr(self, "parent"):
                 print(f"  - Parent type: {type(self.parent).__name__}")
-                print(f"  - Has window_manager: {hasattr(self.parent, 'window_manager')}")
+                print(
+                    f"  - Has window_manager: {hasattr(self.parent, 'window_manager')}"
+                )
 
-            if not hasattr(self, "parent") or not hasattr(self.parent, "window_manager"):
+            if not hasattr(self, "parent") or not hasattr(
+                self.parent, "window_manager"
+            ):
                 print("DEBUG: ERROR - Cannot access window manager!")
                 QMessageBox.critical(self, "Error", "Cannot access window manager.")
                 return
@@ -352,7 +368,9 @@ class ResultsWindow(SidebarWindowBase):
 
             if not show_result:
                 print(f"DEBUG: ERROR - Failed to show window '{window_name}'")
-                QMessageBox.critical(self, "Error", f"Failed to open {window_name.title()} window.")
+                QMessageBox.critical(
+                    self, "Error", f"Failed to open {window_name.title()} window."
+                )
                 return
 
             # Get the window instance
@@ -381,7 +399,9 @@ class ResultsWindow(SidebarWindowBase):
             import traceback
 
             traceback.print_exc()
-            QMessageBox.critical(self, "Load Error", f"Failed to load code files: {str(e)}")
+            QMessageBox.critical(
+                self, "Load Error", f"Failed to load code files: {str(e)}"
+            )
 
     def _load_code_into_window(self, window, load_data: dict):
         """Load code files into a specific test window
@@ -417,8 +437,12 @@ class ResultsWindow(SidebarWindowBase):
             if hasattr(display_area, "test_tabs"):
                 test_tabs = display_area.test_tabs
                 print(f"DEBUG: test_tabs obtained: {type(test_tabs).__name__}")
-                print(f"  - Has switch_language: {hasattr(test_tabs, 'switch_language')}")
-                print(f"  - Has multi_language attr: {hasattr(test_tabs, 'multi_language')}")
+                print(
+                    f"  - Has switch_language: {hasattr(test_tabs, 'switch_language')}"
+                )
+                print(
+                    f"  - Has multi_language attr: {hasattr(test_tabs, 'multi_language')}"
+                )
                 if hasattr(test_tabs, "multi_language"):
                     print(f"  - multi_language value: {test_tabs.multi_language}")
             else:
@@ -436,7 +460,9 @@ class ResultsWindow(SidebarWindowBase):
                 print(f"\nDEBUG: Checking file_key='{file_key}' -> tab='{tab_name}'")
                 if file_key in files:
                     code_content = files[file_key]
-                    print(f"  - Found file_key '{file_key}', content length: {len(code_content)}")
+                    print(
+                        f"  - Found file_key '{file_key}', content length: {len(code_content)}"
+                    )
 
                     # Switch language for this tab if multi-language supported
                     if (
@@ -445,7 +471,9 @@ class ResultsWindow(SidebarWindowBase):
                         and hasattr(test_tabs, "multi_language")
                         and test_tabs.multi_language
                     ):
-                        print(f"  - Switching tab '{tab_name}' to language '{language}'...")
+                        print(
+                            f"  - Switching tab '{tab_name}' to language '{language}'..."
+                        )
                         test_tabs.switch_language(tab_name, language)
                         print("  - Language switched successfully")
 
@@ -456,7 +484,9 @@ class ResultsWindow(SidebarWindowBase):
                 else:
                     print(f"  - File key '{file_key}' not found in files")
 
-            print(f"\nDEBUG: Files loaded via mapping: {files_loaded}/{len(file_key_mapping)}")
+            print(
+                f"\nDEBUG: Files loaded via mapping: {files_loaded}/{len(file_key_mapping)}"
+            )
 
             # If no specific keys found, try generic loading
             if not any(key in files for key in file_key_mapping.keys()):
@@ -542,7 +572,9 @@ class ResultsWindow(SidebarWindowBase):
                     editor.setPlainText(code_content)
                     print("    - Code set successfully")
                 elif hasattr(editor, "setText"):
-                    print(f"    - Setting code with editor.setText() ({len(code_content)} chars)")
+                    print(
+                        f"    - Setting code with editor.setText() ({len(code_content)} chars)"
+                    )
                     editor.setText(code_content)
                     print("    - Code set successfully")
                 else:
@@ -593,4 +625,6 @@ class ResultsWindow(SidebarWindowBase):
             else:
                 print(f"  - No pattern match for '{file_name}'")
 
-        print(f"\nDEBUG: Generic loading complete: {matched_files}/{len(files)} files matched")
+        print(
+            f"\nDEBUG: Generic loading complete: {matched_files}/{len(files)} files matched"
+        )

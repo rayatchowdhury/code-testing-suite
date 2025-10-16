@@ -61,7 +61,9 @@ class TestCountSlider(QWidget):
 
         # Editable input field instead of just a label
         self.value_input = QLineEdit(str(self.slider.value()))
-        self.value_input.setValidator(QIntValidator(self.slider.minimum(), self.slider.maximum()))
+        self.value_input.setValidator(
+            QIntValidator(self.slider.minimum(), self.slider.maximum())
+        )
         self.value_input.setFixedWidth(50)  # Compact width for numbers
         self.value_input.setAlignment(Qt.AlignCenter)
 
@@ -142,7 +144,9 @@ class TestCountSlider(QWidget):
         try:
             if text and text.isdigit():
                 value = int(text)
-                if self.slider.minimum() <= value <= self.slider.maximum():  # Valid range
+                if (
+                    self.slider.minimum() <= value <= self.slider.maximum()
+                ):  # Valid range
                     # Block signals to prevent recursive updates
                     self.slider.blockSignals(True)
                     self.slider.setValue(value)

@@ -75,9 +75,13 @@ def mock_database():
 class TestValidatorInitialization:
     """Test ValidatorRunner initialization and setup."""
 
-    def test_init_with_default_files(self, temp_workspace, mock_compiler, mock_database):
+    def test_init_with_default_files(
+        self, temp_workspace, mock_compiler, mock_database
+    ):
         """Should initialize with default nested file structure."""
-        with patch("src.app.shared.constants.paths.get_workspace_file_path") as mock_path:
+        with patch(
+            "src.app.shared.constants.paths.get_workspace_file_path"
+        ) as mock_path:
             mock_path.side_effect = (
                 lambda workspace, test_type, filename: f"{workspace}/{test_type}/{filename}"
             )
@@ -98,11 +102,15 @@ class TestValidatorInitialization:
         assert validator.workspace_dir == str(temp_workspace)
         assert validator.test_type == "validator"
 
-    def test_init_with_config(self, temp_workspace, validator_files, mock_compiler, mock_database):
+    def test_init_with_config(
+        self, temp_workspace, validator_files, mock_compiler, mock_database
+    ):
         """Should accept configuration dictionary."""
         config = {"language": "java", "timeout": 10.0, "max_memory": 1024}
 
-        validator = ValidatorRunner(str(temp_workspace), files=validator_files, config=config)
+        validator = ValidatorRunner(
+            str(temp_workspace), files=validator_files, config=config
+        )
 
         assert validator.workspace_dir == str(temp_workspace)
 
@@ -173,7 +181,9 @@ class TestValidatorWorkerCreation:
     ):
         """Should pass execution commands from compiler."""
         validator = ValidatorRunner(str(temp_workspace), files=validator_files)
-        mock_compiler.get_execution_command.side_effect = lambda name: f"java {name}.class"
+        mock_compiler.get_execution_command.side_effect = (
+            lambda name: f"java {name}.class"
+        )
 
         worker = validator._create_test_worker(test_count=15)
 

@@ -165,7 +165,9 @@ class Benchmarker(BaseRunner):
         if hasattr(worker, "testCompleted"):
             worker.testCompleted.connect(self.testCompleted)
 
-    def _create_test_result(self, all_passed, test_results, passed_tests, failed_tests, total_time):
+    def _create_test_result(
+        self, all_passed, test_results, passed_tests, failed_tests, total_time
+    ):
         """
         Create benchmark-specific TestResult object.
 
@@ -197,12 +199,15 @@ class Benchmarker(BaseRunner):
                     if r.get("error_details", "").startswith("Runtime Error")
                 ),
                 "system_errors": sum(
-                    1 for r in test_results if "Execution error" in r.get("error_details", "")
+                    1
+                    for r in test_results
+                    if "Execution error" in r.get("error_details", "")
                 ),
             },
             "performance_metrics": {
                 "avg_execution_time": (
-                    sum(r.get("execution_time", 0) for r in test_results) / len(test_results)
+                    sum(r.get("execution_time", 0) for r in test_results)
+                    / len(test_results)
                     if test_results
                     else 0
                 ),
@@ -210,11 +215,14 @@ class Benchmarker(BaseRunner):
                     (r.get("execution_time", 0) for r in test_results), default=0
                 ),
                 "avg_memory_usage": (
-                    sum(r.get("memory_used", 0) for r in test_results) / len(test_results)
+                    sum(r.get("memory_used", 0) for r in test_results)
+                    / len(test_results)
                     if test_results
                     else 0
                 ),
-                "max_memory_usage": max((r.get("memory_used", 0) for r in test_results), default=0),
+                "max_memory_usage": max(
+                    (r.get("memory_used", 0) for r in test_results), default=0
+                ),
             },
             "failed_tests": [r for r in test_results if not r.get("passed", True)],
         }
@@ -234,7 +242,9 @@ class Benchmarker(BaseRunner):
             mismatch_analysis=json.dumps(benchmark_analysis),
         )
 
-    def run_benchmark_test(self, test_count, time_limit=1000, memory_limit=256, max_workers=None):
+    def run_benchmark_test(
+        self, test_count, time_limit=1000, memory_limit=256, max_workers=None
+    ):
         """
         Start benchmark tests - maintains original API.
 

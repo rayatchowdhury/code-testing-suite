@@ -28,7 +28,9 @@ class BaseTestCard(QFrame):
 
     clicked = Signal(int)  # Emits test number when clicked
 
-    def __init__(self, test_number: int, passed: bool, time: float, memory: float, parent=None):
+    def __init__(
+        self, test_number: int, passed: bool, time: float, memory: float, parent=None
+    ):
         """
         Initialize test card.
 

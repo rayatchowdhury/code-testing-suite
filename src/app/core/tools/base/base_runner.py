@@ -73,8 +73,12 @@ class BaseRunner(QObject):
     allTestsCompleted = Signal(bool)  # True if all passed
 
     # UI state change signals (for clean separation of concerns)
-    testingStarted = Signal()  # Emitted when test execution begins (UI can switch to test mode)
-    testingCompleted = Signal()  # Emitted when test execution ends (UI can restore normal mode)
+    testingStarted = (
+        Signal()
+    )  # Emitted when test execution begins (UI can switch to test mode)
+    testingCompleted = (
+        Signal()
+    )  # Emitted when test execution ends (UI can restore normal mode)
 
     def __init__(
         self,
@@ -97,7 +101,9 @@ class BaseRunner(QObject):
         super().__init__()
         self.workspace_dir = workspace_dir
         self.files = files_dict
-        self.test_type = test_type  # Used for both database tracking and file organization
+        self.test_type = (
+            test_type  # Used for both database tracking and file organization
+        )
         self.config = config or {}
 
         # Initialize compiler with config for multi-language support and nested structure
@@ -272,7 +278,9 @@ class BaseRunner(QObject):
                 return -1
 
             total_time = (datetime.now() - self.test_start_time).total_seconds()
-            passed_tests = sum(1 for result in test_results if result.get("passed", False))
+            passed_tests = sum(
+                1 for result in test_results if result.get("passed", False)
+            )
             failed_tests = len(test_results) - passed_tests
             all_passed = (failed_tests == 0) and (len(test_results) > 0)
 
@@ -371,7 +379,11 @@ class BaseRunner(QObject):
 
         # Clean up thread
         try:
-            if self.thread and hasattr(self.thread, "isRunning") and self.thread.isRunning():
+            if (
+                self.thread
+                and hasattr(self.thread, "isRunning")
+                and self.thread.isRunning()
+            ):
                 self.thread.quit()
                 if not self.thread.wait(3000):  # Wait up to 3 seconds
                     self.thread.terminate()

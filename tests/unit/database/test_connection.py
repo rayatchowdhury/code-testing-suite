@@ -273,7 +273,9 @@ class TestDatabaseConnectionThreadSafety:
 
         # Create test table
         with db.get_connection() as conn:
-            conn.execute("CREATE TABLE test_table (id INTEGER PRIMARY KEY, thread_id INTEGER)")
+            conn.execute(
+                "CREATE TABLE test_table (id INTEGER PRIMARY KEY, thread_id INTEGER)"
+            )
 
         errors = []
 
@@ -281,7 +283,9 @@ class TestDatabaseConnectionThreadSafety:
             try:
                 with db.get_connection() as conn:
                     # Each thread inserts its own record
-                    conn.execute("INSERT INTO test_table (thread_id) VALUES (?)", (thread_id,))
+                    conn.execute(
+                        "INSERT INTO test_table (thread_id) VALUES (?)", (thread_id,)
+                    )
             except Exception as e:
                 errors.append(e)
 

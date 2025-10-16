@@ -41,7 +41,9 @@ class CPPSyntaxHighlighter(QSyntaxHighlighter):
         number_format.setForeground(QBrush(QColor(STYLES["number"])))
         self.highlighting_rules.append(
             (
-                QRegularExpression("\\b[0-9]+\\.[0-9]+\\b|\\b0x[0-9A-Fa-f]+\\b|\\b[0-9]+\\b"),
+                QRegularExpression(
+                    "\\b[0-9]+\\.[0-9]+\\b|\\b0x[0-9A-Fa-f]+\\b|\\b[0-9]+\\b"
+                ),
                 number_format,
             )
         )
@@ -64,10 +66,14 @@ class CPPSyntaxHighlighter(QSyntaxHighlighter):
         # Strings with escape handling
         string_format = QTextCharFormat()
         string_format.setForeground(QBrush(QColor(STYLES["string"])))
-        self.highlighting_rules.append((QRegularExpression('"(?:[^"\\\\]|\\\\.)*"'), string_format))
+        self.highlighting_rules.append(
+            (QRegularExpression('"(?:[^"\\\\]|\\\\.)*"'), string_format)
+        )
 
         # Character literals
-        self.highlighting_rules.append((QRegularExpression("'(?:[^'\\\\]|\\\\.)*'"), string_format))
+        self.highlighting_rules.append(
+            (QRegularExpression("'(?:[^'\\\\]|\\\\.)*'"), string_format)
+        )
 
         # Constants
         constant_format = QTextCharFormat()
@@ -169,7 +175,8 @@ class CPPSyntaxHighlighter(QSyntaxHighlighter):
             "xor_eq",
         ]
         self.highlighting_rules.extend(
-            (QRegularExpression(f"\\b{keyword}\\b"), keyword_format) for keyword in keywords
+            (QRegularExpression(f"\\b{keyword}\\b"), keyword_format)
+            for keyword in keywords
         )
 
         # Operators
@@ -205,15 +212,21 @@ class CPPSyntaxHighlighter(QSyntaxHighlighter):
 
         # Add operators as a single pattern
         operator_pattern = "|".join(map(re.escape, operators))
-        self.highlighting_rules.append((QRegularExpression(operator_pattern), operator_format))
+        self.highlighting_rules.append(
+            (QRegularExpression(operator_pattern), operator_format)
+        )
 
         # Add braces separately
-        self.highlighting_rules.append((QRegularExpression(r"[\{\}\(\)\[\]]"), operator_format))
+        self.highlighting_rules.append(
+            (QRegularExpression(r"[\{\}\(\)\[\]]"), operator_format)
+        )
 
         # Preprocessor directives
         preprocessor_format = QTextCharFormat()
         preprocessor_format.setForeground(QBrush(QColor(STYLES["preprocessor"])))
-        self.highlighting_rules.append((QRegularExpression("#[A-Za-z]+"), preprocessor_format))
+        self.highlighting_rules.append(
+            (QRegularExpression("#[A-Za-z]+"), preprocessor_format)
+        )
 
         # Comments
         self.comment_format = QTextCharFormat()
@@ -221,7 +234,9 @@ class CPPSyntaxHighlighter(QSyntaxHighlighter):
         self.comment_format.setFontItalic(True)
 
         # Single-line comments
-        self.highlighting_rules.append((QRegularExpression("//[^\n]*"), self.comment_format))
+        self.highlighting_rules.append(
+            (QRegularExpression("//[^\n]*"), self.comment_format)
+        )
 
         # Multi-line comments (as member variables for use in highlightBlock)
         self.comment_start = QRegularExpression("/\\*")
@@ -369,7 +384,8 @@ class PythonSyntaxHighlighter(QSyntaxHighlighter):
             "yield",
         ]
         self.highlighting_rules.extend(
-            (QRegularExpression(f"\\b{keyword}\\b"), keyword_format) for keyword in keywords
+            (QRegularExpression(f"\\b{keyword}\\b"), keyword_format)
+            for keyword in keywords
         )
 
         # Numbers
@@ -478,7 +494,8 @@ class JavaSyntaxHighlighter(QSyntaxHighlighter):
             "null",
         ]
         self.highlighting_rules.extend(
-            (QRegularExpression(f"\\b{keyword}\\b"), keyword_format) for keyword in keywords
+            (QRegularExpression(f"\\b{keyword}\\b"), keyword_format)
+            for keyword in keywords
         )
 
         # Numbers
@@ -497,7 +514,9 @@ class JavaSyntaxHighlighter(QSyntaxHighlighter):
         self.comment_format.setFontItalic(True)
 
         # Single-line comments
-        self.highlighting_rules.append((QRegularExpression("//[^\n]*"), self.comment_format))
+        self.highlighting_rules.append(
+            (QRegularExpression("//[^\n]*"), self.comment_format)
+        )
 
         # Multi-line comments
         self.comment_start = QRegularExpression("/\\*")

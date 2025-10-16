@@ -154,7 +154,9 @@ class DatabaseConnection:
                 # Corrupted database raises DatabaseError, convert to ConnectionError
                 self._connection.rollback()
                 logger.error(f"Transaction rolled back (corrupted database): {e}")
-                raise ConnectionError(f"Database operation failed (corrupted database): {e}") from e
+                raise ConnectionError(
+                    f"Database operation failed (corrupted database): {e}"
+                ) from e
             except Exception as e:
                 self._connection.rollback()
                 logger.error(f"Transaction rolled back: {e}")

@@ -104,7 +104,9 @@ class TestBasicComparison:
 
         # Compile all files
         compile_results = []
-        comparator.compilationFinished.connect(lambda success: compile_results.append(success))
+        comparator.compilationFinished.connect(
+            lambda success: compile_results.append(success)
+        )
 
         comparator.compile_all()
 
@@ -161,7 +163,9 @@ class TestBasicComparison:
 
         # Compile
         compile_results = []
-        comparator.compilationFinished.connect(lambda success: compile_results.append(success))
+        comparator.compilationFinished.connect(
+            lambda success: compile_results.append(success)
+        )
         comparator.compile_all()
 
         timeout = 30
@@ -213,7 +217,9 @@ class TestBasicComparison:
 
         # Compile (Python "compilation" just validates files exist)
         compile_results = []
-        comparator.compilationFinished.connect(lambda success: compile_results.append(success))
+        comparator.compilationFinished.connect(
+            lambda success: compile_results.append(success)
+        )
         comparator.compile_all()
 
         timeout = 30
@@ -227,7 +233,9 @@ class TestBasicComparison:
         # Run tests
         test_results = []
         comparator.testCompleted.connect(
-            lambda num, passed, inp, correct, test, time, mem: test_results.append(passed)
+            lambda num, passed, inp, correct, test, time, mem: test_results.append(
+                passed
+            )
         )
 
         all_tests_results = []
@@ -251,7 +259,9 @@ class TestBasicComparison:
 class TestDatabaseIntegration:
     """Test database persistence for comparison results."""
 
-    def test_saves_comparison_results_to_database(self, qapp, temp_db, cpp_comparator_workspace):
+    def test_saves_comparison_results_to_database(
+        self, qapp, temp_db, cpp_comparator_workspace
+    ):
         """Should save comparison test results to database."""
         # Create comparator with custom DB
         comparator = Comparator(str(cpp_comparator_workspace))
@@ -259,7 +269,9 @@ class TestDatabaseIntegration:
 
         # Compile and run tests
         compile_results = []
-        comparator.compilationFinished.connect(lambda success: compile_results.append(success))
+        comparator.compilationFinished.connect(
+            lambda success: compile_results.append(success)
+        )
         comparator.compile_all()
 
         timeout = 30
@@ -309,7 +321,9 @@ class TestDatabaseIntegration:
 
         # Compile and run
         compile_results = []
-        comparator.compilationFinished.connect(lambda success: compile_results.append(success))
+        comparator.compilationFinished.connect(
+            lambda success: compile_results.append(success)
+        )
         comparator.compile_all()
 
         timeout = 30
@@ -372,7 +386,9 @@ class TestDatabaseIntegration:
 
         # Compile and run
         compile_results = []
-        comparator.compilationFinished.connect(lambda success: compile_results.append(success))
+        comparator.compilationFinished.connect(
+            lambda success: compile_results.append(success)
+        )
         comparator.compile_all()
 
         timeout = 30
@@ -426,7 +442,9 @@ class TestMetricsTracking:
 
         # Compile
         compile_results = []
-        comparator.compilationFinished.connect(lambda success: compile_results.append(success))
+        comparator.compilationFinished.connect(
+            lambda success: compile_results.append(success)
+        )
         comparator.compile_all()
 
         timeout = 30
@@ -438,7 +456,9 @@ class TestMetricsTracking:
         # Run tests and collect metrics
         test_metrics = []
         comparator.testCompleted.connect(
-            lambda num, passed, inp, correct, test: test_metrics.append({"passed": passed})
+            lambda num, passed, inp, correct, test: test_metrics.append(
+                {"passed": passed}
+            )
         )
 
         all_tests_results = []
@@ -461,14 +481,18 @@ class TestMetricsTracking:
             # Just verify test completed
             assert "passed" in metric
 
-    def test_tracks_average_times_in_analysis(self, qapp, temp_db, cpp_comparator_workspace):
+    def test_tracks_average_times_in_analysis(
+        self, qapp, temp_db, cpp_comparator_workspace
+    ):
         """Should calculate average times in mismatch analysis."""
         comparator = Comparator(str(cpp_comparator_workspace))
         comparator.db_manager = temp_db
 
         # Compile and run
         compile_results = []
-        comparator.compilationFinished.connect(lambda success: compile_results.append(success))
+        comparator.compilationFinished.connect(
+            lambda success: compile_results.append(success)
+        )
         comparator.compile_all()
 
         timeout = 30
@@ -514,7 +538,9 @@ class TestIOFileManagement:
 
         # Compile
         compile_results = []
-        comparator.compilationFinished.connect(lambda success: compile_results.append(success))
+        comparator.compilationFinished.connect(
+            lambda success: compile_results.append(success)
+        )
         comparator.compile_all()
 
         timeout = 30
@@ -558,8 +584,12 @@ class TestIOFileManagement:
 
             # Verify files have content
             assert input_file.read_text().strip() != "", f"Input {test_num} is empty"
-            assert test_output.read_text().strip() != "", f"Test output {test_num} is empty"
-            assert correct_output.read_text().strip() != "", f"Correct output {test_num} is empty"
+            assert (
+                test_output.read_text().strip() != ""
+            ), f"Test output {test_num} is empty"
+            assert (
+                correct_output.read_text().strip() != ""
+            ), f"Correct output {test_num} is empty"
 
 
 class TestParallelExecution:
@@ -571,7 +601,9 @@ class TestParallelExecution:
 
         # Compile
         compile_results = []
-        comparator.compilationFinished.connect(lambda success: compile_results.append(success))
+        comparator.compilationFinished.connect(
+            lambda success: compile_results.append(success)
+        )
         comparator.compile_all()
 
         timeout = 30
@@ -582,7 +614,9 @@ class TestParallelExecution:
 
         # Run with explicit max_workers
         test_start_times = []
-        comparator.testStarted.connect(lambda current, total: test_start_times.append(time.time()))
+        comparator.testStarted.connect(
+            lambda current, total: test_start_times.append(time.time())
+        )
 
         all_tests_results = []
         comparator.allTestsCompleted.connect(
@@ -646,7 +680,9 @@ int main() { std::cout << "output" << std::endl; return 0; }
 
         # Compilation should fail
         compile_results = []
-        comparator.compilationFinished.connect(lambda success: compile_results.append(success))
+        comparator.compilationFinished.connect(
+            lambda success: compile_results.append(success)
+        )
         comparator.compile_all()
 
         timeout = 30
@@ -698,7 +734,9 @@ int main() { std::cout << "output" << std::endl; return 0; }
 
         # Compile should succeed
         compile_results = []
-        comparator.compilationFinished.connect(lambda success: compile_results.append(success))
+        comparator.compilationFinished.connect(
+            lambda success: compile_results.append(success)
+        )
         comparator.compile_all()
 
         timeout = 30
@@ -715,7 +753,9 @@ int main() { std::cout << "output" << std::endl; return 0; }
 class TestCompleteWorkflow:
     """Test complete end-to-end workflow."""
 
-    def test_complete_comparison_workflow(self, qapp, temp_db, cpp_comparator_workspace):
+    def test_complete_comparison_workflow(
+        self, qapp, temp_db, cpp_comparator_workspace
+    ):
         """Should complete full workflow: compile → test → save → retrieve."""
         # Step 1: Create comparator
         comparator = Comparator(str(cpp_comparator_workspace))
@@ -723,7 +763,9 @@ class TestCompleteWorkflow:
 
         # Step 2: Compile
         compile_results = []
-        comparator.compilationFinished.connect(lambda success: compile_results.append(success))
+        comparator.compilationFinished.connect(
+            lambda success: compile_results.append(success)
+        )
         comparator.compile_all()
 
         timeout = 30

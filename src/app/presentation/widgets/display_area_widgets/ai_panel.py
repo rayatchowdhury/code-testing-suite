@@ -185,7 +185,9 @@ class AIPanel(QWidget):
         for action, btn in self.action_buttons.items():
             if action in signal_map:
                 btn.clicked.connect(
-                    lambda checked, s=signal_map[action]: self._emit_with_current_code(s)
+                    lambda checked, s=signal_map[action]: self._emit_with_current_code(
+                        s
+                    )
                 )
 
         # Connect custom command signal
@@ -267,7 +269,9 @@ class AIPanel(QWidget):
             for btn in self.action_buttons.values():
                 if is_ready:
                     btn.setEnabled(True)
-                    btn.setToolTip(btn.toolTip().split("\n")[0])  # Keep original tooltip
+                    btn.setToolTip(
+                        btn.toolTip().split("\n")[0]
+                    )  # Keep original tooltip
                 else:
                     btn.setEnabled(False)
                     original_tooltip = btn.toolTip().split("\n")[0]

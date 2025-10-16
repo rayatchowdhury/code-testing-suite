@@ -122,7 +122,9 @@ class CodeEditorWindow(SidebarWindowBase):
 
         # Check for any unsaved changes
         has_unsaved = any(
-            self.editor_display.tab_widget.widget(i).editor.codeEditor.document().isModified()
+            self.editor_display.tab_widget.widget(i)
+            .editor.codeEditor.document()
+            .isModified()
             for i in range(self.editor_display.tab_widget.count())
         )
 
@@ -182,11 +184,15 @@ class CodeEditorWindow(SidebarWindowBase):
         unsaved_count = sum(
             1
             for i in range(self.editor_display.tab_widget.count())
-            if self.editor_display.tab_widget.widget(i).editor.codeEditor.document().isModified()
+            if self.editor_display.tab_widget.widget(i)
+            .editor.codeEditor.document()
+            .isModified()
         )
 
         if unsaved_count > 1:
-            message = f"You have {unsaved_count} unsaved files. Do you want to save them?"
+            message = (
+                f"You have {unsaved_count} unsaved files. Do you want to save them?"
+            )
         else:
             message = "Do you want to save your changes?"
 
@@ -222,7 +228,10 @@ class CodeEditorWindow(SidebarWindowBase):
     def open_file(self):
         """Handle opening a file with improved logic"""
         # Check for unsaved changes first
-        if self.editor_display.has_editor and self.editor_display.isCurrentFileModified():
+        if (
+            self.editor_display.has_editor
+            and self.editor_display.isCurrentFileModified()
+        ):
             if self.handle_unsaved_changes() == QMessageBox.Cancel:
                 return
 
@@ -251,7 +260,9 @@ class CodeEditorWindow(SidebarWindowBase):
         editor.codeEditor.setPlainText(content or "")
         editor.codeEditor._setup_syntax_highlighting(file_path)
         editor.codeEditor.document().setModified(False)
-        self.editor_display.updateTabTitle(self.editor_display.tab_widget.currentIndex())
+        self.editor_display.updateTabTitle(
+            self.editor_display.tab_widget.currentIndex()
+        )
 
     def _create_new_tab(self, file_path, content):
         new_tab = self.editor_display.add_new_tab(os.path.basename(file_path))
@@ -325,11 +336,15 @@ class CodeEditorWindow(SidebarWindowBase):
                         continue
 
                     # Create new tab for each file
-                    new_tab = self.editor_display.add_new_tab(os.path.basename(file_path))
+                    new_tab = self.editor_display.add_new_tab(
+                        os.path.basename(file_path)
+                    )
                     new_tab.editor.currentFilePath = file_path
                     new_tab.editor.codeEditor.setPlainText(content)
                     new_tab.editor.codeEditor._setup_syntax_highlighting(file_path)
-                    self.editor_display.updateTabTitle(self.editor_display.tab_widget.count() - 1)
+                    self.editor_display.updateTabTitle(
+                        self.editor_display.tab_widget.count() - 1
+                    )
 
         except Exception as e:
             print(f"Error loading editor state: {e}")

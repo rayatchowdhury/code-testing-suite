@@ -133,7 +133,10 @@ class FilesSnapshot:
                 }
 
                 # Set primary language from first main file
-                if not new_snapshot.primary_language or new_snapshot.primary_language == "cpp":
+                if (
+                    not new_snapshot.primary_language
+                    or new_snapshot.primary_language == "cpp"
+                ):
                     new_snapshot.primary_language = lang
 
         # Handle additional_files
@@ -181,7 +184,11 @@ class FilesSnapshot:
         Returns:
             str: Language code ('cpp', 'py', 'java')
         """
-        if "import java" in content or "public class" in content or "System.out" in content:
+        if (
+            "import java" in content
+            or "public class" in content
+            or "System.out" in content
+        ):
             return "java"
         if "def " in content or "import " in content or "print(" in content:
             return "py"

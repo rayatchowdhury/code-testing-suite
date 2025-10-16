@@ -123,14 +123,18 @@ def create_sample_test_result(test_type: str = "comparator", **kwargs) -> TestRe
 
     for key, value in kwargs.items():
         if key == "passed_tests" or key == "failed_tests":
-            builder.with_results(kwargs.get("passed_tests", 8), kwargs.get("failed_tests", 2))
+            builder.with_results(
+                kwargs.get("passed_tests", 8), kwargs.get("failed_tests", 2)
+            )
         elif hasattr(builder, f"with_{key}"):
             getattr(builder, f"with_{key}")(value)
 
     return builder.build()
 
 
-def create_test_result_series(count: int = 5, test_type: str = "comparator") -> List[TestResult]:
+def create_test_result_series(
+    count: int = 5, test_type: str = "comparator"
+) -> List[TestResult]:
     """
     Create a series of test results over time.
 

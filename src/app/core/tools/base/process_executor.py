@@ -95,7 +95,9 @@ class ProcessExecutor:
             if input_text is not None:
                 # Use communicate for input handling - it properly closes stdin
                 try:
-                    stdout, stderr = process.communicate(input=input_text, timeout=timeout)
+                    stdout, stderr = process.communicate(
+                        input=input_text, timeout=timeout
+                    )
                     timed_out = False
                 except subprocess.TimeoutExpired:
                     process.kill()
@@ -216,7 +218,9 @@ class ProcessExecutor:
                     updated_command.append(arg)
 
             # Execute the command
-            result = ProcessExecutor.run_with_monitoring(updated_command, timeout=timeout)
+            result = ProcessExecutor.run_with_monitoring(
+                updated_command, timeout=timeout
+            )
 
             return result, input_temp_path, output_temp_path
 

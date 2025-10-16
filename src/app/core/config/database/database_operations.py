@@ -25,7 +25,9 @@ class DatabaseOperations:
 • Sessions: {stats['oldest_session']} → {stats['newest_session']}"""
                 self.parent.db_stats_label.setText(stats_text)
             else:
-                self.parent.db_stats_label.setText("❌ Could not retrieve database statistics")
+                self.parent.db_stats_label.setText(
+                    "❌ Could not retrieve database statistics"
+                )
         except Exception as e:
             self.parent.db_stats_label.setText(f"❌ Error retrieving stats: {str(e)}")
 
@@ -35,7 +37,9 @@ class DatabaseOperations:
             # Get current stats
             stats = self.database_manager.get_database_stats()
             if not stats:
-                QMessageBox.warning(self.parent, "Error", "Could not retrieve database statistics")
+                QMessageBox.warning(
+                    self.parent, "Error", "Could not retrieve database statistics"
+                )
                 return
 
             # Show confirmation dialog
@@ -64,7 +68,8 @@ class DatabaseOperations:
 
                 if stats_before and stats_after:
                     deleted_tests = (
-                        stats_before["test_results_count"] - stats_after["test_results_count"]
+                        stats_before["test_results_count"]
+                        - stats_after["test_results_count"]
                     )
                     deleted_sessions = (
                         stats_before["sessions_count"] - stats_after["sessions_count"]
@@ -86,7 +91,9 @@ class DatabaseOperations:
                     )
 
         except Exception as e:
-            QMessageBox.critical(self.parent, "Cleanup Error", f"Failed to cleanup data: {str(e)}")
+            QMessageBox.critical(
+                self.parent, "Cleanup Error", f"Failed to cleanup data: {str(e)}"
+            )
 
     def delete_all_data(self):
         """Delete all data with strong confirmation"""
@@ -94,11 +101,15 @@ class DatabaseOperations:
             # Get current stats
             stats = self.database_manager.get_database_stats()
             if not stats:
-                QMessageBox.warning(self.parent, "Error", "Could not retrieve database statistics")
+                QMessageBox.warning(
+                    self.parent, "Error", "Could not retrieve database statistics"
+                )
                 return
 
             if stats["test_results_count"] == 0 and stats["sessions_count"] == 0:
-                QMessageBox.information(self.parent, "No Data", "Database is already empty")
+                QMessageBox.information(
+                    self.parent, "No Data", "Database is already empty"
+                )
                 return
 
             # First confirmation
@@ -128,7 +139,9 @@ class DatabaseOperations:
             )
 
             if not ok or text.strip() != "DELETE ALL":
-                QMessageBox.information(self.parent, "Cancelled", "Data deletion cancelled")
+                QMessageBox.information(
+                    self.parent, "Cancelled", "Data deletion cancelled"
+                )
                 return
 
             # Perform deletion
@@ -151,7 +164,9 @@ class DatabaseOperations:
                 )
 
         except Exception as e:
-            QMessageBox.critical(self.parent, "Deletion Error", f"Failed to delete data: {str(e)}")
+            QMessageBox.critical(
+                self.parent, "Deletion Error", f"Failed to delete data: {str(e)}"
+            )
 
     def optimize_database(self):
         """Optimize database by reclaiming unused space"""
@@ -159,7 +174,9 @@ class DatabaseOperations:
             # Get current stats
             stats = self.database_manager.get_database_stats()
             if not stats:
-                QMessageBox.warning(self.parent, "Error", "Could not retrieve database statistics")
+                QMessageBox.warning(
+                    self.parent, "Error", "Could not retrieve database statistics"
+                )
                 return
 
             current_size = stats["database_size_mb"]

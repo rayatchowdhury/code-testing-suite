@@ -143,7 +143,9 @@ class DatabaseManager:
 
     # Static methods - delegate to service
     @staticmethod
-    def create_files_snapshot(workspace_dir: str, test_type: str = constants.TEST_TYPE_COMPARISON):
+    def create_files_snapshot(
+        workspace_dir: str, test_type: str = constants.TEST_TYPE_COMPARISON
+    ):
         """Create files snapshot."""
         return FilesSnapshotService.create_snapshot(workspace_dir, test_type)
 

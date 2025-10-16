@@ -51,7 +51,9 @@ class TestComparisonWorkerInitialization:
         """Should accept custom max_workers parameter."""
         executables = {"generator": "", "test": "", "correct": ""}
 
-        worker = ComparisonTestWorker(str(temp_workspace), executables, test_count=5, max_workers=3)
+        worker = ComparisonTestWorker(
+            str(temp_workspace), executables, test_count=5, max_workers=3
+        )
 
         assert worker.max_workers == 3
 
@@ -173,7 +175,9 @@ class TestComparisonWorkerExecution:
 
     @patch("subprocess.Popen")
     @patch("psutil.Process")
-    def test_normalizes_whitespace_for_comparison(self, mock_psutil, mock_popen, temp_workspace):
+    def test_normalizes_whitespace_for_comparison(
+        self, mock_psutil, mock_popen, temp_workspace
+    ):
         """Should strip whitespace when comparing outputs."""
         gen_proc = Mock(returncode=0, poll=Mock(return_value=0), pid=1001)
         gen_proc.communicate.return_value = ("input", "")
@@ -260,7 +264,9 @@ class TestComparisonWorkerErrorHandling:
 
     @patch("subprocess.Popen")
     @patch("psutil.Process")
-    def test_handles_test_solution_failure(self, mock_psutil, mock_popen, temp_workspace):
+    def test_handles_test_solution_failure(
+        self, mock_psutil, mock_popen, temp_workspace
+    ):
         """Should create error result if test solution fails."""
         gen_proc = Mock(returncode=0, poll=Mock(return_value=0), pid=1001)
         gen_proc.communicate.return_value = ("input", "")
@@ -282,7 +288,9 @@ class TestComparisonWorkerErrorHandling:
 
     @patch("subprocess.Popen")
     @patch("psutil.Process")
-    def test_handles_correct_solution_failure(self, mock_psutil, mock_popen, temp_workspace):
+    def test_handles_correct_solution_failure(
+        self, mock_psutil, mock_popen, temp_workspace
+    ):
         """Should create error result if correct solution fails."""
         gen_proc = Mock(returncode=0, poll=Mock(return_value=0), pid=1001)
         gen_proc.communicate.return_value = ("input", "")
@@ -473,7 +481,9 @@ class TestComparisonWorkerResultStorage:
 
     @patch("subprocess.Popen")
     @patch("psutil.Process")
-    def test_result_contains_full_outputs(self, mock_psutil, mock_popen, temp_workspace):
+    def test_result_contains_full_outputs(
+        self, mock_psutil, mock_popen, temp_workspace
+    ):
         """Should store full outputs for database."""
         gen_proc = Mock(returncode=0, poll=Mock(return_value=0), pid=1001)
         gen_proc.communicate.return_value = ("input" * 100, "")  # Long input

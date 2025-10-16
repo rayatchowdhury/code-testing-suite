@@ -49,7 +49,8 @@ class TestConsoleInitialization:
 
         assert hasattr(console, "compile_run_btn")
         assert (
-            "Compile" in console.compile_run_btn.text() or "Run" in console.compile_run_btn.text()
+            "Compile" in console.compile_run_btn.text()
+            or "Run" in console.compile_run_btn.text()
         )
 
 

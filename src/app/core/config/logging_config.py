@@ -71,7 +71,9 @@ def setup_logging(log_level=logging.DEBUG, log_to_console=True, log_to_file=True
 
     # Log startup message
     root_logger.info("=" * 60)
-    root_logger.info(f"Logging initialized at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    root_logger.info(
+        f"Logging initialized at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+    )
     root_logger.info(f"Log level: {logging.getLevelName(log_level)}")
     root_logger.info(f"Log directory: {log_dir.absolute()}")
     root_logger.info("=" * 60)

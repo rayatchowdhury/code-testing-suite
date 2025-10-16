@@ -37,7 +37,9 @@ class DatabaseMaintenanceService:
             cursor = conn.cursor()
 
             # Clean old test results
-            cursor.execute("DELETE FROM test_results WHERE timestamp < ?", (cutoff_date,))
+            cursor.execute(
+                "DELETE FROM test_results WHERE timestamp < ?", (cutoff_date,)
+            )
             test_rows_deleted = cursor.rowcount
 
             # Clean old sessions

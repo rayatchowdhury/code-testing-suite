@@ -68,12 +68,16 @@ class TestCaseDetailWidget(QWidget):
         layout.setSpacing(12)
 
         # Test case header
-        header = QLabel(f"Test Case #{self.test_case_data.get('test_number', 'Unknown')}")
+        header = QLabel(
+            f"Test Case #{self.test_case_data.get('test_number', 'Unknown')}"
+        )
         header.setStyleSheet(RESULTS_LABEL_TITLE_STYLE)
         layout.addWidget(header)
 
         # Status indicator
-        status = "✅ PASSED" if self.test_case_data.get("passed", False) else "❌ FAILED"
+        status = (
+            "✅ PASSED" if self.test_case_data.get("passed", False) else "❌ FAILED"
+        )
         status_label = QLabel(status)
         status_color = (
             MATERIAL_COLORS["primary"]
@@ -85,7 +89,9 @@ class TestCaseDetailWidget(QWidget):
 
         # Execution details
         if "execution_time" in self.test_case_data:
-            time_label = QLabel(f"Execution Time: {self.test_case_data['execution_time']:.4f}s")
+            time_label = QLabel(
+                f"Execution Time: {self.test_case_data['execution_time']:.4f}s"
+            )
             time_label.setStyleSheet(RESULTS_LABEL_DETAILS_STYLE)
             layout.addWidget(time_label)
 
@@ -144,7 +150,9 @@ class TestCaseDetailWidget(QWidget):
                     layout.addWidget(expected_label)
 
                     expected_text = QTextEdit()
-                    expected_text.setPlainText(str(self.test_case_data["correct_output"]))
+                    expected_text.setPlainText(
+                        str(self.test_case_data["correct_output"])
+                    )
                     expected_text.setMaximumHeight(150)
                     expected_text.setReadOnly(True)
                     expected_text.setStyleSheet(RESULTS_TEXT_EDIT_STYLE)
@@ -157,16 +165,18 @@ class TestCaseDetailWidget(QWidget):
                     layout.addWidget(actual_label)
 
                     actual_text = QTextEdit()
-                    actual_text.setPlainText(str(self.test_case_data.get("test_output", "")))
+                    actual_text.setPlainText(
+                        str(self.test_case_data.get("test_output", ""))
+                    )
                     actual_text.setMaximumHeight(150)
                     actual_text.setReadOnly(True)
                     actual_text.setStyleSheet(RESULTS_TEXT_EDIT_STYLE)
                     layout.addWidget(actual_text)
             else:
                 # For passed tests, just show output
-                output_data = self.test_case_data.get("test_output") or self.test_case_data.get(
-                    "output", ""
-                )
+                output_data = self.test_case_data.get(
+                    "test_output"
+                ) or self.test_case_data.get("output", "")
                 if output_data:
                     output_label = QLabel("Output:")
                     output_label.setStyleSheet(RESULTS_LABEL_DETAILS_STYLE)
@@ -217,7 +227,9 @@ class TestCaseDetailWidget(QWidget):
                 mismatch_data = {}
 
             # Summary statistics
-            if "summary" in mismatch_data and isinstance(mismatch_data["summary"], dict):
+            if "summary" in mismatch_data and isinstance(
+                mismatch_data["summary"], dict
+            ):
                 summary = mismatch_data["summary"]
                 stats_widget = QWidget()
                 stats_widget.setStyleSheet(RESULTS_CARD_STYLE)
@@ -236,8 +248,12 @@ class TestCaseDetailWidget(QWidget):
                     stats_info.append(
                         f"Line differences: {summary.get('total_line_differences', 0)}"
                     )
-                    stats_info.append(f"Expected length: {summary.get('expected_length', 0)} chars")
-                    stats_info.append(f"Actual length: {summary.get('actual_length', 0)} chars")
+                    stats_info.append(
+                        f"Expected length: {summary.get('expected_length', 0)} chars"
+                    )
+                    stats_info.append(
+                        f"Actual length: {summary.get('actual_length', 0)} chars"
+                    )
 
                     for info in stats_info:
                         info_label = QLabel(info)
@@ -263,10 +279,14 @@ class TestCaseDetailWidget(QWidget):
 
                     diff_table = QTableWidget()
                     diff_table.setColumnCount(4)
-                    diff_table.setHorizontalHeaderLabels(["Line", "Type", "Expected", "Actual"])
+                    diff_table.setHorizontalHeaderLabels(
+                        ["Line", "Type", "Expected", "Actual"]
+                    )
                     diff_table.setStyleSheet(RESULTS_TABLE_SMALL_STYLE)
 
-                    line_diffs = mismatch_data["line_differences"][:50]  # Limit to 50 differences
+                    line_diffs = mismatch_data["line_differences"][
+                        :50
+                    ]  # Limit to 50 differences
                     diff_table.setRowCount(len(line_diffs))
 
                     for row, diff in enumerate(line_diffs):
@@ -276,7 +296,9 @@ class TestCaseDetailWidget(QWidget):
                                 0,
                                 QTableWidgetItem(str(diff.get("line_number", ""))),
                             )
-                            diff_table.setItem(row, 1, QTableWidgetItem(str(diff.get("type", ""))))
+                            diff_table.setItem(
+                                row, 1, QTableWidgetItem(str(diff.get("type", "")))
+                            )
                             diff_table.setItem(
                                 row, 2, QTableWidgetItem(str(diff.get("expected", "")))
                             )
@@ -361,7 +383,9 @@ class FilesSnapshotWidget(QWidget):
         layout.setContentsMargins(16, 16, 16, 16)
 
         error_label = QLabel(f"Error loading files data: {error_message}")
-        error_label.setStyleSheet(f"color: {MATERIAL_COLORS['error']}; font-weight: bold;")
+        error_label.setStyleSheet(
+            f"color: {MATERIAL_COLORS['error']}; font-weight: bold;"
+        )
         layout.addWidget(error_label)
 
     def _setup_ui(self):
@@ -416,7 +440,10 @@ class FilesSnapshotWidget(QWidget):
                     and self.files_data.additional_files
                 ):
                     additional_files = self.files_data.additional_files
-                elif isinstance(self.files_data, dict) and "additional_files" in self.files_data:
+                elif (
+                    isinstance(self.files_data, dict)
+                    and "additional_files" in self.files_data
+                ):
                     additional_files = self.files_data["additional_files"]
 
                 if isinstance(additional_files, dict):
@@ -429,7 +456,9 @@ class FilesSnapshotWidget(QWidget):
                             error_tab = QWidget()
                             error_layout = QVBoxLayout(error_tab)
                             error_label = QLabel(f"Error loading {filename}: {str(e)}")
-                            error_label.setStyleSheet(f"color: {MATERIAL_COLORS['error']};")
+                            error_label.setStyleSheet(
+                                f"color: {MATERIAL_COLORS['error']};"
+                            )
                             error_layout.addWidget(error_label)
                             tab_widget.addTab(error_tab, f"{filename} (Error)")
                             tabs_added += 1
@@ -577,7 +606,9 @@ class DetailedResultsWidget(QWidget):
 
             # Safe division for success rate
             if self.test_result.test_count > 0:
-                success_rate = (self.test_result.passed_tests / self.test_result.test_count) * 100
+                success_rate = (
+                    self.test_result.passed_tests / self.test_result.test_count
+                ) * 100
                 stats.append(f"Success Rate: {success_rate:.1f}%")
             else:
                 stats.append("Success Rate: N/A")
@@ -588,9 +619,9 @@ class DetailedResultsWidget(QWidget):
             # Safe timestamp parsing
             try:
                 if self.test_result.timestamp:
-                    formatted_date = datetime.fromisoformat(self.test_result.timestamp).strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    )
+                    formatted_date = datetime.fromisoformat(
+                        self.test_result.timestamp
+                    ).strftime("%Y-%m-%d %H:%M:%S")
                     stats.append(f"Date: {formatted_date}")
                 else:
                     stats.append("Date: Unknown")
@@ -695,7 +726,9 @@ class DetailedResultsWidget(QWidget):
 
         except Exception as e:
             error_label = QLabel(f"Critical error loading detailed data: {str(e)}")
-            error_label.setStyleSheet(f"color: {MATERIAL_COLORS['error']}; font-weight: bold;")
+            error_label.setStyleSheet(
+                f"color: {MATERIAL_COLORS['error']}; font-weight: bold;"
+            )
             self.analysis_container.addWidget(error_label)
 
     def _load_test_cases(self, test_details):
@@ -791,7 +824,9 @@ class DetailedResultsWidget(QWidget):
             perf = analysis_data["performance_summary"]
 
             if perf.get("average_time"):
-                avg_label = QLabel(f"Average Execution Time: {perf['average_time']:.4f}s")
+                avg_label = QLabel(
+                    f"Average Execution Time: {perf['average_time']:.4f}s"
+                )
                 avg_label.setStyleSheet(RESULTS_LABEL_DETAILS_STYLE)
                 layout.addWidget(avg_label)
 

@@ -72,7 +72,9 @@ class GeminiAI:
                 ai_settings = config_data.get("ai_settings", {})
                 if ai_settings:
                     self._api_key = ai_settings.get("gemini_api_key")
-                    self._model_name = ai_settings.get("preferred_model", "gemini-2.5-flash")
+                    self._model_name = ai_settings.get(
+                        "preferred_model", "gemini-2.5-flash"
+                    )
                     self._enabled = ai_settings.get("enabled", False)
 
         except Exception as e:
