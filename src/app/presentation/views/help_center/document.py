@@ -9,62 +9,53 @@ from PySide6.QtCore import *
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
+from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
 from .content import HelpSection
 
 
 # =============================================================================
-# THEME CONSTANTS
+# LOCAL CONSTANTS (using centralized MATERIAL_COLORS)
 # =============================================================================
 
-class Theme:
-    """Theme configuration for help center documents"""
-    
-    COLORS = {
-        "primary": "#F72585",
-        "text": "#FFFFFF",
-        "text_dim": "#B3B3B3",
-        "text_bright": "#e0e0e0",
-        "success": "#4CAF50",
-        "background_dark": "#1a1a1c",
-        "background_light": "#1e1e20",
-        "surface": "rgba(255, 255, 255, 0.03)",
-        "border": "#F72585",
-        "separator": "#F7258540",
-    }
-    
-    SPACING = {
-        "xs": 4,
-        "sm": 8,
-        "md": 16,
-        "lg": 24,
-        "xl": 32,
-    }
-    
-    FONTS = {
-        "family": "Consolas, 'Courier New', monospace",
-        "fallback": "'Segoe UI', system-ui, sans-serif",
-        "emoji": "Noto Color Emoji, Segoe UI Emoji, Apple Color Emoji, sans-serif",
-        "sizes": {
-            "title": 22,
-            "section_title": 14,
-            "prompt": 10,
-            "description": 11,
-            "icon": 18,
-        },
-    }
-    
-    # UI Constants
-    ANIMATION = {
-        "fade_duration": 300,
-        "fade_start_delay": 50,
-    }
-    
-    UI = {
-        "separator_height": 1,
-        "bullet_symbol": ">>",
-        "prompt_symbol": ">> ",
-        "icon_fallback": "▸",
-    }
+# Spacing constants
+SPACING = {
+    "xs": 4,
+    "sm": 8,
+    "md": 16,
+    "lg": 24,
+    "xl": 32,
+}
+
+# Font configuration
+FONTS = {
+    "family": "Consolas, 'Courier New', monospace",
+    "fallback": "'Segoe UI', system-ui, sans-serif",
+    "emoji": "Noto Color Emoji, Segoe UI Emoji, Apple Color Emoji, sans-serif",
+    "sizes": {
+        "title": 22,
+        "section_title": 14,
+        "prompt": 10,
+        "description": 11,
+        "icon": 18,
+    },
+}
+
+# Animation settings
+ANIMATION = {
+    "fade_duration": 300,
+    "fade_start_delay": 50,
+}
+
+# UI constants
+UI = {
+    "separator_height": 1,
+    "bullet_symbol": ">>",
+    "prompt_symbol": ">> ",
+    "icon_fallback": "▸",
+}
+
+# Surface color (semi-transparent overlay)
+SURFACE_COLOR = "rgba(255, 255, 255, 0.03)"
 
 
 # =============================================================================
@@ -108,11 +99,11 @@ class HelpDocument(QWidget):
             QWidget {{
                 background: qlineargradient(
                     x1:0, y1:0, x2:0, y2:1,
-                    stop:0 {Theme.COLORS['background_dark']},
-                    stop:1 {Theme.COLORS['background_light']}
+                    stop:0 #1a1a1c,
+                    stop:1 #1e1e20
                 );
-                color: {Theme.COLORS['text']};
-                font-family: {Theme.FONTS['fallback']};
+                color: {MATERIAL_COLORS['text']};
+                font-family: {FONTS['fallback']};
             }}
             
             QScrollArea#help_scroll {{
@@ -129,10 +120,10 @@ class HelpDocument(QWidget):
         """Setup fade-in entrance animation"""
         self.setWindowOpacity(0)
         anim = QPropertyAnimation(self, b"windowOpacity")
-        anim.setDuration(Theme.ANIMATION["fade_duration"])
+        anim.setDuration(ANIMATION["fade_duration"])
         anim.setStartValue(0)
         anim.setEndValue(1)
-        QTimer.singleShot(Theme.ANIMATION["fade_start_delay"], anim.start)
+        QTimer.singleShot(ANIMATION["fade_start_delay"], anim.start)
         self._fade_anim = anim  # Keep reference
 
 
@@ -154,25 +145,25 @@ class TerminalDocsWidget(HelpDocument):
         content.setObjectName("terminal_content")
         layout = QVBoxLayout(content)
         layout.setContentsMargins(
-            Theme.SPACING["lg"], 
-            Theme.SPACING["lg"], 
-            Theme.SPACING["lg"], 
-            Theme.SPACING["lg"]
+            SPACING["lg"], 
+            SPACING["lg"], 
+            SPACING["lg"], 
+            SPACING["lg"]
         )
         layout.setSpacing(0)
 
         self._add_header(layout)
         self._add_sections(layout)
 
-        # Apply content-specific styling
+        # Apply content-specific styling (using PRIMARY color from MATERIAL_COLORS for consistency)
         content.setStyleSheet(f"""
             QWidget#terminal_content {{
                 background: qlineargradient(
                     x1:0, y1:0, x2:0, y2:1,
-                    stop:0 {Theme.COLORS['background_dark']},
-                    stop:1 {Theme.COLORS['background_light']}
+                    stop:0 #1a1a1c,
+                    stop:1 #1e1e20
                 );
-                border: 2px solid {Theme.COLORS['border']};
+                border: 2px solid {MATERIAL_COLORS['primary']};
                 border-radius: 8px;
             }}
         """)
@@ -183,14 +174,14 @@ class TerminalDocsWidget(HelpDocument):
         """Add terminal-style header"""
         header = QWidget()
         h_layout = QVBoxLayout(header)
-        h_layout.setSpacing(Theme.SPACING["sm"])
+        h_layout.setSpacing(SPACING["sm"])
         h_layout.setContentsMargins(0, 0, 0, 0)
         
         # Terminal prompt
-        prompt = QLabel(Theme.UI["prompt_symbol"] + "HELP DOCUMENTATION")
+        prompt = QLabel(UI["prompt_symbol"] + "HELP DOCUMENTATION")
         prompt.setFont(self._create_font("prompt", QFont.Weight.Bold, mono=True))
         prompt.setStyleSheet(f"""
-            color: {Theme.COLORS['primary']};
+            color: {MATERIAL_COLORS['primary']};
             background: transparent;
             letter-spacing: 2px;
         """)
@@ -201,7 +192,7 @@ class TerminalDocsWidget(HelpDocument):
         title_label.setFont(self._create_font("title", QFont.Weight.ExtraBold, mono=True))
         title_label.setWordWrap(True)
         title_label.setStyleSheet(f"""
-            color: {Theme.COLORS['text']};
+            color: {MATERIAL_COLORS['text']};
             background: transparent;
             letter-spacing: 1px;
         """)
@@ -209,18 +200,18 @@ class TerminalDocsWidget(HelpDocument):
         
         # Separator
         sep = QFrame()
-        sep.setFixedHeight(Theme.UI["separator_height"])
-        sep.setStyleSheet(f"background: {Theme.COLORS['separator']}; border: none;")
+        sep.setFixedHeight(UI["separator_height"])
+        sep.setStyleSheet(f"background: {MATERIAL_COLORS['separator']}; border: none;")
         h_layout.addWidget(sep)
         
         layout.addWidget(header)
-        layout.addSpacing(Theme.SPACING["md"] + Theme.SPACING["xs"])
+        layout.addSpacing(SPACING["md"] + SPACING["xs"])
 
     def _add_sections(self, layout: QVBoxLayout):
         """Add all sections"""
         for i, section_data in enumerate(self.sections_data):
             if i > 0:
-                layout.addSpacing(Theme.SPACING["lg"])
+                layout.addSpacing(SPACING["lg"])
             
             section = self._create_section(
                 section_data.icon,
@@ -236,9 +227,9 @@ class TerminalDocsWidget(HelpDocument):
         section.setObjectName("terminal_section")
         section.setStyleSheet(f"""
             QFrame#terminal_section {{
-                background: {Theme.COLORS['surface']};
+                background: {SURFACE_COLOR};
                 border: 1px solid rgba(255, 255, 255, 0.15);
-                border-left: 3px solid {Theme.COLORS['primary']};
+                border-left: 3px solid {MATERIAL_COLORS['primary']};
                 border-radius: 8px;
                 padding: 16px;
             }}
@@ -255,16 +246,16 @@ class TerminalDocsWidget(HelpDocument):
         h_layout.setSpacing(10)
         
         # Icon
-        icon_label = QLabel(icon if len(icon) <= 2 else Theme.UI["icon_fallback"])
+        icon_label = QLabel(icon if len(icon) <= 2 else UI["icon_fallback"])
         icon_label.setFont(self._create_font("icon", mono=False, emoji=True))
-        icon_label.setStyleSheet(f"color: {Theme.COLORS['primary']}; background: transparent;")
+        icon_label.setStyleSheet(f"color: {MATERIAL_COLORS['primary']}; background: transparent;")
         h_layout.addWidget(icon_label)
         
         # Title
         title_label = QLabel(title.upper())
         title_label.setFont(self._create_font("section_title", QFont.Weight.Bold, mono=True))
         title_label.setStyleSheet(f"""
-            color: {Theme.COLORS['text']};
+            color: {MATERIAL_COLORS['text']};
             background: transparent;
             letter-spacing: 1px;
         """)
@@ -279,7 +270,7 @@ class TerminalDocsWidget(HelpDocument):
             content_label.setWordWrap(True)
             content_label.setFont(self._create_font("description", mono=False))
             content_label.setStyleSheet(f"""
-                color: {Theme.COLORS['text_dim']};
+                color: {MATERIAL_COLORS['text_dim']};
                 background: transparent;
                 line-height: 1.6;
             """)
@@ -291,19 +282,19 @@ class TerminalDocsWidget(HelpDocument):
                 item_widget = QWidget()
                 item_layout = QHBoxLayout(item_widget)
                 item_layout.setContentsMargins(0, 0, 0, 0)
-                item_layout.setSpacing(Theme.SPACING["sm"])
+                item_layout.setSpacing(SPACING["sm"])
                 
                 # Bullet
-                bullet = QLabel(Theme.UI["bullet_symbol"])
+                bullet = QLabel(UI["bullet_symbol"])
                 bullet.setFont(self._create_font("prompt", QFont.Weight.Bold, mono=True))
-                bullet.setStyleSheet(f"color: {Theme.COLORS['primary']}; background: transparent;")
+                bullet.setStyleSheet(f"color: {MATERIAL_COLORS['primary']}; background: transparent;")
                 item_layout.addWidget(bullet)
                 
                 # Text
                 text = QLabel(item)
                 text.setWordWrap(True)
                 text.setFont(self._create_font("description", mono=False))
-                text.setStyleSheet(f"color: {Theme.COLORS['text_bright']}; background: transparent;")
+                text.setStyleSheet(f"color: {MATERIAL_COLORS['text_bright']}; background: transparent;")
                 item_layout.addWidget(text, 1)
                 
                 s_layout.addWidget(item_widget)
@@ -313,11 +304,11 @@ class TerminalDocsWidget(HelpDocument):
     def _create_font(self, size_key: str, weight: QFont.Weight = QFont.Weight.Normal, mono: bool = True, emoji: bool = False) -> QFont:
         """Create font with specified parameters"""
         if emoji:
-            family = Theme.FONTS["emoji"]
+            family = FONTS["emoji"]
         else:
-            family = Theme.FONTS["family"] if mono else Theme.FONTS["fallback"]
+            family = FONTS["family"] if mono else FONTS["fallback"]
         font = QFont(family, -1, weight)
-        font.setPixelSize(Theme.FONTS["sizes"][size_key])
+        font.setPixelSize(FONTS["sizes"][size_key])
         return font
 
 

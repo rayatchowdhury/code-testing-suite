@@ -17,6 +17,19 @@ from PySide6.QtWidgets import (
 
 from src.app.presentation.styles.fonts.emoji import set_emoji_font
 from src.app.presentation.styles.style import MATERIAL_COLORS
+from src.app.presentation.styles.components.dialogs.test_detail_styles import (
+    TEST_DETAIL_DIALOG_STYLE,
+    TEST_DETAIL_METRICS_LABEL_STYLE,
+    TEST_DETAIL_METRICS_FRAME_STYLE,
+    TEST_DETAIL_CLOSE_BUTTON_STYLE,
+    TEST_DETAIL_SECTION_LABEL_STYLE,
+    TEST_DETAIL_TEXT_EDIT_MONOSPACE_STYLE,
+    get_test_label_style,
+    get_status_label_style,
+    get_header_frame_style,
+    get_validator_log_style,
+    get_performance_summary_style,
+)
 
 
 class TestDetailDialog(QDialog):
@@ -85,44 +98,18 @@ class TestDetailDialog(QDialog):
         layout.setContentsMargins(12, 12, 12, 12)
 
         test_label = QLabel(f"Test #{self.test_number}")
-        test_label.setStyleSheet(
-            """
-            font-weight: bold;
-            font-size: 18px;
-        """
-        )
+        test_label.setStyleSheet(get_test_label_style())
 
         status_text = "✓ Passed" if self.passed else "✗ Failed"
-        status_color = (
-            MATERIAL_COLORS["primary"] if self.passed else MATERIAL_COLORS["error"]
-        )
         status_label = QLabel(status_text)
-        status_label.setStyleSheet(
-            f"""
-            color: {status_color};
-            font-weight: bold;
-            font-size: 18px;
-        """
-        )
+        status_label.setStyleSheet(get_status_label_style(self.passed))
 
         layout.addWidget(test_label)
         layout.addStretch()
         layout.addWidget(status_label)
 
         # Style header
-        bg_color = (
-            MATERIAL_COLORS.get("primary_container", MATERIAL_COLORS["surface_variant"])
-            if self.passed
-            else MATERIAL_COLORS["error_container"]
-        )
-        header.setStyleSheet(
-            f"""
-            QFrame {{
-                background: {bg_color};
-                border-radius: 8px;
-            }}
-        """
-        )
+        header.setStyleSheet(get_header_frame_style(self.passed))
 
         return header
 
@@ -137,24 +124,12 @@ class TestDetailDialog(QDialog):
 
         for label in [time_label, memory_label]:
             set_emoji_font(label)
-            label.setStyleSheet(
-                """
-                font-size: 14px;
-                font-weight: 500;
-            """
-            )
+            label.setStyleSheet(TEST_DETAIL_METRICS_LABEL_STYLE)
             layout.addWidget(label)
 
         layout.addStretch()
 
-        metrics.setStyleSheet(
-            f"""
-            QFrame {{
-                background: {MATERIAL_COLORS['surface_variant']};
-                border-radius: 6px;
-            }}
-        """
-        )
+        metrics.setStyleSheet(TEST_DETAIL_METRICS_FRAME_STYLE)
 
         return metrics
 
@@ -177,22 +152,7 @@ class TestDetailDialog(QDialog):
         close_button = QPushButton("Close")
         close_button.setMinimumWidth(100)
         close_button.clicked.connect(self.accept)
-        close_button.setStyleSheet(
-            f"""
-            QPushButton {{
-                background: {MATERIAL_COLORS['primary']};
-                color: {MATERIAL_COLORS['on_primary']};
-                border: none;
-                border-radius: 6px;
-                padding: 10px 20px;
-                font-weight: bold;
-                font-size: 14px;
-            }}
-            QPushButton:hover {{
-                background: {MATERIAL_COLORS['primary_dark']};
-            }}
-        """
-        )
+        close_button.setStyleSheet(TEST_DETAIL_CLOSE_BUTTON_STYLE)
 
         layout.addWidget(close_button)
 
@@ -200,13 +160,7 @@ class TestDetailDialog(QDialog):
 
     def _apply_styling(self):
         """Apply dialog styling"""
-        self.setStyleSheet(
-            f"""
-            QDialog {{
-                background: {MATERIAL_COLORS['background']};
-            }}
-        """
-        )
+        self.setStyleSheet(TEST_DETAIL_DIALOG_STYLE)
 
 
 class ComparatorDetailDialog(TestDetailDialog):
@@ -251,7 +205,7 @@ class ComparatorDetailDialog(TestDetailDialog):
         # Input section
         input_label = QLabel("📥 Input:")
         set_emoji_font(input_label)
-        input_label.setStyleSheet("font-weight: bold; font-size: 14px;")
+        input_label.setStyleSheet(TEST_DETAIL_SECTION_LABEL_STYLE)
         layout.addWidget(input_label)
 
         input_edit = QTextEdit()
@@ -264,7 +218,7 @@ class ComparatorDetailDialog(TestDetailDialog):
         # Expected output section
         expected_label = QLabel("✅ Expected Output:")
         set_emoji_font(expected_label)
-        expected_label.setStyleSheet("font-weight: bold; font-size: 14px;")
+        expected_label.setStyleSheet(TEST_DETAIL_SECTION_LABEL_STYLE)
         layout.addWidget(expected_label)
 
         expected_edit = QTextEdit()
@@ -276,7 +230,7 @@ class ComparatorDetailDialog(TestDetailDialog):
         # Actual output section
         actual_label = QLabel("📤 Actual Output:")
         set_emoji_font(actual_label)
-        actual_label.setStyleSheet("font-weight: bold; font-size: 14px;")
+        actual_label.setStyleSheet(TEST_DETAIL_SECTION_LABEL_STYLE)
         layout.addWidget(actual_label)
 
         actual_edit = QTextEdit()
@@ -289,19 +243,7 @@ class ComparatorDetailDialog(TestDetailDialog):
 
     def _style_text_edit(self, edit: QTextEdit):
         """Apply consistent styling to text edits"""
-        edit.setStyleSheet(
-            f"""
-            QTextEdit {{
-                background: {MATERIAL_COLORS['surface']};
-                border: 1px solid {MATERIAL_COLORS['outline']};
-                border-radius: 6px;
-                padding: 8px;
-                color: {MATERIAL_COLORS['text_primary']};
-                font-family: 'Consolas', 'Courier New', monospace;
-                font-size: 12px;
-            }}
-        """
-        )
+        edit.setStyleSheet(TEST_DETAIL_TEXT_EDIT_MONOSPACE_STYLE)
 
 
 class ValidatorDetailDialog(TestDetailDialog):
@@ -352,7 +294,7 @@ class ValidatorDetailDialog(TestDetailDialog):
         # Section 1: Input
         input_label = QLabel("📥 Input:")
         set_emoji_font(input_label)
-        input_label.setStyleSheet("font-weight: bold; font-size: 14px;")
+        input_label.setStyleSheet(TEST_DETAIL_SECTION_LABEL_STYLE)
         layout.addWidget(input_label)
 
         input_edit = QTextEdit()
@@ -364,7 +306,7 @@ class ValidatorDetailDialog(TestDetailDialog):
         # Section 2: Output
         output_label = QLabel("📤 Output:")
         set_emoji_font(output_label)
-        output_label.setStyleSheet("font-weight: bold; font-size: 14px;")
+        output_label.setStyleSheet(TEST_DETAIL_SECTION_LABEL_STYLE)
         layout.addWidget(output_label)
 
         output_edit = QTextEdit()
@@ -376,7 +318,7 @@ class ValidatorDetailDialog(TestDetailDialog):
         # Section 3: Validator Log
         validator_label = QLabel("📋 Validator Log:")
         set_emoji_font(validator_label)
-        validator_label.setStyleSheet("font-weight: bold; font-size: 14px;")
+        validator_label.setStyleSheet(TEST_DETAIL_SECTION_LABEL_STYLE)
         layout.addWidget(validator_label)
 
         validator_edit = QTextEdit()
@@ -440,38 +382,10 @@ class ValidatorDetailDialog(TestDetailDialog):
         """
         if is_log:
             # Validator log gets special styling
-            bg_color = (
-                MATERIAL_COLORS["surface"] if self.passed else "#2d1f1f"
-            )  # Slightly reddish for failures
-            edit.setStyleSheet(
-                f"""
-                QTextEdit {{
-                    background: {bg_color};
-                    border: 1px solid {MATERIAL_COLORS['outline']};
-                    border-radius: 6px;
-                    padding: 12px;
-                    color: {MATERIAL_COLORS['text_primary']};
-                    font-family: 'Segoe UI', 'Arial', sans-serif;
-                    font-size: 13px;
-                    line-height: 1.5;
-                }}
-            """
-            )
+            edit.setStyleSheet(get_validator_log_style(self.passed))
         else:
             # Input/Output sections use monospace font
-            edit.setStyleSheet(
-                f"""
-                QTextEdit {{
-                    background: {MATERIAL_COLORS['surface']};
-                    border: 1px solid {MATERIAL_COLORS['outline']};
-                    border-radius: 6px;
-                    padding: 8px;
-                    color: {MATERIAL_COLORS['text_primary']};
-                    font-family: 'Consolas', 'Courier New', monospace;
-                    font-size: 12px;
-                }}
-            """
-            )
+            edit.setStyleSheet(TEST_DETAIL_TEXT_EDIT_MONOSPACE_STYLE)
 
 
 class BenchmarkerDetailDialog(TestDetailDialog):
@@ -516,7 +430,7 @@ class BenchmarkerDetailDialog(TestDetailDialog):
         # Section 1: Input
         input_label = QLabel("📥 Input:")
         set_emoji_font(input_label)
-        input_label.setStyleSheet("font-weight: bold; font-size: 14px;")
+        input_label.setStyleSheet(TEST_DETAIL_SECTION_LABEL_STYLE)
         layout.addWidget(input_label)
 
         input_edit = QTextEdit()
@@ -531,7 +445,7 @@ class BenchmarkerDetailDialog(TestDetailDialog):
         # Section 2: Output
         output_label = QLabel("📤 Output:")
         set_emoji_font(output_label)
-        output_label.setStyleSheet("font-weight: bold; font-size: 14px;")
+        output_label.setStyleSheet(TEST_DETAIL_SECTION_LABEL_STYLE)
         layout.addWidget(output_label)
 
         output_edit = QTextEdit()
@@ -546,7 +460,7 @@ class BenchmarkerDetailDialog(TestDetailDialog):
         # Section 3: Performance Summary
         summary_label = QLabel("📊 Performance Summary:")
         set_emoji_font(summary_label)
-        summary_label.setStyleSheet("font-weight: bold; font-size: 14px;")
+        summary_label.setStyleSheet(TEST_DETAIL_SECTION_LABEL_STYLE)
         layout.addWidget(summary_label)
 
         summary_edit = QTextEdit()
@@ -581,36 +495,8 @@ class BenchmarkerDetailDialog(TestDetailDialog):
 
     def _style_text_edit(self, edit: QTextEdit):
         """Apply monospace styling for input/output sections"""
-        edit.setStyleSheet(
-            f"""
-            QTextEdit {{
-                background: {MATERIAL_COLORS['surface']};
-                border: 1px solid {MATERIAL_COLORS['outline']};
-                border-radius: 6px;
-                padding: 8px;
-                color: {MATERIAL_COLORS['text_primary']};
-                font-family: 'Consolas', 'Courier New', monospace;
-                font-size: 12px;
-            }}
-        """
-        )
+        edit.setStyleSheet(TEST_DETAIL_TEXT_EDIT_MONOSPACE_STYLE)
 
     def _style_summary_edit(self, edit: QTextEdit):
         """Apply special styling for performance summary section"""
-        bg_color = (
-            MATERIAL_COLORS["surface"] if self.passed else "#2d1f1f"
-        )  # Slightly reddish for failures
-        edit.setStyleSheet(
-            f"""
-            QTextEdit {{
-                background: {bg_color};
-                border: 1px solid {MATERIAL_COLORS['outline']};
-                border-radius: 6px;
-                padding: 12px;
-                color: {MATERIAL_COLORS['text_primary']};
-                font-family: 'Segoe UI', 'Arial', sans-serif;
-                font-size: 13px;
-                line-height: 1.5;
-            }}
-        """
-        )
+        edit.setStyleSheet(get_performance_summary_style(self.passed))

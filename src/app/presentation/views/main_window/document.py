@@ -9,72 +9,62 @@ from PySide6.QtCore import *
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
+from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
 from .content import FEATURE_DATA, WELCOME_TITLE, WELCOME_SUBTITLE, CTA_TITLE, CTA_SUBTITLE
 
 
 # =============================================================================
-# THEME CONSTANTS
+# LOCAL CONSTANTS (using centralized MATERIAL_COLORS)
 # =============================================================================
 
-class Theme:
-    """Theme configuration for main window document"""
-    
-    COLORS = {
-        "primary": "#0096C7",
-        "accent": "#F72585",
-        "success": "#4CAF50",
-        "warning": "#ffb600",
-        "info": "#00D9FF",
-        "purple": "#B565D8",
-        "text": "#FFFFFF",
-        "text_dim": "#B3B3B3",
-        "text_bright": "#e0e0e0",
-        "background_dark": "#1a1a1c",
-        "background_mid": "#1e1e20",
-        "surface": "rgba(255, 255, 255, 0.03)",
-        "surface_hover": "rgba(255, 255, 255, 0.08)",
-        "border": "rgba(255, 255, 255, 0.15)",
-        "border_hover": "rgba(255, 255, 255, 0.5)",
-        "separator": "#F7258540",
-    }
-    
-    SPACING = {
-        "xs": 4,
-        "sm": 8,
-        "md": 16,
-        "lg": 24,
-        "xl": 32,
-    }
-    
-    FONTS = {
-        "family": "Consolas, 'Courier New', monospace",
-        "fallback": "'Segoe UI', system-ui, sans-serif",
-        "emoji": "Noto Color Emoji, Segoe UI Emoji, Apple Color Emoji, sans-serif",
-        "sizes": {
-            "hero": 26,
-            "glitch": 11,
-            "card_title": 15,
-            "feature": 11,
-            "cta": 14,
-            "cta_sub": 11,
-        },
-    }
-    
-    # UI Constants
-    ANIMATION = {
-        "fade_duration": 300,
-        "fade_start_delay": 50,
-    }
-    
-    UI = {
-        "separator_height": 1,
-        "card_border_width": 2,
-        "card_border_radius": 10,
-        "card_padding": 14,
-        "cta_border_radius": 12,
-        "cta_padding": 18,
-        "content_border_radius": 8,
-    }
+# Spacing constants
+SPACING = {
+    "xs": 4,
+    "sm": 8,
+    "md": 16,
+    "lg": 24,
+    "xl": 32,
+}
+
+# Font configuration
+FONTS = {
+    "family": "Consolas, 'Courier New', monospace",
+    "fallback": "'Segoe UI', system-ui, sans-serif",
+    "emoji": "Noto Color Emoji, Segoe UI Emoji, Apple Color Emoji, sans-serif",
+    "sizes": {
+        "hero": 26,
+        "glitch": 11,
+        "card_title": 15,
+        "feature": 11,
+        "cta": 14,
+        "cta_sub": 11,
+    },
+}
+
+# Animation settings
+ANIMATION = {
+    "fade_duration": 300,
+    "fade_start_delay": 50,
+}
+
+# UI dimensions
+UI = {
+    "separator_height": 1,
+    "card_border_width": 2,
+    "card_border_radius": 10,
+    "card_padding": 14,
+    "cta_border_radius": 12,
+    "cta_padding": 18,
+    "content_border_radius": 8,
+}
+
+# Surface colors (semi-transparent overlays)
+SURFACE_COLORS = {
+    "surface": "rgba(255, 255, 255, 0.03)",
+    "surface_hover": "rgba(255, 255, 255, 0.08)",
+    "border": "rgba(255, 255, 255, 0.15)",
+    "border_hover": "rgba(255, 255, 255, 0.5)",
+}
 
 
 # =============================================================================
@@ -118,12 +108,12 @@ class MainWindowDocument(QWidget):
             QWidget {{
                 background: qlineargradient(
                     x1:0, y1:0, x2:1, y2:1,
-                    stop:0 {Theme.COLORS['background_dark']},
-                    stop:0.5 {Theme.COLORS['background_mid']},
-                    stop:1 {Theme.COLORS['background_dark']}
+                    stop:0 #1a1a1c,
+                    stop:0.5 #1e1e20,
+                    stop:1 #1a1a1c
                 );
-                color: {Theme.COLORS['text']};
-                font-family: {Theme.FONTS['fallback']};
+                color: {MATERIAL_COLORS['text']};
+                font-family: {FONTS['fallback']};
             }}
             
             QScrollArea#main_scroll {{
@@ -140,10 +130,10 @@ class MainWindowDocument(QWidget):
         """Setup fade-in entrance animation"""
         self.setWindowOpacity(0)
         anim = QPropertyAnimation(self, b"windowOpacity")
-        anim.setDuration(Theme.ANIMATION["fade_duration"])
+        anim.setDuration(ANIMATION["fade_duration"])
         anim.setStartValue(0)
         anim.setEndValue(1)
-        QTimer.singleShot(Theme.ANIMATION["fade_start_delay"], anim.start)
+        QTimer.singleShot(ANIMATION["fade_start_delay"], anim.start)
         self._fade_anim = anim  # Keep reference
 
 
@@ -229,10 +219,10 @@ class GlassmorphismWidget(MainWindowDocument):
         content.setObjectName("glass_content")
         layout = QVBoxLayout(content)
         layout.setContentsMargins(
-            Theme.SPACING["lg"],
-            Theme.SPACING["md"] + Theme.SPACING["xs"],
-            Theme.SPACING["lg"],
-            Theme.SPACING["lg"]
+            SPACING["lg"],
+            SPACING["md"] + SPACING["xs"],
+            SPACING["lg"],
+            SPACING["lg"]
         )
         layout.setSpacing(0)
 
@@ -245,12 +235,12 @@ class GlassmorphismWidget(MainWindowDocument):
             QWidget#glass_content {{
                 background: qlineargradient(
                     x1:0, y1:0, x2:1, y2:1,
-                    stop:0 {Theme.COLORS['background_dark']},
-                    stop:0.5 {Theme.COLORS['background_mid']},
-                    stop:1 {Theme.COLORS['background_dark']}
+                    stop:0 #1a1a1c,
+                    stop:0.5 #1e1e20,
+                    stop:1 #1a1a1c
                 );
-                border: {Theme.UI['card_border_width']}px solid {Theme.COLORS['accent']};
-                border-radius: {Theme.UI['content_border_radius']}px;
+                border: {UI['card_border_width']}px solid {MATERIAL_COLORS['accent']};
+                border-radius: {UI['content_border_radius']}px;
             }}
         """)
 
@@ -261,8 +251,8 @@ class GlassmorphismWidget(MainWindowDocument):
         hero = QWidget()
         hero.setObjectName("hero_section")
         hero_layout = QVBoxLayout(hero)
-        hero_layout.setSpacing(Theme.SPACING["sm"] - 2)
-        hero_layout.setContentsMargins(0, Theme.SPACING["sm"] + 2, 0, Theme.SPACING["md"] + 2)
+        hero_layout.setSpacing(SPACING["sm"] - 2)
+        hero_layout.setContentsMargins(0, SPACING["sm"] + 2, 0, SPACING["md"] + 2)
         
         # Main title
         title = QLabel(WELCOME_TITLE)
@@ -270,7 +260,7 @@ class GlassmorphismWidget(MainWindowDocument):
         title.setWordWrap(True)
         title.setFont(self._create_font("hero", QFont.Weight.ExtraBold, mono=True))
         title.setStyleSheet(f"""
-            color: {Theme.COLORS['accent']};
+            color: {MATERIAL_COLORS['accent']};
             background: transparent;
             letter-spacing: 3px;
         """)
@@ -281,7 +271,7 @@ class GlassmorphismWidget(MainWindowDocument):
         glitch.setAlignment(Qt.AlignCenter)
         glitch.setFont(self._create_font("glitch", mono=True))
         glitch.setStyleSheet(f"""
-            color: {Theme.COLORS['success']};
+            color: {MATERIAL_COLORS['success']};
             background: transparent;
             letter-spacing: 2px;
         """)
@@ -292,7 +282,7 @@ class GlassmorphismWidget(MainWindowDocument):
     def _add_features_grid(self, layout: QVBoxLayout):
         """Add features in 2-column grid"""
         grid = QGridLayout()
-        grid.setSpacing(Theme.SPACING["md"] - 2)
+        grid.setSpacing(SPACING["md"] - 2)
         grid.setContentsMargins(0, 0, 0, 0)
         
         for i, (title, color, features) in enumerate(FEATURE_DATA):
@@ -312,18 +302,18 @@ class GlassmorphismWidget(MainWindowDocument):
             QFrame#glass_card {{
                 background: qlineargradient(
                     x1:0, y1:0, x2:1, y2:1,
-                    stop:0 {Theme.COLORS['surface']},
+                    stop:0 {SURFACE_COLORS['surface']},
                     stop:1 rgba(255, 255, 255, 0.01)
                 );
-                border: 1px solid {Theme.COLORS['border']};
+                border: 1px solid {SURFACE_COLORS['border']};
                 border-left: 3px solid {accent_color};
-                border-radius: {Theme.UI['card_border_radius']}px;
-                padding: {Theme.UI['card_padding']}px;
+                border-radius: {UI['card_border_radius']}px;
+                padding: {UI['card_padding']}px;
             }}
             QFrame#glass_card:hover {{
                 background: qlineargradient(
                     x1:0, y1:0, x2:1, y2:1,
-                    stop:0 {Theme.COLORS['surface_hover']},
+                    stop:0 {SURFACE_COLORS['surface_hover']},
                     stop:1 rgba(255, 255, 255, 0.03)
                 );
                 border: 1px solid {accent_color}80;
@@ -332,7 +322,7 @@ class GlassmorphismWidget(MainWindowDocument):
         """)
         
         card_layout = QVBoxLayout(card)
-        card_layout.setSpacing(Theme.SPACING["sm"] + 2)
+        card_layout.setSpacing(SPACING["sm"] + 2)
         
         # Title
         title_label = QLabel(title.upper())
@@ -347,7 +337,7 @@ class GlassmorphismWidget(MainWindowDocument):
         
         # Separator
         sep = QFrame()
-        sep.setFixedHeight(Theme.UI["separator_height"])
+        sep.setFixedHeight(UI["separator_height"])
         sep.setStyleSheet(f"background: {accent_color}40; border: none;")
         sep.setAttribute(Qt.WA_TransparentForMouseEvents)  # Allow clicks through
         card_layout.addWidget(sep)
@@ -358,7 +348,7 @@ class GlassmorphismWidget(MainWindowDocument):
             feat_label.setWordWrap(True)
             feat_label.setFont(self._create_font("feature", mono=False))
             feat_label.setStyleSheet(f"""
-                color: {Theme.COLORS['text_dim']};
+                color: {MATERIAL_COLORS['text_dim']};
                 background: transparent;
                 padding: 2px 0;
             """)
@@ -369,7 +359,7 @@ class GlassmorphismWidget(MainWindowDocument):
 
     def _add_cta(self, layout: QVBoxLayout):
         """Add call-to-action section"""
-        layout.addSpacing(Theme.SPACING["md"] + 2)
+        layout.addSpacing(SPACING["md"] + 2)
         
         cta = ClickableCTA()
         cta.setObjectName("cta_section")
@@ -382,9 +372,9 @@ class GlassmorphismWidget(MainWindowDocument):
                     stop:0.5 rgba(247, 37, 133, 0.2),
                     stop:1 rgba(255, 182, 0, 0.2)
                 );
-                border: {Theme.UI['card_border_width']}px solid rgba(247, 37, 133, 0.5);
-                border-radius: {Theme.UI['cta_border_radius']}px;
-                padding: {Theme.UI['cta_padding']}px;
+                border: {UI['card_border_width']}px solid rgba(247, 37, 133, 0.5);
+                border-radius: {UI['cta_border_radius']}px;
+                padding: {UI['cta_padding']}px;
             }}
             QFrame#cta_section:hover {{
                 background: qlineargradient(
@@ -398,14 +388,14 @@ class GlassmorphismWidget(MainWindowDocument):
         """)
         
         cta_layout = QVBoxLayout(cta)
-        cta_layout.setSpacing(Theme.SPACING["sm"])
+        cta_layout.setSpacing(SPACING["sm"])
         
         # CTA Title
         cta_title = QLabel(CTA_TITLE)
         cta_title.setAlignment(Qt.AlignCenter)
         cta_title.setFont(self._create_font("cta", QFont.Weight.Bold, mono=True))
         cta_title.setStyleSheet(f"""
-            color: {Theme.COLORS['accent']};
+            color: {MATERIAL_COLORS['accent']};
             background: transparent;
             letter-spacing: 2px;
         """)
@@ -429,11 +419,11 @@ class GlassmorphismWidget(MainWindowDocument):
     def _create_font(self, size_key: str, weight: QFont.Weight = QFont.Weight.Normal, mono: bool = True, emoji: bool = False) -> QFont:
         """Create font with specified parameters"""
         if emoji:
-            family = Theme.FONTS["emoji"]
+            family = FONTS["emoji"]
         else:
-            family = Theme.FONTS["family"] if mono else Theme.FONTS["fallback"]
+            family = FONTS["family"] if mono else FONTS["fallback"]
         font = QFont(family, -1, weight)
-        font.setPixelSize(Theme.FONTS["sizes"][size_key])
+        font.setPixelSize(FONTS["sizes"][size_key])
         return font
 
 
