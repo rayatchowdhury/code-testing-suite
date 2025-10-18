@@ -28,6 +28,7 @@ from src.app.presentation.styles.components.results import (
     RESULTS_TABLE_SMALL_STYLE,
     RESULTS_TEXT_EDIT_STYLE,
 )
+from src.app.presentation.styles.fonts.emoji import set_emoji_font
 from src.app.presentation.styles.helpers.inline_styles import (
     ERROR_LABEL_BOLD_STYLE,
     ERROR_TITLE_STYLE,
@@ -534,6 +535,7 @@ class DetailedResultsWidget(QWidget):
         layout.setContentsMargins(16, 16, 16, 16)
 
         error_title = QLabel("❌ Error Loading Detailed Results")
+        set_emoji_font(error_title)
         error_title.setStyleSheet(ERROR_TITLE_STYLE)
         layout.addWidget(error_title)
 

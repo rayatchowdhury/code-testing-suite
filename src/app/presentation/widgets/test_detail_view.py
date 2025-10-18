@@ -15,6 +15,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
+from src.app.presentation.styles.fonts.emoji import set_emoji_font
 from src.app.presentation.styles.style import MATERIAL_COLORS
 
 
@@ -135,6 +136,7 @@ class TestDetailDialog(QDialog):
         memory_label = QLabel(f"💾 Memory: {self.memory:.1f} MB")
 
         for label in [time_label, memory_label]:
+            set_emoji_font(label)
             label.setStyleSheet(
                 """
                 font-size: 14px;
@@ -248,6 +250,7 @@ class ComparatorDetailDialog(TestDetailDialog):
 
         # Input section
         input_label = QLabel("📥 Input:")
+        set_emoji_font(input_label)
         input_label.setStyleSheet("font-weight: bold; font-size: 14px;")
         layout.addWidget(input_label)
 
@@ -260,6 +263,7 @@ class ComparatorDetailDialog(TestDetailDialog):
 
         # Expected output section
         expected_label = QLabel("✅ Expected Output:")
+        set_emoji_font(expected_label)
         expected_label.setStyleSheet("font-weight: bold; font-size: 14px;")
         layout.addWidget(expected_label)
 
@@ -271,6 +275,7 @@ class ComparatorDetailDialog(TestDetailDialog):
 
         # Actual output section
         actual_label = QLabel("📤 Actual Output:")
+        set_emoji_font(actual_label)
         actual_label.setStyleSheet("font-weight: bold; font-size: 14px;")
         layout.addWidget(actual_label)
 
@@ -346,6 +351,7 @@ class ValidatorDetailDialog(TestDetailDialog):
 
         # Section 1: Input
         input_label = QLabel("📥 Input:")
+        set_emoji_font(input_label)
         input_label.setStyleSheet("font-weight: bold; font-size: 14px;")
         layout.addWidget(input_label)
 
@@ -357,6 +363,7 @@ class ValidatorDetailDialog(TestDetailDialog):
 
         # Section 2: Output
         output_label = QLabel("📤 Output:")
+        set_emoji_font(output_label)
         output_label.setStyleSheet("font-weight: bold; font-size: 14px;")
         layout.addWidget(output_label)
 
@@ -367,7 +374,8 @@ class ValidatorDetailDialog(TestDetailDialog):
         layout.addWidget(output_edit)
 
         # Section 3: Validator Log
-        validator_label = QLabel("� Validator Log:")
+        validator_label = QLabel("📋 Validator Log:")
+        set_emoji_font(validator_label)
         validator_label.setStyleSheet("font-weight: bold; font-size: 14px;")
         layout.addWidget(validator_label)
 
@@ -506,7 +514,8 @@ class BenchmarkerDetailDialog(TestDetailDialog):
         layout.setSpacing(12)
 
         # Section 1: Input
-        input_label = QLabel("� Input:")
+        input_label = QLabel("📥 Input:")
+        set_emoji_font(input_label)
         input_label.setStyleSheet("font-weight: bold; font-size: 14px;")
         layout.addWidget(input_label)
 
@@ -521,6 +530,7 @@ class BenchmarkerDetailDialog(TestDetailDialog):
 
         # Section 2: Output
         output_label = QLabel("📤 Output:")
+        set_emoji_font(output_label)
         output_label.setStyleSheet("font-weight: bold; font-size: 14px;")
         layout.addWidget(output_label)
 
@@ -535,6 +545,7 @@ class BenchmarkerDetailDialog(TestDetailDialog):
 
         # Section 3: Performance Summary
         summary_label = QLabel("📊 Performance Summary:")
+        set_emoji_font(summary_label)
         summary_label.setStyleSheet("font-weight: bold; font-size: 14px;")
         layout.addWidget(summary_label)
 

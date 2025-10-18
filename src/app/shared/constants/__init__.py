@@ -14,7 +14,6 @@ from .paths import (  # EDITOR_WELCOME_HTML removed - file doesn't exist; HTML_C
     HELP_CONTENT_DIR,
     ICONS_DIR,
     LOGO_ICON,
-    MAIN_WINDOW_HTML,
     PROJECT_ROOT,
     README_DIR,
     RESOURCES_DIR,
@@ -45,7 +44,7 @@ __all__ = [
     "WORKSPACE_DIR",
     "CONFIG_FILE",
     "EDITOR_STATE_FILE",
-    "MAIN_WINDOW_HTML",
+    # 'MAIN_WINDOW_HTML' removed - file no longer exists (migrated to Python document system)
     # 'EDITOR_WELCOME_HTML' removed - file doesn't exist
     # 'HTML_CSS' removed - not used in codebase
     "HELP_CONTENT_DIR",

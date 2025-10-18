@@ -50,14 +50,6 @@ TEST_TYPE_ALIASES = {
     "benchmarker": "benchmarker",
 }
 
-# HTML and CSS files
-# Correct path: Located in src/app/presentation/views/
-MAIN_WINDOW_HTML = (
-    PROJECT_ROOT / "src" / "app" / "presentation" / "views" / "main_window.html"
-)
-# Note: EDITOR_WELCOME_HTML removed - file doesn't exist
-# Note: HTML_CSS moved to presentation/styles/html.css
-
 # Help center content
 HELP_CONTENT_DIR = PROJECT_ROOT / "views" / "help_center" / "content"
 

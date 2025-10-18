@@ -15,6 +15,7 @@ from src.app.presentation.styles.components.status_view_styles import (
     TEST_CARD_LABEL_STATUS_PASSED_STYLE,
     get_test_card_style,
 )
+from src.app.presentation.styles.fonts.emoji import set_emoji_font
 from src.app.presentation.styles.style import MATERIAL_COLORS
 
 
@@ -81,6 +82,7 @@ class BaseTestCard(QFrame):
         self.memory_label = QLabel(f"💾 {self.memory:.1f} MB")
 
         for label in [self.time_label, self.memory_label]:
+            set_emoji_font(label)
             label.setStyleSheet(TEST_CARD_LABEL_METRIC_STYLE)
 
         metrics_layout.addWidget(self.time_label)
@@ -116,6 +118,8 @@ class BaseTestCard(QFrame):
         self.memory = memory
         self.time_label.setText(f"⏱️ {self.time:.3f}s")
         self.memory_label.setText(f"💾 {self.memory:.1f} MB")
+        set_emoji_font(self.time_label)
+        set_emoji_font(self.memory_label)
 
 
 class ComparatorTestCard(BaseTestCard):

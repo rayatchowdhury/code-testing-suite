@@ -36,6 +36,7 @@ from src.app.presentation.styles.components.results import (
     RESULTS_TABLE_SMALL_STYLE,
     RESULTS_TEXT_EDIT_STYLE,
 )
+from src.app.presentation.styles.fonts.emoji import set_emoji_font
 from src.app.presentation.styles.style import MATERIAL_COLORS
 from src.app.presentation.widgets.sidebar import Sidebar
 
@@ -153,6 +154,7 @@ class DetailedResultsWidget(QWidget):
 
         # Title
         title = QLabel("📊 Test Results Summary")
+        set_emoji_font(title)
         title.setStyleSheet(
             f"""
             font-size: 24px;
@@ -246,6 +248,7 @@ class DetailedResultsWidget(QWidget):
 
         # Title
         title = QLabel("💻 Source Code Files")
+        set_emoji_font(title)
         title.setStyleSheet(
             f"""
             font-size: 24px;
@@ -456,6 +459,7 @@ class DetailedResultsWidget(QWidget):
         exec_time = test.get("execution_time", test.get("total_time"))
         if exec_time:
             time_label = QLabel(f"⏱️ Execution Time: {exec_time:.4f}s")
+            set_emoji_font(time_label)
             time_label.setStyleSheet(RESULTS_LABEL_DETAILS_STYLE)
             layout.addWidget(time_label)
 
