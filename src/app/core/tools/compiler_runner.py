@@ -371,9 +371,24 @@ class CompilerRunner(QObject):
 
     def _cleanup_worker(self):
         """Clean up worker and thread safely"""
+        # CRITICAL FIX (P0 Issue #1): Kill QProcess BEFORE terminating thread
+        # to prevent zombie processes
         if self.worker:
+            # Step 1: Stop the worker's process synchronously
+            try:
+                if hasattr(self.worker, 'process') and self.worker.process:
+                    if self.worker.process.state() == QProcess.ProcessState.Running:
+                        logger.debug("Killing worker process before thread cleanup")
+                        self.worker.process.kill()
+                        self.worker.process.waitForFinished(1000)
+            except (RuntimeError, AttributeError) as e:
+                # Worker or process might be deleted already
+                logger.debug(f"Process already cleaned up: {e}")
+            
+            # Step 2: Signal worker to stop
             self.worker.stop_execution()
 
+        # Step 3: Now safely cleanup the thread
         try:
             if (
                 self.thread
@@ -385,6 +400,7 @@ class CompilerRunner(QObject):
                     logger.warning(
                         "Thread did not terminate gracefully, forcing termination"
                     )
+                    # Thread terminate is now safe - process already killed
                     self.thread.terminate()
                     self.thread.wait(1000)  # Wait 1 more second after terminate
 

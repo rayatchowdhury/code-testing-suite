@@ -16,7 +16,7 @@ Base Classes:
 
 from src.app.core.tools.base.base_compiler import BaseCompiler
 from src.app.core.tools.base.base_runner import BaseRunner
-from src.app.core.tools.base.base_test_worker import BaseTestWorker
+from src.app.core.tools.specialized.base_test_worker import BaseTestWorker
 from src.app.core.tools.base.language_compilers import (
     BaseLanguageCompiler,
     CppCompiler,

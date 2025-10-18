@@ -9,24 +9,20 @@ This worker implements the 3-stage validation process:
 Maintains exact signal signatures and behavior from the original inline implementation.
 """
 
-import multiprocessing
 import os
 import subprocess
 import tempfile
-import threading
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, Dict, Optional
 
 import psutil
-from PySide6.QtCore import QObject, Signal, Slot
+from PySide6.QtCore import Signal
 
-# Import path helpers for nested I/O file organization
-from src.app.shared.constants.paths import get_input_file_path, get_output_file_path
-from src.app.shared.utils.workspace_utils import ensure_test_type_directory
+# Import base worker with shared functionality
+from src.app.core.tools.specialized.base_test_worker import BaseTestWorker
 
 
-class ValidatorTestWorker(QObject):
+class ValidatorTestWorker(BaseTestWorker):
     """
     Specialized worker for validation testing with 3-stage execution.
 
@@ -60,127 +56,48 @@ class ValidatorTestWorker(QObject):
             execution_commands: Dictionary with 'generator', 'test', 'validator' execution command lists
                               (e.g., ['python', 'gen.py'] or ['./test.exe']). If provided, overrides executables.
         """
-        super().__init__()
-        self.workspace_dir = workspace_dir
-        self.executables = executables
-        self.test_count = test_count
-        self.is_running = True  # Flag to control the worker loop
-        self.test_results = []  # Store detailed test results for database
-        # Use reasonable default: CPU cores - 1, min 1, max 8 (to avoid overwhelming system)
-        self.max_workers = max_workers or min(
-            8, max(1, multiprocessing.cpu_count() - 1)
+        # Call base class initialization - handles common setup
+        super().__init__(
+            workspace_dir=workspace_dir,
+            executables=executables,
+            test_count=test_count,
+            max_workers=max_workers,
+            execution_commands=execution_commands
         )
-        self._results_lock = threading.Lock()  # Thread-safe results access
-
-        # Multi-language support: use execution commands if provided, otherwise fall back to executable paths
-        if execution_commands:
-            self.execution_commands = execution_commands
-        else:
-            # Legacy mode: convert executable paths to command lists
-            self.execution_commands = {k: [v] for k, v in executables.items()}
-
-    def _save_test_io(self, test_number: int, input_data: str, output_data: str):
+    
+    def _calculate_optimal_workers(self) -> int:
         """
-        Save test input and output to nested directories.
+        Override: Use default max workers (8) for validator testing.
+        
+        Validator tests run 3 processes per test (generator, test, validator),
+        so we use the default maximum of 8 workers.
+        
+        Returns:
+            Optimal worker count for validator testing (minimum 1, maximum 8)
+        """
+        import multiprocessing
+        return min(8, max(1, multiprocessing.cpu_count() - 1))
 
+    def _emit_test_completed(self, test_result: Dict[str, Any]) -> None:
+        """
+        Emit the testCompleted signal with validator-specific parameters.
+        
+        Required by BaseTestWorker to handle specialized signal emission.
+        
         Args:
-            test_number: The test number
-            input_data: The generated input data
-            output_data: The test solution output data
+            test_result: Dictionary containing test result data
         """
-        try:
-            # Ensure nested directory structure exists
-            ensure_test_type_directory(self.workspace_dir, "validator")
-
-            # Get full paths for input and output files
-            input_file = get_input_file_path(
-                self.workspace_dir, "validator", f"input_{test_number}.txt"
-            )
-            output_file = get_output_file_path(
-                self.workspace_dir, "validator", f"output_{test_number}.txt"
-            )
-
-            # Save input file
-            with open(input_file, "w", encoding="utf-8") as f:
-                f.write(input_data)
-
-            # Save output file
-            with open(output_file, "w", encoding="utf-8") as f:
-                f.write(output_data)
-
-        except Exception as e:
-            # Don't fail the test if file saving fails, just log the error
-            print(f"Warning: Failed to save I/O files for test {test_number}: {e}")
-
-    @Slot()
-    def run_tests(self):
-        """Run validation tests in parallel without blocking the main thread"""
-        all_passed = True
-        completed_tests = 0
-
-        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-            # Submit all test jobs
-            future_to_test = {
-                executor.submit(self._run_single_test, i): i
-                for i in range(1, self.test_count + 1)
-            }
-
-            # Process completed tests as they finish
-            for future in as_completed(future_to_test):
-                if not self.is_running:
-                    # Cancel remaining futures if stopped
-                    for f in future_to_test:
-                        f.cancel()
-                    break
-
-                test_number = future_to_test[future]
-                completed_tests += 1
-
-                try:
-                    test_result = future.result()
-                    if test_result:  # Check if test wasn't cancelled
-                        # Thread-safe result storage
-                        with self._results_lock:
-                            self.test_results.append(test_result)
-
-                        # Emit signals for UI updates with time and memory metrics
-                        self.testStarted.emit(completed_tests, self.test_count)
-                        self.testCompleted.emit(
-                            test_result["test_number"],
-                            test_result["passed"],
-                            test_result["input"],
-                            test_result["test_output"],
-                            test_result["validation_message"],
-                            test_result["error_details"],
-                            test_result["validator_exit_code"],
-                            test_result["total_time"],  # Total execution time
-                            test_result["memory"],  # Peak memory usage in MB
-                        )
-
-                        if not test_result["passed"]:
-                            all_passed = False
-
-                except Exception as e:
-                    # Handle any unexpected errors
-                    error_result = self._create_error_result(
-                        test_number, f"Execution error: {str(e)}"
-                    )
-                    with self._results_lock:
-                        self.test_results.append(error_result)
-                    self.testCompleted.emit(
-                        error_result["test_number"],
-                        False,
-                        "",
-                        "",
-                        "Execution Error",
-                        str(e),
-                        -3,
-                        error_result["total_time"],
-                        error_result["memory"],
-                    )
-                    all_passed = False
-
-        self.allTestsCompleted.emit(all_passed)
+        self.testCompleted.emit(
+            test_result["test_number"],
+            test_result["passed"],
+            test_result["input"],
+            test_result["test_output"],
+            test_result["validation_message"],
+            test_result["error_details"],
+            test_result["validator_exit_code"],
+            test_result["total_time"],  # Total execution time
+            test_result["memory"],  # Peak memory usage in MB
+        )
 
     def _run_single_test(self, test_number: int) -> Optional[Dict[str, Any]]:
         """
@@ -230,19 +147,49 @@ class ValidatorTestWorker(QObject):
                     0,
                 )
 
-            # Track generator memory
+            # Issue #7: Read output in thread to prevent pipe deadlock
+            # Generator produces output with no input, so we must read concurrently
+            stdout_data = []
+            stderr_data = []
+            
+            def read_stdout():
+                stdout_data.append(generator_process.stdout.read())
+            
+            def read_stderr():
+                stderr_data.append(generator_process.stderr.read())
+            
+            import threading
+            stdout_thread = threading.Thread(target=read_stdout, daemon=True)
+            stderr_thread = threading.Thread(target=read_stderr, daemon=True)
+            stdout_thread.start()
+            stderr_thread.start()
+
+            # Track generator memory while output is being read in background
             try:
                 proc = psutil.Process(generator_process.pid)
-                while generator_process.poll() is None:
+                while generator_process.poll() is None and self.is_running:  # Issue #7
                     mem_mb = proc.memory_info().rss / (1024 * 1024)
                     peak_memory_mb = max(peak_memory_mb, mem_mb)
                     time.sleep(0.01)
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 pass
 
-            generator_stdout, generator_stderr = generator_process.communicate(
-                timeout=10
-            )
+            # Issue #7: If stopped, kill process and return None
+            if not self.is_running:
+                try:
+                    generator_process.kill()
+                    generator_process.wait(timeout=1)
+                except:
+                    pass
+                return None
+
+            # Wait for output reading threads to complete
+            stdout_thread.join(timeout=10)
+            stderr_thread.join(timeout=1)
+            generator_process.wait(timeout=1)
+            
+            generator_stdout = stdout_data[0] if stdout_data else ""
+            generator_stderr = stderr_data[0] if stderr_data else ""
             generator_time = time.time() - generator_start
 
             if generator_process.returncode != 0:
@@ -279,19 +226,64 @@ class ValidatorTestWorker(QObject):
             if input_text:
                 test_process.stdin.write(input_text)
                 test_process.stdin.flush()
+            test_process.stdin.close()  # Issue #7: Close stdin to signal EOF
 
-            # Track test solution memory
+            # Issue #7: Read output in thread to prevent pipe deadlock
+            test_stdout_data = []
+            test_stderr_data = []
+            
+            def read_test_stdout():
+                test_stdout_data.append(test_process.stdout.read())
+            
+            def read_test_stderr():
+                test_stderr_data.append(test_process.stderr.read())
+            
+            test_stdout_thread = threading.Thread(target=read_test_stdout, daemon=True)
+            test_stderr_thread = threading.Thread(target=read_test_stderr, daemon=True)
+            test_stdout_thread.start()
+            test_stderr_thread.start()
+
+            # Track test solution memory while output is being read in background
             try:
                 proc = psutil.Process(test_process.pid)
-                while test_process.poll() is None:
+                while test_process.poll() is None and self.is_running:  # Issue #7
                     mem_mb = proc.memory_info().rss / (1024 * 1024)
                     peak_memory_mb = max(peak_memory_mb, mem_mb)
                     time.sleep(0.01)
+                    
+                    # TIMEOUT CHECK: Kill process if running too long (30s default)
+                    if time.time() - test_start > 30.0:
+                        test_process.kill()
+                        test_process.wait()
+                        return self._create_error_result(
+                            test_number,
+                            "Test solution timeout (>30s)",
+                            "Timeout",
+                            -1,
+                            generator_time,
+                            30.0,
+                            0,
+                            peak_memory_mb,
+                        )
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 pass
 
-            # Get output - communicate() will handle closing stdin automatically
-            test_stdout, test_stderr = test_process.communicate(timeout=30)
+            # Issue #7: If stopped, kill process and return None
+            if not self.is_running:
+                try:
+                    test_process.kill()
+                    test_process.wait(timeout=1)
+                except:
+                    pass
+                return None
+
+            # Wait for output reading threads to complete
+            test_stdout_thread.join(timeout=30)
+            test_stderr_thread.join(timeout=1)
+            test_process.wait(timeout=1)
+            
+            test_stdout = test_stdout_data[0] if test_stdout_data else ""
+            test_stderr = test_stderr_data[0] if test_stderr_data else ""
             test_time = time.time() - test_start
 
             if test_process.returncode != 0:
@@ -350,12 +342,36 @@ class ValidatorTestWorker(QObject):
                 # Track validator memory
                 try:
                     proc = psutil.Process(validator_process.pid)
-                    while validator_process.poll() is None:
+                    while validator_process.poll() is None and self.is_running:  # Issue #7
                         mem_mb = proc.memory_info().rss / (1024 * 1024)
                         peak_memory_mb = max(peak_memory_mb, mem_mb)
                         time.sleep(0.01)
+                        
+                        # TIMEOUT CHECK: Kill process if running too long (10s default for validator)
+                        if time.time() - validator_start > 10.0:
+                            validator_process.kill()
+                            validator_process.wait()
+                            return self._create_error_result(
+                                test_number,
+                                "Validator timeout (>10s)",
+                                "Timeout",
+                                -1,
+                                generator_time,
+                                test_time,
+                                10.0,
+                                peak_memory_mb,
+                            )
                 except (psutil.NoSuchProcess, psutil.AccessDenied):
                     pass
+
+                # Issue #7: If stopped, kill process and return None
+                if not self.is_running:
+                    try:
+                        validator_process.kill()
+                        validator_process.wait(timeout=1)
+                    except:
+                        pass
+                    return None
 
                 validator_stdout, validator_stderr = validator_process.communicate(
                     timeout=10
@@ -393,8 +409,9 @@ class ValidatorTestWorker(QObject):
                     error_details = f"Validator crashed with exit code {validator_exit_code}: {validator_stderr}"
                     passed = False
 
-                # Save I/O files to nested directories
-                self._save_test_io(test_number, input_text, test_output)
+                # Issue #6: REMOVED synchronous disk I/O during test execution
+                # Data is already stored in memory dictionary and database
+                # self._save_test_io(test_number, input_text, test_output)
 
                 # Calculate total time
                 total_time = generator_time + test_time + validator_time
@@ -468,12 +485,3 @@ class ValidatorTestWorker(QObject):
             "total_time": generator_time + test_time + validator_time,
             "memory": peak_memory_mb,
         }
-
-    def stop(self):
-        """Stop the worker and cancel any running tests."""
-        self.is_running = False
-
-    def get_test_results(self) -> list:
-        """Get thread-safe copy of test results for database storage."""
-        with self._results_lock:
-            return self.test_results.copy()

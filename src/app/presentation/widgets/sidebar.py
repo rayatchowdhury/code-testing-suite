@@ -247,6 +247,12 @@ class Sidebar(QWidget):
 
     def replace_results_with_save_button(self):
         """Replace Results button with Save button for status view (Issue #39)"""
+        # FIRST: Clean up any existing save button (Issue #8 fix)
+        if hasattr(self, "save_button") and self.save_button:
+            self.footer.layout().removeWidget(self.save_button)
+            self.save_button.deleteLater()
+            self.save_button = None
+        
         # Get the position of results button before hiding it
         results_index = 0
         if hasattr(self, "results_button") and self.results_button:

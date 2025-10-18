@@ -1,7 +1,17 @@
 """
 Main Window Document - Application-specific main window implementation
 All components now imported from unified qt_doc_engine
+
+PRIMARY DESIGN: Glassmorphism Terminal/Glitch Aesthetic ⭐
+- Tech-focused monospace typography (Consolas)
+- Terminal-style indicators (>> and ──)
+- Glassmorphism cards with subtle transparency
+- Pink accent border (#F72585)
 """
+
+# ============== PRIMARY VARIATION ACTIVE ==============
+ACTIVE_VARIATION = 1
+# ======================================================
 
 from typing import List, Tuple
 
@@ -18,6 +28,13 @@ from src.app.presentation.window_controller.qt_doc_engine import (
     GradientText,
     StyleSheet,
 )
+
+# Import variations
+try:
+    from src.app.presentation.views.main_window.main_window_variations import create_variation
+    USE_VARIATIONS = True
+except ImportError:
+    USE_VARIATIONS = False
 
 
 class MainWindow(DocumentWidget):
@@ -138,4 +155,9 @@ class MainWindow(DocumentWidget):
 
 def create_qt_main_window() -> MainWindow:
     """Factory function for creating the main window widget"""
+    # If variations are available and ACTIVE_VARIATION is set, use it
+    if USE_VARIATIONS and ACTIVE_VARIATION != 0:
+        return create_variation(ACTIVE_VARIATION)
+    
+    # Otherwise, use the original MainWindow
     return MainWindow()

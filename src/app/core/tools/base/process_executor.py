@@ -151,9 +151,12 @@ class ProcessExecutor:
                 command=command,
             )
 
-        except Exception as e:
+        # P0 Issue #3 FIX: Replace broad Exception catch with specific exceptions
+        # Only catch expected exceptions; critical errors should propagate
+        except (OSError, subprocess.SubprocessError) as e:
+            # Expected errors: file not found, permission denied, process errors
             execution_time = time.time() - start_time
-            logger.error(f"Process execution error: {e}")
+            logger.error(f"Process execution error: {e}", exc_info=True)
             return ProcessResult(
                 returncode=-1,
                 stdout="",
@@ -163,6 +166,19 @@ class ProcessExecutor:
                 timed_out=timed_out,
                 command=command,
             )
+        except (MemoryError, KeyboardInterrupt, SystemExit):
+            # Critical errors that should never be caught - re-raise immediately
+            raise
+        except Exception as e:
+            # Unexpected errors - log with full context and re-raise
+            execution_time = time.time() - start_time
+            logger.critical(
+                f"CRITICAL: Unexpected error in process execution: {e}",
+                exc_info=True,
+                extra={"command": command, "execution_time": execution_time}
+            )
+            # Re-raise to ensure critical errors aren't silently swallowed
+            raise
 
     @staticmethod
     def run_with_temp_files(

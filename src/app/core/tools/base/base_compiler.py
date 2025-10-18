@@ -89,6 +89,11 @@ class BaseCompiler(QObject):
             )
             self.executables[key] = executable_path
 
+        # P2 Issue #13 FIX: Add per-file locks to prevent TOCTOU race condition
+        # Prevents multiple threads from simultaneously checking/compiling the same file
+        self._compilation_locks: Dict[str, threading.Lock] = {}
+        self._lock_manager = threading.Lock()  # Lock for managing the locks dict
+
     def _resolve_file_paths(self, files_dict: Dict[str, str]) -> Dict[str, str]:
         """
         Resolve relative paths within test type directory structure.
@@ -192,33 +197,46 @@ class BaseCompiler(QObject):
                 for file_key in files_needing_compilation
             }
 
-            # Process results as they complete
-            for future in as_completed(future_to_file):
-                file_key = future_to_file[future]
-                try:
-                    success, output = future.result()
-                    compilation_results[file_key] = (success, output)
+            # P0 Issue #12 FIX: Add timeout to prevent UI freeze on hanging compilation
+            # Process results as they complete with 60-second timeout per file
+            try:
+                for future in as_completed(future_to_file, timeout=60.0):
+                    file_key = future_to_file[future]
+                    try:
+                        success, output = future.result()
+                        compilation_results[file_key] = (success, output)
 
-                    # Get language for better messaging
-                    language = self.file_languages.get(file_key, Language.UNKNOWN)
-                    lang_display = (
-                        language.value.upper() if language != Language.UNKNOWN else ""
-                    )
-                    file_name = os.path.basename(self.files[file_key])
-
-                    if success:
-                        self.compilationOutput.emit(f"✅ {output}\n", "success")
-                    else:
-                        all_success = False
-                        self.compilationOutput.emit(
-                            f"❌ Failed ({lang_display}): {file_name}\n{output}\n",
-                            "error",
+                        # Get language for better messaging
+                        language = self.file_languages.get(file_key, Language.UNKNOWN)
+                        lang_display = (
+                            language.value.upper() if language != Language.UNKNOWN else ""
                         )
+                        file_name = os.path.basename(self.files[file_key])
 
-                except Exception as e:
-                    all_success = False
-                    error_msg = f"Compilation error for {file_key}: {str(e)}"
-                    self.compilationOutput.emit(f"❌ {error_msg}\n", "error")
+                        if success:
+                            self.compilationOutput.emit(f"✅ {output}\n", "success")
+                        else:
+                            all_success = False
+                            self.compilationOutput.emit(
+                                f"❌ Failed ({lang_display}): {file_name}\n{output}\n",
+                                "error",
+                            )
+
+                    except Exception as e:
+                        all_success = False
+                        error_msg = f"Compilation error for {file_key}: {str(e)}"
+                        self.compilationOutput.emit(f"❌ {error_msg}\n", "error")
+            
+            except TimeoutError:
+                # Compilation hung - cancel remaining futures and report
+                all_success = False
+                for future in future_to_file:
+                    if not future.done():
+                        future.cancel()
+                self.compilationOutput.emit(
+                    "\n❌ TIMEOUT: Compilation took longer than 60 seconds. Remaining files cancelled.\n",
+                    "error"
+                )
 
         # Final result
         if all_success:
@@ -234,6 +252,10 @@ class BaseCompiler(QObject):
     def _needs_recompilation(self, file_key: str) -> bool:
         """
         Check if file needs recompilation based on timestamps and language.
+        
+        P2 Issue #13 FIX: Thread-safe with per-file locking to prevent TOCTOU race condition.
+        Prevents scenario where multiple threads check timestamps simultaneously and
+        both decide to compile the same file.
 
         For interpreted languages (Python), always returns False since no compilation needed.
         For compiled languages (C++, Java), checks timestamps.
@@ -244,42 +266,50 @@ class BaseCompiler(QObject):
         Returns:
             bool: True if recompilation is needed, False if executable is up-to-date
         """
-        language = self.file_languages.get(file_key, Language.UNKNOWN)
+        # P2 Issue #13 FIX: Get or create per-file lock
+        with self._lock_manager:
+            if file_key not in self._compilation_locks:
+                self._compilation_locks[file_key] = threading.Lock()
+            file_lock = self._compilation_locks[file_key]
+        
+        # P2 Issue #13 FIX: Use file-specific lock for timestamp check
+        with file_lock:
+            language = self.file_languages.get(file_key, Language.UNKNOWN)
 
-        # Check if language needs compilation
-        if language in self.language_compilers:
-            compiler = self.language_compilers[language]
-        else:
-            # Create temporary compiler to check
-            lang_config = self._get_language_config(language)
-            compiler = LanguageCompilerFactory.create_compiler(language, lang_config)
+            # Check if language needs compilation
+            if language in self.language_compilers:
+                compiler = self.language_compilers[language]
+            else:
+                # Create temporary compiler to check
+                lang_config = self._get_language_config(language)
+                compiler = LanguageCompilerFactory.create_compiler(language, lang_config)
 
-        # Interpreted languages don't need compilation
-        if not compiler.needs_compilation():
-            return False
+            # Interpreted languages don't need compilation
+            if not compiler.needs_compilation():
+                return False
 
-        source_file = self.files[file_key]
-        executable_file = self.executables[file_key]
+            source_file = self.files[file_key]
+            executable_file = self.executables[file_key]
 
-        # For Python, executable is the source file itself
-        if language == Language.PYTHON:
-            return False
+            # For Python, executable is the source file itself
+            if language == Language.PYTHON:
+                return False
 
-        # If executable doesn't exist, need to compile
-        if not os.path.exists(executable_file):
-            return True
+            # If executable doesn't exist, need to compile
+            if not os.path.exists(executable_file):
+                return True
 
-        # If source doesn't exist, can't compile
-        if not os.path.exists(source_file):
-            return True
+            # If source doesn't exist, can't compile
+            if not os.path.exists(source_file):
+                return True
 
-        # Compare timestamps
-        try:
-            source_mtime = os.path.getmtime(source_file)
-            exe_mtime = os.path.getmtime(executable_file)
-            return source_mtime > exe_mtime  # Source is newer than executable
-        except OSError:
-            return True  # If we can't check timestamps, be safe and recompile
+            # Compare timestamps (now protected by lock - prevents TOCTOU)
+            try:
+                source_mtime = os.path.getmtime(source_file)
+                exe_mtime = os.path.getmtime(executable_file)
+                return source_mtime > exe_mtime  # Source is newer than executable
+            except OSError:
+                return True  # If we can't check timestamps, be safe and recompile
 
     def _compile_single_file(self, file_key: str) -> Tuple[bool, str]:
         """

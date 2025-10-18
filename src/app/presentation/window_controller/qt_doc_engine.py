@@ -12,74 +12,82 @@ from PySide6.QtWidgets import *
 
 
 class AppTheme:
-    """Centralized theme configuration with complete design system"""
+    """Centralized theme configuration - Terminal/Glitch Aesthetic"""
 
-    # Color palette
+    # Color palette - Glassmorphism with terminal vibes
     COLORS = {
-        "background": "#1e1e1e",
-        "surface": "#252525",
-        "surface_hover": "rgba(42, 42, 45, 0.98)",
+        "background": "#1a1a1c",  # Darker background
+        "gradient_start": "#1a1a1c",
+        "gradient_end": "#1e1e20",
+        "surface": "rgba(255, 255, 255, 0.03)",  # Subtle glass
+        "surface_hover": "rgba(255, 255, 255, 0.08)",
         "text": "#e0e0e0",
+        "text_dim": "#888888",
         "primary": "#0096C7",
-        "accent": "#F72585",
+        "accent": "#F72585",  # Pink border
         "secondary": "#ffb600",
         "border": "#333333",
-        "card_normal": "rgba(37, 37, 37, 0.95)",
-        "card_border": "rgba(255, 255, 255, 0.1)",
-        "card_border_hover": "rgba(255, 255, 255, 0.25)",
-        "cta_border": "rgba(0, 150, 199, 0.3)",
-        "cta_border_hover": "rgba(0, 150, 199, 0.5)",
+        "card_normal": "rgba(255, 255, 255, 0.03)",
+        "card_border": "rgba(255, 255, 255, 0.15)",
+        "card_border_hover": "rgba(255, 255, 255, 0.5)",
+        "cta_border": "#F72585",  # Pink CTA
+        "cta_border_hover": "rgba(247, 37, 133, 0.8)",
         "scrollbar_bg": "rgba(0, 0, 0, 0.1)",
         "scrollbar_handle": "rgba(255, 255, 255, 0.08)",
         "scrollbar_handle_hover": "rgba(255, 255, 255, 0.12)",
     }
 
-    # Typography
+    # Typography - Monospace for tech aesthetic
     FONTS = {
-        "family": "'Segoe UI', system-ui, -apple-system, sans-serif",
+        "family": "Consolas, 'Courier New', monospace",  # Terminal font
+        "fallback": "'Segoe UI', system-ui, sans-serif",  # For body text
         "sizes": {
-            "large": 36,  # Main title
-            "medium": 22,  # Subtitle
-            "title": 26,  # Card titles
-            "description": 19,  # Description text
-            "item": 15,  # List items
-            "icon": 46,  # Icon size
-            "arrow": 14,  # Arrow bullets
+            "hero": 26,  # CODE TESTING SUITE
+            "glitch": 11,  # >> SYSTEM READY
+            "card_title": 15,  # Card headers
+            "feature": 11,  # Feature list items
+            "cta": 14,  # CTA text
+            "cta_sub": 11,  # CTA subtitle
+            "arrow": 11,  # Arrow bullets
         },
     }
 
     # Animation settings
     ANIMATION = {
         "duration": 300,  # 0.3s
-        "hover_scale": 1.2,
-        "hover_rotation": 5.0,
+        "hover_scale": 1.0,  # No scale, just glow
+        "hover_rotation": 0.0,  # No rotation
     }
 
-    # Layout dimensions
+    # Layout dimensions - Compact spacing
     LAYOUT = {
-        "card_margin": 25,
-        "card_spacing": 15,
-        "card_radius": 16,
-        "card_padding": 25,
-        "content_padding": 40,
-        "icon_size": 80,
-        "arrow_width": 25,
-        "header_spacing": 12,
-        "list_indent": 22,
+        "card_margin": 24,  # 8px scale
+        "card_spacing": 16,
+        "card_radius": 12,
+        "card_padding": 16,
+        "content_padding": 24,
+        "header_spacing": 8,
+        "list_indent": 16,
+        "border_width": 2,  # Container border
+        "separator_height": 1,
     }
 
 
 class StyleSheet:
-    """Centralized stylesheet generation with reusable components"""
+    """Centralized stylesheet generation - Terminal/Glitch theme"""
 
     @staticmethod
     def base() -> str:
-        """Base application styles"""
+        """Base application styles with gradient background"""
         return f"""
             QWidget {{
-                background-color: {AppTheme.COLORS['background']};
+                background: qlineargradient(
+                    x1:0, y1:0, x2:0, y2:1,
+                    stop:0 {AppTheme.COLORS['gradient_start']},
+                    stop:1 {AppTheme.COLORS['gradient_end']}
+                );
                 color: {AppTheme.COLORS['text']};
-                font-family: {AppTheme.FONTS['family']};
+                font-family: {AppTheme.FONTS['fallback']};
             }}
         """
 
@@ -89,7 +97,7 @@ class StyleSheet:
         return f"""
             QScrollArea#main_scroll {{
                 border: none;
-                background-color: {AppTheme.COLORS['background']};
+                background: transparent;
             }}
             
             QScrollArea QWidget {{
@@ -120,10 +128,12 @@ class StyleSheet:
 
     @staticmethod
     def cards() -> str:
-        """Card component styles"""
+        """Card component styles - Glassmorphism"""
         return f"""
             QWidget#content_container {{
-                background-color: {AppTheme.COLORS['background']};
+                background: transparent;
+                border: {AppTheme.LAYOUT['border_width']}px solid {AppTheme.COLORS['accent']};
+                border-radius: {AppTheme.LAYOUT['card_radius']}px;
             }}
             
             QFrame#feature_card {{
@@ -159,12 +169,13 @@ class StyleSheet:
         return f"""
             color: {AppTheme.COLORS['accent']};
             font-weight: bold;
+            font-family: {AppTheme.FONTS['family']};
             font-size: {AppTheme.FONTS['sizes']['arrow']}px;
         """
 
     @staticmethod
     def feature_card_hover() -> str:
-        """Feature card hover state"""
+        """Feature card hover state - Subtle glow"""
         return f"""
             QFrame#feature_card {{
                 background: {AppTheme.COLORS['surface_hover']};
@@ -186,12 +197,19 @@ class StyleSheet:
 
 
 class FontUtils:
-    """Utility for consistent font creation"""
+    """Utility for consistent font creation - Terminal aesthetic"""
 
     @staticmethod
-    def create(size_key: str, weight: QFont.Weight = QFont.Weight.Normal) -> QFont:
-        """Create font with size from theme and specified weight"""
-        font = QFont("Segoe UI", -1, weight)
+    def create(size_key: str, weight: QFont.Weight = QFont.Weight.Normal, monospace: bool = True) -> QFont:
+        """Create font with size from theme and specified weight
+        
+        Args:
+            size_key: Key from AppTheme.FONTS['sizes']
+            weight: Font weight
+            monospace: Use Consolas (True) or Segoe UI (False)
+        """
+        family = AppTheme.FONTS["family"] if monospace else AppTheme.FONTS["fallback"]
+        font = QFont(family, -1, weight)
         font.setPixelSize(AppTheme.FONTS["sizes"][size_key])
         return font
 

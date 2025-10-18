@@ -232,6 +232,47 @@ class TestResult:
     files_snapshot: str = ""  # JSON string of all file contents
     mismatch_analysis: str = ""  # JSON string of detailed mismatch analysis
 
+    def validate(self) -> tuple[bool, str]:
+        """
+        Validate TestResult data before database save.
+        
+        P1 Issue #11 FIX: Add input validation to prevent data loss
+        
+        Returns:
+            tuple[bool, str]: (is_valid, error_message)
+        """
+        # Required fields
+        if not self.test_type:
+            return False, "test_type is required"
+        if not self.file_path:
+            return False, "file_path is required"
+        if not self.timestamp:
+            return False, "timestamp is required"
+        
+        # Numeric validations
+        if self.test_count < 0:
+            return False, "test_count must be non-negative"
+        if self.passed_tests < 0:
+            return False, "passed_tests must be non-negative"
+        if self.failed_tests < 0:
+            return False, "failed_tests must be non-negative"
+        if self.total_time < 0:
+            return False, "total_time must be non-negative"
+        
+        # Logical validations
+        if self.passed_tests + self.failed_tests > self.test_count:
+            return False, "passed_tests + failed_tests cannot exceed test_count"
+        
+        # Length validations (prevent SQL injection and buffer issues)
+        if len(self.test_type) > 100:
+            return False, "test_type too long (max 100 chars)"
+        if len(self.file_path) > 1000:
+            return False, "file_path too long (max 1000 chars)"
+        if len(self.project_name) > 500:
+            return False, "project_name too long (max 500 chars)"
+        
+        return True, ""
+
 
 @dataclass
 class Session:
@@ -243,6 +284,31 @@ class Session:
     active_file: str = ""
     timestamp: str = ""
     project_name: str = ""
+
+    def validate(self) -> tuple[bool, str]:
+        """
+        Validate Session data before database save.
+        
+        P1 Issue #11 FIX: Add input validation to prevent data loss
+        
+        Returns:
+            tuple[bool, str]: (is_valid, error_message)
+        """
+        # Required fields
+        if not self.session_name:
+            return False, "session_name is required"
+        if not self.timestamp:
+            return False, "timestamp is required"
+        
+        # Length validations
+        if len(self.session_name) > 500:
+            return False, "session_name too long (max 500 chars)"
+        if len(self.project_name) > 500:
+            return False, "project_name too long (max 500 chars)"
+        if len(self.active_file) > 1000:
+            return False, "active_file path too long (max 1000 chars)"
+        
+        return True, ""
 
 
 @dataclass
@@ -256,3 +322,34 @@ class ProjectData:
     file_count: int = 0
     total_lines: int = 0
     languages: str = ""  # JSON string of languages used
+
+    def validate(self) -> tuple[bool, str]:
+        """
+        Validate ProjectData before database save.
+        
+        P1 Issue #11 FIX: Add input validation to prevent data loss
+        
+        Returns:
+            tuple[bool, str]: (is_valid, error_message)
+        """
+        # Required fields
+        if not self.project_name:
+            return False, "project_name is required"
+        if not self.project_path:
+            return False, "project_path is required"
+        if not self.last_accessed:
+            return False, "last_accessed timestamp is required"
+        
+        # Numeric validations
+        if self.file_count < 0:
+            return False, "file_count must be non-negative"
+        if self.total_lines < 0:
+            return False, "total_lines must be non-negative"
+        
+        # Length validations
+        if len(self.project_name) > 500:
+            return False, "project_name too long (max 500 chars)"
+        if len(self.project_path) > 1000:
+            return False, "project_path too long (max 1000 chars)"
+        
+        return True, ""

@@ -8,15 +8,28 @@
 # - Author description
 # - Back button - goes back to the main window
 
+"""
+HELP CENTER VARIATION SELECTOR:
+Change ACTIVE_HELP_VARIATION to switch designs (1-4):
+    1 = Terminal Docs (matches main window V1) ⭐
+    2 = Clean Modern (minimal with whitespace)
+    3 = Card Style (colorful bordered cards)
+    4 = Developer Docs (code/syntax style)
+"""
+
+# ============== CHANGE THIS NUMBER TO SWITCH HELP VARIATIONS ==============
+ACTIVE_HELP_VARIATION = 1  # Change to 1, 2, 3, or 4
+# ==========================================================================
+
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QPushButton
 
 from src.app.presentation.widgets.display_area import DisplayArea
 from src.app.presentation.widgets.sidebar import Sidebar
 from src.app.presentation.window_controller.base_window import SidebarWindowBase
-from src.app.presentation.window_controller.qt_doc_engine import HelpDocument
 
 from .help_content import get_document_data
+from .help_center_variations import create_help_variation
 
 
 class HelpCenterWindow(SidebarWindowBase):
@@ -57,13 +70,17 @@ class HelpCenterWindow(SidebarWindowBase):
         self.load_help_content("Introduction")
 
     def load_help_content(self, topic):
-        """Load help content using Qt document widgets"""
+        """Load help content using variations"""
         # Clear existing content
         if self.current_document:
             self.display_area.layout.removeWidget(self.current_document)
             self.current_document.deleteLater()
 
-        # Create new document widget directly
+        # Create new document widget using variation
         data = get_document_data(topic)
-        self.current_document = HelpDocument(data["title"], data["sections"])
+        self.current_document = create_help_variation(
+            ACTIVE_HELP_VARIATION,
+            data["title"],
+            data["sections"]
+        )
         self.display_area.layout.addWidget(self.current_document)

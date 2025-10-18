@@ -8,23 +8,19 @@ This worker implements the 2-stage benchmark testing process:
 Maintains exact signal signatures and behavior from the original inline implementation.
 """
 
-import multiprocessing
 import os
 import subprocess
-import threading
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, Dict, Optional
 
 import psutil
-from PySide6.QtCore import QObject, Signal, Slot
+from PySide6.QtCore import Signal
 
-# Import path helpers for nested I/O file organization
-from src.app.shared.constants.paths import get_input_file_path, get_output_file_path
-from src.app.shared.utils.workspace_utils import ensure_test_type_directory
+# Import base worker with shared functionality
+from src.app.core.tools.specialized.base_test_worker import BaseTestWorker
 
 
-class BenchmarkTestWorker(QObject):
+class BenchmarkTestWorker(BaseTestWorker):
     """
     Specialized worker for benchmarking with performance monitoring.
 
@@ -62,131 +58,54 @@ class BenchmarkTestWorker(QObject):
             execution_commands: Dictionary with 'generator' and 'test' execution command lists
                               (e.g., ['python', 'gen.py'] or ['./test.exe']). If provided, overrides executables.
         """
-        super().__init__()
-        self.workspace_dir = workspace_dir
-        self.executables = executables
+        # Call base class initialization - handles common setup
+        super().__init__(
+            workspace_dir=workspace_dir,
+            executables=executables,
+            test_count=test_count,
+            max_workers=max_workers,
+            execution_commands=execution_commands
+        )
+        
+        # Benchmark-specific attributes
         self.time_limit = time_limit / 1000.0  # Convert ms to seconds
         self.memory_limit = memory_limit  # MB
-        self.test_count = test_count
-        self.is_running = True
-        self.test_results = []  # Store detailed test results
-        # Use reasonable default for benchmarking (less workers due to memory monitoring overhead)
-        self.max_workers = max_workers or min(
-            4, max(1, multiprocessing.cpu_count() - 1)
-        )
-        self._results_lock = threading.Lock()  # Thread-safe results access
-
-        # Multi-language support: use execution commands if provided, otherwise fall back to executable paths
-        if execution_commands:
-            self.execution_commands = execution_commands
-        else:
-            # Legacy mode: convert executable paths to command lists
-            self.execution_commands = {k: [v] for k, v in executables.items()}
-
-    def _save_test_io(self, test_number: int, input_data: str, output_data: str):
+    
+    def _calculate_optimal_workers(self) -> int:
         """
-        Save test input and output to nested directories.
-
+        Override: Use fewer workers for benchmarking due to memory monitoring overhead.
+        
+        Benchmark tests continuously monitor memory usage which adds CPU overhead,
+        so we use fewer parallel workers (4 vs 8) to avoid overwhelming the system.
+        
+        Returns:
+            Optimal worker count for benchmarking (minimum 1, maximum 4)
+        """
+        import multiprocessing
+        return min(4, max(1, multiprocessing.cpu_count() - 1))
+    
+    def _emit_test_completed(self, test_result: Dict[str, Any]) -> None:
+        """
+        Emit the testCompleted signal with benchmark-specific parameters.
+        
+        Required by BaseTestWorker to handle specialized signal emission.
+        
         Args:
-            test_number: The test number
-            input_data: The generated input data
-            output_data: The test output data
+            test_result: Dictionary containing test result data
         """
-        try:
-            # Ensure nested directory structure exists
-            ensure_test_type_directory(self.workspace_dir, "benchmarker")
-
-            # Get full paths for input and output files
-            input_file = get_input_file_path(
-                self.workspace_dir, "benchmarker", f"input_{test_number}.txt"
-            )
-            output_file = get_output_file_path(
-                self.workspace_dir, "benchmarker", f"output_{test_number}.txt"
-            )
-
-            # Save input file
-            with open(input_file, "w", encoding="utf-8") as f:
-                f.write(input_data)
-
-            # Save output file
-            with open(output_file, "w", encoding="utf-8") as f:
-                f.write(output_data)
-
-        except Exception as e:
-            # Don't fail the test if file saving fails, just log the error
-            print(f"Warning: Failed to save I/O files for test {test_number}: {e}")
-
-    @Slot()
-    def run_tests(self):
-        """Run TLE tests in parallel with memory and time monitoring"""
-        all_passed = True
-        completed_tests = 0
-
-        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-            # Submit all test jobs
-            future_to_test = {
-                executor.submit(self._run_single_benchmark_test, i): i
-                for i in range(1, self.test_count + 1)
-            }
-
-            # Process completed tests as they finish
-            for future in as_completed(future_to_test):
-                if not self.is_running:
-                    # Cancel remaining futures if stopped
-                    for f in future_to_test:
-                        f.cancel()
-                    break
-
-                test_number = future_to_test[future]
-                completed_tests += 1
-
-                try:
-                    test_result = future.result()
-                    if test_result:  # Check if test wasn't cancelled
-                        # Thread-safe result storage
-                        with self._results_lock:
-                            self.test_results.append(test_result)
-
-                        # Emit signals for UI updates
-                        self.testStarted.emit(completed_tests, self.test_count)
-                        self.testCompleted.emit(
-                            test_result["test_name"],
-                            test_result["test_number"],
-                            test_result["passed"],
-                            test_result["execution_time"],
-                            test_result["memory_used"],
-                            test_result["memory_passed"],
-                            test_result.get("input", ""),
-                            test_result.get("output", ""),
-                            test_result.get("test_size", 0),
-                        )
-
-                        if not test_result["passed"]:
-                            all_passed = False
-
-                except Exception as e:
-                    # Handle any unexpected errors
-                    error_result = self._create_error_result(
-                        test_number, f"Execution error: {str(e)}"
-                    )
-                    with self._results_lock:
-                        self.test_results.append(error_result)
-                    self.testCompleted.emit(
-                        f"Test {completed_tests}",
-                        error_result["test_number"],
-                        False,
-                        0.0,
-                        0.0,
-                        False,
-                        "",
-                        "",
-                        0,
-                    )
-                    all_passed = False
-
-        self.allTestsCompleted.emit(all_passed)
-
-    def _run_single_benchmark_test(self, test_number: int) -> Optional[Dict[str, Any]]:
+        self.testCompleted.emit(
+            test_result["test_name"],
+            test_result["test_number"],
+            test_result["passed"],
+            test_result["execution_time"],
+            test_result["memory_used"],
+            test_result["memory_passed"],
+            test_result.get("input", ""),
+            test_result.get("output", ""),
+            test_result.get("test_size", 0),
+        )
+    
+    def _run_single_test(self, test_number: int) -> Optional[Dict[str, Any]]:
         """
         Run a single TLE test with memory and time monitoring.
 
@@ -254,9 +173,26 @@ class BenchmarkTestWorker(QObject):
                 if input_text:
                     process.stdin.write(input_text)
                     process.stdin.flush()
+                    process.stdin.close()  # Issue #7: Close stdin to signal EOF
 
-                # Monitor memory usage while process runs
-                while process.poll() is None:
+                # Issue #7: Read output in thread to prevent pipe deadlock
+                stdout_data = []
+                stderr_data = []
+                
+                def read_stdout():
+                    stdout_data.append(process.stdout.read())
+                
+                def read_stderr():
+                    stderr_data.append(process.stderr.read())
+                
+                import threading
+                stdout_thread = threading.Thread(target=read_stdout, daemon=True)
+                stderr_thread = threading.Thread(target=read_stderr, daemon=True)
+                stdout_thread.start()
+                stderr_thread.start()
+
+                # Monitor memory usage while process runs (output being read in background)
+                while process.poll() is None and self.is_running:  # Issue #7: Check is_running
                     try:
                         memory_info = ps_process.memory_info()
                         memory_used_mb = memory_info.rss / (
@@ -267,8 +203,8 @@ class BenchmarkTestWorker(QObject):
                         # Process finished
                         break
 
-                    # Small sleep to avoid busy-waiting
-                    time.sleep(0.001)
+                    # Small sleep to avoid busy-waiting (Issue #5: optimized from 0.001 to 0.01)
+                    time.sleep(0.01)
 
                     # Check if time limit exceeded during monitoring
                     if time.time() - test_start > self.time_limit:
@@ -306,19 +242,37 @@ class BenchmarkTestWorker(QObject):
                     # Process finished, use last known memory usage
                     pass
 
-                # Get output - don't call communicate() with input since we already wrote it
-                # Just get remaining output from buffers
-                # Note: communicate() will handle closing stdin/stdout/stderr automatically
-                stdout, stderr = process.communicate(timeout=5)
+                # Issue #7: If stopped, kill process and return None
+                if not self.is_running:
+                    try:
+                        process.kill()
+                        process.wait(timeout=1)
+                    except:
+                        pass
+                    return None
+
+                # Wait for output reading threads to complete
+                stdout_thread.join(timeout=5)
+                stderr_thread.join(timeout=1)
+                process.wait(timeout=1)
+                
+                stdout = stdout_data[0] if stdout_data else ""
+                stderr = stderr_data[0] if stderr_data else ""
 
             except (psutil.NoSuchProcess, psutil.AccessDenied, Exception) as e:
                 # Handle any errors during memory monitoring
                 # Process may have terminated unexpectedly
+                # Output reading threads should still complete
                 try:
-                    stdout, stderr = process.communicate(timeout=1)
-                except subprocess.TimeoutExpired:
+                    stdout_thread.join(timeout=1)
+                    stderr_thread.join(timeout=0.5)
+                    process.wait(timeout=0.5)
+                except:
                     process.kill()
-                    stdout, stderr = process.communicate()
+                    process.wait()
+                
+                stdout = stdout_data[0] if stdout_data else ""
+                stderr = stderr_data[0] if stderr_data else ""
 
             test_time = time.time() - test_start
 
@@ -338,8 +292,9 @@ class BenchmarkTestWorker(QObject):
             time_passed = test_time <= self.time_limit
             overall_passed = time_passed and memory_passed and process.returncode == 0
 
-            # Save I/O files to nested directories
-            self._save_test_io(test_number, input_text, stdout)
+            # Issue #6: REMOVED synchronous disk I/O during test execution
+            # Data is already stored in memory dictionary and database
+            # self._save_test_io(test_number, input_text, stdout)
 
             # Calculate test size (number of input lines)
             test_size = len(input_text.strip().split("\n")) if input_text.strip() else 0
@@ -402,12 +357,3 @@ class BenchmarkTestWorker(QObject):
             "output": "",
             "test_size": 0,
         }
-
-    def stop(self):
-        """Stop the worker and cancel any running tests."""
-        self.is_running = False
-
-    def get_test_results(self) -> list:
-        """Get thread-safe copy of test results for database storage."""
-        with self._results_lock:
-            return self.test_results.copy()
