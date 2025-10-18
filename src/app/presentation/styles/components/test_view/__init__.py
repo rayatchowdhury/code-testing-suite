@@ -32,6 +32,15 @@ from .test_control_styles import (
     get_passed_status_style,
     get_failed_status_style,
 )
+from .test_tab_styles import (
+    TAB_CONTAINER_STYLE,
+    TAB_FILE_BUTTON_STYLE,
+    TAB_FILE_BUTTON_SINGLE_STYLE,
+    LANGUAGE_CONTAINER_STYLE,
+    LANGUAGE_LABEL_STYLE,
+    LANGUAGE_CONTEXT_MENU_STYLE,
+    get_file_button_style,
+)
 
 __all__ = [
     # Editor styles
@@ -50,6 +59,13 @@ __all__ = [
     "TEST_VIEW_COMPILATION_CLOSE_BUTTON_STYLE",
     "TEST_VIEW_STATUS_LABEL_STYLE",
     "TEST_VIEW_TIME_LABEL_STYLE",
+    # Tab styles
+    "TAB_CONTAINER_STYLE",
+    "TAB_FILE_BUTTON_STYLE",
+    "TAB_FILE_BUTTON_SINGLE_STYLE",
+    "LANGUAGE_CONTAINER_STYLE",
+    "LANGUAGE_LABEL_STYLE",
+    "LANGUAGE_CONTEXT_MENU_STYLE",
     # Utility functions
     "get_history_label_style",
     "get_running_status_style",
@@ -59,4 +75,5 @@ __all__ = [
     "get_status_label_style",
     "get_passed_status_style",
     "get_failed_status_style",
+    "get_file_button_style",
 ]

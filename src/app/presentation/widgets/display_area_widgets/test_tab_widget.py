@@ -24,6 +24,12 @@ from PySide6.QtWidgets import (
 from src.app.presentation.styles.components.test_view import (
     TEST_VIEW_BUTTON_PANEL_STYLE,
     TEST_VIEW_CONTENT_PANEL_STYLE,
+    TAB_CONTAINER_STYLE,
+    TAB_FILE_BUTTON_STYLE,
+    TAB_FILE_BUTTON_SINGLE_STYLE,
+    LANGUAGE_CONTAINER_STYLE,
+    LANGUAGE_LABEL_STYLE,
+    LANGUAGE_CONTEXT_MENU_STYLE,
 )
 from src.app.presentation.styles.constants import MATERIAL_COLORS
 from src.app.shared.constants import WORKSPACE_DIR
@@ -169,24 +175,7 @@ class TestTabWidget(QWidget):
                 tab_widget.setSizePolicy(
                     QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
                 )  # Allow horizontal expansion
-                tab_widget.setStyleSheet(
-                    f"""
-                    QWidget {{
-                        border: 1px solid {MATERIAL_COLORS['outline_variant']};
-                        border-radius: 8px;
-                        background: {MATERIAL_COLORS['surface_variant']};
-                        margin: 1px 0 1px 1px;
-                    }}
-                    QWidget:hover {{
-                        border-color: {MATERIAL_COLORS['outline']};
-                        background: {MATERIAL_COLORS['surface_bright']};
-                    }}
-                    QWidget[hasUnsavedChanges="true"] {{
-                        border: 2px solid {MATERIAL_COLORS['error']} !important;
-                        margin: 1px 0 1px 1px;
-                    }}
-                """
-                )
+                tab_widget.setStyleSheet(TAB_CONTAINER_STYLE)
 
                 tab_layout = QHBoxLayout(tab_widget)
                 tab_layout.setContentsMargins(2, 2, 2, 2)
@@ -204,66 +193,12 @@ class TestTabWidget(QWidget):
                 )
 
                 # Modern button styling with connected design (no right border-radius for seamless connection)
-                btn.setStyleSheet(
-                    f"""
-                    QPushButton {{
-                        border: none;
-                        border-radius: 6px;
-                        border-top-right-radius: 0;
-                        border-bottom-right-radius: 0;
-                        background: transparent;
-                        color: {MATERIAL_COLORS['on_surface']};
-                        font-size: 13px;
-                        font-weight: 500;
-                        text-align: center;
-                    }}
-                    QPushButton:hover {{
-                        background: rgba(255, 255, 255, 0.08);
-                    }}
-                    QPushButton:pressed {{
-                        background: rgba(255, 255, 255, 0.12);
-                    }}
-                    QPushButton[isActive="true"] {{
-                        background: {MATERIAL_COLORS['primary_container']};
-                        color: {MATERIAL_COLORS['on_primary_container']};
-                        font-weight: 600;
-                    }}
-                    QPushButton[isActive="true"]:hover {{
-                        background: {MATERIAL_COLORS['primary']};
-                        color: {MATERIAL_COLORS['on_primary']};
-                    }}
-                    QPushButton[hasUnsavedChanges="true"] {{
-                        border: 2px solid {MATERIAL_COLORS['error']} !important;
-                        border-radius: 6px;
-                        border-top-right-radius: 0;
-                        border-bottom-right-radius: 0;
-                        padding: 6px 6px;
-                        padding-right: 0px;
-                    }}
-                """
-                )
+                btn.setStyleSheet(TAB_FILE_BUTTON_STYLE)
 
                 # Language selector container with fixed width to prevent collision
                 lang_container = QWidget()
                 lang_container.setFixedWidth(45)  # Slightly smaller fixed width
-                lang_container.setStyleSheet(
-                    f"""
-                    QWidget {{
-                        border: none;
-                        border-left: 1px solid {MATERIAL_COLORS['outline_variant']};
-                        border-radius: 0;
-                        border-top-right-radius: 6px;
-                        border-bottom-right-radius: 6px;
-                        background: {MATERIAL_COLORS['surface_dim']};
-                        min-width: 45px;
-                        max-width: 45px;
-                    }}
-                    QWidget:hover {{
-                        background: {MATERIAL_COLORS['surface_bright']};
-                        border-left-color: {MATERIAL_COLORS['outline']};
-                    }}
-                """
-                )
+                lang_container.setStyleSheet(LANGUAGE_CONTAINER_STYLE)
 
                 lang_layout = QVBoxLayout(lang_container)
                 lang_layout.setContentsMargins(2, 4, 2, 4)
@@ -272,23 +207,7 @@ class TestTabWidget(QWidget):
                 current_lang = self.current_language_per_tab[tab_name]
                 lang_label = QLabel(current_lang.upper())
                 lang_label.setAlignment(Qt.AlignCenter)
-                lang_label.setStyleSheet(
-                    f"""
-                    QLabel {{
-                        color: {MATERIAL_COLORS['text_secondary']};
-                        font-size: 9px;
-                        font-weight: 600;
-                        padding: 4px 1px;
-                        background: transparent;
-                        border: none;
-                        border-radius: 3px;
-                    }}
-                    QLabel:hover {{
-                        color: {MATERIAL_COLORS['primary']};
-                        background: rgba(0, 150, 199, 0.1);
-                    }}
-                """
-                )
+                lang_label.setStyleSheet(LANGUAGE_LABEL_STYLE)
                 lang_label.mousePressEvent = (
                     lambda event, tab=tab_name: self._show_language_menu(event, tab)
                 )
@@ -322,38 +241,7 @@ class TestTabWidget(QWidget):
                 )
 
                 # Apply consistent Material Design styling for single-language buttons
-                btn.setStyleSheet(
-                    f"""
-                    QPushButton {{
-                        background-color: {MATERIAL_COLORS['surface_variant']};
-                        border: 1px solid {MATERIAL_COLORS['outline_variant']};
-                        border-radius: 8px;
-                        color: {MATERIAL_COLORS['on_surface']};
-                        padding: 8px 12px;
-                        font-weight: 500;
-                        font-size: 13px;
-                    }}
-                    QPushButton:hover {{
-                        background-color: {MATERIAL_COLORS['surface_bright']};
-                        border-color: {MATERIAL_COLORS['outline']};
-                    }}
-                    QPushButton[isActive="true"] {{
-                        background-color: {MATERIAL_COLORS['primary_container']};
-                        border: 2px solid {MATERIAL_COLORS['primary']};
-                        color: {MATERIAL_COLORS['on_primary_container']};
-                        font-weight: 600;
-                        padding: 7px 11px;
-                    }}
-                    QPushButton[isActive="true"]:hover {{
-                        background-color: {MATERIAL_COLORS['primary']};
-                        color: {MATERIAL_COLORS['on_primary']};
-                    }}
-                    QPushButton[hasUnsavedChanges="true"] {{
-                        border: 2px solid {MATERIAL_COLORS['error']} !important;
-                        padding: 7px 11px;
-                    }}
-                """
-                )
+                btn.setStyleSheet(TAB_FILE_BUTTON_SINGLE_STYLE)
 
                 self.file_buttons[tab_name] = btn
                 # Add with equal stretch for edge-to-edge layout
@@ -394,41 +282,7 @@ class TestTabWidget(QWidget):
             return
 
         menu = QMenu()
-        menu.setStyleSheet(
-            f"""
-            QMenu {{
-                background-color: {MATERIAL_COLORS['surface']};
-                border: 1px solid {MATERIAL_COLORS['outline']};
-                border-radius: 8px;
-                padding: 8px 0px;
-                min-width: 100px;
-            }}
-            QMenu::item {{
-                background-color: transparent;
-                padding: 10px 16px;
-                margin: 2px 6px;
-                border-radius: 6px;
-                color: {MATERIAL_COLORS['on_surface']};
-                font-size: 12px;
-                font-weight: 500;
-                min-height: 20px;
-            }}
-            QMenu::item:selected {{
-                background-color: {MATERIAL_COLORS['primary_container']};
-                color: {MATERIAL_COLORS['on_primary_container']};
-            }}
-            QMenu::item:checked {{
-                background-color: {MATERIAL_COLORS['primary']};
-                color: {MATERIAL_COLORS['on_primary']};
-                font-weight: 600;
-            }}
-            QMenu::separator {{
-                height: 1px;
-                background-color: {MATERIAL_COLORS['outline_variant']};
-                margin: 6px 12px;
-            }}
-        """
-        )
+        menu.setStyleSheet(LANGUAGE_CONTEXT_MENU_STYLE)
 
         current_lang = self.current_language_per_tab.get(tab_name)
 
