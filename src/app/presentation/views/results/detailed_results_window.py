@@ -39,6 +39,7 @@ from src.app.presentation.styles.components.results import (
     RESULTS_TEXT_EDIT_STYLE,
 )
 from src.app.presentation.styles.fonts.emoji import set_emoji_font
+from src.app.presentation.styles.helpers.common_styles import bold_label
 from src.app.presentation.styles.style import MATERIAL_COLORS
 from src.app.presentation.widgets.sidebar import Sidebar
 
@@ -159,9 +160,7 @@ class DetailedResultsWidget(QWidget):
         set_emoji_font(title)
         title.setStyleSheet(
             f"""
-            font-size: 24px;
-            font-weight: bold;
-            color: {MATERIAL_COLORS['on_surface']};
+            {bold_label(24, MATERIAL_COLORS['on_surface'])}
             padding-bottom: 16px;
         """
         )
@@ -253,9 +252,7 @@ class DetailedResultsWidget(QWidget):
         set_emoji_font(title)
         title.setStyleSheet(
             f"""
-            font-size: 24px;
-            font-weight: bold;
-            color: {MATERIAL_COLORS['on_surface']};
+            {bold_label(24, MATERIAL_COLORS['on_surface'])}
         """
         )
         layout.addWidget(title)
@@ -375,9 +372,7 @@ class DetailedResultsWidget(QWidget):
         title = QLabel(f"{icon} {status_text} Tests")
         title.setStyleSheet(
             f"""
-            font-size: 24px;
-            font-weight: bold;
-            color: {MATERIAL_COLORS['on_surface']};
+            {bold_label(24, MATERIAL_COLORS['on_surface'])}
         """
         )
         layout.addWidget(title)
@@ -450,9 +445,7 @@ class DetailedResultsWidget(QWidget):
         header = QLabel(f"{status_icon} Test #{test_num}")
         header.setStyleSheet(
             f"""
-            font-size: 16px;
-            font-weight: bold;
-            color: {MATERIAL_COLORS['on_surface']};
+            {bold_label(16, MATERIAL_COLORS['on_surface'])}
         """
         )
         layout.addWidget(header)
@@ -758,7 +751,7 @@ class DetailedResultsWidget(QWidget):
 
         value_widget = QLabel(value)
         value_color = color if color else MATERIAL_COLORS["on_surface"]
-        value_widget.setStyleSheet(f"color: {value_color}; font-weight: bold;")
+        value_widget.setStyleSheet(bold_label(color=value_color))
         layout.addWidget(value_widget)
 
         layout.addStretch()
@@ -770,9 +763,7 @@ class DetailedResultsWidget(QWidget):
         label_color = color if color else MATERIAL_COLORS["on_surface"]
         label.setStyleSheet(
             f"""
-            font-size: 14px;
-            font-weight: bold;
-            color: {label_color};
+            {bold_label(14, label_color)}
             padding-top: 8px;
         """
         )

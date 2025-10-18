@@ -36,6 +36,7 @@ from src.app.presentation.styles.helpers.inline_styles import (
     build_status_style,
     get_status_label_style,
 )
+from src.app.presentation.styles.helpers.common_styles import error_text
 from src.app.presentation.styles.style import MATERIAL_COLORS
 
 
@@ -385,9 +386,7 @@ class FilesSnapshotWidget(QWidget):
         layout.setContentsMargins(16, 16, 16, 16)
 
         error_label = QLabel(f"Error loading files data: {error_message}")
-        error_label.setStyleSheet(
-            f"color: {MATERIAL_COLORS['error']}; font-weight: bold;"
-        )
+        error_label.setStyleSheet(error_text(bold=True))
         layout.addWidget(error_label)
 
     def _setup_ui(self):
@@ -729,9 +728,7 @@ class DetailedResultsWidget(QWidget):
 
         except Exception as e:
             error_label = QLabel(f"Critical error loading detailed data: {str(e)}")
-            error_label.setStyleSheet(
-                f"color: {MATERIAL_COLORS['error']}; font-weight: bold;"
-            )
+            error_label.setStyleSheet(error_text(bold=True))
             self.analysis_container.addWidget(error_label)
 
     def _load_test_cases(self, test_details):

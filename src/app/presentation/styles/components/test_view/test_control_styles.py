@@ -7,6 +7,7 @@ Includes styling for status dialogs, compilation dialogs, and status utility fun
 
 from src.app.presentation.styles.constants.status_colors import ERROR_COLOR_HEX
 from src.app.presentation.styles.style import MATERIAL_COLORS
+from src.app.presentation.styles.helpers.common_styles import bold_label
 
 # Status Window Styles
 TEST_VIEW_STATUS_DIALOG_STYLE = f"""
@@ -109,29 +110,27 @@ QPushButton:hover {{
 """
 
 # Status Label Styles
-TEST_VIEW_STATUS_LABEL_STYLE = (
-    f"color: {MATERIAL_COLORS['on_surface']}; font-weight: bold;"
-)
-TEST_VIEW_TIME_LABEL_STYLE = f"color: {MATERIAL_COLORS['primary']}; font-weight: bold;"
+TEST_VIEW_STATUS_LABEL_STYLE = bold_label(color=MATERIAL_COLORS['on_surface'])
+TEST_VIEW_TIME_LABEL_STYLE = bold_label(color=MATERIAL_COLORS['primary'])
 
 
 # Utility Functions
 def get_history_label_style(passed=True):
     """Get history label style based on pass/fail status"""
     color = MATERIAL_COLORS["primary"] if passed else ERROR_COLOR_HEX
-    return f"color: {color}; font-weight: bold;"
+    return bold_label(color=color)
 
 
 def get_running_status_style():
-    return f"color: {MATERIAL_COLORS['on_surface']}; font-weight: bold;"
+    return bold_label(color=MATERIAL_COLORS['on_surface'])
 
 
 def get_test_view_error_status_style():
-    return f"color: {ERROR_COLOR_HEX}; font-weight: bold;"
+    return bold_label(color=ERROR_COLOR_HEX)
 
 
 def get_test_view_success_status_style():
-    return f"color: {MATERIAL_COLORS['primary']}; font-weight: bold;"
+    return bold_label(color=MATERIAL_COLORS['primary'])
 
 
 def get_compilation_status_style(is_success=True):
@@ -141,15 +140,15 @@ def get_compilation_status_style(is_success=True):
 
 def get_status_label_style(passed=True):
     color = MATERIAL_COLORS["primary"] if passed else ERROR_COLOR_HEX
-    return f"color: {color}; font-weight: bold;"
+    return bold_label(color=color)
 
 
 def get_passed_status_style():
-    return f"color: {MATERIAL_COLORS['primary']}; font-weight: bold;"
+    return bold_label(color=MATERIAL_COLORS['primary'])
 
 
 def get_failed_status_style():
-    return f"color: {ERROR_COLOR_HEX}; font-weight: bold;"
+    return bold_label(color=ERROR_COLOR_HEX)
 
 
 __all__ = [
