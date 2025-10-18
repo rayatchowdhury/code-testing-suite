@@ -33,6 +33,8 @@ from src.app.presentation.styles.components.results import (
     RESULTS_CARD_STYLE,
     RESULTS_LABEL_DETAILS_STYLE,
     RESULTS_LABEL_TITLE_STYLE,
+    RESULTS_SCROLL_STYLE,
+    RESULTS_SEPARATOR_STYLE,
     RESULTS_TABLE_SMALL_STYLE,
     RESULTS_TEXT_EDIT_STYLE,
 )
@@ -410,7 +412,7 @@ class DetailedResultsWidget(QWidget):
         # Scroll area for test cases
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll.setStyleSheet(f"background-color: {MATERIAL_COLORS['surface']};")
+        scroll.setStyleSheet(RESULTS_SCROLL_STYLE)
 
         scroll_content = QWidget()
         scroll_layout = QVBoxLayout(scroll_content)
@@ -780,6 +782,6 @@ class DetailedResultsWidget(QWidget):
         """Create horizontal divider"""
         line = QFrame()
         line.setFrameShape(QFrame.Shape.HLine)
-        line.setStyleSheet(f"background-color: {MATERIAL_COLORS['outline']};")
+        line.setStyleSheet(RESULTS_SEPARATOR_STYLE)
         line.setMaximumHeight(1)
         return line

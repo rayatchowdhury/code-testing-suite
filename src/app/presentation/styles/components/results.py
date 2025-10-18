@@ -218,6 +218,15 @@ font-weight: 600;
 font-size: 14px;
 """
 
+# Scroll Area and Separator Styles
+RESULTS_SCROLL_STYLE = f"""
+background-color: {MATERIAL_COLORS['surface']};
+"""
+
+RESULTS_SEPARATOR_STYLE = f"""
+background-color: {MATERIAL_COLORS['outline']};
+"""
+
 
 def create_error_label(text: str, bold: bool = False) -> "QLabel":
     """
