@@ -53,25 +53,35 @@ class BaseStatusView(QWidget):
         self._setup_styles()
 
     def _setup_ui(self):
-        """Setup the main UI structure - content only, no sidebar"""
+        """Setup the main UI structure with V2 enhanced layout"""
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(24, 24, 24, 24)
-        layout.setSpacing(20)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
 
-        # Import here to avoid circular imports
+        # Import V2 widgets here to avoid circular imports
         from src.app.presentation.widgets.status_view_widgets import (
-            CardsSection,
-            ProgressSection,
+            StatusHeaderSection,
+            PerformancePanelSection,
+            VisualProgressBarSection,
+            TestResultsCardsSection,
         )
 
-        # Progress section
-        self.progress_section = ProgressSection()
+        # Header with circular progress ring
+        self.status_header = StatusHeaderSection()
 
-        # Test cards section
-        self.cards_section = CardsSection()
+        # Performance panel (collapsible worker details)
+        self.performance_panel = PerformancePanelSection()
 
-        # Add to layout (no footer - sidebar handles save button)
-        layout.addWidget(self.progress_section)
+        # Visual progress bar with segments
+        self.progress_bar = VisualProgressBarSection()
+
+        # Test cards section (dual column)
+        self.cards_section = TestResultsCardsSection()
+
+        # Add to layout
+        layout.addWidget(self.status_header)
+        layout.addWidget(self.performance_panel)
+        layout.addWidget(self.progress_bar)
         layout.addWidget(self.cards_section, stretch=1)
 
     def _setup_styles(self):
@@ -99,7 +109,9 @@ class BaseStatusView(QWidget):
         if self.tests_running:
             self.tests_running = False
             self.stopRequested.emit()
-            self.controls_panel.update_stop_button_state(False)
+            # Update controls panel if it exists (for subclasses that add one)
+            if hasattr(self, 'controls_panel'):
+                self.controls_panel.update_stop_button_state(False)
 
     # Signal handlers for test execution
 
@@ -126,19 +138,21 @@ class BaseStatusView(QWidget):
             import multiprocessing
             self.max_workers = min(8, max(1, multiprocessing.cpu_count() - 1))
         
-        self.progress_section.reset(total, self.max_workers)
+        # Reset all V2 sections
+        self.status_header.reset(total)
+        self.progress_bar.reset(total)
         self.cards_section.clear()
         
-        # Show worker info
+        # Setup performance panel workers
         if self.max_workers > 0:
-            self.progress_section.update_worker_info(self.max_workers)
+            self.performance_panel.setup_workers(self.max_workers)
+            self.performance_panel.update_summary(self.max_workers, 0.0)
 
     def on_test_running(self, current: int, total: int):
         """Called when a test starts"""
-        self.progress_section.update_current_test(current, total)
-        # Update worker info with current test
-        if self.max_workers > 0:
-            self.progress_section.update_worker_info(self.max_workers, current)
+        # V2 widgets don't have update_current_test method
+        # Worker status can be updated via performance panel if needed
+        pass
 
     def on_test_completed(self, test_number: int, passed: bool, **kwargs):
         """
@@ -158,10 +172,19 @@ class BaseStatusView(QWidget):
         else:
             self.failed_tests += 1
 
-        self.progress_section.add_test_result(passed)
-        self.progress_section.update_stats(
-            self.completed_tests, self.total_tests, self.passed_tests, self.failed_tests
+        # Update V2 widgets
+        self.progress_bar.add_result(test_number, passed)
+        self.status_header.update_stats(
+            self.completed_tests, self.total_tests, 
+            self.passed_tests, self.failed_tests
         )
+        
+        # Update performance panel with speed info
+        if hasattr(self.status_header, 'start_time') and self.status_header.start_time:
+            import time
+            elapsed = time.time() - self.status_header.start_time
+            speed = self.completed_tests / elapsed if elapsed > 0 else 0
+            self.performance_panel.update_summary(self.max_workers, speed)
 
     def add_test_card(self, card):
         """
@@ -189,7 +212,7 @@ class BaseStatusView(QWidget):
     def on_all_tests_completed(self, all_passed: bool):
         """Called when all tests complete - notify parent to enable save button"""
         self.tests_running = False
-        self.progress_section.mark_complete(all_passed)
+        self.status_header.mark_complete()
 
         # Notify parent window to enable save button in sidebar (Issue #39)
         if self.parent_window and hasattr(self.parent_window, "enable_save_button"):

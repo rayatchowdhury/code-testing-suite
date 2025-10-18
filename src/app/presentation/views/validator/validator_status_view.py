@@ -5,7 +5,7 @@ Extends BaseStatusView to show validator test execution with test cards
 displaying input, output, validation messages, and error details.
 """
 
-from src.app.presentation.widgets.test_cards import ValidatorTestCard
+from src.app.presentation.widgets.status_view_widgets import ValidatorTestCard
 from src.app.presentation.widgets.test_detail_view import ValidatorDetailDialog
 from src.app.presentation.widgets.unified_status_view import BaseStatusView
 

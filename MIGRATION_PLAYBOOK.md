@@ -1,1505 +1,949 @@
-# 🚀 Styling Migration Playbook
+# Status View Architecture Migration Playbook
 
-**Version**: 1.0  
-**Target**: Refactor styling system from C+ (69/100) to A- (90/100)  
-**Timeline**: 4 weeks (14 hours total)  
-**Lines to Delete**: 564+ duplicate/waste lines  
-**Files to Touch**: 50+
-
----
-
-## 📋 Table of Contents
-
-1. [Quick Reference](#quick-reference)
-2. [Pre-Migration Checklist](#pre-migration-checklist)
-3. [Week 1: Critical Fixes](#week-1-critical-fixes)
-4. [Week 2: Consolidation](#week-2-consolidation)
-5. [Week 3: Modularity](#week-3-modularity)
-6. [Week 4: Polish & Validation](#week-4-polish--validation)
-7. [Testing Strategy](#testing-strategy)
-8. [Rollback Plan](#rollback-plan)
+**Version:** 1.0  
+**Date:** October 19, 2025  
+**Estimated Time:** 8-12 hours (split across phases)  
+**Risk Level:** Medium (requires careful testing)
 
 ---
 
-## 🎯 Quick Reference
+## Executive Summary
 
-### Migration Goals
-- ✅ Delete 2 conflicting Theme classes (-104 lines)
-- ✅ Create reusable gradient helpers (-400 duplicate lines)
-- ✅ Centralize all widget styles (-88 lines)
-- ✅ Split 3 oversized files (improve maintainability)
-- ✅ Reduce external styling from 35% to <10%
+This playbook refactors the status view system to achieve:
+1. **Clear separation of concerns** (Model → Presenter → View)
+2. **Elimination of tight coupling** between BaseStatusView and widgets
+3. **Consistent interfaces** using typed models instead of dicts
+4. **Cleaner styles organization** (consolidate trivial files)
 
-### Critical Numbers
-| Metric | Before | After | Change |
-|--------|--------|-------|--------|
-| Total lines | 4,000 | 3,200 | -20% |
-| Duplicate lines | 618 | 54 | -91% |
-| Files with inline styles | 35+ | <5 | -86% |
-| Largest style file | 430 | <200 | -53% |
-| External styling % | 35% | <10% | -71% |
+**Key Principle:** BaseStatusView coordinates, StatusViewPresenter translates, Widgets render.
 
 ---
 
-## ✅ Pre-Migration Checklist
+## Phase 1: Prepare Foundation (2 hours)
 
-### 1. Backup Current State
-```powershell
-# Create backup branch
-git checkout -b backup-styling-before-migration
-git add .
-git commit -m "Backup: Pre-styling migration snapshot"
-git push origin backup-styling-before-migration
+### Step 1.1: Create Models Module
 
-# Return to main branch
-git checkout main
-git checkout -b feature/styling-migration
-```
-
-### 2. Document Current Issues
-```powershell
-# Run the app and screenshot all windows/dialogs
-py -m src.app
-
-# Test each major feature:
-# - Main window
-# - Config dialog
-# - Test detail dialogs (validator/benchmarker/comparator)
-# - Results windows
-# - Help center
-```
-
-### 3. Set Up Testing Environment
-```powershell
-# Install dependencies
-pip install -r requirements-dev.txt
-
-# Run existing tests
-pytest tests/ -v
-
-# Generate coverage baseline
-pytest --cov=src/app/presentation --cov-report=html
-```
-
-### 4. Create Migration Branch Structure
-```powershell
-# Week 1 branch
-git checkout -b week1-critical-fixes
-
-# Prepare directories
-mkdir -p src/app/presentation/styles/helpers/gradients
-mkdir -p src/app/presentation/styles/components/dialogs
-```
-
----
-
-## 📅 Week 1: Critical Fixes (4 hours)
-
-**Goal**: Remove duplicate Theme classes, create gradient helpers, extract dialog styles  
-**Impact**: -284 lines, eliminate color conflicts
-
----
-
-### Task 1.1: Delete Conflicting Theme Classes (30 min)
-
-#### Step 1: Update `main_window/document.py`
-
-**File**: `src/app/presentation/styles/constants/colors.py`
-
-**ADD** these missing colors to MATERIAL_COLORS:
-```python
-# Add to MATERIAL_COLORS dict if not present:
-'separator': '#2A3550',
-'text_bright': '#FFFFFF',
-'text_dim': '#9CA3AF',
-'hover_overlay': 'rgba(0, 150, 199, 0.1)',
-```
-
-**File**: `src/app/presentation/views/main_window/document.py`
-
-**FIND** (around line 50-105):
-```python
-class Theme:
-    """Color theme and styling constants."""
-    
-    COLORS = {
-        'primary': '#0096C7',
-        'accent': '#00B4D8',
-        'bg_dark': '#0A0E27',
-        'bg_light': '#13182E',
-        'surface': '#1A1F3A',
-        'text_bright': '#FFFFFF',
-        'text_normal': '#E8E8E8',
-        'text_dim': '#9CA3AF',
-        'separator': '#2A3550',
-        'success': '#90BE6D',
-        'warning': '#F9C74F',
-        'error': '#F72585',
-        'info': '#0096C7',
-        'hover_overlay': 'rgba(0, 150, 199, 0.1)',
-    }
-    
-    SPACING = {
-        'small': 8,
-        'medium': 16,
-        'large': 24,
-        'xl': 32,
-    }
-    
-    FONTS = {
-        'small': 11,
-        'medium': 13,
-        'large': 15,
-        'xl': 18,
-    }
-```
-
-**REPLACE** with:
-```python
-# DELETE entire Theme class, use centralized colors instead
-```
-
-**FIND** all occurrences of `Theme.COLORS['xxx']`:
-```python
-Theme.COLORS['primary']
-Theme.COLORS['bg_dark']
-Theme.COLORS['text_bright']
-# ... etc
-```
-
-**REPLACE** with:
-```python
-MATERIAL_COLORS['primary']
-MATERIAL_COLORS['background']
-MATERIAL_COLORS['text_bright']
-# ... etc
-```
-
-**ADD** import at top:
-```python
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
-```
-
-#### Step 2: Update `help_center/document.py`
-
-**File**: `src/app/presentation/views/help_center/document.py`
-
-**FIND** (around line 20-67):
-```python
-class Theme:
-    """Help Center styling theme."""
-    
-    COLORS = {
-        'primary': '#F72585',      # Pink - WRONG!
-        'accent': '#4CC9F0',
-        'bg_dark': '#0A0E27',
-        'bg_light': '#13182E',
-        'surface': '#1A1F3A',
-        'text_bright': '#E8E8E8',  # Different from main!
-        'text_normal': '#C0C0C0',
-        'text_dim': '#808080',
-        'separator': '#2A3550',
-        'code_bg': '#0D1117',
-        'border': '#30363D',
-    }
-```
-
-**DELETE** entire Theme class.
-
-**FIND** all `Theme.COLORS['xxx']` and **REPLACE** with `MATERIAL_COLORS['xxx']`.
-
-**ADD** import:
-```python
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
-```
-
-**Lines saved**: 104
-
----
-
-### Task 1.2: Create Gradient Helper Module (45 min)
-
-**CREATE FILE**: `src/app/presentation/styles/helpers/gradients.py`
+**File:** `src/app/presentation/models/test_result.py`
 
 ```python
 """
-Gradient helper functions for consistent styling.
-
-Eliminates 400+ lines of duplicate gradient code.
+Test result models for unified status view system.
 """
-
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
-
-
-def surface_gradient() -> str:
-    """Standard surface gradient (light to dark)."""
-    return f"""qlineargradient(
-        x1:0, y1:0, x2:0, y2:1,
-        stop:0 {MATERIAL_COLORS['surface']},
-        stop:1 {MATERIAL_COLORS['surface_variant']}
-    )"""
+from dataclasses import dataclass, field
+from typing import Literal, Optional
 
 
-def surface_gradient_reverse() -> str:
-    """Reverse surface gradient (dark to light)."""
-    return f"""qlineargradient(
-        x1:0, y1:0, x2:0, y2:1,
-        stop:0 {MATERIAL_COLORS['surface_variant']},
-        stop:1 {MATERIAL_COLORS['surface']}
-    )"""
-
-
-def input_gradient() -> str:
-    """Standard input field background gradient."""
-    return """qlineargradient(
-        x1:0, y1:0, x2:0, y2:1,
-        stop:0 rgba(19, 24, 46, 255),
-        stop:1 rgba(26, 31, 58, 255)
-    )"""
-
-
-def button_gradient(color_top: str, color_bottom: str) -> str:
-    """Generic button gradient with custom colors."""
-    return f"""qlineargradient(
-        x1:0, y1:0, x2:0, y2:1,
-        stop:0 {color_top},
-        stop:1 {color_bottom}
-    )"""
-
-
-def primary_button_gradient() -> str:
-    """Primary button gradient (cyan shades)."""
-    return button_gradient(MATERIAL_COLORS['primary'], MATERIAL_COLORS['primary_dark'])
-
-
-def hover_gradient(base_color: str, opacity: float = 0.2) -> str:
-    """Hover state gradient overlay."""
-    rgba = f"rgba(0, 150, 199, {opacity})"
-    return f"""qlineargradient(
-        x1:0, y1:0, x2:0, y2:1,
-        stop:0 {rgba},
-        stop:1 transparent
-    )"""
-
-
-def card_gradient() -> str:
-    """Test card background gradient."""
-    return surface_gradient()
-
-
-def sidebar_gradient() -> str:
-    """Sidebar background gradient."""
-    return f"""qlineargradient(
-        x1:0, y1:0, x2:0, y2:1,
-        stop:0 {MATERIAL_COLORS['background']},
-        stop:1 {MATERIAL_COLORS['surface']}
-    )"""
-```
-
-**UPDATE**: `src/app/presentation/styles/helpers/__init__.py`
-```python
-from .gradients import (
-    surface_gradient,
-    surface_gradient_reverse,
-    input_gradient,
-    button_gradient,
-    primary_button_gradient,
-    hover_gradient,
-    card_gradient,
-    sidebar_gradient,
-)
-
-__all__ = [
-    'surface_gradient',
-    'surface_gradient_reverse',
-    'input_gradient',
-    'button_gradient',
-    'primary_button_gradient',
-    'hover_gradient',
-    'card_gradient',
-    'sidebar_gradient',
-]
-```
-
----
-
-### Task 1.3: Extract Test Detail Dialog Styles (1 hour)
-
-**CREATE FILE**: `src/app/presentation/styles/components/dialogs/test_detail_styles.py`
-
-```python
-"""Styles for test detail dialogs (validator/comparator/benchmarker)."""
-
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
-from src.app.presentation.styles.helpers.gradients import surface_gradient, input_gradient
-
-
-# Base dialog
-TEST_DETAIL_DIALOG_STYLE = f"""
-QDialog {{
-    background: {MATERIAL_COLORS['background']};
-    color: {MATERIAL_COLORS['text']};
-}}
-"""
-
-# Header section
-TEST_DETAIL_HEADER_STYLE = f"""
-QFrame {{
-    background: {surface_gradient()};
-    border: 1px solid {MATERIAL_COLORS['outline']};
-    border-radius: 8px;
-    padding: 12px;
-}}
-"""
-
-TEST_DETAIL_TITLE_STYLE = """
-font-weight: bold;
-font-size: 18px;
-"""
-
-TEST_DETAIL_STATUS_PASSED_STYLE = f"""
-font-weight: bold;
-font-size: 16px;
-color: {MATERIAL_COLORS['primary']};
-"""
-
-TEST_DETAIL_STATUS_FAILED_STYLE = f"""
-font-weight: bold;
-font-size: 16px;
-color: {MATERIAL_COLORS['error']};
-"""
-
-# Metrics section
-TEST_DETAIL_METRICS_FRAME_STYLE = f"""
-QFrame {{
-    background: {MATERIAL_COLORS['surface_variant']};
-    border: 1px solid {MATERIAL_COLORS['outline']};
-    border-radius: 6px;
-    padding: 8px;
-}}
-"""
-
-TEST_DETAIL_METRIC_LABEL_STYLE = f"""
-font-size: 11px;
-color: {MATERIAL_COLORS['text_secondary']};
-"""
-
-TEST_DETAIL_METRIC_VALUE_STYLE = """
-font-weight: bold;
-font-size: 13px;
-"""
-
-# Content labels
-TEST_DETAIL_SECTION_LABEL_STYLE = """
-font-weight: bold;
-font-size: 14px;
-"""
-
-# Text editors
-TEST_DETAIL_TEXTEDIT_STYLE = f"""
-QTextEdit {{
-    background: {input_gradient()};
-    border: 1px solid {MATERIAL_COLORS['outline']};
-    border-radius: 4px;
-    padding: 8px;
-    color: {MATERIAL_COLORS['text']};
-    font-family: 'Consolas', 'Courier New', monospace;
-    font-size: 12px;
-}}
-QTextEdit:focus {{
-    border: 2px solid {MATERIAL_COLORS['primary']};
-}}
-"""
-
-# Buttons
-TEST_DETAIL_CLOSE_BUTTON_STYLE = f"""
-QPushButton {{
-    background: {MATERIAL_COLORS['primary']};
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 8px 24px;
-    font-weight: bold;
-    font-size: 13px;
-}}
-QPushButton:hover {{
-    background: {MATERIAL_COLORS['primary_variant']};
-}}
-QPushButton:pressed {{
-    background: {MATERIAL_COLORS['primary_dark']};
-}}
-"""
-```
-
-**UPDATE**: `src/app/presentation/widgets/test_detail_view.py`
-
-**REPLACE** all inline setStyleSheet calls:
-
-**FIND** (line ~88-93):
-```python
-test_label.setStyleSheet(
+@dataclass
+class TestResult:
     """
-    font-weight: bold;
-    font-size: 18px;
-"""
-)
-```
-
-**REPLACE** with:
-```python
-test_label.setStyleSheet(TEST_DETAIL_TITLE_STYLE)
-```
-
-**FIND** (line ~100-106):
-```python
-status_label.setStyleSheet(f"""
-    font-weight: bold;
-    font-size: 16px;
-    color: {status_color};
-""")
-```
-
-**REPLACE** with:
-```python
-status_label.setStyleSheet(
-    TEST_DETAIL_STATUS_PASSED_STYLE if self.passed 
-    else TEST_DETAIL_STATUS_FAILED_STYLE
-)
-```
-
-**FIND** (lines 254, 267, 279 - DUPLICATED 3 TIMES):
-```python
-input_label.setStyleSheet("font-weight: bold; font-size: 14px;")
-expected_label.setStyleSheet("font-weight: bold; font-size: 14px;")
-actual_label.setStyleSheet("font-weight: bold; font-size: 14px;")
-```
-
-**REPLACE** with:
-```python
-input_label.setStyleSheet(TEST_DETAIL_SECTION_LABEL_STYLE)
-expected_label.setStyleSheet(TEST_DETAIL_SECTION_LABEL_STYLE)
-actual_label.setStyleSheet(TEST_DETAIL_SECTION_LABEL_STYLE)
-```
-
-**ADD** import at top:
-```python
-from src.app.presentation.styles.components.dialogs.test_detail_styles import (
-    TEST_DETAIL_DIALOG_STYLE,
-    TEST_DETAIL_HEADER_STYLE,
-    TEST_DETAIL_TITLE_STYLE,
-    TEST_DETAIL_STATUS_PASSED_STYLE,
-    TEST_DETAIL_STATUS_FAILED_STYLE,
-    TEST_DETAIL_METRICS_FRAME_STYLE,
-    TEST_DETAIL_SECTION_LABEL_STYLE,
-    TEST_DETAIL_TEXTEDIT_STYLE,
-    TEST_DETAIL_CLOSE_BUTTON_STYLE,
-)
-```
-
-**APPLY** to all 4 dialog classes:
-- `TestDetailDialog`
-- `ComparatorDetailDialog`
-- `ValidatorDetailDialog`
-- `BenchmarkerDetailDialog`
-
-**Lines saved**: 180
-
----
-
-### Task 1.4: Test Week 1 Changes (30 min)
-
-```powershell
-# Run app
-py -m src.app
-
-# Test each dialog:
-# 1. Open validator and run tests -> Click test card -> Verify dialog styling
-# 2. Open comparator and run tests -> Click test card -> Verify dialog styling
-# 3. Open benchmarker and run tests -> Click test card -> Verify dialog styling
-# 4. Open main window -> Verify colors match
-# 5. Open help center -> Verify colors now match main window
-
-# Run automated tests
-pytest tests/presentation/ -v
-
-# Commit
-git add .
-git commit -m "Week 1: Remove Theme classes, add gradient helpers, extract dialog styles"
-```
-
-**Week 1 Total**: -284 lines, 4 hours
-
----
-
-## 📅 Week 2: Consolidation (3 hours)
-
-**Goal**: Centralize widget styles, create reusable helpers  
-**Impact**: -152 lines, eliminate widget inline styles
-
----
-
-### Task 2.1: Create Input Styles Module (45 min)
-
-**CREATE FILE**: `src/app/presentation/styles/components/inputs/input_styles.py`
-
-```python
-"""Centralized input widget styles."""
-
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
-from src.app.presentation.styles.helpers.gradients import input_gradient
-
-
-# Group boxes
-INPUT_GROUP_STYLE = f"""
-QGroupBox {{
-    border: 2px solid {MATERIAL_COLORS['outline']};
-    border-radius: 8px;
-    margin-top: 12px;
-    padding-top: 16px;
-    background: {input_gradient()};
-}}
-QGroupBox::title {{
-    subcontrol-origin: margin;
-    left: 12px;
-    padding: 0 8px;
-    color: {MATERIAL_COLORS['primary']};
-    font-weight: bold;
-    font-size: 13px;
-}}
-"""
-
-# Spin boxes
-INPUT_SPINBOX_STYLE = f"""
-QSpinBox {{
-    background: {input_gradient()};
-    border: 1px solid {MATERIAL_COLORS['outline']};
-    border-radius: 4px;
-    padding: 6px;
-    color: {MATERIAL_COLORS['text']};
-    font-size: 13px;
-    min-height: 24px;
-}}
-QSpinBox:focus {{
-    border: 2px solid {MATERIAL_COLORS['primary']};
-}}
-QSpinBox:hover {{
-    border-color: {MATERIAL_COLORS['primary_variant']};
-}}
-QSpinBox::up-button, QSpinBox::down-button {{
-    background: {MATERIAL_COLORS['surface']};
-    border: 1px solid {MATERIAL_COLORS['outline']};
-}}
-QSpinBox::up-button:hover, QSpinBox::down-button:hover {{
-    background: {MATERIAL_COLORS['primary_variant']};
-}}
-"""
-
-# Double spin boxes
-INPUT_DOUBLE_SPINBOX_STYLE = INPUT_SPINBOX_STYLE.replace('QSpinBox', 'QDoubleSpinBox')
-
-# Combo boxes
-INPUT_COMBOBOX_STYLE = f"""
-QComboBox {{
-    background: {input_gradient()};
-    border: 1px solid {MATERIAL_COLORS['outline']};
-    border-radius: 4px;
-    padding: 6px 8px;
-    color: {MATERIAL_COLORS['text']};
-    font-size: 13px;
-    min-height: 24px;
-}}
-QComboBox:focus {{
-    border: 2px solid {MATERIAL_COLORS['primary']};
-}}
-QComboBox:hover {{
-    border-color: {MATERIAL_COLORS['primary_variant']};
-}}
-QComboBox::drop-down {{
-    border: none;
-    width: 20px;
-}}
-QComboBox::down-arrow {{
-    image: none;
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
-    border-top: 6px solid {MATERIAL_COLORS['text']};
-    margin-right: 6px;
-}}
-QComboBox QAbstractItemView {{
-    background: {MATERIAL_COLORS['surface']};
-    border: 1px solid {MATERIAL_COLORS['outline']};
-    selection-background-color: {MATERIAL_COLORS['primary']};
-    color: {MATERIAL_COLORS['text']};
-}}
-"""
-```
-
-**UPDATE**: `src/app/presentation/widgets/sidebar_widgets/limits_input_widget.py`
-
-**FIND** (lines ~120-175 - setup_styles method):
-```python
-def setup_styles(self):
-    """Setup widget styling."""
-    group_style = """
-        QGroupBox {
-            border: 2px solid #2A3550;
-            border-radius: 8px;
-            margin-top: 12px;
-            padding-top: 16px;
-            background: qlineargradient(
-                x1:0, y1:0, x2:0, y2:1,
-                stop:0 rgba(19, 24, 46, 255),
-                stop:1 rgba(26, 31, 58, 255)
-            );
-        }
-        # ... 50 more lines
+    Unified test result model for all test types.
+    
+    Provides type-safe access to test data instead of raw dicts.
     """
-    self.time_group.setStyleSheet(group_style)
-    self.memory_group.setStyleSheet(group_style)
-```
-
-**REPLACE** with:
-```python
-def setup_styles(self):
-    """Setup widget styling."""
-    self.time_group.setStyleSheet(INPUT_GROUP_STYLE)
-    self.memory_group.setStyleSheet(INPUT_GROUP_STYLE)
+    test_number: int
+    passed: bool
+    time: float  # seconds
+    memory: float  # MB
+    test_type: Literal['comparator', 'validator', 'benchmarker']
     
-    # Apply to all spin boxes
-    for spinbox in [self.time_spinbox, self.memory_spinbox]:
-        spinbox.setStyleSheet(INPUT_DOUBLE_SPINBOX_STYLE)
+    # Optional common fields
+    input_data: str = ""
+    output_data: str = ""
+    
+    # Type-specific data (use dict for flexibility)
+    extra_data: dict = field(default_factory=dict)
+    
+    @classmethod
+    def for_comparator(cls, test_number: int, passed: bool, time: float, 
+                       memory: float, input_text: str, correct_output: str, 
+                       test_output: str) -> 'TestResult':
+        """Factory method for comparator tests"""
+        return cls(
+            test_number=test_number,
+            passed=passed,
+            time=time,
+            memory=memory,
+            test_type='comparator',
+            input_data=input_text,
+            output_data=test_output,
+            extra_data={
+                'correct_output': correct_output,
+                'test_output': test_output,
+            }
+        )
+    
+    @classmethod
+    def for_validator(cls, test_number: int, passed: bool, time: float,
+                      memory: float, input_data: str, test_output: str,
+                      validation_message: str, error_details: str,
+                      validator_exit_code: int) -> 'TestResult':
+        """Factory method for validator tests"""
+        return cls(
+            test_number=test_number,
+            passed=passed,
+            time=time,
+            memory=memory,
+            test_type='validator',
+            input_data=input_data,
+            output_data=test_output,
+            extra_data={
+                'validation_message': validation_message,
+                'error_details': error_details,
+                'validator_exit_code': validator_exit_code,
+            }
+        )
+    
+    @classmethod
+    def for_benchmarker(cls, test_number: int, passed: bool, time: float,
+                        memory: float, test_name: str, memory_passed: bool,
+                        input_data: str, output_data: str, 
+                        test_size: int) -> 'TestResult':
+        """Factory method for benchmarker tests"""
+        return cls(
+            test_number=test_number,
+            passed=passed,
+            time=time,
+            memory=memory,
+            test_type='benchmarker',
+            input_data=input_data,
+            output_data=output_data,
+            extra_data={
+                'test_name': test_name,
+                'memory_passed': memory_passed,
+                'test_size': test_size,
+            }
+        )
+
+
+@dataclass
+class TestStatistics:
+    """Statistics calculated from test execution"""
+    total_tests: int
+    completed_tests: int
+    passed_tests: int
+    failed_tests: int
+    progress_percentage: float
+    current_speed: float  # tests/second
+    elapsed_time: float  # seconds
+    estimated_remaining: float  # seconds
+    
+    @property
+    def pass_percentage(self) -> float:
+        """Calculate pass percentage"""
+        if self.completed_tests == 0:
+            return 0.0
+        return (self.passed_tests / self.completed_tests) * 100
+    
+    @property
+    def fail_percentage(self) -> float:
+        """Calculate fail percentage"""
+        if self.completed_tests == 0:
+            return 0.0
+        return (self.failed_tests / self.completed_tests) * 100
 ```
 
-**ADD** import:
+**File:** `src/app/presentation/models/__init__.py`
+
 ```python
-from src.app.presentation.styles.components.inputs.input_styles import (
-    INPUT_GROUP_STYLE,
-    INPUT_DOUBLE_SPINBOX_STYLE,
-)
-```
+"""Presentation layer models"""
+from .test_result import TestResult, TestStatistics
 
-**Lines saved**: 55
+__all__ = ['TestResult', 'TestStatistics']
+```
 
 ---
 
-**UPDATE**: `src/app/presentation/widgets/sidebar_widgets/test_count_slider.py`
+### Step 1.2: Create Test Execution State Manager
 
-**FIND** (lines ~90-123):
+**File:** `src/app/presentation/models/test_execution_state.py`
+
 ```python
-input_style = """
-    QSpinBox {
-        background: qlineargradient(
-            x1:0, y1:0, x2:0, y2:1,
-            stop:0 rgba(19, 24, 46, 255),
-            stop:1 rgba(26, 31, 58, 255)
-        );
-        # ... 30 more lines (EXACT DUPLICATE!)
-    }
 """
-self.count_input.setStyleSheet(input_style)
-```
+Test execution state management.
+"""
+import time
+from typing import Dict, List, Optional
 
-**REPLACE** with:
-```python
-self.count_input.setStyleSheet(INPUT_SPINBOX_STYLE)
-```
+from .test_result import TestResult, TestStatistics
 
-**ADD** import:
-```python
-from src.app.presentation.styles.components.inputs.input_styles import INPUT_SPINBOX_STYLE
-```
 
-**Lines saved**: 33
-
----
-
-### Task 2.2: Create Error Label Helper (30 min)
-
-**UPDATE**: `src/app/presentation/styles/components/results.py`
-
-**ADD** at the end:
-```python
-# Error label styling
-ERROR_LABEL_STYLE = f"color: {MATERIAL_COLORS['error']}; font-weight: 500;"
-
-def create_error_label(text: str, parent=None) -> QLabel:
+class TestExecutionState:
     """
-    Create a styled error label.
+    Manages test execution state and statistics.
     
-    Eliminates 19 duplicate lines in detailed_results_widget.py.
+    Responsible for:
+    - Tracking test results
+    - Calculating statistics
+    - Managing execution timing
+    """
     
-    Args:
-        text: Label text
-        parent: Parent widget
+    def __init__(self):
+        self.results: Dict[int, TestResult] = {}
+        self.total_tests: int = 0
+        self.start_time: Optional[float] = None
+        self.max_workers: int = 0
         
-    Returns:
-        QLabel: Styled error label
+    def reset(self, total_tests: int, max_workers: int):
+        """Reset state for new test run"""
+        self.results.clear()
+        self.total_tests = total_tests
+        self.max_workers = max_workers
+        self.start_time = time.time()
+    
+    def add_result(self, result: TestResult):
+        """Record a test result"""
+        self.results[result.test_number] = result
+    
+    def get_result(self, test_number: int) -> Optional[TestResult]:
+        """Retrieve a specific test result"""
+        return self.results.get(test_number)
+    
+    def get_all_results(self) -> List[TestResult]:
+        """Get all results sorted by test number"""
+        return [self.results[k] for k in sorted(self.results.keys())]
+    
+    def get_statistics(self) -> TestStatistics:
+        """Calculate current statistics"""
+        completed = len(self.results)
+        passed = sum(1 for r in self.results.values() if r.passed)
+        failed = completed - passed
+        
+        elapsed = time.time() - self.start_time if self.start_time else 0
+        speed = completed / elapsed if elapsed > 0 else 0
+        remaining_tests = self.total_tests - completed
+        estimated_remaining = remaining_tests / speed if speed > 0 else 0
+        progress = (completed / self.total_tests * 100) if self.total_tests > 0 else 0
+        
+        return TestStatistics(
+            total_tests=self.total_tests,
+            completed_tests=completed,
+            passed_tests=passed,
+            failed_tests=failed,
+            progress_percentage=progress,
+            current_speed=speed,
+            elapsed_time=elapsed,
+            estimated_remaining=estimated_remaining,
+        )
+    
+    @property
+    def is_complete(self) -> bool:
+        """Check if all tests are complete"""
+        return len(self.results) == self.total_tests
+    
+    @property
+    def all_passed(self) -> bool:
+        """Check if all completed tests passed"""
+        return all(r.passed for r in self.results.values())
+```
+
+---
+
+## Phase 2: Create Presenter Layer (3 hours)
+
+### Step 2.1: Status View Presenter
+
+**File:** `src/app/presentation/presenters/status_view_presenter.py`
+
+```python
+"""
+Status View Presenter - Translation layer between model and widgets.
+"""
+from typing import TYPE_CHECKING
+
+from src.app.presentation.models.test_result import TestResult, TestStatistics
+
+if TYPE_CHECKING:
+    from src.app.presentation.widgets.status_view_widgets import (
+        StatusHeaderSection,
+        PerformancePanelSection,
+        VisualProgressBarSection,
+        TestResultsCardsSection,
+    )
+
+
+class StatusViewPresenter:
     """
-    from PySide6.QtWidgets import QLabel
-    label = QLabel(text, parent)
-    label.setStyleSheet(ERROR_LABEL_STYLE)
-    label.setWordWrap(True)
-    return label
+    Presenter for status view widgets.
+    
+    Responsibilities:
+    - Translate model state changes to widget updates
+    - Format data for display
+    - Coordinate widget updates in response to events
+    
+    Does NOT:
+    - Store business logic
+    - Make decisions about test execution
+    - Know about test runners or workers
+    """
+    
+    def __init__(
+        self,
+        header: 'StatusHeaderSection',
+        performance: 'PerformancePanelSection',
+        progress_bar: 'VisualProgressBarSection',
+        cards_section: 'TestResultsCardsSection',
+    ):
+        self.header = header
+        self.performance = performance
+        self.progress_bar = progress_bar
+        self.cards_section = cards_section
+    
+    def initialize_test_run(self, total_tests: int, max_workers: int):
+        """Initialize widgets for new test run"""
+        self.header.reset(total_tests)
+        self.progress_bar.reset(total_tests)
+        self.cards_section.clear()
+        
+        if max_workers > 0:
+            self.performance.setup_workers(max_workers)
+            self.performance.update_summary(max_workers, 0.0)
+    
+    def update_test_result(self, result: TestResult, stats: TestStatistics):
+        """Update widgets when a test completes"""
+        # Update progress bar
+        self.progress_bar.add_result(result.test_number, result.passed)
+        
+        # Update header statistics
+        self.header.update_stats(
+            completed=stats.completed_tests,
+            total=stats.total_tests,
+            passed=stats.passed_tests,
+            failed=stats.failed_tests,
+        )
+        
+        # Update performance panel
+        self.performance.update_summary(
+            workers_active=stats.total_tests,  # Could be refined
+            speed=stats.current_speed,
+        )
+    
+    def mark_complete(self):
+        """Mark test execution as complete"""
+        self.header.mark_complete()
+    
+    def clear_all(self):
+        """Clear all widget content"""
+        self.cards_section.clear()
 ```
 
-**UPDATE**: `src/app/presentation/views/results/detailed_results_widget.py`
+**File:** `src/app/presentation/presenters/__init__.py`
 
-**FIND** (19 occurrences at lines 138, 194, 265, 328, 353, 364, 431, 470, 484, 514, 543, 693, 708, 712, 722, 726, 767, 779):
 ```python
-error_label = QLabel("Error message")
-error_label.setStyleSheet(f"color: {MATERIAL_COLORS['error']};")
-```
+"""Presentation layer presenters"""
+from .status_view_presenter import StatusViewPresenter
 
-**REPLACE** with:
-```python
-error_label = create_error_label("Error message")
+__all__ = ['StatusViewPresenter']
 ```
-
-**ADD** import:
-```python
-from src.app.presentation.styles.components.results import create_error_label
-```
-
-**Lines saved**: 19
 
 ---
 
-### Task 2.3: Consolidate Inline Styles (1 hour)
+## Phase 3: Refactor BaseStatusView (2 hours)
 
-**UPDATE**: `src/app/presentation/views/results/detailed_results_window.py`
+### Step 3.1: Slim Down BaseStatusView
 
-**ADD** to `styles/components/results.py`:
+**File:** `src/app/presentation/widgets/unified_status_view.py` (REPLACE ENTIRE on_tests_started and on_test_completed)
+
 ```python
-RESULTS_SCROLL_STYLE = f"background-color: {MATERIAL_COLORS['surface']};"
-RESULTS_SEPARATOR_STYLE = f"background-color: {MATERIAL_COLORS['outline']}; border: none; max-height: 1px;"
-RESULTS_VALUE_BOLD_STYLE = lambda color: f"color: {color}; font-weight: bold;"
-```
+# Add imports at top
+from src.app.presentation.models.test_execution_state import TestExecutionState
+from src.app.presentation.models.test_result import TestResult
+from src.app.presentation.presenters.status_view_presenter import StatusViewPresenter
 
-**FIND** (line 413):
-```python
-scroll.setStyleSheet(f"background-color: {MATERIAL_COLORS['surface']};")
-```
+# In __init__, add:
+    def __init__(self, test_type: str, parent=None):
+        super().__init__(parent)
+        self.test_type = test_type
+        self.parent_window = parent
+        
+        # Use state manager instead of raw attributes
+        self.state = TestExecutionState()
+        self.tests_running = False  # Keep for backward compatibility
+        
+        # Presenter will be created after UI setup
+        self.presenter = None
+        
+        self._setup_ui()
+        self._setup_styles()
+        self._create_presenter()
+    
+    def _create_presenter(self):
+        """Create presenter after widgets are initialized"""
+        self.presenter = StatusViewPresenter(
+            header=self.status_header,
+            performance=self.performance_panel,
+            progress_bar=self.progress_bar,
+            cards_section=self.cards_section,
+        )
 
-**REPLACE** with:
-```python
-scroll.setStyleSheet(RESULTS_SCROLL_STYLE)
-```
+# REPLACE on_tests_started:
+    def on_tests_started(self, total: int):
+        """Called when tests start"""
+        self.tests_running = True
+        
+        # Get worker count
+        max_workers = self._determine_worker_count()
+        
+        # Reset state
+        self.state.reset(total, max_workers)
+        
+        # Delegate to presenter
+        self.presenter.initialize_test_run(total, max_workers)
+    
+    def _determine_worker_count(self) -> int:
+        """Determine max worker count from various sources"""
+        worker = None
+        if hasattr(self, 'runner') and hasattr(self.runner, 'get_current_worker'):
+            worker = self.runner.get_current_worker()
+        elif self.parent_window and hasattr(self.parent_window, 'comparator'):
+            if hasattr(self.parent_window.comparator, 'get_current_worker'):
+                worker = self.parent_window.comparator.get_current_worker()
+        
+        if worker and hasattr(worker, 'max_workers'):
+            return worker.max_workers
+        
+        # Fallback
+        import multiprocessing
+        return min(8, max(1, multiprocessing.cpu_count() - 1))
 
-**FIND** (line 783):
-```python
-line.setStyleSheet(f"background-color: {MATERIAL_COLORS['outline']};")
-```
+# REPLACE on_test_completed:
+    def on_test_completed(self, test_number: int, passed: bool, **kwargs):
+        """
+        Called when a test completes.
+        
+        Subclasses should override to create TestResult and call this.
+        
+        Args:
+            test_number: Test case number (1-indexed)
+            passed: Whether test passed
+            **kwargs: Additional test data (will be ignored, use create_result in subclass)
+        """
+        # This base implementation shouldn't be called directly
+        # Subclasses should create TestResult and call _handle_test_result
+        raise NotImplementedError(
+            "Subclasses must override on_test_completed and create TestResult"
+        )
+    
+    def _handle_test_result(self, result: TestResult):
+        """
+        Internal method to handle a test result.
+        
+        Called by subclasses after creating TestResult.
+        """
+        # Store result
+        self.state.add_result(result)
+        
+        # Get current statistics
+        stats = self.state.get_statistics()
+        
+        # Delegate to presenter
+        self.presenter.update_test_result(result, stats)
 
-**REPLACE** with:
-```python
-line.setStyleSheet(RESULTS_SEPARATOR_STYLE)
-```
+# UPDATE on_all_tests_completed:
+    def on_all_tests_completed(self, all_passed: bool):
+        """Called when all tests complete"""
+        self.tests_running = False
+        self.presenter.mark_complete()
+        
+        # Notify parent window
+        if self.parent_window and hasattr(self.parent_window, "enable_save_button"):
+            self.parent_window.enable_save_button()
 
-**Lines saved**: 25
+# ADD backward compatibility properties:
+    @property
+    def total_tests(self) -> int:
+        """Backward compatibility"""
+        return self.state.total_tests
+    
+    @property
+    def completed_tests(self) -> int:
+        """Backward compatibility"""
+        return len(self.state.results)
+    
+    @property
+    def passed_tests(self) -> int:
+        """Backward compatibility"""
+        return sum(1 for r in self.state.results.values() if r.passed)
+    
+    @property
+    def failed_tests(self) -> int:
+        """Backward compatibility"""
+        return self.completed_tests - self.passed_tests
+```
 
 ---
 
-### Task 2.4: Test Week 2 Changes (30 min)
+### Step 3.2: Update Subclasses to Use TestResult
 
-```powershell
-py -m src.app
+**File:** `src/app/presentation/views/comparator/comparator_status_view.py` (REPLACE on_test_completed)
 
-# Test:
-# 1. Sidebar widgets (limits input, test count slider)
-# 2. Results windows (detailed results, error labels)
-# 3. All input fields render correctly
+```python
+# Add import
+from src.app.presentation.models.test_result import TestResult
 
-pytest tests/ -v
-
-git add .
-git commit -m "Week 2: Centralize widget styles, create error label helper"
+# REPLACE on_test_completed method:
+    def on_test_completed(
+        self,
+        test_number: int,
+        passed: bool,
+        input_text: str,
+        correct_output: str,
+        test_output: str,
+        time: float = 0.0,
+        memory: float = 0.0,
+    ):
+        """Handle comparator test completion"""
+        # Create typed result
+        result = TestResult.for_comparator(
+            test_number=test_number,
+            passed=passed,
+            time=time,
+            memory=memory,
+            input_text=input_text,
+            correct_output=correct_output,
+            test_output=test_output,
+        )
+        
+        # Store for detail view
+        self.test_data[test_number] = {
+            "passed": passed,
+            "input_text": input_text,
+            "correct_output": correct_output,
+            "test_output": test_output,
+            "time": time,
+            "memory": memory,
+        }
+        
+        # Call base class with typed result
+        self._handle_test_result(result)
+        
+        # Create and add card
+        card = ComparatorTestCard(
+            test_number=test_number,
+            passed=passed,
+            time=time,
+            memory=memory,
+            input_text=input_text,
+            correct_output=correct_output,
+            test_output=test_output,
+        )
+        self.add_test_card(card)
 ```
 
-**Week 2 Total**: -152 lines, 3 hours
+**Apply similar changes to:**
+- `validator_status_view.py` (use `TestResult.for_validator`)
+- `benchmarker_status_view.py` (use `TestResult.for_benchmarker`)
 
 ---
 
-## 📅 Week 3: Modularity (3 hours)
+## Phase 4: Consolidate Styles (1 hour)
 
-**Goal**: Split oversized files for better organization  
-**Impact**: No line reduction, improved maintainability
+### Step 4.1: Merge status_containers.py
 
----
+**Action:** Delete `src/app/presentation/styles/components/status_view/status_containers.py`
 
-### Task 3.1: Split status_view_styles.py (1 hour)
+**File:** `src/app/presentation/styles/components/status_view/status_widgets_styles.py` (ADD at bottom)
 
-**CURRENT**: `src/app/presentation/styles/components/status_view_styles.py` (430 lines)
-
-**CREATE 3 FILES**:
-
-#### File 1: `status_containers.py` (~140 lines)
 ```python
-"""Status view container styles."""
-
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
-from src.app.presentation.styles.helpers.gradients import surface_gradient
+# ============================================================================
+# CONTAINER STYLES (merged from status_containers.py)
+# ============================================================================
 
 STATUS_VIEW_CONTAINER_STYLE = f"""
-QWidget#status_container {{
+QWidget {{
     background: {MATERIAL_COLORS['background']};
-    border-radius: 8px;
+    border: none;
 }}
 """
 
-STATUS_VIEW_INNER_CONTAINER_STYLE = f"""
-QWidget#inner_container {{
-    background: {surface_gradient()};
-    border: 1px solid {MATERIAL_COLORS['outline']};
-    border-radius: 6px;
-}}
-"""
-
-# ... move all container-related styles here
+# Update __all__ to include STATUS_VIEW_CONTAINER_STYLE
 ```
 
-#### File 2: `status_progress.py` (~140 lines)
-```python
-"""Status view progress and segment styles."""
-
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
-
-def get_segment_style(color: str, is_active: bool = False) -> str:
-    """Generate segment style with dynamic color."""
-    # ... existing implementation
-    
-# ... move all progress bar styles here
-```
-
-#### File 3: `status_cards.py` (~150 lines)
-```python
-"""Status view test card styles."""
-
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
-
-# ... move all card-related styles here
-```
-
-**UPDATE**: Files using STATUS_VIEW_* imports:
-- `src/app/presentation/widgets/unified_status_view.py`
-- Update imports to use new module structure
-
----
-
-### Task 3.2: Split config_styles.py (1 hour)
-
-**CURRENT**: `src/app/presentation/styles/components/config_styles.py` (405 lines)
-
-**CREATE 4 FILES**:
-
-#### File 1: `config/dialog_styles.py` (~100 lines)
-```python
-"""Config dialog container and layout styles."""
-
-CONFIG_DIALOG_STYLE = """..."""
-CONFIG_DIALOG_TITLE_STYLE = """..."""
-# Section frames, containers
-```
-
-#### File 2: `config/input_styles.py` (~100 lines)
-```python
-"""Config dialog input field styles."""
-
-# All input, combobox, checkbox styles specific to config dialog
-```
-
-#### File 3: `config/button_styles.py` (~100 lines)
-```python
-"""Config dialog button styles."""
-
-# Primary, secondary, danger button styles
-```
-
-#### File 4: `config/label_styles.py` (~105 lines)
-```python
-"""Config dialog label and text styles."""
-
-SECTION_INFO_LABEL_STYLE = """..."""
-ERROR_DIALOG_STYLE = """..."""
-# Warning labels, etc.
-```
-
-**UPDATE**: `src/app/core/config/views/config_dialog.py`
-```python
-from src.app.presentation.styles.components.config.dialog_styles import CONFIG_DIALOG_STYLE
-from src.app.presentation.styles.components.config.label_styles import SECTION_INFO_LABEL_STYLE
-# etc.
-```
-
----
-
-### Task 3.3: Split test_view_styles.py (45 min)
-
-**CURRENT**: `src/app/presentation/styles/components/test_view_styles.py` (300+ lines)
-
-**CREATE 2 FILES**:
-
-#### File 1: `test_editor_styles.py` (~150 lines)
-```python
-"""Test editor and syntax highlighting styles."""
-# Editor-specific styles
-```
-
-#### File 2: `test_control_styles.py` (~150 lines)
-```python
-"""Test control buttons and widgets."""
-# Control buttons, sliders, configuration widgets
-```
-
----
-
-### Task 3.4: Test Week 3 Changes (15 min)
-
-```powershell
-py -m src.app
-
-# Test ALL windows/dialogs to ensure nothing broke
-# Verify imports work correctly
-
-pytest tests/ -v
-
-git add .
-git commit -m "Week 3: Split oversized style files for better modularity"
-```
-
-**Week 3 Total**: 0 line reduction (organization only), 3 hours
-
----
-
-## 📅 Week 4: Polish & Validation (4 hours)
-
-**Goal**: Add helpers, create linter, document standards  
-**Impact**: -128 lines, prevent future regressions
-
----
-
-### Task 4.1: Create Common Style Helpers (1 hour)
-
-**CREATE FILE**: `src/app/presentation/styles/helpers/common_styles.py`
+**File:** `src/app/presentation/styles/components/status_view/__init__.py` (UPDATE imports)
 
 ```python
-"""Common reusable style helpers."""
+# REMOVE:
+# from .status_containers import STATUS_VIEW_CONTAINER_STYLE
 
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
-
-
-def bold_label(font_size: int = 14, color: str = None) -> str:
-    """Bold label style."""
-    color_str = f"color: {color};" if color else ""
-    return f"font-weight: bold; font-size: {font_size}px; {color_str}"
-
-
-def error_text() -> str:
-    """Error text color."""
-    return f"color: {MATERIAL_COLORS['error']};"
-
-
-def success_text() -> str:
-    """Success text color."""
-    return f"color: {MATERIAL_COLORS['success']};"
-
-
-def warning_text() -> str:
-    """Warning text color."""
-    return f"color: {MATERIAL_COLORS['warning']};"
-
-
-def background_surface() -> str:
-    """Standard surface background."""
-    return f"background-color: {MATERIAL_COLORS['surface']};"
-
-
-def border_standard(width: int = 1) -> str:
-    """Standard border style."""
-    return f"border: {width}px solid {MATERIAL_COLORS['outline']};"
-
-
-def rounded_corners(radius: int = 4) -> str:
-    """Rounded corner style."""
-    return f"border-radius: {radius}px;"
-
-
-def padding_standard(size: int = 8) -> str:
-    """Standard padding."""
-    return f"padding: {size}px;"
-```
-
-**UPDATE** 20+ files to use these helpers instead of inline styles.
-
----
-
-### Task 4.2: Create Style Linter (1.5 hours)
-
-**CREATE FILE**: `scripts/lint_styles.py`
-
-```python
-"""
-Lint styling violations across the codebase.
-
-Finds:
-- Inline setStyleSheet calls outside styles/
-- Magic color strings (hex codes not from MATERIAL_COLORS)
-- Duplicate gradient patterns
-- Files with >200 lines in styles/
-"""
-
-import re
-from pathlib import Path
-from typing import List, Dict, Tuple
-
-
-class StyleLinter:
-    def __init__(self):
-        self.violations = []
-        self.stats = {
-            'inline_styles': 0,
-            'magic_colors': 0,
-            'duplicate_gradients': 0,
-            'oversized_files': 0,
-        }
-    
-    def lint_all(self):
-        """Run all lint checks."""
-        self.check_inline_styles()
-        self.check_magic_colors()
-        self.check_oversized_files()
-        self.print_report()
-    
-    def check_inline_styles(self):
-        """Find inline setStyleSheet calls outside styles/ folder."""
-        print("🔍 Checking for inline styles...")
-        
-        for py_file in Path("src/app").rglob("*.py"):
-            if "styles/" in str(py_file):
-                continue
-            
-            content = py_file.read_text(encoding='utf-8')
-            lines = content.split('\n')
-            
-            for i, line in enumerate(lines, 1):
-                if 'setStyleSheet(' in line and not line.strip().startswith('#'):
-                    # Check if it's importing a constant (allowed)
-                    if re.search(r'setStyleSheet\([A-Z_]+\)', line):
-                        continue
-                    
-                    self.violations.append({
-                        'type': 'inline_style',
-                        'file': str(py_file),
-                        'line': i,
-                        'content': line.strip()[:80],
-                    })
-                    self.stats['inline_styles'] += 1
-    
-    def check_magic_colors(self):
-        """Find hardcoded hex colors."""
-        print("🔍 Checking for magic color strings...")
-        
-        for py_file in Path("src/app").rglob("*.py"):
-            if "styles/constants/colors.py" in str(py_file):
-                continue
-            
-            content = py_file.read_text(encoding='utf-8')
-            
-            # Find hex colors like #RRGGBB
-            hex_colors = re.findall(r'#[0-9A-Fa-f]{6}', content)
-            
-            if hex_colors:
-                self.violations.append({
-                    'type': 'magic_color',
-                    'file': str(py_file),
-                    'colors': list(set(hex_colors))[:5],
-                })
-                self.stats['magic_colors'] += len(set(hex_colors))
-    
-    def check_oversized_files(self):
-        """Find style files >200 lines."""
-        print("🔍 Checking for oversized style files...")
-        
-        for py_file in Path("src/app/presentation/styles/components").rglob("*.py"):
-            if py_file.name == '__init__.py':
-                continue
-            
-            lines = py_file.read_text(encoding='utf-8').split('\n')
-            line_count = len(lines)
-            
-            if line_count > 200:
-                self.violations.append({
-                    'type': 'oversized_file',
-                    'file': str(py_file),
-                    'lines': line_count,
-                })
-                self.stats['oversized_files'] += 1
-    
-    def print_report(self):
-        """Print linting report."""
-        print("\n" + "="*80)
-        print("📊 STYLE LINTING REPORT")
-        print("="*80)
-        
-        print(f"\n📈 Statistics:")
-        print(f"  Inline styles: {self.stats['inline_styles']}")
-        print(f"  Magic colors: {self.stats['magic_colors']}")
-        print(f"  Oversized files: {self.stats['oversized_files']}")
-        print(f"  Total violations: {len(self.violations)}")
-        
-        if self.violations:
-            print(f"\n⚠️  Found {len(self.violations)} violations:\n")
-            
-            for v in self.violations[:20]:  # Show first 20
-                if v['type'] == 'inline_style':
-                    print(f"❌ Inline style in {v['file']}:{v['line']}")
-                    print(f"   {v['content']}\n")
-                
-                elif v['type'] == 'magic_color':
-                    print(f"❌ Magic colors in {v['file']}")
-                    print(f"   Colors: {', '.join(v['colors'])}\n")
-                
-                elif v['type'] == 'oversized_file':
-                    print(f"❌ Oversized file: {v['file']}")
-                    print(f"   Lines: {v['lines']} (should be <200)\n")
-        else:
-            print("\n✅ No violations found! Excellent work!")
-        
-        # Exit code
-        return 0 if len(self.violations) == 0 else 1
-
-
-if __name__ == "__main__":
-    linter = StyleLinter()
-    exit_code = linter.lint_all()
-    exit(exit_code)
-```
-
-**RUN**:
-```powershell
-python scripts/lint_styles.py
-```
-
----
-
-### Task 4.3: Create Documentation (1 hour)
-
-**CREATE FILE**: `src/app/presentation/styles/README.md`
-
-```markdown
-# Styling Guidelines
-
-## 🎯 Core Principles
-
-1. **Single Source of Truth**: All styles MUST live in `styles/` folder
-2. **No Inline Styles**: Use object names + CSS selectors (except dynamic values)
-3. **Reuse Helpers**: Use gradient/color helpers instead of duplicating
-4. **Keep Files Small**: Max 200 lines per style file
-5. **Import from Constants**: Always use `MATERIAL_COLORS` dict
-
-## 📁 Folder Structure
-
-```
-styles/
-├── constants/           # Color definitions (DO NOT DUPLICATE!)
-│   ├── colors.py        # MATERIAL_COLORS, COLORS
-│   ├── editor_colors.py # Editor-specific colors
-│   └── status_colors.py # Semantic status colors
-│
-├── components/          # Component-specific styles
-│   ├── config/          # Config dialog styles
-│   ├── inputs/          # Input widget styles
-│   ├── dialogs/         # Dialog styles
-│   └── *.py             # Other component styles
-│
-├── helpers/             # Reusable utilities
-│   ├── gradients.py     # Gradient generators
-│   └── common_styles.py # Common style helpers
-│
-└── fonts/               # Font utilities
-```
-
-## ✅ Good Examples
-
-### Using Centralized Styles
-```python
-from src.app.presentation.styles.components.dialogs.test_detail_styles import (
-    TEST_DETAIL_DIALOG_STYLE
+# ADD:
+from .status_widgets_styles import (
+    # ... existing imports ...
+    STATUS_VIEW_CONTAINER_STYLE,  # Add this
 )
 
-dialog.setStyleSheet(TEST_DETAIL_DIALOG_STYLE)
-```
-
-### Using Helpers
-```python
-from src.app.presentation.styles.helpers.gradients import surface_gradient
-
-style = f"background: {surface_gradient()};"
-```
-
-### Using Object Names
-```python
-button.setObjectName("primary_button")
-container.setStyleSheet(BUTTON_STYLE)  # Uses #primary_button selector
-```
-
-## ❌ Bad Examples
-
-### Inline Styles (DON'T DO THIS!)
-```python
-# BAD - inline style
-label.setStyleSheet("color: red; font-size: 14px;")
-
-# GOOD - use constant
-from styles.helpers.common_styles import error_text, bold_label
-label.setStyleSheet(f"{error_text()} {bold_label(14)}")
-```
-
-### Magic Colors (DON'T DO THIS!)
-```python
-# BAD - magic hex color
-setStyleSheet("color: #F72585;")
-
-# GOOD - use MATERIAL_COLORS
-setStyleSheet(f"color: {MATERIAL_COLORS['error']};")
-```
-
-### Duplicate Gradients (DON'T DO THIS!)
-```python
-# BAD - copying gradient code
-style = """
-qlineargradient(x1:0, y1:0, x2:0, y2:1,
-    stop:0 rgba(19, 24, 46, 255),
-    stop:1 rgba(26, 31, 58, 255))
-"""
-
-# GOOD - use helper
-from styles.helpers.gradients import input_gradient
-style = f"background: {input_gradient()};"
-```
-
-## 🔧 Adding New Styles
-
-1. **Determine Category**: Is it a button, input, dialog, or component?
-2. **Choose Location**: Add to appropriate `components/` file
-3. **Use Helpers**: Import gradients/colors from helpers/constants
-4. **Keep it DRY**: If copying code >2 times, extract to helper
-5. **Document**: Add docstring explaining usage
-
-## 🧪 Testing Styles
-
-```powershell
-# Visual test
-py -m src.app
-
-# Lint styles
-python scripts/lint_styles.py
-
-# Run tests
-pytest tests/presentation/ -v
-```
-
-## 📏 File Size Limits
-
-- Style files: Max 200 lines (split if larger)
-- Helper files: Max 300 lines
-- Color files: Max 150 lines
-
-## 🎨 Color Usage
-
-Always import from `MATERIAL_COLORS`:
-
-```python
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
-
-# Primary colors
-MATERIAL_COLORS['primary']      # #0096C7
-MATERIAL_COLORS['error']        # #F72585
-MATERIAL_COLORS['success']      # #90BE6D
-
-# Surface colors
-MATERIAL_COLORS['background']   # #0A0E27
-MATERIAL_COLORS['surface']      # #13182E
-```
-
-**Never** create local Theme classes!
+# Update __all__ accordingly
 ```
 
 ---
 
-### Task 4.4: Final Validation (30 min)
+### Step 4.2: Optimize Style Files Structure
 
-```powershell
-# Run linter
-python scripts/lint_styles.py
+**OPTIONAL:** Split `status_widgets_styles.py` by component if it gets too large:
 
-# Should show minimal violations (<5)
-
-# Run full test suite
-pytest tests/ -v --cov=src/app/presentation
-
-# Manual testing - open every window/dialog
-py -m src.app
-
-# Checklist:
-# ✅ Main window
-# ✅ Config dialog
-# ✅ Help center
-# ✅ Validator window + test detail dialogs
-# ✅ Comparator window + test detail dialogs
-# ✅ Benchmarker window + test detail dialogs
-# ✅ Results window
-# ✅ Detailed results window
-
-# Commit final changes
-git add .
-git commit -m "Week 4: Add helpers, linter, documentation"
-git push origin feature/styling-migration
 ```
+status_view/
+├── __init__.py (exports)
+├── status_cards.py (existing)
+└── widgets/
+    ├── __init__.py
+    ├── header_styles.py (STATUS_HEADER_* styles)
+    ├── performance_styles.py (PERFORMANCE_PANEL_*, WORKER_* styles)
+    ├── progress_styles.py (PROGRESS_BAR_*, VISUAL_PROGRESS_* styles)
+    └── cards_section_styles.py (CARDS_SECTION_* styles)
+```
+
+**Decision:** Keep as-is for now (430 lines is manageable). Only split if crosses 600+ lines.
 
 ---
 
-## 🧪 Testing Strategy
+## Phase 5: Testing & Validation (2 hours)
 
-### Automated Tests
+### Step 5.1: Update Unit Tests
 
-**Run before each commit**:
-```powershell
-pytest tests/presentation/styles/ -v
-```
+**File:** `tests/unit/presentation/widgets/test_status_view.py` (UPDATE tests)
 
-**Coverage target**: >80%
-
-### Visual Tests
-
-**Manual checklist** (run after each week):
-
-- [ ] Main window renders correctly
-- [ ] Config dialog opens and all inputs styled
-- [ ] Test detail dialogs show correct colors
-- [ ] Results windows display properly
-- [ ] Help center matches main window colors
-- [ ] All buttons have hover states
-- [ ] All inputs have focus states
-- [ ] Gradients render smoothly
-- [ ] No visual regressions
-
-### Regression Prevention
-
-**Weekly linter runs**:
-```powershell
-# Add to CI/CD pipeline
-python scripts/lint_styles.py || exit 1
-```
-
----
-
-## 🔄 Rollback Plan
-
-### If Something Breaks
-
-**Week 1 rollback**:
-```powershell
-git checkout week1-critical-fixes
-git reset --hard HEAD~1
-```
-
-**Week 2 rollback**:
-```powershell
-git checkout week2-consolidation
-git reset --hard HEAD~1
-```
-
-**Full rollback**:
-```powershell
-git checkout backup-styling-before-migration
-git checkout -b main-restored
-```
-
-### Common Issues & Fixes
-
-**Issue**: Colors don't match after removing Theme classes
 ```python
-# Fix: Ensure all MATERIAL_COLORS keys exist
-# Add missing colors to constants/colors.py
-```
+# Add import
+from src.app.presentation.models.test_result import TestResult
 
-**Issue**: Gradients not rendering
-```python
-# Fix: Check import path
-from src.app.presentation.styles.helpers.gradients import surface_gradient
-# Ensure return value is string, not function
-```
+# UPDATE fixture to use new architecture
+@pytest.fixture
+def status_view(qtbot):
+    """Create BaseStatusView widget for testing."""
+    # Use concrete subclass for testing since BaseStatusView.on_test_completed 
+    # now raises NotImplementedError
+    from src.app.presentation.views.comparator.comparator_status_view import ComparatorStatusView
+    widget = ComparatorStatusView()
+    qtbot.addWidget(widget)
+    return widget
 
-**Issue**: Import errors after splitting files
-```python
-# Fix: Update __init__.py in each module
-# Re-export all constants for easy import
+# UPDATE test methods to use proper interface:
+class TestStatusViewTestLifecycle:
+    def test_on_test_completed_updates_counters(self, status_view):
+        """Should update counters when test completes."""
+        status_view.on_tests_started(10)
+        
+        # Use proper comparator interface
+        status_view.on_test_completed(
+            test_number=1,
+            passed=True,
+            input_text="test",
+            correct_output="output",
+            test_output="output",
+            time=0.5,
+            memory=10.0
+        )
+        
+        assert status_view.completed_tests == 1
+        assert status_view.passed_tests == 1
+        assert status_view.failed_tests == 0
 ```
 
 ---
 
-## 📊 Success Metrics
+### Step 5.2: Create New Tests for Models
 
-### After Full Migration
+**File:** `tests/unit/presentation/models/test_test_result.py`
 
-| Metric | Before | Target | How to Measure |
-|--------|--------|--------|----------------|
-| Total lines | 4,000 | 3,200 | `find src/app/presentation/styles -name "*.py" -exec wc -l {} + | tail -1` |
-| Duplicate lines | 618 | <60 | Run linter |
-| Files with inline styles | 35+ | <5 | `python scripts/lint_styles.py` |
-| Largest file | 430 | <200 | `wc -l styles/components/*.py` |
-| External styling | 35% | <10% | Manual audit |
-| Test coverage | 60% | >80% | `pytest --cov` |
+```python
+"""Unit tests for TestResult model"""
+import pytest
+from src.app.presentation.models.test_result import TestResult, TestStatistics
+
+
+class TestTestResultModel:
+    def test_comparator_factory(self):
+        """Should create comparator test result"""
+        result = TestResult.for_comparator(
+            test_number=1,
+            passed=True,
+            time=0.5,
+            memory=10.0,
+            input_text="input",
+            correct_output="expected",
+            test_output="actual",
+        )
+        
+        assert result.test_number == 1
+        assert result.passed is True
+        assert result.test_type == 'comparator'
+        assert result.extra_data['correct_output'] == "expected"
+    
+    def test_validator_factory(self):
+        """Should create validator test result"""
+        result = TestResult.for_validator(
+            test_number=2,
+            passed=False,
+            time=1.0,
+            memory=20.0,
+            input_data="input",
+            test_output="output",
+            validation_message="Wrong Answer",
+            error_details="Details",
+            validator_exit_code=1,
+        )
+        
+        assert result.test_number == 2
+        assert result.passed is False
+        assert result.test_type == 'validator'
+
+
+class TestTestStatistics:
+    def test_calculates_percentages(self):
+        """Should calculate pass/fail percentages"""
+        stats = TestStatistics(
+            total_tests=10,
+            completed_tests=5,
+            passed_tests=4,
+            failed_tests=1,
+            progress_percentage=50.0,
+            current_speed=2.0,
+            elapsed_time=2.5,
+            estimated_remaining=2.5,
+        )
+        
+        assert stats.pass_percentage == 80.0
+        assert stats.fail_percentage == 20.0
+```
 
 ---
 
-## 📝 Final Checklist
+### Step 5.3: Integration Testing
 
-### Pre-Merge Review
+Run existing integration tests to ensure nothing broke:
 
-- [ ] All tests passing (`pytest tests/ -v`)
-- [ ] Linter shows <5 violations
-- [ ] Visual inspection completed
+```bash
+pytest tests/integration/test_comparator_workflow.py -v
+pytest tests/integration/test_validator_workflow.py -v
+pytest tests/integration/test_benchmarker_workflow.py -v
+```
+
+---
+
+## Phase 6: Documentation & Cleanup (1 hour)
+
+### Step 6.1: Update Architecture Docs
+
+**File:** `docs/architecture/STATUS_VIEW_ARCHITECTURE.md` (CREATE)
+
+```markdown
+# Status View Architecture
+
+## Overview
+
+The status view system follows the Model-View-Presenter (MVP) pattern:
+
+```
+┌─────────────────────────────────────────┐
+│          Test Execution                  │
+│    (Worker signals test events)         │
+└─────────────────┬───────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────┐
+│     ComparatorStatusView                 │
+│     ValidatorStatusView                  │
+│     BenchmarkerStatusView                │
+│  (Convert events to TestResult)         │
+└─────────────────┬───────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────┐
+│      BaseStatusView (Controller)        │
+│  - Manages TestExecutionState           │
+│  - Coordinates Presenter                │
+│  - Handles user signals                 │
+└─────────────────┬───────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────┐
+│   StatusViewPresenter (Translator)      │
+│  - Translates state to widget updates   │
+│  - Formats data for display             │
+└─────────────────┬───────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────┐
+│    Status View Widgets (Pure UI)        │
+│  - StatusHeaderSection                  │
+│  - PerformancePanelSection              │
+│  - VisualProgressBarSection             │
+│  - TestResultsCardsSection              │
+└─────────────────────────────────────────┘
+```
+
+## Key Components
+
+### TestExecutionState (Model)
+- Stores test results using `TestResult` models
+- Calculates statistics
+- Manages timing information
+- **Does NOT** know about UI
+
+### StatusViewPresenter (Presenter)
+- Receives state updates from controller
+- Calls appropriate widget update methods
+- Formats data for display
+- **Does NOT** contain business logic
+
+### BaseStatusView (Controller)
+- Coordinates between model and presenter
+- Handles Qt signals (stop, back, run)
+- Manages lifecycle events
+- **Does NOT** directly manipulate widgets
+
+### Status Widgets (View)
+- Pure UI components
+- Expose clean update APIs
+- Handle animations and styling
+- **Does NOT** know about test execution logic
+
+## Data Flow
+
+1. Worker emits signal → Window catches it
+2. Window calls StatusView.on_test_completed()
+3. StatusView creates TestResult model
+4. StatusView updates TestExecutionState
+5. StatusView calls Presenter with result + stats
+6. Presenter updates individual widgets
+7. Widgets render the changes
+
+## Benefits
+
+- **Testability:** Each layer can be tested independently
+- **Maintainability:** Clear responsibilities
+- **Flexibility:** Easy to swap widget implementations
+- **Type Safety:** TestResult provides compile-time checks
+```
+
+---
+
+### Step 6.2: Add Code Comments
+
+Add docstring clarifications to key files explaining the new architecture.
+
+---
+
+## Phase 7: Rollout Strategy
+
+### Option A: Big Bang (Riskier, Faster)
+1. Complete all phases in feature branch
+2. Comprehensive testing
+3. Merge to main in single PR
+
+### Option B: Incremental (Safer, Slower)
+1. **PR 1:** Add models (TestResult, TestExecutionState)
+2. **PR 2:** Add presenter layer (StatusViewPresenter)
+3. **PR 3:** Refactor BaseStatusView to use presenter
+4. **PR 4:** Update subclasses to use TestResult
+5. **PR 5:** Consolidate styles
+6. **PR 6:** Update tests and docs
+
+**Recommendation:** **Option B** - Incremental rollout with thorough testing at each step.
+
+---
+
+## Rollback Plan
+
+If issues arise after migration:
+
+1. **Revert commits** in reverse order
+2. **Key commit messages** should clearly mark each phase
+3. **Tag pre-migration state** with `pre-status-view-refactor`
+
+```bash
+# Tag current state before starting
+git tag -a pre-status-view-refactor -m "Before status view architecture refactor"
+git push origin pre-status-view-refactor
+
+# If rollback needed
+git revert <commit-hash>
+# or
+git reset --hard pre-status-view-refactor
+```
+
+---
+
+## Success Criteria
+
+✅ All existing tests pass  
+✅ No regression in UI behavior  
+✅ Code coverage maintained or improved  
+✅ Manual testing of all three status views (comparator, validator, benchmarker)  
+✅ No circular imports  
+✅ Clean separation verified via dependency graph  
+
+---
+
+## Common Pitfalls & Solutions
+
+### Pitfall 1: "Property object has no attribute..."
+**Cause:** Using `@property` for backward compatibility but something tries to set it  
+**Solution:** Add `@property.setter` or refactor calling code
+
+### Pitfall 2: "NotImplementedError in base class"
+**Cause:** Code still calling `BaseStatusView.on_test_completed()` directly  
+**Solution:** Ensure all calls go through subclass implementations
+
+### Pitfall 3: Tests fail with "module not found"
+**Cause:** New module structure not in Python path  
+**Solution:** Ensure `__init__.py` files exist in all new directories
+
+### Pitfall 4: Widgets not updating
+**Cause:** Presenter not wired up correctly  
+**Solution:** Verify `_create_presenter()` is called after `_setup_ui()`
+
+---
+
+## Estimated Lines of Code Impact
+
+| Action | LOC Before | LOC After | Change |
+|--------|------------|-----------|--------|
+| Create models | 0 | 180 | +180 |
+| Create presenter | 0 | 100 | +100 |
+| Refactor BaseStatusView | 280 | 240 | -40 |
+| Update subclasses | 360 | 360 | 0 |
+| Consolidate styles | 30 | 15 | -15 |
+| Tests | 400 | 450 | +50 |
+| **Total** | **1,070** | **1,345** | **+275** |
+
+**Note:** Net increase is due to proper separation of concerns, not bloat.
+
+---
+
+## Timeline
+
+| Phase | Duration | Blocking | Can Start After |
+|-------|----------|----------|-----------------|
+| Phase 1 | 2h | No | Immediately |
+| Phase 2 | 3h | No | Phase 1 |
+| Phase 3 | 2h | Yes | Phase 2 |
+| Phase 4 | 1h | No | Anytime |
+| Phase 5 | 2h | Yes | Phase 3 |
+| Phase 6 | 1h | No | Phase 5 |
+| **Total** | **11h** | | |
+
+---
+
+## Final Checklist
+
+Before merging to main:
+
+- [ ] All phases completed
+- [ ] Unit tests pass (`pytest tests/unit/`)
+- [ ] Integration tests pass (`pytest tests/integration/`)
+- [ ] Manual testing completed (run app, test all 3 modes)
+- [ ] Code review completed
 - [ ] Documentation updated
-- [ ] Code reviewed by team
-- [ ] Performance tested (no slowdowns)
-- [ ] Backup branch created
-- [ ] Migration log completed
-
-### Merge to Main
-
-```powershell
-git checkout main
-git merge feature/styling-migration
-git push origin main
-
-# Tag the release
-git tag -a v2.0-styling-refactor -m "Major styling system refactor"
-git push origin v2.0-styling-refactor
-```
+- [ ] Pre-migration tag created
+- [ ] Migration playbook reviewed by team
+- [ ] Performance testing done (1000+ test run)
+- [ ] Memory profiling done (check for leaks)
 
 ---
 
-## 🎓 Lessons Learned
+## Contact
 
-### What Worked Well
-- Gradient helpers eliminated massive duplication
-- Centralized colors prevented conflicts
-- Incremental weekly approach reduced risk
-- Automated linter caught regressions
+Questions? Issues during migration?  
+→ Open an issue or ping the team
 
-### What to Improve
-- Earlier testing of Theme class removal
-- Better documentation from day 1
-- More comprehensive visual test suite
-
-### Future Recommendations
-- Enforce linter in CI/CD
-- Code review checklist for styling
-- Quarterly style audits
-- Component library for reusability
-
----
-
-**Migration Playbook Complete** - Total: 14 hours, -564 lines, +maintainability ∞
-
+**Good luck!** 🚀

@@ -12,7 +12,7 @@ import pytest
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel
 
-from src.app.presentation.widgets.test_cards import (
+from src.app.presentation.widgets.status_view_widgets import (
     BaseTestCard,
     BenchmarkerTestCard,
     ComparatorTestCard,

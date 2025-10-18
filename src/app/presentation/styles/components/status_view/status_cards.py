@@ -1,11 +1,11 @@
 """
 Status View Test Card Styles.
 
-Redesigned with Material Design elevation and surfaces:
-- Clean Material surface colors
-- Proper shadows for depth (elevation)
-- Vibrant but tasteful pass/fail indicators
-- Modern hover effects with shadow transitions
+Redesigned with Glassmorphism V2 design:
+- Modern glassmorphism effects with rgba transparency
+- Uses MATERIAL_COLORS palette for consistency
+- Left-border accent for pass/fail status
+- Subtle gradients for depth
 - Consistent with app's overall design
 
 Includes:
@@ -89,77 +89,81 @@ QLabel {{
 
 def get_test_card_style(passed: bool, is_hover: bool = False) -> str:
     """
-    Get test card style based on pass/fail state and hover.
+    Get test card style based on pass/fail state with glassmorphism V2 design.
     
-    Uses Material Design elevation with proper surfaces and shadows.
+    Uses rgba gradients and left-border accent.
 
     Args:
         passed: Whether test passed
         is_hover: Whether in hover state
     """
-    if passed:
-        base_bg = MATERIAL_COLORS['surface_variant']
-        border = f"border: 2px solid {MATERIAL_COLORS['primary']};"
-        hover_bg = MATERIAL_COLORS['primary_container']
-        hover_border = f"border: 3px solid {MATERIAL_COLORS['primary']};"
-    else:
-        base_bg = MATERIAL_COLORS['error_container']
-        border = f"border: 2px solid {MATERIAL_COLORS['error']};"
-        hover_bg = MATERIAL_COLORS['error_container']
-        hover_border = f"border: 3px solid {MATERIAL_COLORS['error']};"
+    border_color = MATERIAL_COLORS['success'] if passed else MATERIAL_COLORS['error']
 
     if is_hover:
         return f"""
             QFrame {{
-                background: {hover_bg};
-                {hover_border}
-                border-radius: 10px;
-                padding: 2px;
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                    stop:0 rgba(48, 48, 51, 0.90),
+                    stop:1 rgba(42, 42, 45, 0.95));
+                border-left: 4px solid {border_color};
+                border-top: 1px solid {MATERIAL_COLORS['outline']};
+                border-right: 1px solid {MATERIAL_COLORS['outline']};
+                border-bottom: 1px solid {MATERIAL_COLORS['outline']};
+                border-radius: 8px;
+                border-top-left-radius: 0;
+                border-bottom-left-radius: 0;
             }}
         """
 
     return f"""
             QFrame {{
-                background: {base_bg};
-                {border}
-                border-radius: 10px;
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                    stop:0 rgba(42, 42, 45, 0.85),
+                    stop:1 rgba(36, 36, 38, 0.90));
+                border-left: 4px solid {border_color};
+                border-top: 1px solid {MATERIAL_COLORS['outline']};
+                border-right: 1px solid {MATERIAL_COLORS['outline']};
+                border-bottom: 1px solid {MATERIAL_COLORS['outline']};
+                border-radius: 8px;
+                border-top-left-radius: 0;
+                border-bottom-left-radius: 0;
             }}
             QFrame:hover {{
-                background: {hover_bg};
-                {hover_border}
-                padding: 2px;
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                    stop:0 rgba(48, 48, 51, 0.90),
+                    stop:1 rgba(42, 42, 45, 0.95));
             }}
         """
 
 
 # ============================================================================
-# CARD LABEL STYLES
+# CARD LABEL STYLES (V2 Glassmorphism)
 # ============================================================================
 
 TEST_CARD_LABEL_HEADER_STYLE = f"""
 font-weight: 700;
 font-size: 14px;
-color: {MATERIAL_COLORS['on_surface']};
+color: {MATERIAL_COLORS['text_primary']};
 background: transparent;
 letter-spacing: 0.3px;
 """
 
 TEST_CARD_LABEL_STATUS_PASSED_STYLE = f"""
-color: {MATERIAL_COLORS['primary']};
+color: {MATERIAL_COLORS['success']};
 font-weight: 700;
-font-size: 14px;
+font-size: 13px;
 background: transparent;
 """
 
 TEST_CARD_LABEL_STATUS_FAILED_STYLE = f"""
 color: {MATERIAL_COLORS['error']};
 font-weight: 700;
-font-size: 14px;
+font-size: 13px;
 background: transparent;
 """
 
 TEST_CARD_LABEL_METRIC_STYLE = f"""
-color: {MATERIAL_COLORS['on_surface_variant']};
+color: {MATERIAL_COLORS['text_secondary']};
 font-size: 12px;
 background: transparent;
 """

@@ -5,7 +5,7 @@ Extends BaseStatusView to show comparison test execution with test cards
 displaying input, expected output, and actual output.
 """
 
-from src.app.presentation.widgets.test_cards import ComparatorTestCard
+from src.app.presentation.widgets.status_view_widgets import ComparatorTestCard
 from src.app.presentation.widgets.test_detail_view import ComparatorDetailDialog
 from src.app.presentation.widgets.unified_status_view import BaseStatusView
 

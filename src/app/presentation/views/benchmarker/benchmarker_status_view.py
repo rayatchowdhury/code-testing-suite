@@ -5,7 +5,7 @@ Extends BaseStatusView to show benchmarker test execution with test cards
 displaying performance metrics like execution time and memory usage against limits.
 """
 
-from src.app.presentation.widgets.test_cards import BenchmarkerTestCard
+from src.app.presentation.widgets.status_view_widgets import BenchmarkerTestCard
 from src.app.presentation.widgets.test_detail_view import BenchmarkerDetailDialog
 from src.app.presentation.widgets.unified_status_view import BaseStatusView
 

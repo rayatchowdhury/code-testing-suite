@@ -55,7 +55,12 @@ MATERIAL_COLORS = {
     "separator": "#3F3F3F",  # Separator lines
     "success": "#4CAF50",  # Success/green color
     "warning": "#ffb600",  # Warning/yellow color
-    "info": "#00D9FF",  # Info/light blue
+    "info": "#0096C7",  # Info/blue (matching primary)
     "purple": "#B565D8",  # Purple accent
     "tab_height": "36px",
+    # Additional glassmorphism colors
+    "pending": "#3F3F3F",  # Pending state
+    "progress_track": "#2A2A2D",  # Progress bar track
+    "worker_active": "#4CAF50",  # Active worker indicator
+    "worker_idle": "#666666",  # Idle worker indicator
 }
