@@ -18,6 +18,11 @@ from PySide6.QtWidgets import (
 )
 
 from src.app.presentation.styles.style import MATERIAL_COLORS
+from src.app.presentation.styles.components.inputs.input_styles import (
+    INPUT_GROUP_STYLE,
+    INPUT_LINEEDIT_STYLE,
+    INPUT_DIVIDER_STYLE,
+)
 
 
 class LimitsInputWidget(QWidget):
@@ -103,78 +108,22 @@ class LimitsInputWidget(QWidget):
         # Main widget - subtle background matching sidebar sections
         self.setStyleSheet(
             """
-            LimitsInputWidget {{
+            LimitsInputWidget {
                 background: transparent;
-            }}
+            }
         """
         )
 
-        # Group box styling - modern titled borders with reduced margin
-        group_style = f"""
-            QGroupBox {{
-                font-size: 11px;
-                font-weight: 600;
-                color: {MATERIAL_COLORS['primary']};
-                border: 1px solid {MATERIAL_COLORS['outline']};
-                border-radius: 8px;
-                margin: 4px 0px;
-                padding-top: 6px;
-                background: transparent;
-            }}
-            
-            QGroupBox::title {{
-                subcontrol-origin: margin;
-                left: 8px;
-                padding: 0px 6px 0px 6px;
-                color: {MATERIAL_COLORS['primary']};
-                font-weight: 600;
-            }}
-        """
-        self.time_group.setStyleSheet(group_style)
-        self.memory_group.setStyleSheet(group_style)
+        # Group box styling - modern titled borders
+        self.time_group.setStyleSheet(INPUT_GROUP_STYLE)
+        self.memory_group.setStyleSheet(INPUT_GROUP_STYLE)
 
-        # Input fields - following config styles pattern with more rounded corners
-        input_style = f"""
-            QLineEdit {{
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                           stop:0 rgba(20, 24, 28, 0.8),
-                           stop:1 rgba(14, 17, 20, 0.8));
-                border: 1px solid {MATERIAL_COLORS['outline']};
-                border-radius: 12px;
-                color: {MATERIAL_COLORS['text_primary']};
-                padding: 8px 12px;
-                font-size: 13px;
-                font-weight: 500;
-                selection-background-color: {MATERIAL_COLORS['primary']}40;
-                selection-color: {MATERIAL_COLORS['on_primary']};
-            }}
-            
-            QLineEdit:hover {{
-                border: 1px solid {MATERIAL_COLORS['primary']};
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                           stop:0 {MATERIAL_COLORS['primary']}10,
-                           stop:1 rgba(255, 255, 255, 0.08));
-            }}
-            
-            QLineEdit:focus {{
-                border: 2px solid {MATERIAL_COLORS['primary']};
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                           stop:0 {MATERIAL_COLORS['primary']}15,
-                           stop:1 rgba(255, 255, 255, 0.08));
-                outline: none;
-            }}
-        """
-        self.time_input.setStyleSheet(input_style)
-        self.memory_input.setStyleSheet(input_style)
+        # Input fields - using centralized style
+        self.time_input.setStyleSheet(INPUT_LINEEDIT_STYLE)
+        self.memory_input.setStyleSheet(INPUT_LINEEDIT_STYLE)
 
         # Simple divider - following sidebar divider pattern
-        self.divider.setStyleSheet(
-            f"""
-            QWidget {{
-                background-color: {MATERIAL_COLORS['outline_variant']};
-            }}
-        """
-        )
+        self.divider.setStyleSheet(INPUT_DIVIDER_STYLE)
 
     def _on_time_changed(self, text):
         """Handle time input change with validation feedback."""

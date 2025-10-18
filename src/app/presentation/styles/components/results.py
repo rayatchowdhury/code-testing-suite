@@ -205,3 +205,37 @@ font-weight: 600;
 font-size: 14px;
 margin-top: 8px;
 """
+
+
+# Error Label Styles
+ERROR_LABEL_STYLE = f"""
+color: {MATERIAL_COLORS['error']};
+"""
+
+ERROR_LABEL_BOLD_STYLE = f"""
+color: {MATERIAL_COLORS['error']};
+font-weight: 600;
+font-size: 14px;
+"""
+
+
+def create_error_label(text: str, bold: bool = False) -> "QLabel":
+    """
+    Create a QLabel with error styling.
+    
+    Args:
+        text: The error message text
+        bold: If True, use bold styling
+    
+    Returns:
+        Configured QLabel with error styling
+    """
+    from PySide6.QtWidgets import QLabel
+    
+    label = QLabel(text)
+    if bold:
+        label.setStyleSheet(ERROR_LABEL_BOLD_STYLE)
+    else:
+        label.setStyleSheet(ERROR_LABEL_STYLE)
+    return label
+
