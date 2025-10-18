@@ -29,6 +29,7 @@ MATERIAL_COLORS = {
     "primary_dark": "#023E8A",
     "primary_darker": "#012E52",
     "primary_container": "#004B63",
+    "primary_variant": "#40A9D4",  # For hover states
     "secondary": "#FFB703",
     "accent": "#F72585",
     "error": "#FF6B6B",
@@ -38,9 +39,12 @@ MATERIAL_COLORS = {
     "outline": "#3F3F3F",
     "outline_variant": "#2C2C2C",
     "border": "#333333",
+    "text": "#FFFFFF",  # Main text color
     "text_primary": "#FFFFFF",
     "text_secondary": "#B3B3B3",
     "text_disabled": "#666666",
+    "text_bright": "#e0e0e0",  # Bright text
+    "text_dim": "#B3B3B3",  # Dimmed text
     "on_primary": "#FFFFFF",
     "on_primary_container": "#FFFFFF",
     "on_surface": "#FFFFFF",
@@ -48,5 +52,10 @@ MATERIAL_COLORS = {
     "on_surface_dim": "#999999",
     "on_surface_disabled": "#666666",
     "button_hover": "#2A2A2D",
+    "separator": "#3F3F3F",  # Separator lines
+    "success": "#4CAF50",  # Success/green color
+    "warning": "#ffb600",  # Warning/yellow color
+    "info": "#00D9FF",  # Info/light blue
+    "purple": "#B565D8",  # Purple accent
     "tab_height": "36px",
 }

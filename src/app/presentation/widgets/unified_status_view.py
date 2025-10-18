@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from src.app.presentation.styles.components.status_view_styles import (
+from src.app.presentation.styles.components.status_view import (
     STATUS_VIEW_CONTAINER_STYLE,
 )
 

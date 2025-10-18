@@ -6,12 +6,11 @@ Provides a clean interface for navigating between different application features
 
 Features:
 - Sidebar with organized sections (Editor, Tests, History)
-- Display area with Qt-optimized welcome content
+- Display area with glassmorphism welcome document
 - Window management and navigation
 - Unsaved changes detection on exit
 """
 
-import importlib
 import sys
 from typing import Optional
 
@@ -125,21 +124,16 @@ class MainWindowContent(SidebarWindowBase):
         self.sidebar.button_clicked.connect(self.handle_button_click)
 
     def _init_content_widget(self) -> None:
-        """Initialize Qt native content widget asynchronously"""
+        """Initialize main window document widget asynchronously"""
         if self._content_initialized:
             return
 
         try:
-            # Force reload of the module to get fresh changes
-            module_name = "src.app.presentation.views.main_window.main_window_content"
-            if module_name in sys.modules:
-                importlib.reload(sys.modules[module_name])
-
-            from src.app.presentation.views.main_window.main_window_content import (
-                create_qt_main_window,
+            from src.app.presentation.views.main_window.document import (
+                create_main_window_document,
             )
 
-            self.main_content_widget = create_qt_main_window()
+            self.main_content_widget = create_main_window_document()
             self.display_area.layout.addWidget(self.main_content_widget)
             self._content_initialized = True
 

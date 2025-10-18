@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from src.app.presentation.styles.components.status_view_styles import (
+from src.app.presentation.styles.components.status_view import (
     CARDS_SECTION_SCROLL_STYLE,
     CARDS_SECTION_TITLE_FAILED_STYLE,
     CARDS_SECTION_TITLE_PASSED_STYLE,
@@ -27,6 +27,7 @@ from src.app.presentation.styles.components.status_view_styles import (
     VISUAL_PROGRESS_BAR_STYLE,
     get_segment_style,
 )
+from src.app.presentation.styles.helpers.common_styles import text_secondary
 from src.app.presentation.styles.style import MATERIAL_COLORS
 
 
@@ -176,7 +177,7 @@ class VisualProgressBar(QWidget):
         if self.segment_size > 1:
             info_label = QLabel(f"({self.segment_size} tests/segment)")
             info_label.setAlignment(Qt.AlignCenter)
-            info_label.setStyleSheet("color: #666; font-size: 9px;")
+            info_label.setStyleSheet(f"{text_secondary()} font-size: 9px;")
             self.layout.addWidget(info_label)
 
     def add_result(self, passed: bool):

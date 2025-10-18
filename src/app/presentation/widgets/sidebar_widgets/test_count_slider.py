@@ -10,8 +10,11 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIntValidator
 from PySide6.QtWidgets import QHBoxLayout, QLineEdit, QSlider, QVBoxLayout, QWidget
 
-from src.app.presentation.styles.components.test_view_styles import (
+from src.app.presentation.styles.components.test_view import (
     TEST_VIEW_SLIDER_STYLE,
+)
+from src.app.presentation.styles.components.inputs.input_styles import (
+    INPUT_LINEEDIT_COMPACT_STYLE,
 )
 from src.app.presentation.styles.style import MATERIAL_COLORS
 
@@ -96,37 +99,7 @@ class TestCountSlider(QWidget):
 
     def _setup_input_styles(self):
         """Style the input field to match the limits input design."""
-        input_style = f"""
-            QLineEdit {{
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                           stop:0 rgba(20, 24, 28, 0.8),
-                           stop:1 rgba(14, 17, 20, 0.8));
-                border: 1px solid {MATERIAL_COLORS['outline']};
-                border-radius: 8px;
-                color: {MATERIAL_COLORS['text_primary']};
-                padding: 6px 8px;
-                font-size: 12px;
-                font-weight: 500;
-                selection-background-color: {MATERIAL_COLORS['primary']}40;
-                selection-color: {MATERIAL_COLORS['on_primary']};
-            }}
-            
-            QLineEdit:hover {{
-                border: 1px solid {MATERIAL_COLORS['primary']};
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                           stop:0 {MATERIAL_COLORS['primary']}10,
-                           stop:1 rgba(255, 255, 255, 0.08));
-            }}
-            
-            QLineEdit:focus {{
-                border: 2px solid {MATERIAL_COLORS['primary']};
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                           stop:0 {MATERIAL_COLORS['primary']}15,
-                           stop:1 rgba(255, 255, 255, 0.08));
-                outline: none;
-            }}
-        """
-        self.value_input.setStyleSheet(input_style)
+        self.value_input.setStyleSheet(INPUT_LINEEDIT_COMPACT_STYLE)
 
     def _on_slider_changed(self, value):
         """Update input field when slider changes."""

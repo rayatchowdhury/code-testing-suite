@@ -9,17 +9,9 @@
 # - Back button - goes back to the main window
 
 """
-HELP CENTER VARIATION SELECTOR:
-Change ACTIVE_HELP_VARIATION to switch designs (1-4):
-    1 = Terminal Docs (matches main window V1) ⭐
-    2 = Clean Modern (minimal with whitespace)
-    3 = Card Style (colorful bordered cards)
-    4 = Developer Docs (code/syntax style)
+HELP CENTER DESIGN: Terminal/Glitch Aesthetic
+Uses unified terminal docs style to match main window V1
 """
-
-# ============== CHANGE THIS NUMBER TO SWITCH HELP VARIATIONS ==============
-ACTIVE_HELP_VARIATION = 1  # Change to 1, 2, 3, or 4
-# ==========================================================================
 
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QPushButton
@@ -28,8 +20,8 @@ from src.app.presentation.widgets.display_area import DisplayArea
 from src.app.presentation.widgets.sidebar import Sidebar
 from src.app.presentation.window_controller.base_window import SidebarWindowBase
 
-from .help_content import get_document_data
-from .help_center_variations import create_help_variation
+from .content import get_document_data
+from .document import create_help_document
 
 
 class HelpCenterWindow(SidebarWindowBase):
@@ -46,6 +38,7 @@ class HelpCenterWindow(SidebarWindowBase):
             "Comparison Guide",
             "Benchmarking Guide",
             "Validation Guide",
+            "Results Guide",
             "Configuration",
             "About",
         ]
@@ -70,16 +63,15 @@ class HelpCenterWindow(SidebarWindowBase):
         self.load_help_content("Introduction")
 
     def load_help_content(self, topic):
-        """Load help content using variations"""
+        """Load help content using terminal docs style"""
         # Clear existing content
         if self.current_document:
             self.display_area.layout.removeWidget(self.current_document)
             self.current_document.deleteLater()
 
-        # Create new document widget using variation
+        # Create new document widget
         data = get_document_data(topic)
-        self.current_document = create_help_variation(
-            ACTIVE_HELP_VARIATION,
+        self.current_document = create_help_document(
             data["title"],
             data["sections"]
         )

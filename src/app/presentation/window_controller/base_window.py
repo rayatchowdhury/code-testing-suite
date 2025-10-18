@@ -2,6 +2,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QHBoxLayout, QPushButton, QSplitter, QWidget
 
+from src.app.presentation.styles.fonts.emoji import set_emoji_font
 from src.app.presentation.styles.style import SPLITTER_STYLE
 
 
@@ -49,6 +50,7 @@ class SidebarWindowBase(QWidget):
 
         options_btn = QPushButton("⚙️")
         options_btn.setObjectName("back_button")
+        set_emoji_font(options_btn)
         options_btn.setFont(QFont("Segoe UI", 14))
         options_btn.clicked.connect(lambda: self.handle_button_click("Options"))
 

@@ -1,14 +1,24 @@
 """
-Help Center Content Data - Centralized storage for all help documentation
-All help content defined here using HelpSectionData from qt_doc_engine
+Help Center Content Data - Pure content without UI dependencies
+Centralized storage for all help documentation
 """
 
-from typing import Dict, List
+from dataclasses import dataclass
+from typing import Dict, List, Optional
 
-from src.app.presentation.window_controller.qt_doc_engine import HelpSectionData
 
-# Alias for backwards compatibility and cleaner code
-HelpSection = HelpSectionData
+@dataclass
+class HelpSection:
+    """Data structure for a help section"""
+    icon: str
+    title: str
+    content: str = ""
+    items: Optional[List[str]] = None
+
+    def __post_init__(self):
+        """Ensure items is always a list"""
+        if self.items is None:
+            self.items = []
 
 
 HELP_DOCUMENTS: Dict[str, Dict[str, any]] = {

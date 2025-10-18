@@ -33,9 +33,13 @@ from src.app.presentation.styles.components.results import (
     RESULTS_CARD_STYLE,
     RESULTS_LABEL_DETAILS_STYLE,
     RESULTS_LABEL_TITLE_STYLE,
+    RESULTS_SCROLL_STYLE,
+    RESULTS_SEPARATOR_STYLE,
     RESULTS_TABLE_SMALL_STYLE,
     RESULTS_TEXT_EDIT_STYLE,
 )
+from src.app.presentation.styles.fonts.emoji import set_emoji_font
+from src.app.presentation.styles.helpers.common_styles import bold_label
 from src.app.presentation.styles.style import MATERIAL_COLORS
 from src.app.presentation.widgets.sidebar import Sidebar
 
@@ -153,11 +157,10 @@ class DetailedResultsWidget(QWidget):
 
         # Title
         title = QLabel("📊 Test Results Summary")
+        set_emoji_font(title)
         title.setStyleSheet(
             f"""
-            font-size: 24px;
-            font-weight: bold;
-            color: {MATERIAL_COLORS['on_surface']};
+            {bold_label(24, MATERIAL_COLORS['on_surface'])}
             padding-bottom: 16px;
         """
         )
@@ -246,11 +249,10 @@ class DetailedResultsWidget(QWidget):
 
         # Title
         title = QLabel("💻 Source Code Files")
+        set_emoji_font(title)
         title.setStyleSheet(
             f"""
-            font-size: 24px;
-            font-weight: bold;
-            color: {MATERIAL_COLORS['on_surface']};
+            {bold_label(24, MATERIAL_COLORS['on_surface'])}
         """
         )
         layout.addWidget(title)
@@ -370,9 +372,7 @@ class DetailedResultsWidget(QWidget):
         title = QLabel(f"{icon} {status_text} Tests")
         title.setStyleSheet(
             f"""
-            font-size: 24px;
-            font-weight: bold;
-            color: {MATERIAL_COLORS['on_surface']};
+            {bold_label(24, MATERIAL_COLORS['on_surface'])}
         """
         )
         layout.addWidget(title)
@@ -407,7 +407,7 @@ class DetailedResultsWidget(QWidget):
         # Scroll area for test cases
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll.setStyleSheet(f"background-color: {MATERIAL_COLORS['surface']};")
+        scroll.setStyleSheet(RESULTS_SCROLL_STYLE)
 
         scroll_content = QWidget()
         scroll_layout = QVBoxLayout(scroll_content)
@@ -445,9 +445,7 @@ class DetailedResultsWidget(QWidget):
         header = QLabel(f"{status_icon} Test #{test_num}")
         header.setStyleSheet(
             f"""
-            font-size: 16px;
-            font-weight: bold;
-            color: {MATERIAL_COLORS['on_surface']};
+            {bold_label(16, MATERIAL_COLORS['on_surface'])}
         """
         )
         layout.addWidget(header)
@@ -456,6 +454,7 @@ class DetailedResultsWidget(QWidget):
         exec_time = test.get("execution_time", test.get("total_time"))
         if exec_time:
             time_label = QLabel(f"⏱️ Execution Time: {exec_time:.4f}s")
+            set_emoji_font(time_label)
             time_label.setStyleSheet(RESULTS_LABEL_DETAILS_STYLE)
             layout.addWidget(time_label)
 
@@ -752,7 +751,7 @@ class DetailedResultsWidget(QWidget):
 
         value_widget = QLabel(value)
         value_color = color if color else MATERIAL_COLORS["on_surface"]
-        value_widget.setStyleSheet(f"color: {value_color}; font-weight: bold;")
+        value_widget.setStyleSheet(bold_label(color=value_color))
         layout.addWidget(value_widget)
 
         layout.addStretch()
@@ -764,9 +763,7 @@ class DetailedResultsWidget(QWidget):
         label_color = color if color else MATERIAL_COLORS["on_surface"]
         label.setStyleSheet(
             f"""
-            font-size: 14px;
-            font-weight: bold;
-            color: {label_color};
+            {bold_label(14, label_color)}
             padding-top: 8px;
         """
         )
@@ -776,6 +773,6 @@ class DetailedResultsWidget(QWidget):
         """Create horizontal divider"""
         line = QFrame()
         line.setFrameShape(QFrame.Shape.HLine)
-        line.setStyleSheet(f"background-color: {MATERIAL_COLORS['outline']};")
+        line.setStyleSheet(RESULTS_SEPARATOR_STYLE)
         line.setMaximumHeight(1)
         return line

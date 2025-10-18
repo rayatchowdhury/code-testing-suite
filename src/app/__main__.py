@@ -53,6 +53,31 @@ def get_app_icon():
     return None  # No icon found
 
 
+def load_emoji_font():
+    """Load Noto Color Emoji font for consistent emoji display across platforms"""
+    from PySide6.QtGui import QFontDatabase
+    
+    # Try different possible paths for the emoji font
+    font_paths = [
+        "src/app/presentation/styles/fonts/NotoColorEmoji-subset.ttf",
+        "src/app/presentation/styles/fonts/NotoColorEmoji.ttf",
+    ]
+    
+    for font_path in font_paths:
+        full_path = project_root / font_path
+        if full_path.exists():
+            font_id = QFontDatabase.addApplicationFont(str(full_path))
+            if font_id != -1:
+                families = QFontDatabase.applicationFontFamilies(font_id)
+                print(f"✅ Loaded emoji font: {families}")
+                return True
+            else:
+                print(f"⚠️ Failed to load font from: {font_path}")
+    
+    print("⚠️ Emoji font not found, emojis may display as blocks on some systems")
+    return False
+
+
 def create_main_window():
     """Create main window using src structure"""
     # Debug: Force reload any modules for testing
@@ -115,6 +140,9 @@ def main():
         app = QApplication(sys.argv)
         app.setApplicationName("Code Testing Suite")
         app.setApplicationVersion("1.0.0")
+        
+        # Load emoji font for consistent display across platforms
+        load_emoji_font()
 
         # Set application icon if available
         icon_path = get_app_icon()
