@@ -21,7 +21,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from src.app.presentation.styles.components.test_view_styles import (
+from src.app.presentation.styles.components.test_view import (
     TEST_VIEW_BUTTON_PANEL_STYLE,
     TEST_VIEW_CONTENT_PANEL_STYLE,
 )

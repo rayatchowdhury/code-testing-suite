@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from src.app.presentation.styles.components.status_view_styles import (
+from src.app.presentation.styles.components.status_view import (
     CARDS_SECTION_SCROLL_STYLE,
     CARDS_SECTION_TITLE_FAILED_STYLE,
     CARDS_SECTION_TITLE_PASSED_STYLE,

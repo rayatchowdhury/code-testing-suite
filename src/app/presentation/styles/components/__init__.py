@@ -40,7 +40,7 @@ from src.app.presentation.styles.components.sidebar import (
     SIDEBAR_STYLE,
 )
 from src.app.presentation.styles.components.splitter import SPLITTER_STYLE
-from src.app.presentation.styles.components.test_view_styles import (
+from src.app.presentation.styles.components.test_view import (
     TEST_VIEW_BUTTON_PANEL_STYLE,
     TEST_VIEW_COMPILATION_CLOSE_BUTTON_STYLE,
     TEST_VIEW_COMPILATION_DETAIL_LABEL_STYLE,

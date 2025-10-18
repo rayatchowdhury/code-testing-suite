@@ -1,65 +1,12 @@
 # -*- coding: utf-8 -*-
+"""
+Test View Control and Status Component Styles.
 
-# Shared styles for test views (comparator, benchmarker, validator)
+Includes styling for status dialogs, compilation dialogs, and status utility functions.
+"""
+
 from src.app.presentation.styles.constants.status_colors import ERROR_COLOR_HEX
 from src.app.presentation.styles.style import MATERIAL_COLORS
-
-TEST_VIEW_BUTTON_PANEL_STYLE = f"""
-QWidget {{
-    background-color: {MATERIAL_COLORS['surface_dim']};
-    border-bottom: 1px solid {MATERIAL_COLORS['outline']};
-}}
-"""
-
-TEST_VIEW_FILE_BUTTON_STYLE = f"""
-QPushButton {{
-    background-color: {MATERIAL_COLORS['surface_variant']};
-    border: 1px solid {MATERIAL_COLORS['outline_variant']};
-    border-radius: 8px;
-    color: {MATERIAL_COLORS['on_surface']};
-    padding: 8px 16px;
-    font-weight: 500;
-    font-size: 13px;
-}}
-
-QPushButton:hover {{
-    background-color: {MATERIAL_COLORS['surface_bright']};
-    border-color: {MATERIAL_COLORS['outline']};
-}}
-
-QPushButton[isActive="true"] {{
-    background-color: {MATERIAL_COLORS['primary_container']};
-    border: 1px solid {MATERIAL_COLORS['primary']};
-    color: {MATERIAL_COLORS['on_primary_container']};
-    font-weight: 600;
-}}
-
-QPushButton[isActive="true"]:hover {{
-    background-color: {MATERIAL_COLORS['primary']};
-    color: {MATERIAL_COLORS['on_primary']};
-}}
-
-QPushButton[isActive="true"][hasUnsavedChanges="true"] {{
-    background-color: {MATERIAL_COLORS['primary_container']};
-    border: 2px solid {MATERIAL_COLORS['error']};
-    border-radius: 8px;
-    color: {MATERIAL_COLORS['on_primary']};
-    font-weight: 600;
-    padding: 7px 15px;  /* Adjust padding to account for thicker border */
-}}
-
-QPushButton[isActive="true"][hasUnsavedChanges="true"]:hover {{
-    background-color: {MATERIAL_COLORS['primary']};
-    border-color: {MATERIAL_COLORS['error']};
-    color: {MATERIAL_COLORS['on_primary']};
-}}
-"""
-
-TEST_VIEW_CONTENT_PANEL_STYLE = f"""
-QWidget {{
-    background-color: {MATERIAL_COLORS['surface']};
-}}
-"""
 
 # Status Window Styles
 TEST_VIEW_STATUS_DIALOG_STYLE = f"""
@@ -161,39 +108,6 @@ QPushButton:hover {{
 }}
 """
 
-# Slider Styles
-TEST_VIEW_SLIDER_STYLE = f"""
-QSlider::groove:horizontal {{
-    border: none;
-    height: 4px;
-    background: {MATERIAL_COLORS['surface_variant']};
-    margin: 0px;
-    border-radius: 2px;
-}}
-QSlider::handle:horizontal {{
-    background: {MATERIAL_COLORS['primary']};
-    border: none;
-    width: 16px;
-    height: 16px;
-    margin: -6px 0;
-    border-radius: 8px;
-}}
-QSlider::handle:horizontal:hover {{
-    background: {MATERIAL_COLORS['primary_container']};
-}}
-QSlider::sub-page:horizontal {{
-    background: {MATERIAL_COLORS['primary']};
-    border-radius: 2px;
-}}
-"""
-
-TEST_VIEW_SLIDER_VALUE_LABEL_STYLE = f"""
-color: {MATERIAL_COLORS['on_surface']};
-font-size: 13px;
-padding: 0 8px;
-min-width: 28px;
-"""
-
 # Status Label Styles
 TEST_VIEW_STATUS_LABEL_STYLE = (
     f"color: {MATERIAL_COLORS['on_surface']}; font-weight: bold;"
@@ -236,3 +150,24 @@ def get_passed_status_style():
 
 def get_failed_status_style():
     return f"color: {ERROR_COLOR_HEX}; font-weight: bold;"
+
+
+__all__ = [
+    "TEST_VIEW_STATUS_DIALOG_STYLE",
+    "TEST_VIEW_HISTORY_ITEM_STYLE",
+    "TEST_VIEW_COMPILATION_STATUS_DIALOG_STYLE",
+    "TEST_VIEW_COMPILATION_STATUS_LABEL_STYLE",
+    "TEST_VIEW_COMPILATION_PROGRESS_BAR_STYLE",
+    "TEST_VIEW_COMPILATION_DETAIL_LABEL_STYLE",
+    "TEST_VIEW_COMPILATION_CLOSE_BUTTON_STYLE",
+    "TEST_VIEW_STATUS_LABEL_STYLE",
+    "TEST_VIEW_TIME_LABEL_STYLE",
+    "get_history_label_style",
+    "get_running_status_style",
+    "get_test_view_error_status_style",
+    "get_test_view_success_status_style",
+    "get_compilation_status_style",
+    "get_status_label_style",
+    "get_passed_status_style",
+    "get_failed_status_style",
+]

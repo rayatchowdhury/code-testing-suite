@@ -21,7 +21,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from src.app.presentation.styles.components.config_styles import CONFIG_DIALOG_STYLE
+from src.app.presentation.styles.components.config import CONFIG_DIALOG_STYLE
 from src.app.presentation.styles.components.config_ui import (
     CONFIG_DIALOG_TITLE_STYLE,
     SECTION_INFO_LABEL_STYLE,

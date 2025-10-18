@@ -8,7 +8,7 @@ Clicking a card shows detailed test information.
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QVBoxLayout
 
-from src.app.presentation.styles.components.status_view_styles import (
+from src.app.presentation.styles.components.status_view import (
     TEST_CARD_LABEL_HEADER_STYLE,
     TEST_CARD_LABEL_METRIC_STYLE,
     TEST_CARD_LABEL_STATUS_FAILED_STYLE,
