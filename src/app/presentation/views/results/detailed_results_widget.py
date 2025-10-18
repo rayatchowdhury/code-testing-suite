@@ -27,10 +27,11 @@ from src.app.presentation.styles.components.results import (
     RESULTS_LABEL_TITLE_STYLE,
     RESULTS_TABLE_SMALL_STYLE,
     RESULTS_TEXT_EDIT_STYLE,
+    ERROR_LABEL_BOLD_STYLE,
+    ERROR_LABEL_STYLE,
 )
 from src.app.presentation.styles.fonts.emoji import set_emoji_font
 from src.app.presentation.styles.helpers.inline_styles import (
-    ERROR_LABEL_BOLD_STYLE,
     ERROR_TITLE_STYLE,
     build_status_style,
     get_status_label_style,
@@ -135,7 +136,7 @@ class TestCaseDetailWidget(QWidget):
                 layout.addWidget(input_text)
         except Exception as e:
             error_label = QLabel(f"Error loading input: {str(e)}")
-            error_label.setStyleSheet(f"color: {MATERIAL_COLORS['error']};")
+            error_label.setStyleSheet(ERROR_LABEL_STYLE)
             layout.addWidget(error_label)
 
         try:
@@ -191,7 +192,7 @@ class TestCaseDetailWidget(QWidget):
                     layout.addWidget(output_text)
         except Exception as e:
             error_label = QLabel(f"Error loading output: {str(e)}")
-            error_label.setStyleSheet(f"color: {MATERIAL_COLORS['error']};")
+            error_label.setStyleSheet(ERROR_LABEL_STYLE)
             layout.addWidget(error_label)
 
         if layout.count() == 0:
@@ -262,7 +263,7 @@ class TestCaseDetailWidget(QWidget):
                         stats_layout.addWidget(info_label)
                 except Exception as e:
                     error_label = QLabel(f"Error displaying summary: {str(e)}")
-                    error_label.setStyleSheet(f"color: {MATERIAL_COLORS['error']};")
+                    error_label.setStyleSheet(ERROR_LABEL_STYLE)
                     stats_layout.addWidget(error_label)
 
                 layout.addWidget(stats_widget)
@@ -325,7 +326,7 @@ class TestCaseDetailWidget(QWidget):
 
                 except Exception as e:
                     error_label = QLabel(f"Error displaying line differences: {str(e)}")
-                    error_label.setStyleSheet(f"color: {MATERIAL_COLORS['error']};")
+                    error_label.setStyleSheet(ERROR_LABEL_STYLE)
                     layout.addWidget(error_label)
 
             # Unified diff view
@@ -350,7 +351,7 @@ class TestCaseDetailWidget(QWidget):
                     layout.addWidget(diff_text)
                 except Exception as e:
                     error_label = QLabel(f"Error displaying unified diff: {str(e)}")
-                    error_label.setStyleSheet(f"color: {MATERIAL_COLORS['error']};")
+                    error_label.setStyleSheet(ERROR_LABEL_STYLE)
                     layout.addWidget(error_label)
 
             # If no mismatch data is available
@@ -361,7 +362,7 @@ class TestCaseDetailWidget(QWidget):
 
         except Exception as e:
             error_label = QLabel(f"Error creating mismatch analysis: {str(e)}")
-            error_label.setStyleSheet(f"color: {MATERIAL_COLORS['error']};")
+            error_label.setStyleSheet(ERROR_LABEL_STYLE)
             layout.addWidget(error_label)
 
         return widget
@@ -428,7 +429,7 @@ class FilesSnapshotWidget(QWidget):
                     error_tab = QWidget()
                     error_layout = QVBoxLayout(error_tab)
                     error_label = QLabel(f"Error loading {display_name}: {str(e)}")
-                    error_label.setStyleSheet(f"color: {MATERIAL_COLORS['error']};")
+                    error_label.setStyleSheet(ERROR_LABEL_STYLE)
                     error_layout.addWidget(error_label)
                     tab_widget.addTab(error_tab, f"{display_name} (Error)")
                     tabs_added += 1
@@ -467,7 +468,7 @@ class FilesSnapshotWidget(QWidget):
                 error_tab = QWidget()
                 error_layout = QVBoxLayout(error_tab)
                 error_label = QLabel(f"Error loading additional files: {str(e)}")
-                error_label.setStyleSheet(f"color: {MATERIAL_COLORS['error']};")
+                error_label.setStyleSheet(ERROR_LABEL_STYLE)
                 error_layout.addWidget(error_label)
                 tab_widget.addTab(error_tab, "Additional Files (Error)")
                 tabs_added += 1
@@ -481,7 +482,7 @@ class FilesSnapshotWidget(QWidget):
 
         except Exception as e:
             error_label = QLabel(f"Error setting up files UI: {str(e)}")
-            error_label.setStyleSheet(f"color: {MATERIAL_COLORS['error']};")
+            error_label.setStyleSheet(ERROR_LABEL_STYLE)
             layout.addWidget(error_label)
 
     def _create_code_tab(self, code_content):
@@ -511,7 +512,7 @@ class FilesSnapshotWidget(QWidget):
             layout.addWidget(code_edit)
         except Exception as e:
             error_label = QLabel(f"Error displaying code: {str(e)}")
-            error_label.setStyleSheet(f"color: {MATERIAL_COLORS['error']};")
+            error_label.setStyleSheet(ERROR_LABEL_STYLE)
             layout.addWidget(error_label)
 
         return widget
@@ -540,7 +541,7 @@ class DetailedResultsWidget(QWidget):
         layout.addWidget(error_title)
 
         error_label = QLabel(f"Failed to load detailed test results: {error_message}")
-        error_label.setStyleSheet(f"color: {MATERIAL_COLORS['error']};")
+        error_label.setStyleSheet(ERROR_LABEL_STYLE)
         error_label.setWordWrap(True)
         layout.addWidget(error_label)
 
@@ -690,7 +691,7 @@ class DetailedResultsWidget(QWidget):
                         test_details = []
                 except (json.JSONDecodeError, TypeError) as e:
                     error_label = QLabel(f"Error parsing test details: {str(e)}")
-                    error_label.setStyleSheet(f"color: {MATERIAL_COLORS['error']};")
+                    error_label.setStyleSheet(ERROR_LABEL_STYLE)
                     self.analysis_container.addWidget(error_label)
                     test_details = []
 
@@ -705,11 +706,11 @@ class DetailedResultsWidget(QWidget):
                     self.files_widget_layout.addWidget(files_widget)
                 except (json.JSONDecodeError, TypeError) as e:
                     error_label = QLabel(f"Error loading files snapshot: {str(e)}")
-                    error_label.setStyleSheet(f"color: {MATERIAL_COLORS['error']};")
+                    error_label.setStyleSheet(ERROR_LABEL_STYLE)
                     self.files_widget_layout.addWidget(error_label)
                 except Exception as e:
                     error_label = QLabel(f"Error creating files widget: {str(e)}")
-                    error_label.setStyleSheet(f"color: {MATERIAL_COLORS['error']};")
+                    error_label.setStyleSheet(ERROR_LABEL_STYLE)
                     self.files_widget_layout.addWidget(error_label)
 
             # Load analysis
@@ -719,11 +720,11 @@ class DetailedResultsWidget(QWidget):
                     self._load_analysis(analysis_data)
                 except (json.JSONDecodeError, TypeError) as e:
                     error_label = QLabel(f"Error parsing mismatch analysis: {str(e)}")
-                    error_label.setStyleSheet(f"color: {MATERIAL_COLORS['error']};")
+                    error_label.setStyleSheet(ERROR_LABEL_STYLE)
                     self.analysis_container.addWidget(error_label)
                 except Exception as e:
                     error_label = QLabel(f"Error loading analysis: {str(e)}")
-                    error_label.setStyleSheet(f"color: {MATERIAL_COLORS['error']};")
+                    error_label.setStyleSheet(ERROR_LABEL_STYLE)
                     self.analysis_container.addWidget(error_label)
 
         except Exception as e:
@@ -764,7 +765,7 @@ class DetailedResultsWidget(QWidget):
                         error_layout.addWidget(error_header)
 
                         error_label = QLabel(f"Error loading test case: {str(e)}")
-                        error_label.setStyleSheet(f"color: {MATERIAL_COLORS['error']};")
+                        error_label.setStyleSheet(ERROR_LABEL_STYLE)
                         error_layout.addWidget(error_label)
 
                         layout.addWidget(error_widget)
@@ -776,7 +777,7 @@ class DetailedResultsWidget(QWidget):
             error_container = QWidget()
             error_layout = QVBoxLayout(error_container)
             error_label = QLabel(f"Error setting up test cases: {str(e)}")
-            error_label.setStyleSheet(f"color: {MATERIAL_COLORS['error']};")
+            error_label.setStyleSheet(ERROR_LABEL_STYLE)
             error_layout.addWidget(error_label)
             self.test_cases_scroll.setWidget(error_container)
 
