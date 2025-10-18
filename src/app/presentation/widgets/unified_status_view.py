@@ -47,6 +47,7 @@ class BaseStatusView(QWidget):
         self.completed_tests = 0
         self.passed_tests = 0
         self.failed_tests = 0
+        self.max_workers = 0  # Track worker count
 
         self._setup_ui()
         self._setup_styles()
@@ -109,12 +110,35 @@ class BaseStatusView(QWidget):
         self.completed_tests = 0
         self.passed_tests = 0
         self.failed_tests = 0
-        self.progress_section.reset(total)
+        
+        # Get worker count from the actual worker (not the runner)
+        worker = None
+        if hasattr(self, 'runner') and hasattr(self.runner, 'get_current_worker'):
+            worker = self.runner.get_current_worker()
+        elif self.parent_window and hasattr(self.parent_window, 'comparator'):
+            if hasattr(self.parent_window.comparator, 'get_current_worker'):
+                worker = self.parent_window.comparator.get_current_worker()
+        
+        if worker and hasattr(worker, 'max_workers'):
+            self.max_workers = worker.max_workers
+        else:
+            # Fallback to default calculation
+            import multiprocessing
+            self.max_workers = min(8, max(1, multiprocessing.cpu_count() - 1))
+        
+        self.progress_section.reset(total, self.max_workers)
         self.cards_section.clear()
+        
+        # Show worker info
+        if self.max_workers > 0:
+            self.progress_section.update_worker_info(self.max_workers)
 
     def on_test_running(self, current: int, total: int):
         """Called when a test starts"""
         self.progress_section.update_current_test(current, total)
+        # Update worker info with current test
+        if self.max_workers > 0:
+            self.progress_section.update_worker_info(self.max_workers, current)
 
     def on_test_completed(self, test_number: int, passed: bool, **kwargs):
         """

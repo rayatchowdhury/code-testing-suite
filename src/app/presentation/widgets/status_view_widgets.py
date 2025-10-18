@@ -14,6 +14,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
+from src.app.presentation.styles.constants.spacing import SPACING, FONTS, BORDER_RADIUS, BORDER_WIDTH, SIZES
 from src.app.presentation.styles.components.status_view import (
     CARDS_SECTION_SCROLL_STYLE,
     CARDS_SECTION_TITLE_FAILED_STYLE,
@@ -24,41 +26,137 @@ from src.app.presentation.styles.components.status_view import (
     STATS_LABEL_PASSED_STYLE,
     STATS_PANEL_STYLE,
     STATS_PERCENTAGE_STYLE,
+    STATS_ROW_PERCENTAGE_STYLE,
+    STATS_ROW_TIME_STYLE,
+    STATS_ROW_PROGRESS_STYLE,
+    STATS_ROW_PASSED_STYLE,
+    STATS_ROW_FAILED_STYLE,
+    STATS_ROW_WORKERS_ACTIVE_STYLE,
+    WORKER_BADGE_IDLE_STYLE,
+    WORKER_BADGE_ACTIVE_STYLE,
+    STATS_INLINE_DIVIDER_STYLE,
+    STATS_INLINE_PERCENTAGE_STYLE,
+    STATS_INLINE_PROGRESS_STYLE,
+    STATS_INLINE_COUNTS_STYLE,
+    STATS_INLINE_WORKER_STYLE,
+    EMPTY_STATE_LABEL_STYLE,
     VISUAL_PROGRESS_BAR_STYLE,
     get_segment_style,
 )
 from src.app.presentation.styles.helpers.common_styles import text_secondary
-from src.app.presentation.styles.style import MATERIAL_COLORS
 
 
 class ProgressSection(QWidget):
-    """Progress bar with visual indicators and statistics"""
+    """Progress bar with visual indicators and statistics - 3-row layout with detailed worker tracking"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.worker_labels = []  # Track individual worker status labels
+        self.max_workers = 0
+        self.start_time = None
         self._setup_ui()
 
     def _setup_ui(self):
-        layout = QHBoxLayout(self)
+        # Main vertical layout - 3 rows
+        layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(12)
+        layout.setSpacing(SPACING['MD'])  # 12px between rows
 
-        # Visual progress (75% width)
+        # ROW 1: Full-width progress bar
         self.visual_progress = VisualProgressBar()
+        layout.addWidget(self.visual_progress)
 
-        # Stats panel (25% width)
-        self.stats_panel = StatsPanel()
+        # ROW 2: Stats row - horizontal distribution
+        stats_row = QWidget()
+        stats_layout = QHBoxLayout(stats_row)
+        stats_layout.setContentsMargins(SPACING['PADDING_MD'], SPACING['SM'], SPACING['PADDING_MD'], SPACING['SM'])
+        stats_layout.setSpacing(SPACING['LG'])  # 16px between stats
 
-        layout.addWidget(self.visual_progress, stretch=3)
-        layout.addWidget(self.stats_panel, stretch=1)
+        # Percentage
+        self.percentage_label = QLabel("0%")
+        self.percentage_label.setStyleSheet(STATS_ROW_PERCENTAGE_STYLE)
+        
+        # Time elapsed
+        self.time_label = QLabel("0:00")
+        self.time_label.setStyleSheet(STATS_ROW_TIME_STYLE)
+        
+        # X/Y tests completed
+        self.progress_label = QLabel("0 / 0 tests")
+        self.progress_label.setStyleSheet(STATS_ROW_PROGRESS_STYLE)
+        
+        # Passed count
+        self.passed_label = QLabel("0 passed")
+        self.passed_label.setStyleSheet(STATS_ROW_PASSED_STYLE)
+        
+        # Failed count
+        self.failed_label = QLabel("0 failed")
+        self.failed_label.setStyleSheet(STATS_ROW_FAILED_STYLE)
+        
+        # Workers active
+        self.workers_active_label = QLabel("0 workers active")
+        self.workers_active_label.setStyleSheet(STATS_ROW_WORKERS_ACTIVE_STYLE)
+        
+        stats_layout.addWidget(self.percentage_label)
+        stats_layout.addWidget(self.time_label)
+        stats_layout.addWidget(self.progress_label)
+        stats_layout.addWidget(self.passed_label)
+        stats_layout.addWidget(self.failed_label)
+        stats_layout.addWidget(self.workers_active_label)
+        stats_layout.addStretch()
+        
+        layout.addWidget(stats_row)
+
+        # ROW 3: Individual worker status - horizontal distribution
+        self.workers_row = QWidget()
+        self.workers_layout = QHBoxLayout(self.workers_row)
+        self.workers_layout.setContentsMargins(SPACING['PADDING_MD'], SPACING['SM'], SPACING['PADDING_MD'], SPACING['SM'])
+        self.workers_layout.setSpacing(SPACING['SM'])  # 8px between workers
+        
+        # Initially hidden until tests start
+        self.workers_row.setVisible(False)
+        
+        layout.addWidget(self.workers_row)
 
         # Apply container styling
         self.setStyleSheet(PROGRESS_SECTION_CONTAINER_STYLE)
 
-    def reset(self, total_tests: int):
+    def reset(self, total_tests: int, max_workers: int = 0):
         """Reset for new test run"""
+        import time
+        self.start_time = time.time()
+        self.max_workers = max_workers
+        
         self.visual_progress.reset(total_tests)
-        self.stats_panel.reset()
+        self.percentage_label.setText("0%")
+        self.time_label.setText("0:00")
+        self.progress_label.setText(f"0 / {total_tests} tests")
+        self.passed_label.setText("0 passed")
+        self.failed_label.setText("0 failed")
+        self.workers_active_label.setText(f"{max_workers} workers active")
+        
+        # Create worker status labels
+        self._setup_worker_labels(max_workers)
+
+    def _setup_worker_labels(self, count: int):
+        """Create individual worker status labels"""
+        # Clear existing labels
+        for label in self.worker_labels:
+            label.deleteLater()
+        self.worker_labels.clear()
+        
+        if count == 0:
+            self.workers_row.setVisible(False)
+            return
+        
+        # Create labels for each worker
+        for i in range(count):
+            worker_label = QLabel(f"Worker {i+1}: Idle")
+            worker_label.setStyleSheet(WORKER_BADGE_IDLE_STYLE)
+            self.workers_layout.addWidget(worker_label)
+            self.worker_labels.append(worker_label)
+        
+        self.workers_layout.addStretch()
+        self.workers_row.setVisible(True)
 
     def add_test_result(self, passed: bool):
         """Add test result to visual progress"""
@@ -66,7 +164,48 @@ class ProgressSection(QWidget):
 
     def update_stats(self, completed: int, total: int, passed: int, failed: int):
         """Update statistics display"""
-        self.stats_panel.update(completed, total, passed, failed)
+        import time
+        
+        # Calculate percentage
+        percentage = (completed / total * 100) if total > 0 else 0
+        self.percentage_label.setText(f"{percentage:.0f}%")
+        
+        # Calculate elapsed time
+        if self.start_time:
+            elapsed = time.time() - self.start_time
+            minutes = int(elapsed // 60)
+            seconds = int(elapsed % 60)
+            self.time_label.setText(f"{minutes}:{seconds:02d}")
+        
+        # Update counts
+        self.progress_label.setText(f"{completed} / {total} tests")
+        self.passed_label.setText(f"{passed} passed")
+        self.failed_label.setText(f"{failed} failed")
+
+    def update_worker_status(self, worker_id: int, test_number: int = None, idle: bool = False):
+        """
+        Update individual worker status.
+        
+        Args:
+            worker_id: Worker ID (0-indexed)
+            test_number: Current test number being processed (None if idle)
+            idle: Whether worker is idle
+        """
+        if worker_id < 0 or worker_id >= len(self.worker_labels):
+            return
+        
+        label = self.worker_labels[worker_id]
+        
+        if idle or test_number is None:
+            label.setText(f"Worker {worker_id + 1}: Idle")
+            label.setStyleSheet(WORKER_BADGE_IDLE_STYLE)
+        else:
+            label.setText(f"Worker {worker_id + 1}: Test #{test_number}")
+            label.setStyleSheet(WORKER_BADGE_ACTIVE_STYLE)
+
+    def update_worker_info(self, workers_active: int, current_test: int = None):
+        """Update worker information (legacy method for compatibility)"""
+        self.workers_active_label.setText(f"{workers_active} workers active")
 
     def update_current_test(self, current: int, total: int):
         """Update current test indicator"""
@@ -75,6 +214,11 @@ class ProgressSection(QWidget):
     def mark_complete(self, all_passed: bool):
         """Mark tests as complete"""
         self.visual_progress.mark_complete(all_passed)
+        self.workers_active_label.setText("0 workers active")
+        
+        # Mark all workers as idle
+        for i in range(len(self.worker_labels)):
+            self.update_worker_status(i, idle=True)
 
 
 class VisualProgressBar(QWidget):
@@ -91,62 +235,57 @@ class VisualProgressBar(QWidget):
 
     def _setup_ui(self):
         self.layout = QHBoxLayout(self)
-        self.layout.setContentsMargins(12, 12, 12, 12)
-        self.layout.setSpacing(0)  # No spacing for connected segments
+        self.layout.setContentsMargins(SPACING['MD'], SPACING['MD'], SPACING['MD'], SPACING['MD'])  # 12px padding
+        self.layout.setSpacing(SPACING['NONE'])  # No spacing for connected segments
 
         self.setStyleSheet(VISUAL_PROGRESS_BAR_STYLE)
 
     def reset(self, total: int):
-        """Reset progress bar"""
+        """Reset progress bar with simplified segment calculation"""
         self.results = []
         self.total = total
         self.current = 0
         self._clear_layout()
         self.segments = []
 
-        # Calculate optimal segment count and size
-        if total <= 100:
+        # Simplified segment calculation: max 50 segments
+        if total <= 50:
             # Show individual segments for small test counts
             segment_count = total
             self.segment_size = 1
-        elif total <= 200:
-            # 1 segment = 2 tests
-            segment_count = 100
-            self.segment_size = 2
-        elif total <= 500:
-            # 1 segment = ~5 tests
-            segment_count = 100
-            self.segment_size = total // 100
         else:
-            # 1 segment = ~10+ tests
-            segment_count = 100
-            self.segment_size = total // 100
+            # Cap at 50 segments, each representing multiple tests
+            segment_count = 50
+            self.segment_size = (total + 49) // 50  # Ceiling division
 
+        # Create segments with consistent width
+        segment_width = max(SPACING['MD'], 900 // segment_count)  # Minimum 12px per segment
+        
         # Create segments
         for i in range(segment_count):
             segment = QFrame()
-            segment.setFixedSize(max(5, 800 // segment_count), 28)
+            segment.setFixedSize(segment_width, SIZES['PROGRESS_MD'])  # 32px progress bar height
 
             # Apply default style with no border radius on inner sides for connected look
             if i == 0:
                 # First segment - round left side only
                 segment.setStyleSheet(
                     SEGMENT_DEFAULT_STYLE.replace(
-                        "border-radius: 3px;", "border-radius: 3px 0 0 3px;"
+                        "border-radius: 4px;", "border-radius: 4px 0 0 4px;"
                     )
                 )
             elif i == segment_count - 1:
                 # Last segment - round right side only
                 segment.setStyleSheet(
                     SEGMENT_DEFAULT_STYLE.replace(
-                        "border-radius: 3px;", "border-radius: 0 3px 3px 0;"
+                        "border-radius: 4px;", "border-radius: 0 4px 4px 0;"
                     )
                 )
             else:
                 # Middle segments - no rounding
                 segment.setStyleSheet(
                     SEGMENT_DEFAULT_STYLE.replace(
-                        "border-radius: 3px;", "border-radius: 0;"
+                        "border-radius: 4px;", "border-radius: 0;"
                     )
                 )
 
@@ -226,14 +365,14 @@ class VisualProgressBar(QWidget):
         base_style = get_segment_style(state)
         if position == "first":
             style = base_style.replace(
-                "border-radius: 3px;", "border-radius: 3px 0 0 3px;"
+                "border-radius: 4px;", "border-radius: 4px 0 0 4px;"
             )
         elif position == "last":
             style = base_style.replace(
-                "border-radius: 3px;", "border-radius: 0 3px 3px 0;"
+                "border-radius: 4px;", "border-radius: 0 4px 4px 0;"
             )
         else:
-            style = base_style.replace("border-radius: 3px;", "border-radius: 0;")
+            style = base_style.replace("border-radius: 4px;", "border-radius: 0;")
 
         widget.setStyleSheet(style)
 
@@ -249,7 +388,7 @@ class VisualProgressBar(QWidget):
         widget.setToolTip(tooltip)
 
     def set_current(self, current: int, total: int):
-        """Highlight current test"""
+        """Track current test (visual indicator disabled for now - causes stylesheet parsing issues)"""
         self.current = current
 
     def mark_complete(self, all_passed: bool):
@@ -265,31 +404,52 @@ class VisualProgressBar(QWidget):
 
 
 class StatsPanel(QWidget):
-    """Statistics display panel"""
+    """Statistics display panel with completion percentage and worker info (horizontal inline layout)"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self._setup_ui()
 
-    def _setup_ui(self):
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(16, 12, 16, 12)
-        layout.setSpacing(8)
+    def _create_divider(self):
+        """Create a vertical divider for inline layout"""
+        divider = QLabel("│")  # Using box drawing character for better visibility
+        divider.setStyleSheet(STATS_INLINE_DIVIDER_STYLE)
+        return divider
 
+    def _setup_ui(self):
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(SPACING['XL'], SPACING['MD'] + 2, SPACING['XL'], SPACING['MD'] + 2)  # 20px, 14px
+        layout.setSpacing(SPACING['MD'])  # 12px between elements
+
+        # Completion percentage (large and prominent)
         self.percentage_label = QLabel("0%")
         self.percentage_label.setAlignment(Qt.AlignCenter)
-        self.percentage_label.setStyleSheet(STATS_PERCENTAGE_STYLE)
+        self.percentage_label.setMinimumWidth(SIZES['MIN_WIDTH_MD'])  # 90px
+        self.percentage_label.setStyleSheet(STATS_INLINE_PERCENTAGE_STYLE)
 
-        self.passed_label = QLabel("Passed: 0")
-        self.passed_label.setAlignment(Qt.AlignCenter)
+        # Progress text (e.g., "0 / 50 tests")
+        self.progress_label = QLabel("0 / 0 tests")
+        self.progress_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        self.progress_label.setStyleSheet(STATS_INLINE_PROGRESS_STYLE)
 
-        self.failed_label = QLabel("Failed: 0")
-        self.failed_label.setAlignment(Qt.AlignCenter)
+        # Pass/Fail counts (compact, single line)
+        self.counts_label = QLabel("0 passed | 0 failed")
+        self.counts_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        self.counts_label.setStyleSheet(STATS_INLINE_COUNTS_STYLE)
 
+        # Worker info (will be updated during test execution)
+        self.worker_label = QLabel("")
+        self.worker_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        self.worker_label.setStyleSheet(STATS_INLINE_WORKER_STYLE)
+        self.worker_label.setVisible(False)  # Hidden until tests start
+
+        # Build horizontal layout: percentage | progress | counts | worker
         layout.addWidget(self.percentage_label)
-        layout.addSpacing(4)
-        layout.addWidget(self.passed_label)
-        layout.addWidget(self.failed_label)
+        layout.addWidget(self._create_divider())
+        layout.addWidget(self.progress_label)
+        layout.addWidget(self._create_divider())
+        layout.addWidget(self.counts_label)
+        layout.addWidget(self.worker_label)
         layout.addStretch()
 
         self.setStyleSheet(STATS_PANEL_STYLE)
@@ -297,33 +457,43 @@ class StatsPanel(QWidget):
     def reset(self):
         """Reset statistics"""
         self.percentage_label.setText("0%")
-        self.passed_label.setText("Passed: 0")
-        self.failed_label.setText("Failed: 0")
-
-        # Reset styles
-        self.passed_label.setStyleSheet("")
-        self.failed_label.setStyleSheet("")
+        self.progress_label.setText("0 / 0 tests")
+        self.counts_label.setText("0 passed | 0 failed")
+        self.worker_label.setVisible(False)
 
     def update(self, completed: int, total: int, passed: int, failed: int):
         """Update statistics"""
         percentage = (completed / total * 100) if total > 0 else 0
         self.percentage_label.setText(f"{percentage:.0f}%")
-        self.passed_label.setText(f"Passed: {passed}")
-        self.failed_label.setText(f"Failed: {failed}")
+        self.progress_label.setText(f"{completed} / {total} tests")
+        
+        # Compact single-line format with color coding
+        counts_html = f'<span style="color: {MATERIAL_COLORS["primary"]};">{passed} passed</span> | <span style="color: {MATERIAL_COLORS["error"]};">{failed} failed</span>'
+        self.counts_label.setText(counts_html)
 
-        # Color code labels with new gradient-aware styles
-        if passed > 0:
-            self.passed_label.setStyleSheet(STATS_LABEL_PASSED_STYLE)
-        if failed > 0:
-            self.failed_label.setStyleSheet(STATS_LABEL_FAILED_STYLE)
+    def update_worker_info(self, workers_active: int, current_test: int = None):
+        """
+        Update worker information display.
+        
+        Args:
+            workers_active: Number of currently active workers
+            current_test: Current test number being processed (optional)
+        """
+        if workers_active > 0:
+            if current_test:
+                self.worker_label.setText(f"⚡ {workers_active} workers | Test #{current_test}")
+            else:
+                self.worker_label.setText(f"⚡ {workers_active} workers active")
+            self.worker_label.setVisible(True)
+        else:
+            self.worker_label.setVisible(False)
 
 
 class CardsSection(QWidget):
-    """Container for test cards with dynamic layout"""
+    """Container for test cards - always shows both passed and failed columns"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.layout_mode = "single"  # 'single' or 'split'
         self.passed_cards = []
         self.failed_cards = []
         self._setup_ui()
@@ -331,13 +501,13 @@ class CardsSection(QWidget):
     def _setup_ui(self):
         self.main_layout = QHBoxLayout(self)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.main_layout.setSpacing(16)
+        self.main_layout.setSpacing(SPACING['LG'])  # 16px between columns
 
-        # Always start with passed column (single mode will show passed tests)
+        # Passed column (always visible)
         passed_widget = QWidget()
         passed_main_layout = QVBoxLayout(passed_widget)
         passed_main_layout.setContentsMargins(0, 0, 0, 0)
-        passed_main_layout.setSpacing(8)
+        passed_main_layout.setSpacing(SPACING['SM'])  # 8px spacing
 
         # Passed title with counter
         self.passed_title = QLabel("✓ Passed Tests (0)")
@@ -348,18 +518,44 @@ class CardsSection(QWidget):
         self.passed_container = QWidget()
         self.passed_layout = QVBoxLayout(self.passed_container)
         self.passed_layout.setAlignment(Qt.AlignTop)
-        self.passed_layout.setSpacing(8)
+        self.passed_layout.setSpacing(SPACING['SM'])  # 8px between cards
+        
+        # Empty state label for passed tests
+        self.passed_empty_label = QLabel("No passed tests yet")
+        self.passed_empty_label.setAlignment(Qt.AlignCenter)
+        self.passed_empty_label.setStyleSheet(EMPTY_STATE_LABEL_STYLE)
+        self.passed_layout.addWidget(self.passed_empty_label)
+        
         self.passed_scroll.setWidget(self.passed_container)
         passed_main_layout.addWidget(self.passed_scroll)
-
         self.main_layout.addWidget(passed_widget)
 
-        # Failed column (will be created when needed)
-        self.failed_scroll = None
-        self.failed_container = None
-        self.failed_layout = None
-        self.failed_title = None
-        self.failed_widget = None
+        # Failed column (always visible)
+        failed_widget = QWidget()
+        failed_main_layout = QVBoxLayout(failed_widget)
+        failed_main_layout.setContentsMargins(0, 0, 0, 0)
+        failed_main_layout.setSpacing(SPACING['SM'])  # 8px spacing
+
+        # Failed title with counter
+        self.failed_title = QLabel("✗ Failed Tests (0)")
+        self.failed_title.setStyleSheet(CARDS_SECTION_TITLE_FAILED_STYLE)
+        failed_main_layout.addWidget(self.failed_title)
+
+        self.failed_scroll = self._create_scroll_area()
+        self.failed_container = QWidget()
+        self.failed_layout = QVBoxLayout(self.failed_container)
+        self.failed_layout.setAlignment(Qt.AlignTop)
+        self.failed_layout.setSpacing(SPACING['SM'])  # 8px between cards
+        
+        # Empty state label for failed tests
+        self.failed_empty_label = QLabel("No failed tests yet! 🎉")
+        self.failed_empty_label.setAlignment(Qt.AlignCenter)
+        self.failed_empty_label.setStyleSheet(EMPTY_STATE_LABEL_STYLE)
+        self.failed_layout.addWidget(self.failed_empty_label)
+        
+        self.failed_scroll.setWidget(self.failed_container)
+        failed_main_layout.addWidget(self.failed_scroll)
+        self.main_layout.addWidget(failed_widget)
 
     def _create_scroll_area(self) -> QScrollArea:
         """Create configured scroll area"""
@@ -370,95 +566,67 @@ class CardsSection(QWidget):
         return scroll
 
     def clear(self):
-        """Clear all cards"""
+        """Clear all cards and show empty states"""
         self.passed_cards = []
         self.failed_cards = []
         self._clear_layout(self.passed_layout)
-
-        # Remove failed column if it exists
-        if self.layout_mode == "split":
-            self._remove_failed_column()
-
-        # Reset counter
+        self._clear_layout(self.failed_layout)
+        
+        # Show empty state labels
+        self.passed_empty_label.setVisible(True)
+        self.failed_empty_label.setVisible(True)
+        
+        # Reset counters
         self._update_title_counters()
 
     def add_card(self, card: QWidget, passed: bool):
-        """Add test card"""
+        """Add test card to appropriate column"""
         if passed:
+            # Hide empty state if this is first card
+            if len(self.passed_cards) == 0:
+                self.passed_empty_label.setVisible(False)
+            
             self.passed_cards.append(card)
             self.passed_layout.addWidget(card)
-            # Update passed counter
-            self._update_title_counters()
         else:
+            # Hide empty state if this is first card
+            if len(self.failed_cards) == 0:
+                self.failed_empty_label.setVisible(False)
+            
             self.failed_cards.append(card)
-            if self.layout_mode == "single" and len(self.failed_cards) == 1:
-                # First failure - add failed column
-                self._add_failed_column()
-            if self.layout_mode == "split":
-                self.failed_layout.addWidget(card)
-                # Update failed counter
-                self._update_title_counters()
+            self.failed_layout.addWidget(card)
+        
+        # Update counters
+        self._update_title_counters()
 
     def _update_title_counters(self):
         """Update the test counters in titles"""
         passed_count = len(self.passed_cards)
-        self.passed_title.setText(f"✓ Passed Tests ({passed_count})")
-
-        if self.layout_mode == "split" and self.failed_title:
-            failed_count = len(self.failed_cards)
-            self.failed_title.setText(f"✗ Failed Tests ({failed_count})")
-
-    def _add_failed_column(self):
-        """Add failed column when first test fails"""
-        if self.layout_mode == "split":
-            return
-
-        self.layout_mode = "split"
-
-        # Create failed column
-        self.failed_widget = QWidget()
-        failed_main_layout = QVBoxLayout(self.failed_widget)
-        failed_main_layout.setContentsMargins(0, 0, 0, 0)
-        failed_main_layout.setSpacing(8)
-
-        # Failed title with counter
         failed_count = len(self.failed_cards)
-        self.failed_title = QLabel(f"✗ Failed Tests ({failed_count})")
-        self.failed_title.setStyleSheet(CARDS_SECTION_TITLE_FAILED_STYLE)
-        failed_main_layout.addWidget(self.failed_title)
-
-        self.failed_scroll = self._create_scroll_area()
-        self.failed_container = QWidget()
-        self.failed_layout = QVBoxLayout(self.failed_container)
-        self.failed_layout.setAlignment(Qt.AlignTop)
-        self.failed_layout.setSpacing(8)
-        self.failed_scroll.setWidget(self.failed_container)
-        failed_main_layout.addWidget(self.failed_scroll)
-
-        # Add failed column to main layout
-        self.main_layout.addWidget(self.failed_widget)
-
-    def _remove_failed_column(self):
-        """Remove failed column when clearing tests"""
-        if self.layout_mode == "single":
-            return
-
-        self.layout_mode = "single"
-
-        # Remove failed column
-        if self.failed_widget:
-            self.failed_widget.deleteLater()
-            self.failed_widget = None
-            self.failed_scroll = None
-            self.failed_container = None
-            self.failed_layout = None
-            self.failed_title = None
+        self.passed_title.setText(f"✓ Passed Tests ({passed_count})")
+        self.failed_title.setText(f"✗ Failed Tests ({failed_count})")
 
     def _clear_layout(self, layout: QVBoxLayout):
-        """Clear all widgets from layout"""
+        """Clear all widgets from layout except empty state labels"""
         if layout is None:
             return
+        
+        # Store empty labels before clearing
+        empty_labels = []
+        for i in range(layout.count()):
+            item = layout.itemAt(i)
+            if item and item.widget():
+                widget = item.widget()
+                # Check if it's an empty state label
+                if isinstance(widget, QLabel) and ("No " in widget.text() or "🎉" in widget.text()):
+                    empty_labels.append(widget)
+        
+        # Clear all widgets
         while layout.count():
             item = layout.takeAt(0)
-            if item.widget():
+            if item.widget() and item.widget() not in empty_labels:
                 item.widget().deleteLater()
+        
+        # Re-add empty labels
+        for label in empty_labels:
+            layout.addWidget(label)

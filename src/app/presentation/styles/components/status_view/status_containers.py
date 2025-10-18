@@ -1,25 +1,22 @@
 """
 Status View Container and Control Panel Styles.
 
-Designed to match the app's gradient-based design language with:
-- Subtle gradients matching sidebar and console
-- Consistent borders and shadows
-- Material Design color palette
+Redesigned with Material Design principles:
+- Proper Material surface colors for consistency with sidebar
+- Elevation and shadows for depth
+- Modern hover states and interactions
+- Consistent with app's overall design language
 """
 
-from src.app.presentation.styles.constants.colors import COLORS, MATERIAL_COLORS
+from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
 
 # ============================================================================
 # STATUS VIEW CONTAINER
 # ============================================================================
 
-STATUS_VIEW_CONTAINER_STYLE = """
+STATUS_VIEW_CONTAINER_STYLE = f"""
 QWidget {{
-    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
-        stop:0 rgba(27, 27, 30, 0.98),
-        stop:0.3 rgba(30, 30, 33, 0.95),
-        stop:0.7 rgba(27, 27, 30, 0.98),
-        stop:1 rgba(30, 30, 33, 0.95));
+    background: {MATERIAL_COLORS['background']};
     border: none;
 }}
 """
@@ -28,25 +25,20 @@ QWidget {{
 # CONTROLS PANEL (File buttons area at top)
 # ============================================================================
 
-CONTROLS_PANEL_STYLE = """
+CONTROLS_PANEL_STYLE = f"""
 QWidget {{
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                             stop:0 rgba(36, 36, 38, 0.98),
-                             stop:0.5 rgba(40, 40, 43, 0.95),
-                             stop:1 rgba(36, 36, 38, 0.98));
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: {MATERIAL_COLORS['surface']};
+    border: 1px solid {MATERIAL_COLORS['outline']};
     border-radius: 12px;
-    padding: 12px 16px;
+    padding: 16px;
 }}
 """
 
 FILE_BUTTON_STYLE = f"""
 QPushButton {{
-    color: {COLORS['text_light']};
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                             stop:0 rgba(255, 255, 255, 0.06),
-                             stop:1 rgba(255, 255, 255, 0.03));
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: {MATERIAL_COLORS['on_surface']};
+    background: {MATERIAL_COLORS['surface_variant']};
+    border: 1px solid {MATERIAL_COLORS['outline_variant']};
     text-align: center;
     padding: 10px 20px;
     font-size: 13px;
@@ -58,24 +50,21 @@ QPushButton {{
 }}
 
 QPushButton:hover {{
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                stop:0 {COLORS['primary']}33,
-                stop:1 rgba(255, 255, 255, 0.08));
-    border: 1px solid {COLORS['primary']}66;
+    background: {MATERIAL_COLORS['surface_bright']};
+    border: 1px solid {MATERIAL_COLORS['primary']};
+    color: {MATERIAL_COLORS['on_surface']};
 }}
 
 QPushButton:pressed {{
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                stop:0 {COLORS['primary']}22,
-                stop:1 rgba(255, 255, 255, 0.05));
-    border: 1px solid {COLORS['primary']}44;
+    background: {MATERIAL_COLORS['surface_dim']};
+    border: 1px solid {MATERIAL_COLORS['primary']};
     padding: 11px 19px 9px 21px;
 }}
 
 QPushButton:disabled {{
-    color: {MATERIAL_COLORS['text_disabled']};
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.03);
+    color: {MATERIAL_COLORS['on_surface_disabled']};
+    background: {MATERIAL_COLORS['surface_dim']};
+    border: 1px solid {MATERIAL_COLORS['outline_variant']};
 }}
 """
 
@@ -85,7 +74,7 @@ QPushButton:disabled {{
 
 SECTION_HEADER_STYLE = f"""
 QLabel {{
-    color: {COLORS['accent']}CC;
+    color: {MATERIAL_COLORS['primary']};
     background: transparent;
     padding: 4px 8px;
     margin: 8px 0 4px 0;

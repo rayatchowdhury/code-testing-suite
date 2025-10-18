@@ -153,6 +153,10 @@ class BaseTestWorker(QObject, metaclass=QObjectABCMeta):
                     break
                 
                 test_number = future_to_test[future]
+                
+                # Emit testStarted BEFORE getting result (so UI shows "running test #X")
+                self.testStarted.emit(test_number, self.test_count)
+                
                 completed_tests += 1
                 
                 try:
@@ -162,9 +166,6 @@ class BaseTestWorker(QObject, metaclass=QObjectABCMeta):
                         # Store result thread-safely
                         with self._results_lock:
                             self.test_results.append(test_result)
-                        
-                        # Emit progress signal
-                        self.testStarted.emit(completed_tests, self.test_count)
                         
                         # Subclasses emit their own testCompleted signal here
                         self._emit_test_completed(test_result)

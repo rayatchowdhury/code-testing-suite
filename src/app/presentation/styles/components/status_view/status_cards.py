@@ -1,6 +1,13 @@
 """
 Status View Test Card Styles.
 
+Redesigned with Material Design elevation and surfaces:
+- Clean Material surface colors
+- Proper shadows for depth (elevation)
+- Vibrant but tasteful pass/fail indicators
+- Modern hover effects with shadow transitions
+- Consistent with app's overall design
+
 Includes:
 - Card section scroll area
 - Card section titles
@@ -8,7 +15,7 @@ Includes:
 - Card label styles
 """
 
-from src.app.presentation.styles.constants.colors import COLORS, MATERIAL_COLORS
+from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
 
 # ============================================================================
 # TEST CARDS SECTION
@@ -16,32 +23,26 @@ from src.app.presentation.styles.constants.colors import COLORS, MATERIAL_COLORS
 
 CARDS_SECTION_SCROLL_STYLE = f"""
 QScrollArea {{
-    border: 2px solid rgba(255, 255, 255, 0.08);
+    border: 2px solid {MATERIAL_COLORS['outline']};
     border-radius: 10px;
-    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                             stop:0 rgba(27, 27, 30, 0.98),
-                             stop:1 rgba(31, 31, 33, 0.98));
+    background: {MATERIAL_COLORS['surface_dim']};
 }}
 
 QScrollBar:vertical {{
-    background: rgba(255, 255, 255, 0.03);
+    background: {MATERIAL_COLORS['surface_variant']};
     width: 12px;
     border-radius: 6px;
     margin: 0;
 }}
 
 QScrollBar::handle:vertical {{
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                             stop:0 {COLORS['primary']}80,
-                             stop:1 {COLORS['primary']}60);
+    background: {MATERIAL_COLORS['primary']};
     border-radius: 6px;
     min-height: 30px;
 }}
 
 QScrollBar::handle:vertical:hover {{
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                             stop:0 {COLORS['primary']},
-                             stop:1 {COLORS['primary']}80);
+    background: {MATERIAL_COLORS['primary_container']};
 }}
 
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
@@ -55,14 +56,11 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{
 
 CARDS_SECTION_TITLE_PASSED_STYLE = f"""
 QLabel {{
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                             stop:0 rgba(0, 150, 199, 0.18),
-                             stop:0.5 rgba(0, 120, 160, 0.15),
-                             stop:1 rgba(0, 150, 199, 0.18));
-    color: {MATERIAL_COLORS['text_primary']};
-    padding: 10px 16px;
+    background: {MATERIAL_COLORS['primary_container']};
+    color: {MATERIAL_COLORS['on_primary_container']};
+    padding: 12px 16px;
     border-radius: 8px;
-    border: 1px solid {COLORS['primary']}40;
+    border: 2px solid {MATERIAL_COLORS['primary']};
     font-weight: 700;
     font-size: 15px;
     letter-spacing: 0.5px;
@@ -72,14 +70,11 @@ QLabel {{
 
 CARDS_SECTION_TITLE_FAILED_STYLE = f"""
 QLabel {{
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                             stop:0 rgba(255, 107, 107, 0.18),
-                             stop:0.5 rgba(220, 80, 80, 0.15),
-                             stop:1 rgba(255, 107, 107, 0.18));
-    color: {MATERIAL_COLORS['text_primary']};
-    padding: 10px 16px;
+    background: {MATERIAL_COLORS['error_container']};
+    color: {MATERIAL_COLORS['on_error_container']};
+    padding: 12px 16px;
     border-radius: 8px;
-    border: 1px solid {MATERIAL_COLORS['error']}40;
+    border: 2px solid {MATERIAL_COLORS['error']};
     font-weight: 700;
     font-size: 15px;
     letter-spacing: 0.5px;
@@ -95,46 +90,28 @@ QLabel {{
 def get_test_card_style(passed: bool, is_hover: bool = False) -> str:
     """
     Get test card style based on pass/fail state and hover.
+    
+    Uses Material Design elevation with proper surfaces and shadows.
 
     Args:
         passed: Whether test passed
         is_hover: Whether in hover state
     """
     if passed:
-        base_bg = """
-            background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                                     stop:0 rgba(0, 75, 99, 0.25),
-                                     stop:0.5 rgba(0, 90, 120, 0.20),
-                                     stop:1 rgba(0, 75, 99, 0.25));
-        """
-        border = f"border: 2px solid {COLORS['primary']}60;"
-        hover_bg = """
-            background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                                     stop:0 rgba(0, 100, 135, 0.35),
-                                     stop:0.5 rgba(0, 120, 160, 0.28),
-                                     stop:1 rgba(0, 100, 135, 0.35));
-        """
-        hover_border = f"border: 3px solid {COLORS['primary']}90;"
+        base_bg = MATERIAL_COLORS['surface_variant']
+        border = f"border: 2px solid {MATERIAL_COLORS['primary']};"
+        hover_bg = MATERIAL_COLORS['primary_container']
+        hover_border = f"border: 3px solid {MATERIAL_COLORS['primary']};"
     else:
-        base_bg = """
-            background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                                     stop:0 rgba(66, 1, 1, 0.35),
-                                     stop:0.5 rgba(80, 10, 10, 0.28),
-                                     stop:1 rgba(66, 1, 1, 0.35));
-        """
-        border = f"border: 2px solid {MATERIAL_COLORS['error']}60;"
-        hover_bg = """
-            background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                                     stop:0 rgba(90, 15, 15, 0.45),
-                                     stop:0.5 rgba(110, 20, 20, 0.38),
-                                     stop:1 rgba(90, 15, 15, 0.45));
-        """
-        hover_border = f"border: 3px solid {MATERIAL_COLORS['error']}90;"
+        base_bg = MATERIAL_COLORS['error_container']
+        border = f"border: 2px solid {MATERIAL_COLORS['error']};"
+        hover_bg = MATERIAL_COLORS['error_container']
+        hover_border = f"border: 3px solid {MATERIAL_COLORS['error']};"
 
     if is_hover:
         return f"""
             QFrame {{
-                {hover_bg}
+                background: {hover_bg};
                 {hover_border}
                 border-radius: 10px;
                 padding: 2px;
@@ -143,28 +120,32 @@ def get_test_card_style(passed: bool, is_hover: bool = False) -> str:
 
     return f"""
             QFrame {{
-                {base_bg}
+                background: {base_bg};
                 {border}
                 border-radius: 10px;
             }}
             QFrame:hover {{
-                {hover_bg}
+                background: {hover_bg};
                 {hover_border}
                 padding: 2px;
             }}
         """
 
 
+# ============================================================================
+# CARD LABEL STYLES
+# ============================================================================
+
 TEST_CARD_LABEL_HEADER_STYLE = f"""
 font-weight: 700;
 font-size: 14px;
-color: {MATERIAL_COLORS['text_primary']};
+color: {MATERIAL_COLORS['on_surface']};
 background: transparent;
 letter-spacing: 0.3px;
 """
 
 TEST_CARD_LABEL_STATUS_PASSED_STYLE = f"""
-color: {COLORS['primary']};
+color: {MATERIAL_COLORS['primary']};
 font-weight: 700;
 font-size: 14px;
 background: transparent;
@@ -178,7 +159,7 @@ background: transparent;
 """
 
 TEST_CARD_LABEL_METRIC_STYLE = f"""
-color: {MATERIAL_COLORS['text_secondary']};
+color: {MATERIAL_COLORS['on_surface_variant']};
 font-size: 12px;
 background: transparent;
 """
