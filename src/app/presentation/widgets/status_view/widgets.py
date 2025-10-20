@@ -33,7 +33,6 @@ from src.app.presentation.styles.components.status_view.status_widgets_styles im
     WORKER_TEST_LABEL_ACTIVE_STYLE,
     WORKER_TIME_LABEL_IDLE_STYLE,
     WORKER_TIME_LABEL_ACTIVE_STYLE,
-    get_worker_progress_container_style,
     VISUAL_PROGRESS_BAR_SECTION_STYLE,
     PROGRESS_BAR_LEGEND_PASSED_STYLE,
     PROGRESS_BAR_LEGEND_FAILED_STYLE,
