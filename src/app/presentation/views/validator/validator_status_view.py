@@ -1,30 +1,18 @@
 """
-Validator Status View
+Validator Status View - migrated to StatusViewBase.
 
-Thin adapter that:
-1. Creates presenter with widgets
-2. Translates worker signals to TestResult
-3. Handles domain-specific detail views
+Reduced from 215 lines to ~65 lines following Phase 3B migration pattern.
+Inherits common status view behavior from StatusViewBase.
+
+NOTE: ValidatorRunner uses 'validator_runner' attribute (not 'validator')
 """
 
-from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QMessageBox
-
-from src.app.presentation.widgets.status_view import (
-    TestResult,
-    TestType,
-    StatusViewPresenter,
-    StatusHeaderSection,
-    PerformancePanelSection,
-    VisualProgressBarSection,
-    TestResultsCardsSection,
-    ValidatorTestCard
-)
+from src.app.presentation.base.status_view_base import StatusViewBase
+from src.app.presentation.widgets.status_view import TestResult, ValidatorTestCard
 from src.app.presentation.widgets.test_detail_view import ValidatorDetailDialog
-from src.app.presentation.styles.components.status_view import STATUS_VIEW_CONTAINER_STYLE
 
 
-class ValidatorStatusView(QWidget):
+class ValidatorStatusView(StatusViewBase):
     """
     Validator-specific status view.
     
@@ -32,75 +20,24 @@ class ValidatorStatusView(QWidget):
     - Translate validator worker signals to TestResult
     - Create validator-specific cards
     - Show validator detail dialogs with 3 sections
-    - Coordinate with presenter for UI updates
     """
     
-    # Signals for window coordination
-    stopRequested = Signal()
-    backRequested = Signal()
-    runRequested = Signal()
-    
     def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setObjectName("status_view_container")
-        self.parent_window = parent
-        self.test_type = TestType.VALIDATOR
-        
-        # Store results for detail views
-        self.test_results = {}  # {test_number: TestResult}
-        
-        self._setup_ui()
-        self.setStyleSheet(STATUS_VIEW_CONTAINER_STYLE)
+        super().__init__(parent, test_type="validator")
     
-    def _setup_ui(self):
-        """Create UI with presenter pattern"""
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-        
-        # Create widgets
-        self.header = StatusHeaderSection()
-        self.performance = PerformancePanelSection()
-        self.progress_bar = VisualProgressBarSection()
-        self.cards_section = TestResultsCardsSection()
-        
-        # Create presenter
-        self.presenter = StatusViewPresenter(
-            header=self.header,
-            performance=self.performance,
-            progress_bar=self.progress_bar,
-            cards_section=self.cards_section,
-            test_type="validator"
-        )
-        
-        # Add to layout
-        layout.addWidget(self.header)
-        layout.addWidget(self.performance)
-        layout.addWidget(self.progress_bar)
-        layout.addWidget(self.cards_section, stretch=1)
+    # ===== Template Methods (Required by StatusViewBase) =====
     
-    def on_tests_started(self, total: int):
-        """Handle test execution start"""
-        # Get worker count
-        max_workers = self._get_worker_count()
-        
-        # Initialize presenter
-        self.presenter.start_test_execution(total, max_workers)
-        
-        # Clear stored results
-        self.test_results.clear()
+    def _get_runner_attribute_name(self) -> str:
+        """Return 'validator_runner' (NOTE: different from benchmarker!)"""
+        return "validator_runner"
     
-    def on_test_running(self, test_number: int, total: int):
-        """Handle test being processed (misleading name - actually called after completion)"""
-        self.presenter.mark_test_active(test_number)
+    def _get_card_class(self):
+        """Return ValidatorTestCard class."""
+        return ValidatorTestCard
     
-    def on_worker_busy(self, worker_id: int, test_number: int):
-        """Handle worker starting work on a test"""
-        self.presenter.handle_worker_busy(worker_id, test_number)
-    
-    def on_worker_idle(self, worker_id: int):
-        """Handle worker finishing work"""
-        self.presenter.handle_worker_idle(worker_id)
+    def _get_detail_dialog_class(self):
+        """Return ValidatorDetailDialog class."""
+        return ValidatorDetailDialog
     
     def on_test_completed(
         self,
@@ -143,16 +80,8 @@ class ValidatorStatusView(QWidget):
         card.clicked.connect(self.show_test_detail)
         self.cards_section.add_card(card, result.passed)
     
-    def on_all_tests_completed(self, all_passed: bool):
-        """Handle test execution completion"""
-        self.presenter.complete_execution()
-        
-        # Notify parent to enable save button
-        if self.parent_window and hasattr(self.parent_window, "enable_save_button"):
-            self.parent_window.enable_save_button()
-    
     def show_test_detail(self, test_number: int):
-        """Show detail dialog with 3 sections: Input, Output, Validator Log"""
+        """Show detail dialog with 3 sections: Input, Output, Validator Log."""
         if test_number not in self.test_results:
             return
         
@@ -172,52 +101,3 @@ class ValidatorStatusView(QWidget):
             parent=self
         )
         dialog.exec()
-    
-    def _get_worker_count(self) -> int:
-        """Get worker count from parent"""
-        worker = None
-        if self.parent_window and hasattr(self.parent_window, 'validator'):
-            if hasattr(self.parent_window.validator, 'get_current_worker'):
-                worker = self.parent_window.validator.get_current_worker()
-        
-        if worker and hasattr(worker, 'max_workers'):
-            return worker.max_workers
-        
-        import multiprocessing
-        return min(8, max(1, multiprocessing.cpu_count() - 1))
-    
-    def save_to_database(self):
-        """Save results to database"""
-        runner = None
-        if hasattr(self, "runner"):
-            runner = self.runner
-        elif self.parent_window and hasattr(self.parent_window, "validator"):
-            runner = self.parent_window.validator
-        
-        if not runner:
-            QMessageBox.critical(self, "Error", "Runner not found")
-            return -1
-        
-        try:
-            result_id = runner.save_test_results_to_database()
-            if result_id > 0:
-                QMessageBox.information(
-                    self, "Success",
-                    f"Results saved!\nDatabase ID: {result_id}"
-                )
-                if self.parent_window and hasattr(self.parent_window, "mark_results_saved"):
-                    self.parent_window.mark_results_saved()
-            else:
-                QMessageBox.critical(self, "Error", "Failed to save")
-            return result_id
-        except Exception as e:
-            QMessageBox.critical(self, "Error", f"Error saving: {e}")
-            return -1
-    
-    def set_runner(self, runner):
-        """Set runner for saving"""
-        self.runner = runner
-    
-    def is_tests_running(self) -> bool:
-        """Check if tests are running"""
-        return self.presenter.is_running()
