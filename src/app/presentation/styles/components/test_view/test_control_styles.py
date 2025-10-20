@@ -114,41 +114,10 @@ TEST_VIEW_STATUS_LABEL_STYLE = bold_label(color=MATERIAL_COLORS['on_surface'])
 TEST_VIEW_TIME_LABEL_STYLE = bold_label(color=MATERIAL_COLORS['primary'])
 
 
-# Utility Functions
-def get_history_label_style(passed=True):
-    """Get history label style based on pass/fail status"""
-    color = MATERIAL_COLORS["primary"] if passed else ERROR_COLOR_HEX
-    return bold_label(color=color)
-
-
-def get_running_status_style():
-    return bold_label(color=MATERIAL_COLORS['on_surface'])
-
-
-def get_test_view_error_status_style():
-    return bold_label(color=ERROR_COLOR_HEX)
-
-
-def get_test_view_success_status_style():
-    return bold_label(color=MATERIAL_COLORS['primary'])
-
-
-def get_compilation_status_style(is_success=True):
-    color = MATERIAL_COLORS["primary"] if is_success else ERROR_COLOR_HEX
-    return f"color: {color};"
-
-
+# Utility Functions (actively used)
 def get_status_label_style(passed=True):
     color = MATERIAL_COLORS["primary"] if passed else ERROR_COLOR_HEX
     return bold_label(color=color)
-
-
-def get_passed_status_style():
-    return bold_label(color=MATERIAL_COLORS['primary'])
-
-
-def get_failed_status_style():
-    return bold_label(color=ERROR_COLOR_HEX)
 
 
 __all__ = [
@@ -161,12 +130,6 @@ __all__ = [
     "TEST_VIEW_COMPILATION_CLOSE_BUTTON_STYLE",
     "TEST_VIEW_STATUS_LABEL_STYLE",
     "TEST_VIEW_TIME_LABEL_STYLE",
-    "get_history_label_style",
-    "get_running_status_style",
-    "get_test_view_error_status_style",
-    "get_test_view_success_status_style",
-    "get_compilation_status_style",
     "get_status_label_style",
-    "get_passed_status_style",
-    "get_failed_status_style",
 ]
+

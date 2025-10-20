@@ -25,19 +25,3 @@ def set_emoji_font(label: QLabel, size: int = None) -> None:
     if size is not None:
         font.setPixelSize(size)
     label.setFont(font)
-
-
-def create_emoji_label(text: str, size: int = None) -> QLabel:
-    """
-    Create a QLabel with emoji font pre-applied.
-    
-    Args:
-        text: The label text (should contain emojis)
-        size: Optional font size in pixels
-        
-    Returns:
-        QLabel configured with emoji font
-    """
-    label = QLabel(text)
-    set_emoji_font(label, size)
-    return label

@@ -106,17 +106,7 @@ SECTION_INFO_LABEL_STYLE = (
 )
 
 
-# Dynamic styles for status colors in validators
-def get_error_status_style():
-    """Get style for error status"""
-    return f"color: {MATERIAL_COLORS['error']}"
-
-
-def get_neutral_status_style():
-    """Get style for neutral/info status"""
-    return f"color: {MATERIAL_COLORS['on_surface_variant']}"
-
-
+# Dynamic style for success status (used in config_handler.py)
 def get_success_status_style():
     """Get style for success status"""
     return f"color: {MATERIAL_COLORS['primary']}"
@@ -128,7 +118,6 @@ __all__ = [
     "SUCCESS_MESSAGE_STYLE",
     "INFO_MESSAGE_STYLE",
     "SECTION_INFO_LABEL_STYLE",
-    "get_error_status_style",
-    "get_neutral_status_style",
     "get_success_status_style",
 ]
+

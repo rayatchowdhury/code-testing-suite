@@ -23,14 +23,7 @@ from .test_control_styles import (
     TEST_VIEW_COMPILATION_CLOSE_BUTTON_STYLE,
     TEST_VIEW_STATUS_LABEL_STYLE,
     TEST_VIEW_TIME_LABEL_STYLE,
-    get_history_label_style,
-    get_running_status_style,
-    get_test_view_error_status_style,
-    get_test_view_success_status_style,
-    get_compilation_status_style,
     get_status_label_style,
-    get_passed_status_style,
-    get_failed_status_style,
 )
 from .test_tab_styles import (
     TAB_CONTAINER_STYLE,
@@ -39,7 +32,6 @@ from .test_tab_styles import (
     LANGUAGE_CONTAINER_STYLE,
     LANGUAGE_LABEL_STYLE,
     LANGUAGE_CONTEXT_MENU_STYLE,
-    get_file_button_style,
 )
 
 __all__ = [
@@ -67,13 +59,5 @@ __all__ = [
     "LANGUAGE_LABEL_STYLE",
     "LANGUAGE_CONTEXT_MENU_STYLE",
     # Utility functions
-    "get_history_label_style",
-    "get_running_status_style",
-    "get_test_view_error_status_style",
-    "get_test_view_success_status_style",
-    "get_compilation_status_style",
     "get_status_label_style",
-    "get_passed_status_style",
-    "get_failed_status_style",
-    "get_file_button_style",
 ]

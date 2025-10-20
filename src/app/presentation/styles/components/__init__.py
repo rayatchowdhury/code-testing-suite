@@ -8,8 +8,6 @@ from src.app.presentation.styles.components.config_ui import (
     INFO_MESSAGE_STYLE,
     SECTION_INFO_LABEL_STYLE,
     SUCCESS_MESSAGE_STYLE,
-    get_error_status_style,
-    get_neutral_status_style,
     get_success_status_style,
 )
 from src.app.presentation.styles.components.console import CONSOLE_STYLE
@@ -55,14 +53,7 @@ from src.app.presentation.styles.components.test_view import (
     TEST_VIEW_STATUS_DIALOG_STYLE,
     TEST_VIEW_STATUS_LABEL_STYLE,
     TEST_VIEW_TIME_LABEL_STYLE,
-    get_compilation_status_style,
-    get_failed_status_style,
-    get_history_label_style,
-    get_passed_status_style,
-    get_running_status_style,
     get_status_label_style,
-    get_test_view_error_status_style,
-    get_test_view_success_status_style,
 )
 
 __all__ = [
@@ -106,20 +97,12 @@ __all__ = [
     "TEST_VIEW_STATUS_LABEL_STYLE",
     "TEST_VIEW_TIME_LABEL_STYLE",
     "get_history_label_style",
-    "get_running_status_style",
-    "get_test_view_error_status_style",
-    "get_test_view_success_status_style",
-    "get_compilation_status_style",
     "get_status_label_style",
-    "get_passed_status_style",
-    "get_failed_status_style",
     # Config UI styles
     "ERROR_DIALOG_STYLE",
     "CONFIG_DIALOG_TITLE_STYLE",
     "SUCCESS_MESSAGE_STYLE",
     "INFO_MESSAGE_STYLE",
     "SECTION_INFO_LABEL_STYLE",
-    "get_error_status_style",
-    "get_neutral_status_style",
     "get_success_status_style",
 ]

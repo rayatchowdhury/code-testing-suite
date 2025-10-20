@@ -188,23 +188,6 @@ QMenu::separator {{
 
 
 # ============================================================================
-# HELPER FUNCTIONS
-# ============================================================================
-
-def get_file_button_style(is_multi_language: bool = False) -> str:
-    """
-    Get the appropriate file button style based on language mode.
-    
-    Args:
-        is_multi_language: Whether the tab supports multiple languages
-        
-    Returns:
-        CSS style string for file button
-    """
-    return TAB_FILE_BUTTON_STYLE if is_multi_language else TAB_FILE_BUTTON_SINGLE_STYLE
-
-
-# ============================================================================
 # EXPORTS
 # ============================================================================
 
@@ -215,7 +198,6 @@ __all__ = [
     # Button styles
     'TAB_FILE_BUTTON_STYLE',
     'TAB_FILE_BUTTON_SINGLE_STYLE',
-    'get_file_button_style',
     
     # Language selector styles
     'LANGUAGE_CONTAINER_STYLE',

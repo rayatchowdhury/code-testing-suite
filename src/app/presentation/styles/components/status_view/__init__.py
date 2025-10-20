@@ -37,7 +37,6 @@ from .status_widgets_styles import (
     WORKER_TEST_LABEL_ACTIVE_STYLE,
     WORKER_TIME_LABEL_IDLE_STYLE,
     WORKER_TIME_LABEL_ACTIVE_STYLE,
-    get_worker_progress_container_style,
     # Visual Progress Bar
     PROGRESS_BAR_LEGEND_PASSED_STYLE,
     PROGRESS_BAR_LEGEND_FAILED_STYLE,
@@ -81,7 +80,6 @@ __all__ = [
     "WORKER_TEST_LABEL_ACTIVE_STYLE",
     "WORKER_TIME_LABEL_IDLE_STYLE",
     "WORKER_TIME_LABEL_ACTIVE_STYLE",
-    "get_worker_progress_container_style",
     # Visual Progress Bar (V2 Widgets)
     "PROGRESS_BAR_LEGEND_PASSED_STYLE",
     "PROGRESS_BAR_LEGEND_FAILED_STYLE",

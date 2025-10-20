@@ -227,24 +227,3 @@ RESULTS_SEPARATOR_STYLE = f"""
 background-color: {MATERIAL_COLORS['outline']};
 """
 
-
-def create_error_label(text: str, bold: bool = False) -> "QLabel":
-    """
-    Create a QLabel with error styling.
-    
-    Args:
-        text: The error message text
-        bold: If True, use bold styling
-    
-    Returns:
-        Configured QLabel with error styling
-    """
-    from PySide6.QtWidgets import QLabel
-    
-    label = QLabel(text)
-    if bold:
-        label.setStyleSheet(ERROR_LABEL_BOLD_STYLE)
-    else:
-        label.setStyleSheet(ERROR_LABEL_STYLE)
-    return label
-

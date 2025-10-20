@@ -151,33 +151,6 @@ color: {MATERIAL_COLORS['text_secondary']};
 background: transparent;
 """
 
-def get_worker_progress_container_style(idle: bool = True, progress: float = 0.0) -> str:
-    """
-    Get worker progress container style based on state.
-    
-    Args:
-        idle: Whether worker is idle
-        progress: Progress value (0.0 to 1.0)
-    """
-    if idle:
-        return f"""
-            background: {MATERIAL_COLORS['surface_dim']};
-            border: 1px solid {MATERIAL_COLORS['outline']};
-            border-radius: 8px;
-        """
-    
-    grad_stop = min(1.0, progress)
-    return f"""
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-            stop:0 {MATERIAL_COLORS['worker_active']},
-            stop:{grad_stop} {MATERIAL_COLORS['worker_active']},
-            stop:{grad_stop} {MATERIAL_COLORS['surface_dim']},
-            stop:1 {MATERIAL_COLORS['surface_dim']});
-        border: 1px solid rgba(76, 175, 80, 0.4);
-        border-radius: 8px;
-    """
-
-
 # ============================================================================
 # VISUAL PROGRESS BAR SECTION STYLES
 # ============================================================================
@@ -331,7 +304,6 @@ __all__ = [
     "WORKER_TEST_LABEL_ACTIVE_STYLE",
     "WORKER_TIME_LABEL_IDLE_STYLE",
     "WORKER_TIME_LABEL_ACTIVE_STYLE",
-    "get_worker_progress_container_style",
     # Visual Progress Bar
     "PROGRESS_BAR_LEGEND_PASSED_STYLE",
     "PROGRESS_BAR_LEGEND_FAILED_STYLE",
