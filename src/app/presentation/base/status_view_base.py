@@ -9,7 +9,6 @@ from abc import abstractmethod
 from typing import Type, Dict, Any
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QMessageBox
 from PySide6.QtCore import Signal
-from .protocols import TestCard, TestDetailDialog
 
 
 class StatusViewBase(QWidget):
@@ -112,15 +111,6 @@ class StatusViewBase(QWidget):
         """
         pass
     
-    @abstractmethod
-    def _get_detail_dialog_class(self) -> Type[TestDetailDialog]:
-        """
-        Get the dialog class for showing test details.
-        
-        Returns:
-            Dialog class (protocol-compliant)
-        """
-        pass
     
     @abstractmethod
     def on_test_completed(self, *args, **kwargs):

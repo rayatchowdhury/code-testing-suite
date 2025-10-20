@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QWidget,
     QMessageBox,
     QFileDialog,
+    QPushButton,
 )
 from PySide6.QtCore import QEvent
 from PySide6.QtGui import QCloseEvent
