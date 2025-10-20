@@ -155,7 +155,7 @@ class TerminalDocsWidget(HelpDocument):
         self._add_header(layout)
         self._add_sections(layout)
 
-        # Apply content-specific styling (using PRIMARY color from MATERIAL_COLORS for consistency)
+        # Apply content-specific styling (using ACCENT color from MATERIAL_COLORS for consistency with main window)
         content.setStyleSheet(f"""
             QWidget#terminal_content {{
                 background: qlineargradient(
@@ -163,7 +163,7 @@ class TerminalDocsWidget(HelpDocument):
                     stop:0 #1a1a1c,
                     stop:1 #1e1e20
                 );
-                border: 2px solid {MATERIAL_COLORS['primary']};
+                border: 2px solid {MATERIAL_COLORS['accent']};
                 border-radius: 8px;
             }}
         """)
@@ -181,7 +181,7 @@ class TerminalDocsWidget(HelpDocument):
         prompt = QLabel(UI["prompt_symbol"] + "HELP DOCUMENTATION")
         prompt.setFont(self._create_font("prompt", QFont.Weight.Bold, mono=True))
         prompt.setStyleSheet(f"""
-            color: {MATERIAL_COLORS['primary']};
+            color: {MATERIAL_COLORS['accent']};
             background: transparent;
             letter-spacing: 2px;
         """)
@@ -229,7 +229,7 @@ class TerminalDocsWidget(HelpDocument):
             QFrame#terminal_section {{
                 background: {SURFACE_COLOR};
                 border: 1px solid rgba(255, 255, 255, 0.15);
-                border-left: 3px solid {MATERIAL_COLORS['primary']};
+                border-left: 3px solid {MATERIAL_COLORS['accent']};
                 border-radius: 8px;
                 padding: 16px;
             }}
@@ -248,7 +248,7 @@ class TerminalDocsWidget(HelpDocument):
         # Icon
         icon_label = QLabel(icon if len(icon) <= 2 else UI["icon_fallback"])
         icon_label.setFont(self._create_font("icon", mono=False, emoji=True))
-        icon_label.setStyleSheet(f"color: {MATERIAL_COLORS['primary']}; background: transparent;")
+        icon_label.setStyleSheet(f"color: {MATERIAL_COLORS['accent']}; background: transparent;")
         h_layout.addWidget(icon_label)
         
         # Title
@@ -287,7 +287,7 @@ class TerminalDocsWidget(HelpDocument):
                 # Bullet
                 bullet = QLabel(UI["bullet_symbol"])
                 bullet.setFont(self._create_font("prompt", QFont.Weight.Bold, mono=True))
-                bullet.setStyleSheet(f"color: {MATERIAL_COLORS['primary']}; background: transparent;")
+                bullet.setStyleSheet(f"color: {MATERIAL_COLORS['accent']}; background: transparent;")
                 item_layout.addWidget(bullet)
                 
                 # Text

@@ -42,6 +42,7 @@ class BenchmarkerStatusView(QWidget):
     
     def __init__(self, time_limit_ms: float, memory_limit_mb: int, parent=None):
         super().__init__(parent)
+        self.setObjectName("status_view_container")
         self.parent_window = parent
         self.test_type = TestType.BENCHMARKER
         

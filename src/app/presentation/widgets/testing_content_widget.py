@@ -1,21 +1,25 @@
 # -*- coding: utf-8 -*-
+"""
+TestingContentWidget - Unified content widget for test windows.
+
+This widget provides the shared editor + console + test tabs structure
+used by Benchmarker, Validator, and Comparator windows. It encapsulates
+the common functionality and reduces code duplication.
+"""
+
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QMessageBox,
-    QPushButton,
     QSplitter,
     QVBoxLayout,
     QWidget,
 )
 
-from src.app.core.tools.compiler_runner import CompilerRunner
 from src.app.presentation.styles.components.code_editor_display_area import (
     OUTER_PANEL_STYLE,
     SPLITTER_STYLE,
 )
-from src.app.presentation.styles.style import MATERIAL_COLORS
-from src.app.presentation.widgets.display_area_widgets.ai_panel import AIPanel
 from src.app.presentation.widgets.display_area_widgets.console import ConsoleOutput
 from src.app.presentation.widgets.display_area_widgets.editor import EditorWidget
 from src.app.presentation.widgets.display_area_widgets.test_tab_widget import (
@@ -24,27 +28,68 @@ from src.app.presentation.widgets.display_area_widgets.test_tab_widget import (
 from src.app.shared.constants import WORKSPACE_DIR
 
 
-class ValidatorDisplay(QWidget):
+class TestingContentWidget(QWidget):
+    """
+    Unified content widget for test windows (Benchmarker, Validator, Comparator).
+    
+    Contains:
+    - Editor widget with AI panel support
+    - Console output
+    - Test tabs for file switching
+    - Horizontal splitter layout
+    
+    Signals:
+    - filePathChanged: Emitted when the current file changes
+    """
+
     filePathChanged = Signal()
 
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        # Workspace structure is initialized at application startup
-        self.workspace_dir = WORKSPACE_DIR
+    def __init__(
+        self,
+        parent=None,
+        tab_config=None,
+        default_tab=None,
+        test_type="comparator",
+        compiler_runner_class=None,
+        ai_panel_type="comparison",
+    ):
+        """
+        Initialize TestingContentWidget.
 
+        Args:
+            parent: Parent widget
+            tab_config: Dict mapping tab names to file configs
+            default_tab: Name of the tab to activate by default
+            test_type: Type of test (comparator/validator/benchmarker)
+            compiler_runner_class: Class to use for compilation (optional)
+            ai_panel_type: Type of AI panel (comparison/validator/benchmark)
+        """
+        super().__init__(parent)
+        
+        # Configuration
+        self.workspace_dir = WORKSPACE_DIR
+        self.test_type = test_type
+        self.ai_panel_type = ai_panel_type
+        self.tab_config = tab_config or {}
+        self.default_tab = default_tab
+        self.compiler_runner_class = compiler_runner_class
+
+        # Initialize UI
         self._setup_ui()
         self._connect_signals()
 
-        # Initialize threaded compiler
-        self.compiler_runner = CompilerRunner(self.console)
+        # Initialize compiler runner if provided
+        if compiler_runner_class:
+            self.compiler_runner = compiler_runner_class(self.console)
 
         # Activate default tab
         self.test_tabs.activate_default_tab()
 
-        # Add backward compatibility property for window files
+        # Backward compatibility property for window files
         self.file_buttons = self.test_tabs.file_buttons
 
     def _setup_ui(self):
+        """Setup the main UI layout."""
         main_layout = QHBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
@@ -66,35 +111,22 @@ class ValidatorDisplay(QWidget):
         # Create editor
         self.editor = EditorWidget()
 
-        # Create test tabs widget with validator configuration (multi-language)
-        tab_config = {
-            "Generator": {
-                "cpp": "generator.cpp",
-                "py": "generator.py",
-                "java": "Generator.java",
-            },
-            "Test Code": {"cpp": "test.cpp", "py": "test.py", "java": "TestCode.java"},
-            "Validator Code": {
-                "cpp": "validator.cpp",
-                "py": "validator.py",
-                "java": "ValidatorCode.java",
-            },
-        }
+        # Create test tabs widget with multi-language support
         self.test_tabs = TestTabWidget(
             parent=self,
-            tab_config=tab_config,
-            default_tab="Generator",
+            tab_config=self.tab_config,
+            default_tab=self.default_tab,
             multi_language=True,
             default_language="cpp",
-            test_type="validator",  # Use nested validator directory
+            test_type=self.test_type,
         )
 
         # Set editor as the content widget for tabs
         self.test_tabs.set_content_widget(self.editor)
 
-        # Initialize AI panel with validator type (lazy loading)
+        # Initialize AI panel with appropriate type
         self.ai_panel = self.editor.get_ai_panel()
-        self.ai_panel.set_panel_type("validator")
+        self.ai_panel.set_panel_type(self.ai_panel_type)
 
         # Add test tabs to outer panel
         outer_layout.addWidget(self.test_tabs)
@@ -154,7 +186,7 @@ class ValidatorDisplay(QWidget):
 
     def _handle_language_changed(self, tab_name, language):
         """Handle language switching in tabs."""
-        print(f"Validator: Switched {tab_name} to {language.upper()}")
+        print(f"{self.test_type.capitalize()}: Switched {tab_name} to {language.upper()}")
         # Update AI panel context if needed
         if hasattr(self.ai_panel, "refresh_context"):
             self.ai_panel.refresh_context()
@@ -192,31 +224,18 @@ class ValidatorDisplay(QWidget):
         if not current_file:
             return
 
-        self.console.compile_run_btn.setEnabled(False)
+        # Only compile if we have a compiler runner
+        if hasattr(self, "compiler_runner"):
+            self.console.compile_run_btn.setEnabled(False)
 
-        def on_complete():
-            self.console.compile_run_btn.setEnabled(True)
-            self.compiler_runner.finished.disconnect(on_complete)
+            def on_complete():
+                self.console.compile_run_btn.setEnabled(True)
+                self.compiler_runner.finished.disconnect(on_complete)
 
-        self.compiler_runner.finished.connect(on_complete)
-        self.compiler_runner.compile_and_run_code(current_file)
+            self.compiler_runner.finished.connect(on_complete)
+            self.compiler_runner.compile_and_run_code(current_file)
 
-    def set_content(self, widget):
-        """
-        Replace display area content with the given widget.
-
-        This method supports unified status view integration by allowing
-        the display area to be dynamically replaced with a status view widget.
-
-        Args:
-            widget: QWidget to display
-        """
-        # Clear existing content
-        layout = self.layout()
-        while layout.count():
-            item = layout.takeAt(0)
-            if item.widget():
-                item.widget().setParent(None)
-
-        # Add new widget
-        layout.addWidget(widget)
+    def refresh_ai_panel(self):
+        """Refresh AI panel visibility based on current configuration."""
+        if hasattr(self.ai_panel, "refresh_visibility"):
+            self.ai_panel.refresh_visibility()

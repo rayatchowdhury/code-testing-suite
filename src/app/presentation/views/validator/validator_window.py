@@ -2,7 +2,9 @@
 from PySide6.QtGui import QFont, QShowEvent
 from PySide6.QtWidgets import QMessageBox, QPushButton
 
-from src.app.presentation.views.validator.validator_display_area import ValidatorDisplay
+from src.app.core.tools.compiler_runner import CompilerRunner
+from src.app.presentation.widgets.display_area import DisplayArea
+from src.app.presentation.widgets.testing_content_widget import TestingContentWidget
 from src.app.presentation.widgets.sidebar import Sidebar
 from src.app.presentation.widgets.sidebar_widgets import TestCountSlider
 from src.app.presentation.window_controller.base_window import SidebarWindowBase
@@ -49,8 +51,24 @@ class ValidatorWindow(SidebarWindowBase):
         back_btn, options_btn = self.create_footer_buttons()
         self.sidebar.setup_horizontal_footer_buttons(back_btn, options_btn)
 
-        # Create display area
-        self.display_area = ValidatorDisplay()
+        # Create display area and testing content
+        self.display_area = DisplayArea()
+        
+        # Create testing content with validator configuration
+        tab_config = {
+            "Generator": {"cpp": "generator.cpp", "py": "generator.py", "java": "Generator.java"},
+            "Test Code": {"cpp": "test.cpp", "py": "test.py", "java": "TestCode.java"},
+            "Validator Code": {"cpp": "validator.cpp", "py": "validator.py", "java": "ValidatorCode.java"},
+        }
+        self.testing_content = TestingContentWidget(
+            parent=self,
+            tab_config=tab_config,
+            default_tab="Generator",
+            test_type="validator",
+            compiler_runner_class=CompilerRunner,
+            ai_panel_type="validator",
+        )
+        self.display_area.set_content(self.testing_content)
 
         # Setup splitter with sidebar and display area
         self.setup_splitter(self.sidebar, self.display_area)
@@ -62,7 +80,7 @@ class ValidatorWindow(SidebarWindowBase):
         self._initialize_tool()
 
         # Connect filesManifestChanged signal to reinitialize tool
-        self.display_area.test_tabs.filesManifestChanged.connect(self._on_files_changed)
+        self.testing_content.test_tabs.filesManifestChanged.connect(self._on_files_changed)
 
     def _initialize_tool(self):
         """Initialize or reinitialize the validator tool with current file manifest."""
@@ -80,7 +98,7 @@ class ValidatorWindow(SidebarWindowBase):
         config = self._load_config()
 
         # Get file manifest from test tabs
-        manifest = self.display_area.test_tabs.get_compilation_manifest()
+        manifest = self.testing_content.test_tabs.get_compilation_manifest()
         files = manifest["files"]
 
         # Lazy import to avoid circular dependency
@@ -88,10 +106,10 @@ class ValidatorWindow(SidebarWindowBase):
 
         # Create validator with multi-language support
         self.validator_runner = ValidatorRunner(
-            workspace_dir=self.display_area.workspace_dir, files=files, config=config
+            workspace_dir=self.testing_content.workspace_dir, files=files, config=config
         )
         self.validator_runner.compilationOutput.connect(
-            self.display_area.console.displayOutput
+            self.testing_content.console.displayOutput
         )
 
         # Connect runner signals to handle UI state changes
@@ -123,10 +141,10 @@ class ValidatorWindow(SidebarWindowBase):
     def handle_action_button(self, button_text):
         if button_text == "Compile":
             # Clear console before compilation
-            self.display_area.console.clear()
+            self.testing_content.console.clear()
 
             # Check all files for unsaved changes
-            for btn_name, btn in self.display_area.file_buttons.items():
+            for btn_name, btn in self.testing_content.file_buttons.items():
                 if btn.property("hasUnsavedChanges"):
                     reply = QMessageBox.question(
                         self,
@@ -137,8 +155,8 @@ class ValidatorWindow(SidebarWindowBase):
 
                     if reply == QMessageBox.Save:
                         # Switch to this file (no need to skip save prompt since validator doesn't double-check)
-                        self.display_area._handle_file_button(btn_name)
-                        if not self.display_area.editor.saveFile():
+                        self.testing_content._handle_file_button(btn_name)
+                        if not self.testing_content.editor.saveFile():
                             return
                     elif reply == QMessageBox.Cancel:
                         return
@@ -330,5 +348,5 @@ class ValidatorWindow(SidebarWindowBase):
 
     def refresh_ai_panels(self):
         """Refresh AI panel visibility based on current configuration"""
-        if hasattr(self.display_area, "ai_panel"):
-            self.display_area.ai_panel.refresh_visibility()
+        if hasattr(self.testing_content, "ai_panel"):
+            self.testing_content.ai_panel.refresh_visibility()

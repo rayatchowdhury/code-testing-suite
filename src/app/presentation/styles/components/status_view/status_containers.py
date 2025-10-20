@@ -12,9 +12,10 @@ from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
 # ============================================================================
 
 STATUS_VIEW_CONTAINER_STYLE = f"""
-QWidget {{
+QWidget#status_view_container {{
     background: {MATERIAL_COLORS['background']};
-    border: none;
+    border: 2px solid {MATERIAL_COLORS['accent']};
+    border-radius: 8px;
 }}
 """
 

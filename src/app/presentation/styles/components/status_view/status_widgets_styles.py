@@ -69,7 +69,7 @@ StatusHeaderSection {{
         stop:0.5 rgba(31, 31, 33, 0.98),
         stop:1 rgba(36, 36, 38, 0.95));
     border-bottom: 1px solid {MATERIAL_COLORS['border']};
-    border-radius: 0px;
+    border-left: 3px solid {MATERIAL_COLORS['primary']};
 }}
 """
 
@@ -110,6 +110,7 @@ PerformancePanelSection {{
         stop:0 rgba(31, 31, 33, 0.92),
         stop:1 rgba(36, 36, 38, 0.90));
     border-bottom: 1px solid {MATERIAL_COLORS['border']};
+    border-left: 3px solid {MATERIAL_COLORS['purple']};
 }}
 """
 
@@ -162,7 +163,7 @@ def get_worker_progress_container_style(idle: bool = True, progress: float = 0.0
         return f"""
             background: {MATERIAL_COLORS['surface_dim']};
             border: 1px solid {MATERIAL_COLORS['outline']};
-            border-radius: 6px;
+            border-radius: 8px;
         """
     
     grad_stop = min(1.0, progress)
@@ -173,7 +174,7 @@ def get_worker_progress_container_style(idle: bool = True, progress: float = 0.0
             stop:{grad_stop} {MATERIAL_COLORS['surface_dim']},
             stop:1 {MATERIAL_COLORS['surface_dim']});
         border: 1px solid rgba(76, 175, 80, 0.4);
-        border-radius: 6px;
+        border-radius: 8px;
     """
 
 
@@ -201,6 +202,7 @@ VisualProgressBarSection {{
         stop:0 rgba(31, 31, 33, 0.88),
         stop:1 rgba(36, 36, 38, 0.92));
     border-bottom: 1px solid {MATERIAL_COLORS['border']};
+    border-left: 3px solid {MATERIAL_COLORS['accent']};
 }}
 """
 
@@ -214,9 +216,9 @@ def get_progress_segment_style(state: str = 'default', position: str = 'middle')
     """
     # Determine border radius based on position
     if position == 'first':
-        border_radius = "border-radius: 6px 0 0 6px;"
+        border_radius = "border-radius: 8px 0 0 8px;"
     elif position == 'last':
-        border_radius = "border-radius: 0 6px 6px 0;"
+        border_radius = "border-radius: 0 8px 8px 0;"
     else:
         border_radius = "border-radius: 0;"
     

@@ -156,7 +156,7 @@ class SidebarWindowBase(QWidget):
         Integrate status view into display area.
 
         This method handles the display area manipulation when switching to
-        test execution view.
+        test execution view. Hides the testing content without deleting it.
 
         Args:
             status_view: The status view widget to display
@@ -169,12 +169,13 @@ class SidebarWindowBase(QWidget):
             not hasattr(self, "_original_display_content")
             or self._original_display_content is None
         ):
-            layout = self.display_area.layout()
+            # Get the layout reference (new architecture uses property, old uses method)
+            layout = self.display_area.layout if hasattr(self.display_area, "layout") and not callable(self.display_area.layout) else self.display_area.layout()
             if layout and layout.count() > 0:
                 self._original_display_content = layout.itemAt(0).widget()
 
-        # Remove current widget from layout
-        layout = self.display_area.layout()
+        # Remove current widget from layout without deleting it
+        layout = self.display_area.layout if hasattr(self.display_area, "layout") and not callable(self.display_area.layout) else self.display_area.layout()
         if layout and layout.count() > 0:
             current_widget = layout.itemAt(0).widget()
             if current_widget:
@@ -184,7 +185,7 @@ class SidebarWindowBase(QWidget):
 
         # Add status view to display area
         if status_view:
-            self.display_area.layout().addWidget(status_view)
+            layout.addWidget(status_view)
             status_view.show()
 
     def _restore_display_area(self):
@@ -192,13 +193,19 @@ class SidebarWindowBase(QWidget):
         Restore original display area content.
 
         This method handles the display area manipulation when returning from
-        test execution view.
+        test execution view. Restores the testing content without recreating it.
         """
         if not hasattr(self, "display_area"):
             return
 
+        if not (
+            hasattr(self, "_original_display_content")
+            and self._original_display_content
+        ):
+            return
+
         # Remove status view from layout
-        layout = self.display_area.layout()
+        layout = self.display_area.layout if hasattr(self.display_area, "layout") and not callable(self.display_area.layout) else self.display_area.layout()
         if layout and layout.count() > 0:
             current_widget = layout.itemAt(0).widget()
             if current_widget:
@@ -207,12 +214,8 @@ class SidebarWindowBase(QWidget):
                 current_widget.hide()
 
         # Restore original display content
-        if (
-            hasattr(self, "_original_display_content")
-            and self._original_display_content
-        ):
-            self.display_area.layout().addWidget(self._original_display_content)
-            self._original_display_content.show()
+        layout.addWidget(self._original_display_content)
+        self._original_display_content.show()
 
     def _connect_worker_to_status_view(self, worker, status_view):
         """

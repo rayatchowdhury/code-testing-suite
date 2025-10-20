@@ -2,9 +2,9 @@
 from PySide6.QtGui import QShowEvent
 from PySide6.QtWidgets import QMessageBox, QPushButton
 
-from src.app.presentation.views.benchmarker.benchmarker_display_area import (
-    BenchmarkerDisplay,
-)
+from src.app.core.tools.benchmarker import BenchmarkCompilerRunner
+from src.app.presentation.widgets.display_area import DisplayArea
+from src.app.presentation.widgets.testing_content_widget import TestingContentWidget
 from src.app.presentation.widgets.sidebar import Sidebar
 from src.app.presentation.widgets.sidebar_widgets import (
     LimitsInputWidget,
@@ -60,8 +60,23 @@ class BenchmarkerWindow(SidebarWindowBase):
         back_btn, options_btn = self.create_footer_buttons()
         self.sidebar.setup_horizontal_footer_buttons(back_btn, options_btn)
 
-        # Create display area
-        self.display_area = BenchmarkerDisplay()
+        # Create display area and testing content
+        self.display_area = DisplayArea()
+        
+        # Create testing content with benchmarker configuration
+        tab_config = {
+            "Generator": {"cpp": "generator.cpp", "py": "generator.py", "java": "Generator.java"},
+            "Test Code": {"cpp": "test.cpp", "py": "test.py", "java": "TestCode.java"},
+        }
+        self.testing_content = TestingContentWidget(
+            parent=self,
+            tab_config=tab_config,
+            default_tab="Generator",
+            test_type="benchmarker",
+            compiler_runner_class=BenchmarkCompilerRunner,
+            ai_panel_type="benchmark",
+        )
+        self.display_area.set_content(self.testing_content)
 
         # Setup splitter with sidebar and display area
         self.setup_splitter(self.sidebar, self.display_area)
@@ -73,7 +88,7 @@ class BenchmarkerWindow(SidebarWindowBase):
         self._initialize_tool()
 
         # Connect filesManifestChanged signal to reinitialize tool
-        self.display_area.test_tabs.filesManifestChanged.connect(self._on_files_changed)
+        self.testing_content.test_tabs.filesManifestChanged.connect(self._on_files_changed)
 
     def _initialize_tool(self):
         """Initialize or reinitialize the benchmarker tool with current file manifest."""
@@ -91,7 +106,7 @@ class BenchmarkerWindow(SidebarWindowBase):
         config = self._load_config()
 
         # Get file manifest from test tabs
-        manifest = self.display_area.test_tabs.get_compilation_manifest()
+        manifest = self.testing_content.test_tabs.get_compilation_manifest()
         files = manifest["files"]
 
         # Lazy import to avoid circular dependency
@@ -99,10 +114,10 @@ class BenchmarkerWindow(SidebarWindowBase):
 
         # Create benchmarker with multi-language support
         self.benchmarker = Benchmarker(
-            workspace_dir=self.display_area.workspace_dir, files=files, config=config
+            workspace_dir=self.testing_content.workspace_dir, files=files, config=config
         )
         self.benchmarker.compilationOutput.connect(
-            self.display_area.console.displayOutput
+            self.testing_content.console.displayOutput
         )
 
         # Connect runner signals to handle UI state changes
@@ -128,10 +143,10 @@ class BenchmarkerWindow(SidebarWindowBase):
     def handle_action_button(self, button_text):
         if button_text == "Compile":
             # Clear console before compilation
-            self.display_area.console.clear()
+            self.testing_content.console.clear()
 
             # Check all files for unsaved changes
-            for btn_name, btn in self.display_area.file_buttons.items():
+            for btn_name, btn in self.testing_content.file_buttons.items():
                 if btn.property("hasUnsavedChanges"):
                     reply = QMessageBox.question(
                         self,
@@ -142,10 +157,10 @@ class BenchmarkerWindow(SidebarWindowBase):
 
                     if reply == QMessageBox.Save:
                         # Switch to this file (skip save prompt since we already handled it)
-                        self.display_area._handle_file_button(
+                        self.testing_content._handle_file_button(
                             btn_name, skip_save_prompt=True
                         )
-                        if not self.display_area.editor.saveFile():
+                        if not self.testing_content.editor.saveFile():
                             return
                     elif reply == QMessageBox.Cancel:
                         return
@@ -348,5 +363,5 @@ class BenchmarkerWindow(SidebarWindowBase):
 
     def refresh_ai_panels(self):
         """Refresh AI panel visibility based on current configuration"""
-        if hasattr(self.display_area, "ai_panel"):
-            self.display_area.ai_panel.refresh_visibility()
+        if hasattr(self.testing_content, "ai_panel"):
+            self.testing_content.ai_panel.refresh_visibility()

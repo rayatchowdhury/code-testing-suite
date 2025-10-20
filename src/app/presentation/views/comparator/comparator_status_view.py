@@ -42,6 +42,7 @@ class ComparatorStatusView(QWidget):
     
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setObjectName("status_view_container")
         self.parent_window = parent
         self.test_type = TestType.COMPARATOR
         
