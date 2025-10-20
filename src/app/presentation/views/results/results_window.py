@@ -313,7 +313,8 @@ class ResultsWindow(SidebarWindowBase):
 
         if button_text == "Help Center":
             if self.can_close():
-                self.parent.window_manager.show_window("help_center")
+                from src.app.presentation.services.navigation_service import NavigationService
+                NavigationService.instance().navigate_to("help_center")
         else:
             super().handle_button_click(button_text)
 
@@ -342,29 +343,13 @@ class ResultsWindow(SidebarWindowBase):
             print(f"DEBUG: Language: {language}")
             print(f"DEBUG: Files to load: {list(files.keys())}")
 
-            # Get window manager from parent
-            print("\nDEBUG: Checking parent attributes...")
-            print(f"  - Has parent: {hasattr(self, 'parent')}")
-            if hasattr(self, "parent"):
-                print(f"  - Parent type: {type(self.parent).__name__}")
-                print(
-                    f"  - Has window_manager: {hasattr(self.parent, 'window_manager')}"
-                )
-
-            if not hasattr(self, "parent") or not hasattr(
-                self.parent, "window_manager"
-            ):
-                print("DEBUG: ERROR - Cannot access window manager!")
-                QMessageBox.critical(self, "Error", "Cannot access window manager.")
-                return
-
-            window_manager = self.parent.window_manager
-            print(f"DEBUG: Window manager obtained: {type(window_manager).__name__}")
-
+            # Use NavigationService for navigation (Phase 4A)
+            from src.app.presentation.services.navigation_service import NavigationService
+            
             # Show the target window (creates it if doesn't exist)
-            print(f"\nDEBUG: Calling show_window('{window_name}')...")
-            show_result = window_manager.show_window(window_name)
-            print(f"DEBUG: show_window result: {show_result}")
+            print(f"\nDEBUG: Calling navigate_to('{window_name}')...")
+            show_result = NavigationService.instance().navigate_to(window_name)
+            print(f"DEBUG: navigate_to result: {show_result}")
 
             if not show_result:
                 print(f"DEBUG: ERROR - Failed to show window '{window_name}'")
@@ -373,6 +358,17 @@ class ResultsWindow(SidebarWindowBase):
                 )
                 return
 
+            # Get the window instance from parent's window_manager for accessing windows dict
+            # TODO: Phase 4C - Consider adding get_window method to NavigationService
+            if not hasattr(self, "parent") or not hasattr(
+                self.parent, "window_manager"
+            ):
+                print("DEBUG: ERROR - Cannot access window manager for window lookup!")
+                QMessageBox.critical(self, "Error", "Cannot access window manager.")
+                return
+
+            window_manager = self.parent.window_manager
+            
             # Get the window instance
             print("\nDEBUG: Retrieving window instance from windows dict...")
             print(f"DEBUG: Available windows: {list(window_manager.windows.keys())}")

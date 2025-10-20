@@ -163,13 +163,12 @@ class ContentWindowBase(WindowBase):
         Handle Back button click.
         
         Checks can_close() before navigating back.
-        Will be updated in Phase 4A to use NavigationService.
+        Uses NavigationService for decoupled navigation.
         """
         if self.can_close():
-            # TODO: Phase 4A - Replace with NavigationService
-            if self.parent and hasattr(self.parent, 'window_manager'):
-                if not self.parent.window_manager.go_back():
-                    self.parent.window_manager.show_window("main")
+            from src.app.presentation.services.navigation_service import NavigationService
+            if not NavigationService.instance().go_back():
+                NavigationService.instance().navigate_to("main")
     
     def _handle_options_click(self):
         """

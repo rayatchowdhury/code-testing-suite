@@ -199,7 +199,8 @@ class BenchmarkerWindow(TestWindowBase):
                 
         elif button_text == "Results":
             if self.can_close():
-                self.parent.window_manager.show_window("results")
+                from src.app.presentation.services.navigation_service import NavigationService
+                NavigationService.instance().navigate_to("results")
 
     def _on_run_requested(self):
         """Handle rerun from status view."""

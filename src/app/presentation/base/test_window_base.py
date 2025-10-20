@@ -329,7 +329,8 @@ class TestWindowBase(ContentWindowBase):
 
         if button_text == "Help Center":
             if self.can_close():
-                self.parent.window_manager.show_window("help_center")
+                from src.app.presentation.services.navigation_service import NavigationService
+                NavigationService.instance().navigate_to("help_center")
         else:
             super().handle_button_click(button_text)
     

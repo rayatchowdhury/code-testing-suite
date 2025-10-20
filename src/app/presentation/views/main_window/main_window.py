@@ -195,7 +195,8 @@ class MainWindowContent(SidebarWindowBase):
         )
 
         try:
-            self.parent.window_manager.show_window(window_name)
+            from src.app.presentation.services.navigation_service import NavigationService
+            NavigationService.instance().navigate_to(window_name)
         except Exception as e:
             print(f"Error navigating to {window_name}: {e}")
 
@@ -311,8 +312,13 @@ class MainWindow(QMainWindow):
         from src.app.presentation.window_controller.window_management import (
             WindowManager,
         )
+        from src.app.presentation.services.navigation_service import NavigationService
 
         self.window_manager = WindowManager(self)
+        
+        # Phase 4C: Register WindowManager with NavigationService
+        NavigationService.instance().set_window_manager(self.window_manager)
+        
         self.setCentralWidget(self.window_manager)
         self.window_manager.show_window("main")
 

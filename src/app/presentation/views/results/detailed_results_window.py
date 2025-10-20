@@ -685,13 +685,13 @@ class DetailedResultsWidget(QWidget):
             QMessageBox.information(
                 self,
                 "Files Loaded Successfully",
-                f"Successfully wrote {len(written_files)} files to workspace.\n\n"
+                f"Successfully wrote {len(written_files)} files to workspace.\\n\\n"
                 f"Navigate to the {test_subdir.title()} window to view and test them.",
             )
 
             # Optionally open the target window
-            if hasattr(self.parent, "window_manager"):
-                self.parent.window_manager.show_window(test_subdir)
+            from src.app.presentation.services.navigation_service import NavigationService
+            NavigationService.instance().navigate_to(test_subdir)
 
         except json.JSONDecodeError as e:
             QMessageBox.critical(

@@ -4,7 +4,16 @@ from datetime import datetime
 
 from PySide6.QtCore import QTimer
 from PySide6.QtGui import QCloseEvent, QFont, QShowEvent
-from PySide6.QtWidgets import QFileDialog, QMessageBox, QPushButton
+from PySide6.QtWidgets import (
+    QMainWindow,
+    QVBoxLayout,
+    QWidget,
+    QMessageBox,
+    QFileDialog,
+)
+from PySide6.QtCore import QEvent
+from PySide6.QtGui import QCloseEvent
+from src.app.presentation.services.navigation_service import NavigationService
 
 from src.app.core.tools.compiler_runner import CompilerRunner
 from src.app.presentation.views.code_editor.code_editor_display_area import (
@@ -117,7 +126,7 @@ class CodeEditorWindow(SidebarWindowBase):
         """Handle window close event with improved unsaved changes check"""
         if not self.editor_display.has_editor:
             event.accept()
-            self.parent.window_manager.show_window("main")
+            NavigationService.instance().navigate_to("main")
             return
 
         # Check for any unsaved changes
@@ -131,7 +140,7 @@ class CodeEditorWindow(SidebarWindowBase):
         if not has_unsaved:
             self.cleanup()
             event.accept()
-            self.parent.window_manager.show_window("main")
+            NavigationService.instance().navigate_to("main")
             return
 
         # Handle unsaved changes
@@ -140,17 +149,17 @@ class CodeEditorWindow(SidebarWindowBase):
             self.save_editor_state()
             self.cleanup()
             event.accept()
-            self.parent.window_manager.show_window("main")
+            NavigationService.instance().navigate_to("main")
         elif result == QMessageBox.Discard:
             self.cleanup()
             event.accept()
-            self.parent.window_manager.show_window("main")
+            NavigationService.instance().navigate_to("main")
         else:  # Cancel or save failed
             event.ignore()
 
     def handle_button_click(self, button_text):
         if button_text == "Help Center":
-            self.parent.window_manager.show_window("help_center")
+            NavigationService.instance().navigate_to("help_center")
         elif button_text == "Back":
             self.close()  # This will trigger closeEvent
         elif button_text == "New File":
