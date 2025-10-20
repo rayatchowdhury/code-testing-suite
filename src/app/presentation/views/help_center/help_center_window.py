@@ -46,7 +46,7 @@ class HelpCenterWindow(SidebarWindowBase):
         for button_text in topics:
             btn = self.sidebar.add_button(button_text, main_section)
             btn.clicked.connect(
-                lambda checked, text=button_text: self.load_help_content(text)
+                lambda _, text=button_text: self.load_help_content(text)
             )
 
         back_btn, options_btn = self.create_footer_buttons()

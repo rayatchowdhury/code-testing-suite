@@ -185,7 +185,7 @@ class AIPanel(QWidget):
         for action, btn in self.action_buttons.items():
             if action in signal_map:
                 btn.clicked.connect(
-                    lambda checked, s=signal_map[action]: self._emit_with_current_code(
+                    lambda _, s=signal_map[action]: self._emit_with_current_code(
                         s
                     )
                 )
@@ -240,7 +240,7 @@ class AIPanel(QWidget):
                 signal = getattr(self, f"{action}Requested", None)
 
             if signal:
-                btn.clicked.connect(lambda checked, s=signal, c=code: s.emit(c))
+                btn.clicked.connect(lambda _, s=signal, c=code: s.emit(c))
 
     def refresh_from_config(self):
         """Refresh AI panel visibility based on current configuration"""

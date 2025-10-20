@@ -31,7 +31,7 @@ class ResultsWindow(SidebarWindowBase):
         for button_text in ["Refresh Data", "Export Results", "Clear Old Data"]:
             btn = self.sidebar.add_button(button_text, action_section)
             btn.clicked.connect(
-                lambda checked, text=button_text: self.handle_action_button(text)
+                lambda _, text=button_text: self.handle_action_button(text)
             )
 
         # Phase 3 (Issue #17): Removed redundant "View Options" section

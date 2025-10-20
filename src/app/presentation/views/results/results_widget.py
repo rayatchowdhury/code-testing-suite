@@ -492,7 +492,7 @@ class TestResultsWidget(QWidget):
             detail_btn = QPushButton("View Details")
             detail_btn.setStyleSheet(RESULTS_BUTTON_STYLE)
             detail_btn.clicked.connect(
-                lambda checked, r=result: self._show_detailed_view(r)
+                lambda _, r=result: self._show_detailed_view(r)
             )
             self.results_table.setCellWidget(row, 8, detail_btn)
 
@@ -500,7 +500,7 @@ class TestResultsWidget(QWidget):
             delete_btn = QPushButton("Delete")
             delete_btn.setStyleSheet(RESULTS_BUTTON_STYLE)
             delete_btn.clicked.connect(
-                lambda checked, r_id=result.id: self._delete_selected_result(r_id)
+                lambda _, r_id=result.id: self._delete_selected_result(r_id)
             )
             self.results_table.setCellWidget(row, 9, delete_btn)
 

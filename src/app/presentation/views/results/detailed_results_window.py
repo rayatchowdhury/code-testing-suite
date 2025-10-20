@@ -88,7 +88,7 @@ class DetailedResultsWidget(QWidget):
         self.nav_buttons = []
         for i, text in enumerate(detail_sections):
             btn = self.sidebar.add_button(text, details_section)
-            btn.clicked.connect(lambda checked, idx=i: self._show_page(idx))
+            btn.clicked.connect(lambda _, idx=i: self._show_page(idx))
             self.nav_buttons.append(btn)
 
         # Add "Options" section

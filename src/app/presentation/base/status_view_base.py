@@ -113,7 +113,7 @@ class StatusViewBase(QWidget):
     
     
     @abstractmethod
-    def on_test_completed(self, *args, **kwargs):
+    def on_test_completed(self, **kwargs):
         """
         Handle individual test completion.
         
@@ -200,7 +200,7 @@ class StatusViewBase(QWidget):
         """Handle worker finishing work."""
         self.presenter.handle_worker_idle(worker_id)
     
-    def on_all_tests_completed(self, all_passed: bool):
+    def on_all_tests_completed(self):
         """Handle test execution completion."""
         self.presenter.complete_execution()
         

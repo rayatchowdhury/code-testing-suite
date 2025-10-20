@@ -43,7 +43,7 @@ class ValidatorWindow(TestWindowBase):
         for button_text in ["Compile", "Run"]:
             btn = self.sidebar.add_button(button_text, self.action_section)
             btn.clicked.connect(
-                lambda checked, text=button_text: self.handle_action_button(text)
+                lambda _, text=button_text: self.handle_action_button(text)
             )
             if button_text == "Compile":
                 self.compile_btn = btn

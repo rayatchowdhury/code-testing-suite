@@ -189,7 +189,7 @@ class TestTabWidget(QWidget):
                     QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
                 )  # Allow expansion
                 btn.clicked.connect(
-                    lambda checked, name=tab_name: self._handle_tab_click(name)
+                    lambda _, name=tab_name: self._handle_tab_click(name)
                 )
 
                 # Modern button styling with connected design (no right border-radius for seamless connection)
@@ -237,7 +237,7 @@ class TestTabWidget(QWidget):
                     QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
                 )  # Allow expansion
                 btn.clicked.connect(
-                    lambda checked, name=tab_name: self._handle_tab_click(name)
+                    lambda _, name=tab_name: self._handle_tab_click(name)
                 )
 
                 # Apply consistent Material Design styling for single-language buttons
@@ -291,7 +291,7 @@ class TestTabWidget(QWidget):
             action.setCheckable(True)
             action.setChecked(lang == current_lang)
             action.triggered.connect(
-                lambda checked, language=lang: self._handle_language_change(
+                lambda _, language=lang: self._handle_language_change(
                     tab_name, language
                 )
             )

@@ -147,7 +147,7 @@ class BenchmarkerStatusView(QWidget):
         card.clicked.connect(self.show_test_detail)
         self.cards_section.add_card(card, result.passed)
     
-    def on_all_tests_completed(self, all_passed: bool):
+    def on_all_tests_completed(self):
         """Handle test execution completion"""
         self.presenter.complete_execution()
         
