@@ -119,6 +119,85 @@ class TestWindowBase(ContentWindowBase):
     
     # ===== SHARED IMPLEMENTATION (588 lines extracted) =====
     
+    def _setup_standard_sidebar(self, action_section):
+        """
+        Setup standard sidebar buttons (Compile, Run, Results, Help, Back, Options).
+        
+        This consolidates duplicated sidebar setup code from all test windows.
+        
+        Args:
+            action_section: The action section widget to add buttons to
+        """
+        # Add Compile and Run buttons
+        for button_text in ["Compile", "Run"]:
+            btn = self.sidebar.add_button(button_text, action_section)
+            btn.clicked.connect(
+                lambda _, text=button_text: self.handle_action_button(text)
+            )
+            if button_text == "Compile":
+                self.compile_btn = btn
+            elif button_text == "Run":
+                self.run_btn = btn
+
+        # Add standard footer buttons
+        self.sidebar.add_results_button()
+        self.sidebar.add_footer_button_divider()
+        self.sidebar.add_help_button()
+        self.sidebar.add_footer_divider()
+
+        back_btn, options_btn = self.create_footer_buttons()
+        self.sidebar.setup_horizontal_footer_buttons(back_btn, options_btn)
+    
+    def _check_unsaved_changes(self) -> bool:
+        """
+        Check for unsaved changes and prompt user to save.
+        
+        This consolidates duplicated unsaved changes logic from all test windows.
+        
+        Returns:
+            bool: True if we should proceed (saved or discarded), False if cancelled
+        """
+        for btn_name, btn in self.testing_content.file_buttons.items():
+            if btn.property("hasUnsavedChanges"):
+                from PySide6.QtWidgets import QMessageBox
+                
+                reply = QMessageBox.question(
+                    self,
+                    "Unsaved Changes",
+                    f"Do you want to save changes to {btn_name}?",
+                    QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel,
+                )
+
+                if reply == QMessageBox.Save:
+                    self.testing_content._handle_file_button(
+                        btn_name, skip_save_prompt=True
+                    )
+                    if not self.testing_content.editor.saveFile():
+                        return False
+                elif reply == QMessageBox.Cancel:
+                    return False
+        
+        return True
+    
+    def _finalize_window_setup(self):
+        """
+        Finalize window setup after creating display area and testing content.
+        
+        This consolidates duplicated window setup code from all test windows.
+        Connects signals and initializes the tool.
+        """
+        # Setup splitter with sidebar and display area
+        self.setup_splitter(self.sidebar, self.display_area)
+
+        # Connect signals
+        self.sidebar.button_clicked.connect(self.handle_button_click)
+
+        # Initialize tool with multi-language support
+        self._initialize_tool()
+
+        # Connect filesManifestChanged signal to reinitialize tool
+        self.testing_content.test_tabs.filesManifestChanged.connect(self._on_files_changed)
+    
     def _initialize_tool(self):
         """Initialize or reinitialize the tool with current file manifest."""
         # Disconnect old runner's signals if it exists

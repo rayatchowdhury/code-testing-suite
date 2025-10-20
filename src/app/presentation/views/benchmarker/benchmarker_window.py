@@ -73,26 +73,9 @@ class BenchmarkerWindow(TestWindowBase):
         self.test_count_slider.valueChanged.connect(self.handle_test_count_changed)
         test_count_section.layout().addWidget(self.test_count_slider)
 
-        # Add action buttons
+        # Add action buttons using base class helper
         self.action_section = self.sidebar.add_section("Actions")
-
-        for button_text in ["Compile", "Run"]:
-            btn = self.sidebar.add_button(button_text, self.action_section)
-            btn.clicked.connect(
-                lambda _, text=button_text: self.handle_action_button(text)
-            )
-            if button_text == "Compile":
-                self.compile_btn = btn
-            elif button_text == "Run":
-                self.run_btn = btn
-
-        self.sidebar.add_results_button()
-        self.sidebar.add_footer_button_divider()
-        self.sidebar.add_help_button()
-        self.sidebar.add_footer_divider()
-
-        back_btn, options_btn = self.create_footer_buttons()
-        self.sidebar.setup_horizontal_footer_buttons(back_btn, options_btn)
+        self._setup_standard_sidebar(self.action_section)
 
         # Create display area and testing content
         self.display_area = DisplayArea()
@@ -111,17 +94,8 @@ class BenchmarkerWindow(TestWindowBase):
         )
         self.display_area.set_content(self.testing_content)
 
-        # Setup splitter
-        self.setup_splitter(self.sidebar, self.display_area)
-
-        # Connect signals
-        self.sidebar.button_clicked.connect(self.handle_button_click)
-
-        # Initialize tool (calls _create_runner)
-        self._initialize_tool()
-
-        # Connect file change signal
-        self.testing_content.test_tabs.filesManifestChanged.connect(self._on_files_changed)
+        # Finalize window setup using base class helper
+        self._finalize_window_setup()
 
     # ===== TEMPLATE METHOD IMPLEMENTATIONS =====
 
@@ -166,24 +140,9 @@ class BenchmarkerWindow(TestWindowBase):
             # Clear console
             self.testing_content.console.clear()
 
-            # Check for unsaved changes
-            for btn_name, btn in self.testing_content.file_buttons.items():
-                if btn.property("hasUnsavedChanges"):
-                    reply = QMessageBox.question(
-                        self,
-                        "Unsaved Changes",
-                        f"Do you want to save changes to {btn_name}?",
-                        QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel,
-                    )
-
-                    if reply == QMessageBox.Save:
-                        self.testing_content._handle_file_button(
-                            btn_name, skip_save_prompt=True
-                        )
-                        if not self.testing_content.editor.saveFile():
-                            return
-                    elif reply == QMessageBox.Cancel:
-                        return
+            # Check for unsaved changes using base class helper
+            if not self._check_unsaved_changes():
+                return
 
             self.benchmarker.compile_all()
             

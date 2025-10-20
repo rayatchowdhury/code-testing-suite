@@ -33,30 +33,9 @@ class ValidatorWindow(TestWindowBase):
         self.test_count_slider.valueChanged.connect(self.handle_test_count_changed)
         options_section.layout().addWidget(self.test_count_slider)
 
-        # Split actions into two sections
+        # Add action buttons using base class helper
         self.action_section = self.sidebar.add_section("Actions")
-        self.compile_btn = None
-        self.run_btn = None
-        self.stop_btn = None
-        self.status_view_active = False  # Track if status view is active
-
-        for button_text in ["Compile", "Run"]:
-            btn = self.sidebar.add_button(button_text, self.action_section)
-            btn.clicked.connect(
-                lambda _, text=button_text: self.handle_action_button(text)
-            )
-            if button_text == "Compile":
-                self.compile_btn = btn
-            elif button_text == "Run":
-                self.run_btn = btn
-
-        self.sidebar.add_results_button()
-        self.sidebar.add_footer_button_divider()
-        self.sidebar.add_help_button()
-        self.sidebar.add_footer_divider()
-
-        back_btn, options_btn = self.create_footer_buttons()
-        self.sidebar.setup_horizontal_footer_buttons(back_btn, options_btn)
+        self._setup_standard_sidebar(self.action_section)
 
         # Create display area and testing content
         self.display_area = DisplayArea()
@@ -77,17 +56,8 @@ class ValidatorWindow(TestWindowBase):
         )
         self.display_area.set_content(self.testing_content)
 
-        # Setup splitter with sidebar and display area
-        self.setup_splitter(self.sidebar, self.display_area)
-
-        # Connect signals
-        self.sidebar.button_clicked.connect(self.handle_button_click)
-
-        # Initialize tool with multi-language support
-        self._initialize_tool()
-
-        # Connect filesManifestChanged signal to reinitialize tool
-        self.testing_content.test_tabs.filesManifestChanged.connect(self._on_files_changed)
+        # Finalize window setup using base class helper
+        self._finalize_window_setup()
     
     # ===== Template Methods (Required by TestWindowBase) =====
     
@@ -149,23 +119,9 @@ class ValidatorWindow(TestWindowBase):
             # Clear console before compilation
             self.testing_content.console.clear()
 
-            # Check all files for unsaved changes
-            for btn_name, btn in self.testing_content.file_buttons.items():
-                if btn.property("hasUnsavedChanges"):
-                    reply = QMessageBox.question(
-                        self,
-                        "Unsaved Changes",
-                        f"Do you want to save changes to {btn_name}?",
-                        QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel,
-                    )
-
-                    if reply == QMessageBox.Save:
-                        # Switch to this file
-                        self.testing_content._handle_file_button(btn_name)
-                        if not self.testing_content.editor.saveFile():
-                            return
-                    elif reply == QMessageBox.Cancel:
-                        return
+            # Check for unsaved changes using base class helper
+            if not self._check_unsaved_changes():
+                return
 
             self.validator_runner.compile_all()
             
