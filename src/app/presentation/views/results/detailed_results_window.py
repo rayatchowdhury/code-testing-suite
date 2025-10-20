@@ -42,6 +42,7 @@ from src.app.presentation.styles.fonts.emoji import set_emoji_font
 from src.app.presentation.styles.helpers.common_styles import bold_label
 from src.app.presentation.styles.style import MATERIAL_COLORS
 from src.app.presentation.widgets.sidebar import Sidebar
+from src.app.presentation.services import export_test_cases_to_zip, create_export_summary
 
 
 class DetailedResultsWidget(QWidget):
@@ -529,66 +530,11 @@ class DetailedResultsWidget(QWidget):
                         content_str = str(content) if content else ""
                         zipf.writestr(f"code/{clean_name}", content_str.encode("utf-8"))
 
-                # 2. Extract and save test cases
-                if self.test_result.test_details:
-                    test_data = json.loads(self.test_result.test_details)
+                # 2. Extract and save test cases using export service
+                export_test_cases_to_zip(zipf, self.test_result.test_details)
 
-                    # Separate passed and failed tests
-                    for i, test_case in enumerate(test_data, 1):
-                        test_num = test_case.get("test", i)
-                        status = test_case.get("status", "unknown")
-
-                        # Create test case file content
-                        test_content = f"Test #{test_num}\n"
-                        test_content += f"Status: {status}\n"
-                        test_content += f"{'='*50}\n\n"
-
-                        if "input" in test_case:
-                            test_content += f"INPUT:\n{test_case['input']}\n\n"
-
-                        if "output" in test_case:
-                            test_content += (
-                                f"EXPECTED OUTPUT:\n{test_case['output']}\n\n"
-                            )
-
-                        if "actual_output" in test_case:
-                            test_content += (
-                                f"ACTUAL OUTPUT:\n{test_case['actual_output']}\n\n"
-                            )
-
-                        if "error" in test_case:
-                            test_content += f"ERROR:\n{test_case['error']}\n\n"
-
-                        if "execution_time" in test_case:
-                            test_content += f"Execution Time: {test_case['execution_time']} seconds\n"
-
-                        # Save to appropriate folder
-                        folder = "passed" if status.lower() == "pass" else "failed"
-                        zipf.writestr(
-                            f"{folder}/test_{test_num}.txt",
-                            test_content.encode("utf-8"),
-                        )
-
-                # 3. Create summary file
-                summary = "Test Results Export\n"
-                summary += f"{'='*60}\n\n"
-                summary += f"Project: {self.test_result.project_name}\n"
-                summary += f"Test Type: {self.test_result.test_type}\n"
-                summary += f"File: {os.path.basename(self.test_result.file_path)}\n"
-                summary += f"Timestamp: {self.test_result.timestamp}\n\n"
-                summary += "Test Statistics:\n"
-                summary += f"  Total Tests: {self.test_result.test_count}\n"
-                summary += f"  Passed: {self.test_result.passed_tests}\n"
-                summary += f"  Failed: {self.test_result.failed_tests}\n"
-                summary += f"  Success Rate: {(self.test_result.passed_tests/self.test_result.test_count*100) if self.test_result.test_count > 0 else 0:.1f}%\n"
-                summary += (
-                    f"  Total Time: {self.test_result.total_time:.3f} seconds\n\n"
-                )
-
-                if self.test_result.mismatch_analysis:
-                    summary += "\nMismatch Analysis:\n"
-                    summary += f"{self.test_result.mismatch_analysis}\n"
-
+                # 3. Create summary file using export service
+                summary = create_export_summary(self.test_result)
                 zipf.writestr("summary.txt", summary.encode("utf-8"))
 
             QMessageBox.information(

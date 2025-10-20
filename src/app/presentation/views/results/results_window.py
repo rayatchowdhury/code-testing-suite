@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
 from src.app.presentation.views.results.results_widget import TestResultsWidget
 from src.app.presentation.widgets.sidebar import Sidebar
 from src.app.presentation.window_controller.base_window import SidebarWindowBase
+from src.app.presentation.services import export_test_cases_to_zip, create_export_summary
 
 
 class ResultsWindow(SidebarWindowBase):
@@ -149,64 +150,11 @@ class ResultsWindow(SidebarWindowBase):
 
                     zipf.writestr("code/FILES_INFO.txt", metadata.encode("utf-8"))
 
-                # 2. Extract and save test cases
-                if result.test_details:
-                    test_data = json.loads(result.test_details)
+                # 2. Extract and save test cases using export service
+                export_test_cases_to_zip(zipf, result.test_details)
 
-                    # Separate passed and failed tests
-                    for i, test_case in enumerate(test_data, 1):
-                        test_num = test_case.get("test", i)
-                        status = test_case.get("status", "unknown")
-
-                        # Create test case file content
-                        test_content = f"Test #{test_num}\n"
-                        test_content += f"Status: {status}\n"
-                        test_content += f"{'='*50}\n\n"
-
-                        if "input" in test_case:
-                            test_content += f"INPUT:\n{test_case['input']}\n\n"
-
-                        if "output" in test_case:
-                            test_content += (
-                                f"EXPECTED OUTPUT:\n{test_case['output']}\n\n"
-                            )
-
-                        if "actual_output" in test_case:
-                            test_content += (
-                                f"ACTUAL OUTPUT:\n{test_case['actual_output']}\n\n"
-                            )
-
-                        if "error" in test_case:
-                            test_content += f"ERROR:\n{test_case['error']}\n\n"
-
-                        if "execution_time" in test_case:
-                            test_content += f"Execution Time: {test_case['execution_time']} seconds\n"
-
-                        # Save to appropriate folder
-                        folder = "passed" if status.lower() == "pass" else "failed"
-                        zipf.writestr(
-                            f"{folder}/test_{test_num}.txt",
-                            test_content.encode("utf-8"),
-                        )
-
-                # 3. Create summary file
-                summary = "Test Results Export\n"
-                summary += f"{'='*60}\n\n"
-                summary += f"Project: {result.project_name}\n"
-                summary += f"Test Type: {result.test_type}\n"
-                summary += f"File: {os.path.basename(result.file_path)}\n"
-                summary += f"Timestamp: {result.timestamp}\n\n"
-                summary += "Test Statistics:\n"
-                summary += f"  Total Tests: {result.test_count}\n"
-                summary += f"  Passed: {result.passed_tests}\n"
-                summary += f"  Failed: {result.failed_tests}\n"
-                summary += f"  Success Rate: {(result.passed_tests/result.test_count*100) if result.test_count > 0 else 0:.1f}%\n"
-                summary += f"  Total Time: {result.total_time:.3f} seconds\n\n"
-
-                if result.mismatch_analysis:
-                    summary += "\nMismatch Analysis:\n"
-                    summary += f"{result.mismatch_analysis}\n"
-
+                # 3. Create summary file using export service
+                summary = create_export_summary(result)
                 zipf.writestr("summary.txt", summary.encode("utf-8"))
 
             QMessageBox.information(
