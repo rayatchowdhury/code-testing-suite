@@ -41,19 +41,24 @@ class WindowBase(QWidget):
             parent: Parent widget (typically MainWindow)
         """
         super().__init__(parent)
-        # TODO: Implementation in Phase 1B
+        self.parent = parent
+        self._is_initialized = False
+        self.has_unsaved_changes = False
     
     def showEvent(self, event):
         """
         Handle window show event.
         
-        Emits windowShown signal and performs initialization.
+        Emits windowShown signal and performs first-time initialization.
         
         Args:
             event: QShowEvent
         """
-        # TODO: Implementation in Phase 1B
-        pass
+        super().showEvent(event)
+        if not self._is_initialized:
+            self._on_first_show()
+            self._is_initialized = True
+        self.windowShown.emit()
     
     def closeEvent(self, event):
         """
@@ -64,8 +69,39 @@ class WindowBase(QWidget):
         Args:
             event: QCloseEvent
         """
-        # TODO: Implementation in Phase 1B
+        self.windowClosed.emit()
+        self.cleanup()
+        super().closeEvent(event)
+    
+    def _on_first_show(self):
+        """
+        Called once when window is first shown.
+        
+        Override in subclasses to perform one-time initialization
+        that requires the window to be visible (e.g., geometry calculations).
+        """
         pass
+    
+    def cleanup(self):
+        """
+        Clean up resources when window is closed.
+        
+        Override in subclasses to release resources, disconnect signals,
+        stop background tasks, etc.
+        """
+        pass
+    
+    def can_close(self):
+        """
+        Check if window can be closed safely.
+        
+        Returns:
+            bool: True if window can close, False to prevent closing
+            
+        Override in subclasses to check for unsaved changes or
+        confirm dangerous operations.
+        """
+        return not self.has_unsaved_changes
     
     def handle_error(self, error: Exception, title: str = "Error"):
         """
@@ -74,6 +110,8 @@ class WindowBase(QWidget):
         Args:
             error: The exception that occurred
             title: Error dialog title
+            
+        Note: Will be implemented in Phase 1C after ErrorHandlerService
         """
         # TODO: Implementation in Phase 1C (after ErrorHandlerService)
-        pass
+        print(f"{title}: {error}")  # Temporary fallback
