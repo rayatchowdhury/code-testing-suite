@@ -1,13 +1,13 @@
 """
 Base class for status views (Benchmarker, Validator, Comparator).
 
-StatusViewBase consolidates 450 lines of duplicated code from status views,
+StatusViewBase consolidates ~150 lines of duplicated code from status views,
 using configuration-driven design for customization.
 """
 
 from abc import abstractmethod
-from typing import Type
-from PySide6.QtWidgets import QWidget
+from typing import Type, Dict, Any
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QMessageBox
 from PySide6.QtCore import Signal
 from .protocols import TestCard, TestDetailDialog
 
@@ -16,89 +16,99 @@ class StatusViewBase(QWidget):
     """
     Base class for all test status views.
     
-    This class eliminates 450 lines of duplication by providing shared
-    implementations of UI setup, test lifecycle events, and database operations.
+    Extracts ~150 lines of duplicated code into shared implementation.
+    Uses StatusViewPresenter for state management and widget coordination.
     
     Responsibilities:
-    - UI layout (top controls, scroll area, test card grid)
-    - Test lifecycle events (started, running, completed)
-    - Worker coordination (busy/idle tracking)
+    - UI setup delegation to presenter
+    - Test lifecycle event handling
+    - Worker coordination
     - Database save operations
-    - Status presenter integration
-    
-    Configuration:
-    - test_type: "benchmark", "validation", "comparison"
-    - card_class: BenchmarkerTestCard, ValidatorTestCard, etc.
-    - dialog_class: BenchmarkerDetailDialog, etc.
-    - runner_attribute: "benchmarker", "validator_runner", etc.
+    - Runner access abstraction
     
     Template Methods (must override):
-    - _create_test_card(): Create test-specific card widget
-    - _get_detail_dialog_class(): Return dialog class
-    - _get_runner_from_window(): Access runner from parent
+    - _get_runner_attribute_name(): Return runner attribute name
+    - _get_card_class(): Return test card class
+    - _get_detail_dialog_class(): Return detail dialog class
+    - on_test_completed(): Handle test completion (signature varies)
+    - show_test_detail(): Show detail dialog (data varies)
     
-    Subclasses:
-    - BenchmarkerStatusView: Benchmark result display
-    - ValidatorStatusView: Validation result display  
-    - ComparatorStatusView: Comparison result display
+    Shared Methods (150 lines extracted):
+    - _setup_ui()
+    - on_tests_started()
+    - on_test_running()
+    - on_worker_busy()
+    - on_worker_idle()
+    - on_all_tests_completed()
+    - _get_worker_count()
+    - save_to_database()
+    - set_runner()
+    - is_tests_running()
     
     Usage:
         class BenchmarkerStatusView(StatusViewBase):
-            def __init__(self, parent=None):
-                config = StatusViewConfig(
-                    test_type="benchmark",
-                    card_class=BenchmarkerTestCard,
-                    dialog_class=BenchmarkerDetailDialog,
-                    runner_attribute="benchmarker"
-                )
-                super().__init__(config, parent)
-    
-    Before Refactoring:
-        - BenchmarkerStatusView: 220 lines
-        - ValidatorStatusView: 215 lines
-        - ComparatorStatusView: 215 lines
-        - Total: 650 lines
-    
-    After Refactoring:
-        - StatusViewBase: 280 lines (shared)
-        - BenchmarkerStatusView: 30 lines (config only)
-        - ValidatorStatusView: 30 lines (config only)
-        - ComparatorStatusView: 30 lines (config only)
-        - Total: 370 lines (43% reduction)
+            def __init__(self, time_limit_ms, memory_limit_mb, parent=None):
+                super().__init__(parent, test_type="benchmarker")
+                self.time_limit_ms = time_limit_ms
+                self.memory_limit_mb = memory_limit_mb
+            
+            def _get_runner_attribute_name(self):
+                return "benchmarker"
+            
+            def _get_card_class(self):
+                return BenchmarkerTestCard
     """
     
-    # Signals
+    # Signals for window coordination
     stopRequested = Signal()
     backRequested = Signal()
     runRequested = Signal()
     
-    def __init__(self, config, parent=None):
+    def __init__(self, parent=None, test_type: str = "comparator"):
         """
         Initialize StatusViewBase.
         
         Args:
-            config: StatusViewConfig with test-specific settings
             parent: Parent widget (test window)
+            test_type: Type of test ("benchmarker", "validator", "comparator")
         """
         super().__init__(parent)
-        self._config = config
-        self._presenter = None
-        # TODO: Implementation in Phase 2B
+        self.setObjectName("status_view_container")
+        self.parent_window = parent
+        self.test_type = test_type
+        
+        # Store results for detail views
+        self.test_results: Dict[int, Any] = {}
+        
+        # Runner reference (set via set_runner or from parent)
+        self.runner = None
+        
+        # Setup UI using presenter pattern
+        self._setup_ui()
+        
+        # Apply styling
+        from src.app.presentation.styles.components.status_view import STATUS_VIEW_CONTAINER_STYLE
+        self.setStyleSheet(STATUS_VIEW_CONTAINER_STYLE)
+    
+    # ===== TEMPLATE METHODS (must override) =====
     
     @abstractmethod
-    def _create_test_card(self, test_name: str) -> TestCard:
+    def _get_runner_attribute_name(self) -> str:
         """
-        Create a test card widget for displaying test results.
-        
-        Args:
-            test_name: Name of the test
+        Get the attribute name for the runner on parent window.
         
         Returns:
-            Test card widget (protocol-compliant)
+            "benchmarker", "validator_runner", or "comparator"
+        """
+        pass
+    
+    @abstractmethod
+    def _get_card_class(self) -> Type:
+        """
+        Get the test card class.
         
-        Example:
-            def _create_test_card(self, test_name: str):
-                return BenchmarkerTestCard(test_name)
+        Returns:
+            BenchmarkerTestCard, ValidatorTestCard, or ComparatorTestCard
         """
         pass
     
@@ -109,103 +119,159 @@ class StatusViewBase(QWidget):
         
         Returns:
             Dialog class (protocol-compliant)
-        
-        Example:
-            def _get_detail_dialog_class(self):
-                return BenchmarkerDetailDialog
         """
         pass
     
     @abstractmethod
-    def _get_runner_from_window(self):
-        """
-        Get the test runner from parent window.
-        
-        Returns:
-            Test runner instance
-        
-        Example:
-            def _get_runner_from_window(self):
-                if self.parent():
-                    return self.parent().benchmarker
-                return None
-        """
-        pass
-    
-    def _setup_ui(self):
-        """
-        Set up the status view UI layout.
-        
-        Creates:
-        - Top control panel (Run, Stop, Back buttons)
-        - Scroll area for test cards
-        - Grid layout for card organization
-        - Bottom info panel (worker count, progress)
-        """
-        # TODO: Implementation in Phase 2B
-        pass
-    
-    def on_tests_started(self, total: int):
-        """
-        Handle test execution started event.
-        
-        Args:
-            total: Total number of tests to run
-        """
-        # TODO: Implementation in Phase 2B
-        pass
-    
-    def on_test_completed(self, test_name: str, **kwargs):
+    def on_test_completed(self, *args, **kwargs):
         """
         Handle individual test completion.
         
-        Args:
-            test_name: Name of completed test
-            **kwargs: Test-specific result data
+        Signature varies by test type:
+        - Benchmarker: (test_name, test_number, passed, execution_time, memory_used, ...)
+        - Validator: (test_number, passed, input_data, test_output, ...)
+        - Comparator: (test_number, passed, input_text, correct_output, ...)
+        
+        Must:
+        1. Create TestResult
+        2. Store in self.test_results
+        3. Call self.presenter.handle_test_result(result)
+        4. Create card and add to cards_section
         """
-        # TODO: Implementation in Phase 2B
         pass
     
-    def on_all_tests_completed(self):
-        """Handle all tests completed event."""
-        # TODO: Implementation in Phase 2B
-        pass
-    
-    def on_worker_busy(self, worker_id: int):
+    @abstractmethod
+    def show_test_detail(self, test_number: int):
         """
-        Handle worker busy event.
+        Show detail dialog for test.
         
         Args:
-            worker_id: ID of busy worker
+            test_number: Test number to show details for
         """
-        # TODO: Implementation in Phase 2B
         pass
+    
+    # ===== SHARED IMPLEMENTATION (150 lines extracted) =====
+    
+    def _setup_ui(self):
+        """Create UI with presenter pattern."""
+        from src.app.presentation.widgets.status_view import (
+            StatusViewPresenter,
+            StatusHeaderSection,
+            PerformancePanelSection,
+            VisualProgressBarSection,
+            TestResultsCardsSection
+        )
+        
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        
+        # Create widgets
+        self.header = StatusHeaderSection()
+        self.performance = PerformancePanelSection()
+        self.progress_bar = VisualProgressBarSection()
+        self.cards_section = TestResultsCardsSection()
+        
+        # Create presenter
+        self.presenter = StatusViewPresenter(
+            header=self.header,
+            performance=self.performance,
+            progress_bar=self.progress_bar,
+            cards_section=self.cards_section,
+            test_type=self.test_type
+        )
+        
+        # Add to layout
+        layout.addWidget(self.header)
+        layout.addWidget(self.performance)
+        layout.addWidget(self.progress_bar)
+        layout.addWidget(self.cards_section, stretch=1)
+    
+    def on_tests_started(self, total: int):
+        """Handle test execution start."""
+        # Get worker count
+        max_workers = self._get_worker_count()
+        
+        # Initialize presenter
+        self.presenter.start_test_execution(total, max_workers)
+        
+        # Clear stored results
+        self.test_results.clear()
+    
+    def on_test_running(self, test_number: int, total: int):
+        """Handle test being processed (misleading name - actually called after completion)."""
+        self.presenter.mark_test_active(test_number)
+    
+    def on_worker_busy(self, worker_id: int, test_number: int):
+        """Handle worker starting work on a test."""
+        self.presenter.handle_worker_busy(worker_id, test_number)
     
     def on_worker_idle(self, worker_id: int):
-        """
-        Handle worker idle event.
-        
-        Args:
-            worker_id: ID of idle worker
-        """
-        # TODO: Implementation in Phase 2B
-        pass
+        """Handle worker finishing work."""
+        self.presenter.handle_worker_idle(worker_id)
     
-    def save_to_database(self):
-        """
-        Save test results to database.
+    def on_all_tests_completed(self, all_passed: bool):
+        """Handle test execution completion."""
+        self.presenter.complete_execution()
         
-        Calls runner's save_test_results() and updates UI on success.
-        """
-        # TODO: Implementation in Phase 2B
-        pass
+        # Notify parent to enable save button
+        if self.parent_window and hasattr(self.parent_window, "enable_save_button"):
+            self.parent_window.enable_save_button()
     
     def _get_worker_count(self) -> int:
-        """
-        Get number of workers from runner.
+        """Get worker count from parent."""
+        import multiprocessing
         
-        Returns:
-            Worker count
-        """
-        # TODO: Implementation in Phase 2B
-        pass
+        runner_attr = self._get_runner_attribute_name()
+        worker = None
+        
+        if self.parent_window and hasattr(self.parent_window, runner_attr):
+            runner = getattr(self.parent_window, runner_attr)
+            if hasattr(runner, 'get_current_worker'):
+                worker = runner.get_current_worker()
+        
+        if worker and hasattr(worker, 'max_workers'):
+            return worker.max_workers
+        
+        return min(8, max(1, multiprocessing.cpu_count() - 1))
+    
+    def save_to_database(self):
+        """Save results to database."""
+        runner = None
+        
+        # Try to get runner from self.runner first
+        if hasattr(self, "runner") and self.runner:
+            runner = self.runner
+        # Otherwise get from parent window
+        elif self.parent_window:
+            runner_attr = self._get_runner_attribute_name()
+            if hasattr(self.parent_window, runner_attr):
+                runner = getattr(self.parent_window, runner_attr)
+        
+        if not runner:
+            QMessageBox.critical(self, "Error", "Runner not found")
+            return -1
+        
+        try:
+            result_id = runner.save_test_results_to_database()
+            if result_id > 0:
+                QMessageBox.information(
+                    self, "Success",
+                    f"Results saved!\nDatabase ID: {result_id}"
+                )
+                if self.parent_window and hasattr(self.parent_window, "mark_results_saved"):
+                    self.parent_window.mark_results_saved()
+            else:
+                QMessageBox.critical(self, "Error", "Failed to save")
+            return result_id
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Error saving: {e}")
+            return -1
+    
+    def set_runner(self, runner):
+        """Set runner for saving."""
+        self.runner = runner
+    
+    def is_tests_running(self) -> bool:
+        """Check if tests are running."""
+        return self.presenter.is_running()
