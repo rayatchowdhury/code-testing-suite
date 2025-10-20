@@ -110,8 +110,16 @@ class WindowBase(QWidget):
         Args:
             error: The exception that occurred
             title: Error dialog title
-            
-        Note: Will be implemented in Phase 1C after ErrorHandlerService
         """
-        # TODO: Implementation in Phase 1C (after ErrorHandlerService)
-        print(f"{title}: {error}")  # Temporary fallback
+        try:
+            from ..services.error_handler_service import ErrorHandlerService, ErrorSeverity
+            ErrorHandlerService.instance().handle_error(
+                error,
+                title=title,
+                severity=ErrorSeverity.ERROR,
+                parent=self,
+                log=True
+            )
+        except ImportError:
+            # Fallback if service not available
+            print(f"{title}: {error}")

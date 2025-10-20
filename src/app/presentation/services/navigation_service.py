@@ -58,7 +58,7 @@ class NavigationService(QObject):
             raise RuntimeError("Use NavigationService.instance()")
         super().__init__()
         self._window_manager = None
-        # TODO: Implementation in Phase 1C
+        NavigationService._instance = self
     
     def set_window_manager(self, manager):
         """
@@ -69,8 +69,7 @@ class NavigationService(QObject):
         Args:
             manager: WindowManager instance
         """
-        # TODO: Implementation in Phase 1C
-        pass
+        self._window_manager = manager
     
     def navigate_to(self, window_name: str, **kwargs):
         """
@@ -79,14 +78,26 @@ class NavigationService(QObject):
         Args:
             window_name: Name of window to show
             **kwargs: Window initialization arguments
+            
+        Returns:
+            bool: True if navigation successful
         """
-        # TODO: Implementation in Phase 1C
-        pass
+        if self._window_manager:
+            return self._window_manager.show_window(window_name, **kwargs)
+        else:
+            self.windowChangeRequested.emit(window_name, kwargs)
+            return False
     
     def go_back(self):
-        """Navigate to previous window in history."""
-        # TODO: Implementation in Phase 1C
-        pass
+        """
+        Navigate to previous window in history.
+        
+        Returns:
+            bool: True if navigation successful
+        """
+        if self._window_manager:
+            return self._window_manager.go_back()
+        return False
     
     def current_window(self) -> Optional[str]:
         """
@@ -95,5 +106,6 @@ class NavigationService(QObject):
         Returns:
             Window name or None
         """
-        # TODO: Implementation in Phase 1C
-        pass
+        if self._window_manager:
+            return self._window_manager.current_window_name()
+        return None

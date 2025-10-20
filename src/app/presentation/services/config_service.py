@@ -52,7 +52,13 @@ class ConfigService(QObject):
         if ConfigService._instance is not None:
             raise RuntimeError("Use ConfigService.instance()")
         super().__init__()
-        # TODO: Implementation in Phase 1C
+        
+        # Lazy import to avoid circular dependencies
+        from src.app.core.config import ConfigManager, ConfigView
+        self._config = ConfigManager()
+        self._config_view = ConfigView()
+        
+        ConfigService._instance = self
     
     def get(self, key: str, default: Any = None) -> Any:
         """
@@ -65,8 +71,7 @@ class ConfigService(QObject):
         Returns:
             Configuration value
         """
-        # TODO: Implementation in Phase 1C
-        pass
+        return self._config.get(key, default)
     
     def set(self, key: str, value: Any):
         """
@@ -76,5 +81,17 @@ class ConfigService(QObject):
             key: Configuration key
             value: New value
         """
-        # TODO: Implementation in Phase 1C
-        pass
+        self._config.set(key, value)
+        self.configChanged.emit(key, value)
+    
+    def show_config_dialog(self, parent=None):
+        """
+        Show configuration dialog.
+        
+        Args:
+            parent: Parent widget for the dialog
+        """
+        if hasattr(self._config_view, 'exec'):
+            self._config_view.exec()
+        else:
+            self._config_view.show()

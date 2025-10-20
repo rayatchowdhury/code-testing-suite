@@ -7,7 +7,7 @@ consistent error handling, logging, and user feedback.
 
 from enum import Enum
 from typing import Optional
-from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QMessageBox, QWidget
 from PySide6.QtCore import QObject, Signal
 import logging
 
@@ -74,7 +74,7 @@ class ErrorHandlerService(QObject):
         if ErrorHandlerService._instance is not None:
             raise RuntimeError("Use ErrorHandlerService.instance()")
         super().__init__()
-        # TODO: Implementation in Phase 1C
+        ErrorHandlerService._instance = self
     
     def handle_error(
         self,
@@ -94,5 +94,27 @@ class ErrorHandlerService(QObject):
             parent: Parent widget for dialog
             log: Whether to log the error
         """
-        # TODO: Implementation in Phase 1C
-        pass
+        message = str(error)
+        
+        # Log the error
+        if log:
+            if severity == ErrorSeverity.CRITICAL:
+                logging.critical(f"{title}: {message}", exc_info=error)
+            elif severity == ErrorSeverity.ERROR:
+                logging.error(f"{title}: {message}", exc_info=error)
+            elif severity == ErrorSeverity.WARNING:
+                logging.warning(f"{title}: {message}")
+            else:
+                logging.info(f"{title}: {message}")
+        
+        # Emit signal for event tracking
+        self.errorOccurred.emit(title, message, severity)
+        
+        # Show dialog to user
+        if parent:
+            if severity in (ErrorSeverity.CRITICAL, ErrorSeverity.ERROR):
+                QMessageBox.critical(parent, title, message)
+            elif severity == ErrorSeverity.WARNING:
+                QMessageBox.warning(parent, title, message)
+            else:
+                QMessageBox.information(parent, title, message)
