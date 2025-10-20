@@ -1,48 +1,110 @@
 """
-Benchmarker-specific status view.
+Benchmarker Status View
 
-Extends BaseStatusView to show benchmarker test execution with test cards
-displaying performance metrics like execution time and memory usage against limits.
+Thin adapter that:
+1. Creates presenter with widgets
+2. Translates worker signals to TestResult
+3. Handles domain-specific detail views
 """
 
-from src.app.presentation.widgets.status_view_widgets import BenchmarkerTestCard
+from PySide6.QtCore import Signal
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QMessageBox
+
+from src.app.presentation.widgets.status_view import (
+    TestResult,
+    TestType,
+    StatusViewPresenter,
+    StatusHeaderSection,
+    PerformancePanelSection,
+    VisualProgressBarSection,
+    TestResultsCardsSection,
+    BenchmarkerTestCard
+)
 from src.app.presentation.widgets.test_detail_view import BenchmarkerDetailDialog
-from src.app.presentation.widgets.unified_status_view import BaseStatusView
+from src.app.presentation.styles.components.status_view import STATUS_VIEW_CONTAINER_STYLE
 
 
-class BenchmarkerStatusView(BaseStatusView):
+class BenchmarkerStatusView(QWidget):
     """
-    Status view for benchmarker tests.
-
-    Shows execution progress with cards for each test, displaying:
-    - Test number and pass/fail status
-    - Execution time vs time limit
-    - Memory usage vs memory limit
-    - Time limit exceeded indicator
-    - Memory limit exceeded indicator
-
-    Clicking a card shows detailed performance metrics in a dialog.
+    Benchmarker-specific status view.
+    
+    Responsibilities:
+    - Translate benchmarker worker signals to TestResult
+    - Create benchmarker-specific cards with performance metrics
+    - Show benchmarker detail dialogs with input/output
+    - Coordinate with presenter for UI updates
     """
-
+    
+    # Signals for window coordination
+    stopRequested = Signal()
+    backRequested = Signal()
+    runRequested = Signal()
+    
     def __init__(self, time_limit_ms: float, memory_limit_mb: int, parent=None):
-        """
-        Initialize benchmarker status view.
-
-        Args:
-            time_limit_ms: Time limit in milliseconds
-            memory_limit_mb: Memory limit in MB
-            parent: Parent widget
-        """
-        super().__init__("benchmarker", parent)
-
+        super().__init__(parent)
+        self.parent_window = parent
+        self.test_type = TestType.BENCHMARKER
+        
+        # Store limits for detail views
         self.time_limit_ms = time_limit_ms
         self.memory_limit_mb = memory_limit_mb
-
-        # Store test data for detail views
-        self.test_data = (
-            {}
-        )  # {test_number: {test_name, time, memory, time_passed, memory_passed, input, output}}
-
+        
+        # Store results for detail views
+        self.test_results = {}  # {test_number: TestResult}
+        
+        self._setup_ui()
+        self.setStyleSheet(STATUS_VIEW_CONTAINER_STYLE)
+    
+    def _setup_ui(self):
+        """Create UI with presenter pattern"""
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        
+        # Create widgets
+        self.header = StatusHeaderSection()
+        self.performance = PerformancePanelSection()
+        self.progress_bar = VisualProgressBarSection()
+        self.cards_section = TestResultsCardsSection()
+        
+        # Create presenter
+        self.presenter = StatusViewPresenter(
+            header=self.header,
+            performance=self.performance,
+            progress_bar=self.progress_bar,
+            cards_section=self.cards_section,
+            test_type="benchmarker"
+        )
+        
+        # Add to layout
+        layout.addWidget(self.header)
+        layout.addWidget(self.performance)
+        layout.addWidget(self.progress_bar)
+        layout.addWidget(self.cards_section, stretch=1)
+    
+    def on_tests_started(self, total: int):
+        """Handle test execution start"""
+        # Get worker count
+        max_workers = self._get_worker_count()
+        
+        # Initialize presenter
+        self.presenter.start_test_execution(total, max_workers)
+        
+        # Clear stored results
+        self.test_results.clear()
+    
+    def on_test_running(self, test_number: int, total: int):
+        """Handle test being processed (misleading name - actually called after completion)"""
+        self.presenter.mark_test_active(test_number)
+    
+    def on_worker_busy(self, worker_id: int, test_number: int):
+        """Handle worker starting work on a test"""
+        self.presenter.handle_worker_busy(worker_id, test_number)
+    
+    def on_worker_idle(self, worker_id: int):
+        """Handle worker finishing work"""
+        self.presenter.handle_worker_idle(worker_id)
+    
     def on_test_completed(
         self,
         test_name: str,
@@ -53,85 +115,110 @@ class BenchmarkerStatusView(BaseStatusView):
         memory_passed: bool,
         input_data: str = "",
         output_data: str = "",
-        test_size: int = 0,
+        test_size: int = 0
     ):
         """
-        Handle benchmarker test completion.
-
-        Args:
-            test_name: Test case name
-            test_number: Test case number (1-indexed)
-            passed: Whether test passed (both time and memory within limits)
-            execution_time: Execution time in seconds
-            memory_used: Memory usage in MB
-            memory_passed: Whether memory limit was met
-            input_data: Input data for the test
-            output_data: Output data from the test
-            test_size: Size of test input (number of lines)
+        Handle test completion from worker.
+        
+        Translates benchmarker worker signal (9 params) to TestResult.
         """
-        # Update counters and progress (base class)
-        # Convert time to milliseconds for display
-        time_ms = execution_time * 1000
-        super().on_test_completed(
-            test_number,
-            passed,
-            time=execution_time,
-            memory=memory_used,
+        # Create TestResult
+        result = TestResult.from_benchmarker(
             test_name=test_name,
-            time_ms=time_ms,
-            memory_passed=memory_passed,
-        )
-
-        # Store test data for detail view
-        self.test_data[test_number] = {
-            "test_name": test_name,
-            "passed": passed,
-            "execution_time": execution_time,
-            "time_ms": time_ms,
-            "memory_used": memory_used,
-            "time_passed": passed,  # In benchmarker, passed means time limit met
-            "memory_passed": memory_passed,
-            "time_limit_ms": self.time_limit_ms,
-            "memory_limit_mb": self.memory_limit_mb,
-            "input_data": input_data,
-            "output_data": output_data,
-            "test_size": test_size,
-        }
-
-        # Create benchmarker-specific card
-        card = BenchmarkerTestCard(
             test_number=test_number,
             passed=passed,
-            time=execution_time,
-            memory=memory_used,
-            test_size=100,  # Default test size for now (could be passed as parameter)
+            execution_time=execution_time,
+            memory_used=memory_used,
+            memory_passed=memory_passed,
+            input_data=input_data,
+            output_data=output_data,
+            test_size=test_size
         )
-
-        # Add card to section (will trigger layout switch on first failure)
-        self.add_test_card(card)
-
+        
+        # Store for detail view
+        self.test_results[test_number] = result
+        
+        # Update UI through presenter
+        self.presenter.handle_test_result(result)
+        
+        # Create and add card
+        card = BenchmarkerTestCard(result)
+        card.clicked.connect(self.show_test_detail)
+        self.cards_section.add_card(card, result.passed)
+    
+    def on_all_tests_completed(self, all_passed: bool):
+        """Handle test execution completion"""
+        self.presenter.complete_execution()
+        
+        # Notify parent to enable save button
+        if self.parent_window and hasattr(self.parent_window, "enable_save_button"):
+            self.parent_window.enable_save_button()
+    
     def show_test_detail(self, test_number: int):
-        """
-        Show detail view for a benchmarker test.
-
-        Args:
-            test_number: Test case number to show details for
-        """
-        if test_number not in self.test_data:
+        """Show detail dialog with input/output sections"""
+        if test_number not in self.test_results:
             return
-
-        data = self.test_data[test_number]
-
-        # Create and show detail dialog with input/output sections
+        
+        result = self.test_results[test_number]
+        data = result.data
+        
         dialog = BenchmarkerDetailDialog(
             test_number=test_number,
-            passed=data["passed"],
-            time=data.get("execution_time", 0),
-            memory=data.get("memory_used", 0),
-            test_size=data.get("test_size", 0),
-            input_data=data.get("input_data", ""),
-            output_data=data.get("output_data", ""),
-            parent=self,
+            passed=result.passed,
+            time=result.time,
+            memory=result.memory,
+            test_size=data.get('test_size', 0),
+            input_data=data.get('input_data', ''),
+            output_data=data.get('output_data', ''),
+            parent=self
         )
-
         dialog.exec()
+    
+    def _get_worker_count(self) -> int:
+        """Get worker count from parent"""
+        worker = None
+        if self.parent_window and hasattr(self.parent_window, 'benchmarker'):
+            if hasattr(self.parent_window.benchmarker, 'get_current_worker'):
+                worker = self.parent_window.benchmarker.get_current_worker()
+        
+        if worker and hasattr(worker, 'max_workers'):
+            return worker.max_workers
+        
+        import multiprocessing
+        return min(8, max(1, multiprocessing.cpu_count() - 1))
+    
+    def save_to_database(self):
+        """Save results to database"""
+        runner = None
+        if hasattr(self, "runner"):
+            runner = self.runner
+        elif self.parent_window and hasattr(self.parent_window, "benchmarker"):
+            runner = self.parent_window.benchmarker
+        
+        if not runner:
+            QMessageBox.critical(self, "Error", "Runner not found")
+            return -1
+        
+        try:
+            result_id = runner.save_test_results_to_database()
+            if result_id > 0:
+                QMessageBox.information(
+                    self, "Success",
+                    f"Results saved!\nDatabase ID: {result_id}"
+                )
+                if self.parent_window and hasattr(self.parent_window, "mark_results_saved"):
+                    self.parent_window.mark_results_saved()
+            else:
+                QMessageBox.critical(self, "Error", "Failed to save")
+            return result_id
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Error saving: {e}")
+            return -1
+    
+    def set_runner(self, runner):
+        """Set runner for saving"""
+        self.runner = runner
+    
+    def is_tests_running(self) -> bool:
+        """Check if tests are running"""
+        return self.presenter.is_running()

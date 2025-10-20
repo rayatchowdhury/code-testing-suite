@@ -47,6 +47,10 @@ class BaseTestWorker(QObject, metaclass=QObjectABCMeta):
     testStarted = Signal(int, int)  # completed_count, total_count
     allTestsCompleted = Signal(bool)  # all_passed
     
+    # NEW: Real-time worker activity tracking
+    workerBusy = Signal(int, int)  # worker_id (0-based), test_number - emitted when worker starts a test
+    workerIdle = Signal(int)  # worker_id (0-based) - emitted when worker finishes
+    
     def __init__(
         self,
         workspace_dir: str,
@@ -125,6 +129,28 @@ class BaseTestWorker(QObject, metaclass=QObjectABCMeta):
         """
         return min(8, max(1, multiprocessing.cpu_count() - 1))
     
+    def _tracked_test_wrapper(self, test_number: int, worker_id: int) -> Dict[str, Any]:
+        """
+        Wrapper around _run_single_test that emits worker tracking signals.
+        
+        Args:
+            test_number: Test number to run
+            worker_id: Worker ID (0-based thread index)
+            
+        Returns:
+            Test result dictionary
+        """
+        # Emit that this worker is now busy with this test
+        self.workerBusy.emit(worker_id, test_number)
+        
+        try:
+            # Run the actual test
+            result = self._run_single_test(test_number)
+            return result
+        finally:
+            # Emit that this worker is now idle
+            self.workerIdle.emit(worker_id)
+    
     @Slot()
     def run_tests(self) -> None:
         """
@@ -132,14 +158,36 @@ class BaseTestWorker(QObject, metaclass=QObjectABCMeta):
         
         Template method pattern: calls abstract _run_single_test() for each test.
         Handles parallel execution, cancellation, result collection, and signal emissions.
+        Now with real worker tracking!
         """
         all_passed = True
         completed_tests = 0
         
+        # Track which worker (thread) is running which test
+        import threading
+        worker_id_map = {}  # {thread_id: worker_id}
+        next_worker_id = 0
+        worker_id_lock = threading.Lock()
+        
+        def get_worker_id() -> int:
+            """Get worker ID for current thread"""
+            nonlocal next_worker_id
+            thread_id = threading.get_ident()
+            with worker_id_lock:
+                if thread_id not in worker_id_map:
+                    worker_id_map[thread_id] = next_worker_id
+                    next_worker_id += 1
+                return worker_id_map[thread_id]
+        
+        def wrapped_test(test_num: int) -> Dict[str, Any]:
+            """Wrapper that tracks worker ID"""
+            worker_id = get_worker_id()
+            return self._tracked_test_wrapper(test_num, worker_id)
+        
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-            # Submit all tests
+            # Submit all tests with worker tracking
             future_to_test = {
-                executor.submit(self._run_single_test, i): i
+                executor.submit(wrapped_test, i): i
                 for i in range(1, self.test_count + 1)
             }
             

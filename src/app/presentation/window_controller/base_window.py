@@ -244,6 +244,17 @@ class SidebarWindowBase(QWidget):
                 status_view, "on_all_tests_completed"
             ):
                 worker.allTestsCompleted.connect(status_view.on_all_tests_completed)
+
+            # Connect worker tracking signals for real-time worker status
+            if hasattr(worker, "workerBusy") and hasattr(
+                status_view, "on_worker_busy"
+            ):
+                worker.workerBusy.connect(status_view.on_worker_busy)
+
+            if hasattr(worker, "workerIdle") and hasattr(
+                status_view, "on_worker_idle"
+            ):
+                worker.workerIdle.connect(status_view.on_worker_idle)
         except RuntimeError:
             # Worker was deleted before we could connect - this is OK, just skip
             pass

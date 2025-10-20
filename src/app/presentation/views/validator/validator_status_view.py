@@ -1,45 +1,106 @@
 """
-Validator-specific status view.
+Validator Status View
 
-Extends BaseStatusView to show validator test execution with test cards
-displaying input, output, validation messages, and error details.
+Thin adapter that:
+1. Creates presenter with widgets
+2. Translates worker signals to TestResult
+3. Handles domain-specific detail views
 """
 
-from src.app.presentation.widgets.status_view_widgets import ValidatorTestCard
+from PySide6.QtCore import Signal
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QMessageBox
+
+from src.app.presentation.widgets.status_view import (
+    TestResult,
+    TestType,
+    StatusViewPresenter,
+    StatusHeaderSection,
+    PerformancePanelSection,
+    VisualProgressBarSection,
+    TestResultsCardsSection,
+    ValidatorTestCard
+)
 from src.app.presentation.widgets.test_detail_view import ValidatorDetailDialog
-from src.app.presentation.widgets.unified_status_view import BaseStatusView
+from src.app.presentation.styles.components.status_view import STATUS_VIEW_CONTAINER_STYLE
 
 
-class ValidatorStatusView(BaseStatusView):
+class ValidatorStatusView(QWidget):
     """
-    Status view for validator tests.
-
-    Shows execution progress with cards for each test, displaying:
-    - Test number and pass/fail status
-    - Time and memory metrics
-    - Input data
-    - Test output
-    - Validation message from validator
-    - Error details (if any)
-    - Validator exit code
-
-    Clicking a card shows detailed validation results in a dialog.
+    Validator-specific status view.
+    
+    Responsibilities:
+    - Translate validator worker signals to TestResult
+    - Create validator-specific cards
+    - Show validator detail dialogs with 3 sections
+    - Coordinate with presenter for UI updates
     """
-
+    
+    # Signals for window coordination
+    stopRequested = Signal()
+    backRequested = Signal()
+    runRequested = Signal()
+    
     def __init__(self, parent=None):
-        """
-        Initialize validator status view.
-
-        Args:
-            parent: Parent widget
-        """
-        super().__init__("validator", parent)
-
-        # Store test data for detail views
-        self.test_data = (
-            {}
-        )  # {test_number: {input, output, validation_message, error_details, exit_code, time, memory}}
-
+        super().__init__(parent)
+        self.parent_window = parent
+        self.test_type = TestType.VALIDATOR
+        
+        # Store results for detail views
+        self.test_results = {}  # {test_number: TestResult}
+        
+        self._setup_ui()
+        self.setStyleSheet(STATUS_VIEW_CONTAINER_STYLE)
+    
+    def _setup_ui(self):
+        """Create UI with presenter pattern"""
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        
+        # Create widgets
+        self.header = StatusHeaderSection()
+        self.performance = PerformancePanelSection()
+        self.progress_bar = VisualProgressBarSection()
+        self.cards_section = TestResultsCardsSection()
+        
+        # Create presenter
+        self.presenter = StatusViewPresenter(
+            header=self.header,
+            performance=self.performance,
+            progress_bar=self.progress_bar,
+            cards_section=self.cards_section,
+            test_type="validator"
+        )
+        
+        # Add to layout
+        layout.addWidget(self.header)
+        layout.addWidget(self.performance)
+        layout.addWidget(self.progress_bar)
+        layout.addWidget(self.cards_section, stretch=1)
+    
+    def on_tests_started(self, total: int):
+        """Handle test execution start"""
+        # Get worker count
+        max_workers = self._get_worker_count()
+        
+        # Initialize presenter
+        self.presenter.start_test_execution(total, max_workers)
+        
+        # Clear stored results
+        self.test_results.clear()
+    
+    def on_test_running(self, test_number: int, total: int):
+        """Handle test being processed (misleading name - actually called after completion)"""
+        self.presenter.mark_test_active(test_number)
+    
+    def on_worker_busy(self, worker_id: int, test_number: int):
+        """Handle worker starting work on a test"""
+        self.presenter.handle_worker_busy(worker_id, test_number)
+    
+    def on_worker_idle(self, worker_id: int):
+        """Handle worker finishing work"""
+        self.presenter.handle_worker_idle(worker_id)
+    
     def on_test_completed(
         self,
         test_number: int,
@@ -50,84 +111,112 @@ class ValidatorStatusView(BaseStatusView):
         error_details: str,
         validator_exit_code: int,
         time: float = 0.0,
-        memory: float = 0.0,
+        memory: float = 0.0
     ):
         """
-        Handle validator test completion.
-
-        Args:
-            test_number: Test case number (1-indexed)
-            passed: Whether test passed validation
-            input_data: Test input
-            test_output: Program output
-            validation_message: Message from validator
-            error_details: Error details (if any)
-            validator_exit_code: Exit code from validator
-            time: Execution time in seconds
-            memory: Memory usage in MB
+        Handle test completion from worker.
+        
+        Translates validator worker signal (9 params) to TestResult.
         """
-        # Update counters and progress (base class)
-        super().on_test_completed(
-            test_number,
-            passed,
-            time=time,
-            memory=memory,
+        # Create TestResult
+        result = TestResult.from_validator(
+            test_number=test_number,
+            passed=passed,
             input_data=input_data,
             test_output=test_output,
             validation_message=validation_message,
             error_details=error_details,
             validator_exit_code=validator_exit_code,
-        )
-
-        # Store test data for detail view
-        self.test_data[test_number] = {
-            "passed": passed,
-            "input_data": input_data,
-            "test_output": test_output,
-            "validation_message": validation_message,
-            "error_details": error_details,
-            "validator_exit_code": validator_exit_code,
-            "time": time,
-            "memory": memory,
-        }
-
-        # Create validator-specific card
-        card = ValidatorTestCard(
-            test_number=test_number,
-            passed=passed,
             time=time,
-            memory=memory,
-            expected_output=validation_message,  # What the validator expected/reported
-            actual_output=test_output,  # What the test program output
+            memory=memory
         )
-
-        # Add card to section (will trigger layout switch on first failure)
-        self.add_test_card(card)
-
+        
+        # Store for detail view
+        self.test_results[test_number] = result
+        
+        # Update UI through presenter
+        self.presenter.handle_test_result(result)
+        
+        # Create and add card
+        card = ValidatorTestCard(result)
+        card.clicked.connect(self.show_test_detail)
+        self.cards_section.add_card(card, result.passed)
+    
+    def on_all_tests_completed(self, all_passed: bool):
+        """Handle test execution completion"""
+        self.presenter.complete_execution()
+        
+        # Notify parent to enable save button
+        if self.parent_window and hasattr(self.parent_window, "enable_save_button"):
+            self.parent_window.enable_save_button()
+    
     def show_test_detail(self, test_number: int):
-        """
-        Show detail view for a validator test.
-
-        Args:
-            test_number: Test case number to show details for
-        """
-        if test_number not in self.test_data:
+        """Show detail dialog with 3 sections: Input, Output, Validator Log"""
+        if test_number not in self.test_results:
             return
-
-        data = self.test_data[test_number]
-
-        # Create and show detail dialog with 3 sections: Input, Output, Validator Log
+        
+        result = self.test_results[test_number]
+        data = result.data
+        
         dialog = ValidatorDetailDialog(
             test_number=test_number,
-            passed=data["passed"],
-            time=data["time"],
-            memory=data["memory"],
-            input_data=data.get("input_data", "No input data"),
-            test_output=data.get("test_output", "No output"),
-            validation_message=data.get("validation_message", "Unknown"),
-            error_details=data.get("error_details", ""),
-            validator_exit_code=data.get("validator_exit_code", -1),
-            parent=self,
+            passed=result.passed,
+            time=result.time,
+            memory=result.memory,
+            input_data=data.get('input_data', 'No input data'),
+            test_output=data.get('test_output', 'No output'),
+            validation_message=data.get('validation_message', 'Unknown'),
+            error_details=data.get('error_details', ''),
+            validator_exit_code=data.get('validator_exit_code', -1),
+            parent=self
         )
-
         dialog.exec()
+    
+    def _get_worker_count(self) -> int:
+        """Get worker count from parent"""
+        worker = None
+        if self.parent_window and hasattr(self.parent_window, 'validator'):
+            if hasattr(self.parent_window.validator, 'get_current_worker'):
+                worker = self.parent_window.validator.get_current_worker()
+        
+        if worker and hasattr(worker, 'max_workers'):
+            return worker.max_workers
+        
+        import multiprocessing
+        return min(8, max(1, multiprocessing.cpu_count() - 1))
+    
+    def save_to_database(self):
+        """Save results to database"""
+        runner = None
+        if hasattr(self, "runner"):
+            runner = self.runner
+        elif self.parent_window and hasattr(self.parent_window, "validator"):
+            runner = self.parent_window.validator
+        
+        if not runner:
+            QMessageBox.critical(self, "Error", "Runner not found")
+            return -1
+        
+        try:
+            result_id = runner.save_test_results_to_database()
+            if result_id > 0:
+                QMessageBox.information(
+                    self, "Success",
+                    f"Results saved!\nDatabase ID: {result_id}"
+                )
+                if self.parent_window and hasattr(self.parent_window, "mark_results_saved"):
+                    self.parent_window.mark_results_saved()
+            else:
+                QMessageBox.critical(self, "Error", "Failed to save")
+            return result_id
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Error saving: {e}")
+            return -1
+    
+    def set_runner(self, runner):
+        """Set runner for saving"""
+        self.runner = runner
+    
+    def is_tests_running(self) -> bool:
+        """Check if tests are running"""
+        return self.presenter.is_running()
