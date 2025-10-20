@@ -1,8 +1,32 @@
 # -*- coding: utf-8 -*-
-from PySide6.QtGui import QShowEvent
-from PySide6.QtWidgets import QMessageBox, QPushButton
+"""
+Benchmarker window - migrated to TestWindowBase.
+
+Migrated from SidebarWindowBase (271 lines) to TestWindowBase.
+Extracted shared test execution logic to base class while preserving
+benchmarker-specific configuration (limits, compilation, etc.).
+
+Reduced by extracting to TestWindowBase:
+- _switch_to_test_mode()
+- _switch_to_completed_mode()  
+- _restore_normal_mode()
+- _handle_rerun_tests()
+- _on_testing_started() (partial)
+- _on_testing_completed()
+- showEvent()
+- _load_config()
+- _on_files_changed()
+- enable_save_button()
+- mark_results_saved()
+- refresh_ai_panels()
+- handle_button_click() (partial)
+- _get_runner()
+"""
+
+from PySide6.QtWidgets import QMessageBox
 
 from src.app.core.tools.benchmarker import BenchmarkCompilerRunner
+from src.app.presentation.base.test_window_base import TestWindowBase
 from src.app.presentation.widgets.display_area import DisplayArea
 from src.app.presentation.widgets.testing_content_widget import TestingContentWidget
 from src.app.presentation.widgets.sidebar import Sidebar
@@ -10,37 +34,47 @@ from src.app.presentation.widgets.sidebar_widgets import (
     LimitsInputWidget,
     TestCountSlider,
 )
-from src.app.presentation.window_controller.base_window import SidebarWindowBase
-
-# Lazy import to avoid circular dependency
-# from src.app.core.tools.benchmarker import Benchmarker
 
 
-class BenchmarkerWindow(SidebarWindowBase):
+class BenchmarkerWindow(TestWindowBase):
+    """
+    Benchmarker window - uses TestWindowBase for shared test execution logic.
+    
+    TestWindowBase provides:
+    - Test lifecycle management
+    - UI mode switching
+    - Tool initialization
+    - Status view integration
+    - Button/save handling
+    
+    Benchmarker-specific:
+    - Time/memory limit widgets
+    - Compile/Run actions with limits
+    - Benchmarker runner creation
+    """
+    
     def __init__(self, parent=None):
-        super().__init__(parent, title=None)
+        # Initialize base class
+        super().__init__(parent)
 
+        # Create sidebar
         self.sidebar = Sidebar("Benchmarker")
 
-        # Add resource limits input section with parallel time and memory inputs
+        # Add resource limits input section
         limits_section = self.sidebar.add_section("Resource Limits")
         self.limits_widget = LimitsInputWidget()
         self.limits_widget.timeLimitChanged.connect(self.handle_time_limit_changed)
         self.limits_widget.memoryLimitChanged.connect(self.handle_memory_limit_changed)
         limits_section.layout().addWidget(self.limits_widget)
 
-        # Add test count slider section below resource limits
+        # Add test count slider
         test_count_section = self.sidebar.add_section("Number of Tests")
         self.test_count_slider = TestCountSlider(mode="benchmarker")
         self.test_count_slider.valueChanged.connect(self.handle_test_count_changed)
         test_count_section.layout().addWidget(self.test_count_slider)
 
-        # Split actions into two sections
+        # Add action buttons
         self.action_section = self.sidebar.add_section("Actions")
-        self.compile_btn = None
-        self.run_btn = None
-        self.stop_btn = None
-        self.status_view_active = False  # Track if status view is active
 
         for button_text in ["Compile", "Run"]:
             btn = self.sidebar.add_button(button_text, self.action_section)
@@ -63,7 +97,6 @@ class BenchmarkerWindow(SidebarWindowBase):
         # Create display area and testing content
         self.display_area = DisplayArea()
         
-        # Create testing content with benchmarker configuration
         tab_config = {
             "Generator": {"cpp": "generator.cpp", "py": "generator.py", "java": "Generator.java"},
             "Test Code": {"cpp": "test.cpp", "py": "test.py", "java": "TestCode.java"},
@@ -78,74 +111,62 @@ class BenchmarkerWindow(SidebarWindowBase):
         )
         self.display_area.set_content(self.testing_content)
 
-        # Setup splitter with sidebar and display area
+        # Setup splitter
         self.setup_splitter(self.sidebar, self.display_area)
 
         # Connect signals
         self.sidebar.button_clicked.connect(self.handle_button_click)
 
-        # Initialize tool with multi-language support
+        # Initialize tool (calls _create_runner)
         self._initialize_tool()
 
-        # Connect filesManifestChanged signal to reinitialize tool
+        # Connect file change signal
         self.testing_content.test_tabs.filesManifestChanged.connect(self._on_files_changed)
 
-    def _initialize_tool(self):
-        """Initialize or reinitialize the benchmarker tool with current file manifest."""
-        # Disconnect old benchmarker's signals if it exists
-        if hasattr(self, "benchmarker") and self.benchmarker:
-            try:
-                self.benchmarker.compilationOutput.disconnect()
-                self.benchmarker.testingStarted.disconnect()
-                self.benchmarker.testingCompleted.disconnect()
-            except (RuntimeError, TypeError):
-                # Signals may already be disconnected or object deleted
-                pass
+    # ===== TEMPLATE METHOD IMPLEMENTATIONS =====
 
-        # Load configuration
-        config = self._load_config()
-
-        # Get file manifest from test tabs
-        manifest = self.testing_content.test_tabs.get_compilation_manifest()
-        files = manifest["files"]
-
-        # Lazy import to avoid circular dependency
+    def _create_runner(self):
+        """Create Benchmarker instance."""
         from src.app.core.tools.benchmarker import Benchmarker
 
-        # Create benchmarker with multi-language support
-        self.benchmarker = Benchmarker(
-            workspace_dir=self.testing_content.workspace_dir, files=files, config=config
+        manifest = self.testing_content.test_tabs.get_compilation_manifest()
+        config = self._load_config()
+
+        return Benchmarker(
+            workspace_dir=self.testing_content.workspace_dir,
+            files=manifest["files"],
+            config=config
         )
-        self.benchmarker.compilationOutput.connect(
-            self.testing_content.console.displayOutput
+
+    def _create_status_view(self):
+        """Create BenchmarkerStatusView with limits."""
+        from src.app.presentation.views.benchmarker.benchmarker_status_view import (
+            BenchmarkerStatusView,
         )
 
-        # Connect runner signals to handle UI state changes
-        self.benchmarker.testingStarted.connect(self._on_testing_started)
-        self.benchmarker.testingCompleted.connect(self._on_testing_completed)
+        return BenchmarkerStatusView(
+            time_limit_ms=self.limits_widget.get_time_limit(),
+            memory_limit_mb=self.limits_widget.get_memory_limit(),
+            parent=self,
+        )
 
-    def _load_config(self):
-        """Load configuration for multi-language compilation."""
-        try:
-            from src.app.core.config import ConfigManager
+    def _get_runner_attribute_name(self) -> str:
+        """Return runner attribute name."""
+        return "benchmarker"
 
-            config_manager = ConfigManager()
-            return config_manager.load_config()
-        except Exception as e:
-            # Fallback to empty config if loading fails
-            return {}
+    def _get_run_method_name(self) -> str:
+        """Return run method name."""
+        return "run_benchmark_test"
 
-    def _on_files_changed(self):
-        """Handle file manifest changes (language switches)."""
-        # Reinitialize tool with new file configuration
-        self._initialize_tool()
+    # ===== BENCHMARKER-SPECIFIC METHODS =====
 
     def handle_action_button(self, button_text):
+        """Handle Compile/Run/Stop/Results buttons."""
         if button_text == "Compile":
-            # Clear console before compilation
+            # Clear console
             self.testing_content.console.clear()
 
-            # Check all files for unsaved changes
+            # Check for unsaved changes
             for btn_name, btn in self.testing_content.file_buttons.items():
                 if btn.property("hasUnsavedChanges"):
                     reply = QMessageBox.question(
@@ -156,7 +177,6 @@ class BenchmarkerWindow(SidebarWindowBase):
                     )
 
                     if reply == QMessageBox.Save:
-                        # Switch to this file (skip save prompt since we already handled it)
                         self.testing_content._handle_file_button(
                             btn_name, skip_save_prompt=True
                         )
@@ -166,42 +186,27 @@ class BenchmarkerWindow(SidebarWindowBase):
                         return
 
             self.benchmarker.compile_all()
+            
         elif button_text == "Run":
             time_limit = self.limits_widget.get_time_limit()
             memory_limit = self.limits_widget.get_memory_limit()
             test_count = self.test_count_slider.value()
             self.benchmarker.run_benchmark_test(test_count, time_limit, memory_limit)
+            
         elif button_text == "Stop":
-            # Stop running tests
             if hasattr(self.benchmarker, "stop"):
                 self.benchmarker.stop()
+                
         elif button_text == "Results":
-            # Navigate to results window
             if self.can_close():
                 self.parent.window_manager.show_window("results")
 
-    def handle_button_click(self, button_text):
-        if button_text == "Back":
-            # If status view is active, restore it instead of navigating away
-            if self.status_view_active:
-                self._on_back_requested()
-                return
-
-        # Handle Save button (Phase 2: Issue #39)
-        if button_text == "Save":
-            if self.status_view:
-                self.status_view.save_to_database()
-            return
-
-        if button_text == "Help Center":
-            if self.can_close():
-                self.parent.window_manager.show_window("help_center")
-        else:
-            super().handle_button_click(button_text)
-
-    def _get_runner(self):
-        """Get the test runner instance"""
-        return self.benchmarker if hasattr(self, "benchmarker") else None
+    def _on_run_requested(self):
+        """Handle rerun from status view."""
+        time_limit = self.limits_widget.get_time_limit()
+        memory_limit = self.limits_widget.get_memory_limit()
+        test_count = self.test_count_slider.value()
+        self.benchmarker.run_benchmark_test(test_count, time_limit, memory_limit)
 
     def handle_time_limit_changed(self, value):
         print(f"Time limit changed to: {value} ms")
@@ -211,157 +216,3 @@ class BenchmarkerWindow(SidebarWindowBase):
 
     def handle_test_count_changed(self, value):
         print(f"Test count changed to: {value} tests")
-
-    def showEvent(self, event):
-        """Handle window show event - reload AI config and refresh AI panels"""
-        super().showEvent(event)
-        # Reload AI configuration to pick up any changes made while window was closed
-        try:
-            from src.app.core.ai import reload_ai_config
-
-            reload_ai_config()
-        except ImportError:
-            pass  # AI module not available
-
-    def _on_testing_started(self):
-        """Handle testing started signal - create and show status view"""
-        # Create status view with time/memory limits
-        from src.app.presentation.views.benchmarker.benchmarker_status_view import (
-            BenchmarkerStatusView,
-        )
-
-        status_view = BenchmarkerStatusView(
-            time_limit_ms=self.limits_widget.get_time_limit(),
-            memory_limit_mb=self.limits_widget.get_memory_limit(),
-            parent=self,
-        )
-
-        # Set runner for on-demand saving (Issue #39)
-        status_view.set_runner(self.benchmarker)
-
-        # Replace Results button with Save button (Phase 2: Issue #39)
-        self.sidebar.replace_results_with_save_button()
-
-        # Store reference
-        self.status_view = status_view
-        self.current_status_view = status_view
-
-        # Get worker and connect signals
-        worker = self.benchmarker.get_current_worker()
-        if worker and status_view:
-            self._connect_worker_to_status_view(worker, status_view)
-
-            # Connect allTestsCompleted to switch buttons
-            try:
-                if hasattr(worker, "allTestsCompleted"):
-                    worker.allTestsCompleted.connect(self._switch_to_completed_mode)
-            except RuntimeError:
-                pass  # Worker deleted, ignore
-
-            # Notify view that tests are starting
-            if hasattr(status_view, "on_tests_started"):
-                status_view.on_tests_started(self.test_count_slider.value())
-
-        # Integrate status view into display area
-        self._integrate_status_view(status_view)
-
-        # Switch to test mode (hide compile/run, show stop)
-        self._switch_to_test_mode()
-
-    def _on_testing_completed(self):
-        """Handle testing completed signal - switch to completed mode but stay in status view"""
-        # When tests are stopped, switch to Run button but keep status view open
-        self._switch_to_completed_mode()
-
-    def _switch_to_test_mode(self):
-        """Hide Compile and Run buttons, show Stop button when tests start"""
-        self.status_view_active = True
-
-        # Hide Compile button during test execution
-        if self.compile_btn:
-            self.compile_btn.hide()
-
-        # Hide Run button
-        if self.run_btn:
-            self.run_btn.hide()
-
-        if not self.stop_btn:
-            # Create Stop button dynamically
-            self.stop_btn = self.sidebar.add_button("Stop", self.action_section)
-            self.stop_btn.clicked.connect(lambda: self.handle_action_button("Stop"))
-
-        if self.stop_btn:
-            self.stop_btn.show()
-
-        # Hide rerun button during test execution
-        if hasattr(self, "rerun_btn") and self.rerun_btn:
-            self.rerun_btn.hide()
-
-    def _switch_to_completed_mode(self):
-        """Show Run button after tests complete (while viewing status)"""
-        # Hide Stop button
-        if self.stop_btn:
-            self.stop_btn.hide()
-
-        # Create and show Rerun button
-        if not hasattr(self, "rerun_btn") or not self.rerun_btn:
-            self.rerun_btn = self.sidebar.add_button("Run", self.action_section)
-            self.rerun_btn.clicked.connect(self._handle_rerun_tests)
-
-        if self.rerun_btn:
-            self.rerun_btn.show()
-
-    def _handle_rerun_tests(self):
-        """Handle rerun button click - trigger test execution again"""
-        if hasattr(self, "current_status_view") and self.current_status_view:
-            # Emit runRequested signal from status view
-            self.current_status_view.runRequested.emit()
-            # Switch back to test mode (show Stop button)
-            self._switch_to_test_mode()
-
-    def _on_run_requested(self):
-        """Handle run request from status view - re-run benchmark tests"""
-        # Run benchmark tests with same parameters
-        time_limit = self.limits_widget.get_time_limit()
-        memory_limit = self.limits_widget.get_memory_limit()
-        test_count = self.test_count_slider.value()
-        self.benchmarker.run_benchmark_test(test_count, time_limit, memory_limit)
-
-    def _restore_normal_mode(self):
-        """Full restoration when returning to test window - show all buttons"""
-        self.status_view_active = False
-
-        # Restore Results button (Phase 2: Issue #39)
-        self.sidebar.restore_results_button()
-
-        # Show Compile button (back in test window)
-        if self.compile_btn:
-            self.compile_btn.show()
-
-        # Show Run button
-        if self.run_btn:
-            self.run_btn.show()
-
-        # Hide Stop button
-        if self.stop_btn:
-            self.stop_btn.hide()
-
-        # Hide rerun button (back in test window)
-        if hasattr(self, "rerun_btn") and self.rerun_btn:
-            self.rerun_btn.hide()
-
-        # Refresh AI panels with current configuration
-        self.refresh_ai_panels()
-
-    def enable_save_button(self):
-        """Enable the Save button after tests complete (Phase 2: Issue #39)"""
-        self.sidebar.enable_save_button()
-
-    def mark_results_saved(self):
-        """Mark results as saved in the UI (Phase 2: Issue #39)"""
-        self.sidebar.mark_results_saved()
-
-    def refresh_ai_panels(self):
-        """Refresh AI panel visibility based on current configuration"""
-        if hasattr(self.testing_content, "ai_panel"):
-            self.testing_content.ai_panel.refresh_visibility()
