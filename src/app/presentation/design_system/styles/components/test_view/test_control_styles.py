@@ -6,8 +6,8 @@ Includes styling for status dialogs, compilation dialogs, and status utility fun
 """
 
 from src.app.presentation.design_system.tokens.status_colors import ERROR_COLOR_HEX
-from src.app.presentation.styles.style import MATERIAL_COLORS
-from src.app.presentation.styles.helpers.common_styles import bold_label
+from src.app.presentation.design_system.tokens import MATERIAL_COLORS
+from src.app.presentation.design_system.styles.common_styles import bold_label
 
 # Status Window Styles
 TEST_VIEW_STATUS_DIALOG_STYLE = f"""

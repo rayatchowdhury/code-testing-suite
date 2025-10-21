@@ -16,8 +16,8 @@ from PySide6.QtWidgets import (
 )
 
 from src.app.presentation.design_system.tokens.colors import MATERIAL_COLORS
-from src.app.presentation.styles.fonts.emoji import set_emoji_font
-from src.app.presentation.styles.components.status_view.status_widgets_styles import (
+from src.app.presentation.design_system.styles.emoji import set_emoji_font
+from src.app.presentation.design_system.styles.components.status_view.status_widgets_styles import (
     STATUS_HEADER_SECTION_STYLE,
     STATUS_HEADER_TIME_LABEL_STYLE,
     STATUS_HEADER_ETA_LABEL_STYLE,
@@ -43,7 +43,7 @@ from src.app.presentation.styles.components.status_view.status_widgets_styles im
     CARDS_SECTION_SCROLLBAR_STYLE,
     TEST_RESULTS_CARDS_SECTION_STYLE,
 )
-from src.app.presentation.styles.components.status_view import (
+from src.app.presentation.design_system.styles.components.status_view import (
     TEST_CARD_LABEL_HEADER_STYLE,
     TEST_CARD_LABEL_STATUS_PASSED_STYLE,
     TEST_CARD_LABEL_STATUS_FAILED_STYLE,

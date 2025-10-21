@@ -14,12 +14,12 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from src.app.presentation.styles import (
+from src.app.presentation.design_system.styles.components import (
     SCROLLBAR_STYLE,
     SIDEBAR_BUTTON_STYLE,
     SIDEBAR_STYLE,
 )
-from src.app.presentation.styles.components.sidebar_dividers import (
+from src.app.presentation.design_system.styles.components.sidebar_dividers import (
     SIDEBAR_DIVIDER_CONTAINER_STYLE,
     SIDEBAR_DIVIDER_SPACE_STYLE,
     SIDEBAR_FOOTER_CONTAINER_STYLE,

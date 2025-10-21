@@ -2,8 +2,8 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QHBoxLayout, QPushButton, QSplitter, QWidget
 
-from src.app.presentation.styles.fonts.emoji import set_emoji_font
-from src.app.presentation.styles.style import SPLITTER_STYLE
+from src.app.presentation.design_system.styles.emoji import set_emoji_font
+from src.app.presentation.design_system.styles.style import SPLITTER_STYLE
 
 class SidebarWindowBase(QWidget):
     def __init__(self, parent=None, title=None):

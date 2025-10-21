@@ -1,7 +1,7 @@
 # this is the default display area for the application which contains the default display area class
 from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
-from src.app.presentation.styles.style import DISPLAY_AREA_STYLE
+from src.app.presentation.design_system.styles.style import DISPLAY_AREA_STYLE
 
 class DisplayArea(QWidget):
     def __init__(self, parent=None):

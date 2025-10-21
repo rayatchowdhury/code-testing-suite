@@ -12,11 +12,11 @@ from PySide6.QtWidgets import (
 )
 
 from src.app.core.tools.compiler_runner import CompilerRunner
-from src.app.presentation.styles.components.code_editor_display_area import (
+from src.app.presentation.design_system.styles.components.code_editor_display_area import (
     OUTER_PANEL_STYLE,
     SPLITTER_STYLE,
 )
-from src.app.presentation.styles.style import MATERIAL_COLORS
+from src.app.presentation.design_system.tokens import MATERIAL_COLORS
 from src.app.presentation.widgets.display_area.ai_panel import AIPanel
 from src.app.presentation.widgets.display_area.console import ConsoleWidget
 from src.app.presentation.widgets.display_area.editor import EditorWidget

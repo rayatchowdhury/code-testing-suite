@@ -29,8 +29,8 @@ from PySide6.QtWidgets import (
 )
 from qasync import QEventLoop, asyncSlot
 
-from src.app.presentation.styles.components.ai_panel import AI_PANEL_STYLE
-from src.app.presentation.styles.components.editor import (
+from src.app.presentation.design_system.styles.components.ai_panel import AI_PANEL_STYLE
+from src.app.presentation.design_system.styles.components.editor import (
     AI_DIALOG_STYLE,
     EDITOR_WIDGET_STYLE,
     get_editor_style,
@@ -78,7 +78,7 @@ def _import_pygments():
 def _import_syntax_highlighters():
     global _syntax_highlighters
     if _syntax_highlighters is None:
-        from src.app.presentation.styles.syntaxhighlighter import (
+        from src.app.presentation.design_system.styles.syntaxhighlighter import (
             CPPSyntaxHighlighter,
             JavaSyntaxHighlighter,
             PythonSyntaxHighlighter,

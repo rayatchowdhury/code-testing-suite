@@ -1,8 +1,8 @@
-from src.app.presentation.styles.components.ai_panel import (
+from src.app.presentation.design_system.styles.components.ai_panel import (
     AI_PANEL_STYLE,
     CUSTOM_COMMAND_STYLE,
 )
-from src.app.presentation.styles.components.config_ui import (
+from src.app.presentation.design_system.styles.components.config_ui import (
     CONFIG_DIALOG_TITLE_STYLE,
     ERROR_DIALOG_STYLE,
     INFO_MESSAGE_STYLE,
@@ -10,14 +10,14 @@ from src.app.presentation.styles.components.config_ui import (
     SUCCESS_MESSAGE_STYLE,
     get_success_status_style,
 )
-from src.app.presentation.styles.components.console import CONSOLE_STYLE
-from src.app.presentation.styles.components.editor import (
+from src.app.presentation.design_system.styles.components.console import CONSOLE_STYLE
+from src.app.presentation.design_system.styles.components.editor import (
     AI_DIALOG_STYLE,
     EDITOR_WIDGET_STYLE,
     get_editor_style,
     get_tab_style,
 )
-from src.app.presentation.styles.components.results import (
+from src.app.presentation.design_system.styles.components.results import (
     RESULTS_BUTTON_STYLE,
     RESULTS_CARD_STYLE,
     RESULTS_COMBO_STYLE,
@@ -32,13 +32,13 @@ from src.app.presentation.styles.components.results import (
     RESULTS_TABLE_STYLE,
     RESULTS_TEXT_EDIT_STYLE,
 )
-from src.app.presentation.styles.components.scrollbar import SCROLLBAR_STYLE
-from src.app.presentation.styles.components.sidebar import (
+from src.app.presentation.design_system.styles.components.scrollbar import SCROLLBAR_STYLE
+from src.app.presentation.design_system.styles.components.sidebar import (
     SIDEBAR_BUTTON_STYLE,
     SIDEBAR_STYLE,
 )
-from src.app.presentation.styles.components.splitter import SPLITTER_STYLE
-from src.app.presentation.styles.components.test_view import (
+from src.app.presentation.design_system.styles.components.splitter import SPLITTER_STYLE
+from src.app.presentation.design_system.styles.components.test_view import (
     TEST_VIEW_BUTTON_PANEL_STYLE,
     TEST_VIEW_COMPILATION_CLOSE_BUTTON_STYLE,
     TEST_VIEW_COMPILATION_DETAIL_LABEL_STYLE,

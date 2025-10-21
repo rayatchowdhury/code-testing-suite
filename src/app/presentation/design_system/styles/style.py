@@ -1,4 +1,4 @@
-from src.app.presentation.styles.components import (
+from src.app.presentation.design_system.styles.components import (
     AI_PANEL_STYLE,
     CONSOLE_STYLE,
     CUSTOM_COMMAND_STYLE,
@@ -9,7 +9,7 @@ from src.app.presentation.styles.components import (
     SPLITTER_STYLE,
     get_tab_style,
 )
-from src.app.presentation.design_system.tokens import COLORS, MATERIAL_COLORS
+from src.app.presentation.design_system.tokens import COLORS, SPACING, STATUS_COLORS
 
 # Simplified DISPLAY_AREA_STYLE
 DISPLAY_AREA_STYLE = f"""

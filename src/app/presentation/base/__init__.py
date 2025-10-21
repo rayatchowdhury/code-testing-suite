@@ -1,14 +1,11 @@
-"""
-Base classes and protocols for presentation layer.
+"""Package exports."""
 
-This module provides the foundation for all windows, widgets, and components
-in the presentation layer.
-"""
+from .content_window_base import ContentWindowBase
+from .test_window_base import TestWindowBase
+from .window_base import WindowBase
 
 __all__ = [
-    "WindowBase",
-    "ContentWindowBase", 
+    "ContentWindowBase",
     "TestWindowBase",
-    "StatusViewBase",
-    "WidgetBase",
+    "WindowBase",
 ]

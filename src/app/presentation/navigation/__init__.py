@@ -1,9 +1,7 @@
-"""
-Navigation package for the Code Testing Suite.
+"""Package exports."""
 
-Provides injectable navigation router to replace singleton NavigationService.
-"""
+from .router import NavigationRouter
 
-from src.app.presentation.navigation.router import NavigationRouter
-
-__all__ = ["NavigationRouter"]
+__all__ = [
+    "NavigationRouter",
+]

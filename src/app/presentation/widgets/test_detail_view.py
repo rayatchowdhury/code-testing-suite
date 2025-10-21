@@ -15,9 +15,9 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
-from src.app.presentation.styles.fonts.emoji import set_emoji_font
-from src.app.presentation.styles.style import MATERIAL_COLORS
-from src.app.presentation.styles.components.dialogs.test_detail_styles import (
+from src.app.presentation.design_system.styles.emoji import set_emoji_font
+from src.app.presentation.design_system.tokens import MATERIAL_COLORS
+from src.app.presentation.design_system.styles.components.dialogs.test_detail_styles import (
     TEST_DETAIL_DIALOG_STYLE,
     TEST_DETAIL_METRICS_LABEL_STYLE,
     TEST_DETAIL_METRICS_FRAME_STYLE,

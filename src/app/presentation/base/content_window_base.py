@@ -53,7 +53,7 @@ class ContentWindowBase(WindowBase):
         splitter = QSplitter(Qt.Horizontal)
         
         try:
-            from src.app.presentation.styles.style import SPLITTER_STYLE
+            from src.app.presentation.design_system.styles.style import SPLITTER_STYLE
             splitter.setStyleSheet(SPLITTER_STYLE)
         except ImportError:
             pass  # Style not available, use default
@@ -98,7 +98,7 @@ class ContentWindowBase(WindowBase):
         options_btn.setObjectName("back_button")
         
         try:
-            from src.app.presentation.styles.fonts.emoji import set_emoji_font
+            from src.app.presentation.design_system.styles.emoji import set_emoji_font
             set_emoji_font(options_btn)
         except ImportError:
             pass  # Emoji font not available

@@ -1,4 +1,4 @@
-from src.app.presentation.styles.components.scrollbar import SCROLLBAR_STYLE
+from src.app.presentation.design_system.styles.components.scrollbar import SCROLLBAR_STYLE
 from src.app.presentation.design_system.tokens.colors import COLORS
 
 SIDEBAR_STYLE = (

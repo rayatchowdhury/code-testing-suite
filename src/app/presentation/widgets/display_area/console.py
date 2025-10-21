@@ -10,9 +10,10 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from src.app.presentation.styles import CONSOLE_STYLE, MATERIAL_COLORS
-from src.app.presentation.styles.components.console_colors import CONSOLE_COLORS
-from src.app.presentation.styles.components.scrollbar import SCROLLBAR_STYLE
+from src.app.presentation.design_system.styles.components import CONSOLE_STYLE
+from src.app.presentation.design_system.tokens import MATERIAL_COLORS
+from src.app.presentation.design_system.styles.components.console_colors import CONSOLE_COLORS
+from src.app.presentation.design_system.styles.components.scrollbar import SCROLLBAR_STYLE
 
 class ConsoleWidget(QWidget):
     inputSubmitted = Signal(str)

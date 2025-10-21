@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from src.app.presentation.styles.components.code_editor_display_area import (
+from src.app.presentation.design_system.styles.components.code_editor_display_area import (
     OUTER_PANEL_STYLE,
     SPLITTER_STYLE,
 )

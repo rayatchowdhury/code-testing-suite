@@ -24,7 +24,7 @@ from .widgets import (
     TestResultsCardsSection
 )
 from .cards import ComparatorTestCard, ValidatorTestCard, BenchmarkerTestCard
-from src.app.presentation.styles.components.status_view import STATUS_VIEW_CONTAINER_STYLE
+from src.app.presentation.design_system.styles.components.status_view import STATUS_VIEW_CONTAINER_STYLE
 
 
 class StatusView(QWidget):

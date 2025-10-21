@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from src.app.presentation.styles.components import AI_PANEL_STYLE, CUSTOM_COMMAND_STYLE
+from src.app.presentation.design_system.styles.components import AI_PANEL_STYLE, CUSTOM_COMMAND_STYLE
 
 class AIActionButton(QPushButton):
     def __init__(self, text, parent=None):

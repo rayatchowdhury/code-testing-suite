@@ -5,7 +5,7 @@ Test View Editor and UI Component Styles.
 Includes styling for file buttons, content panels, and editor controls.
 """
 
-from src.app.presentation.styles.style import MATERIAL_COLORS
+from src.app.presentation.design_system.tokens import MATERIAL_COLORS
 
 TEST_VIEW_BUTTON_PANEL_STYLE = f"""
 QWidget {{

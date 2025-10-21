@@ -17,8 +17,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from src.app.presentation.styles.style import MATERIAL_COLORS
-from src.app.presentation.styles.components.inputs.input_styles import (
+from src.app.presentation.design_system.tokens import MATERIAL_COLORS
+from src.app.presentation.design_system.styles.components.inputs.input_styles import (
     INPUT_GROUP_STYLE,
     INPUT_LINEEDIT_STYLE,
     INPUT_DIVIDER_STYLE,

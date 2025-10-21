@@ -10,13 +10,13 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIntValidator
 from PySide6.QtWidgets import QHBoxLayout, QLineEdit, QSlider, QVBoxLayout, QWidget
 
-from src.app.presentation.styles.components.test_view import (
+from src.app.presentation.design_system.styles.components.test_view import (
     TEST_VIEW_SLIDER_STYLE,
 )
-from src.app.presentation.styles.components.inputs.input_styles import (
+from src.app.presentation.design_system.styles.components.inputs.input_styles import (
     INPUT_LINEEDIT_COMPACT_STYLE,
 )
-from src.app.presentation.styles.style import MATERIAL_COLORS
+from src.app.presentation.design_system.tokens import MATERIAL_COLORS
 
 class TestCountSlider(QWidget):
     """

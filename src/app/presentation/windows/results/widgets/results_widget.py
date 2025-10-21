@@ -26,11 +26,11 @@ from PySide6.QtWidgets import (
 )
 
 from src.app.persistence.database import DatabaseManager, TestResult
-from src.app.presentation.styles.components.code_editor_display_area import (
+from src.app.presentation.design_system.styles.components.code_editor_display_area import (
     OUTER_PANEL_STYLE,
     SPLITTER_STYLE,
 )
-from src.app.presentation.styles.components.results import (
+from src.app.presentation.design_system.styles.components.results import (
     RESULTS_BUTTON_STYLE,
     RESULTS_CARD_STYLE,
     RESULTS_COMBO_STYLE,
@@ -45,7 +45,7 @@ from src.app.presentation.styles.components.results import (
     RESULTS_TABLE_STYLE,
     RESULTS_TEXT_EDIT_STYLE,
 )
-from src.app.presentation.styles.style import MATERIAL_COLORS
+from src.app.presentation.design_system.tokens import MATERIAL_COLORS
 
 class ResultsWidget(QWidget):
     """Widget to display test results from database"""

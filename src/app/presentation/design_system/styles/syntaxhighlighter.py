@@ -3,7 +3,7 @@ import re
 from PySide6.QtCore import QRegularExpression
 from PySide6.QtGui import QBrush, QColor, QSyntaxHighlighter, QTextCharFormat
 
-from src.app.presentation.styles.components.syntax_highlighting import (
+from src.app.presentation.design_system.styles.components.syntax_highlighting import (
     SYNTAX_HIGHLIGHTING_COLORS,
 )
 
