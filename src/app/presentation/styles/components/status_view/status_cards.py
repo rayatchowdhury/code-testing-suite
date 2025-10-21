@@ -15,7 +15,7 @@ Includes:
 - Card label styles
 """
 
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
+from src.app.presentation.design_system.tokens.colors import MATERIAL_COLORS
 
 # ============================================================================
 # TEST CARDS SECTION

@@ -4,7 +4,7 @@ Config Dialog Label Styles.
 Includes standard labels, info labels, and warning labels.
 """
 
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
+from src.app.presentation.design_system.tokens.colors import MATERIAL_COLORS
 
 CONFIG_LABEL_STYLES = f"""
 QLabel {{

@@ -18,8 +18,8 @@ from src.app.presentation.styles.components.sidebar_dividers import (
 from src.app.presentation.styles.components.syntax_highlighting import (
     SYNTAX_HIGHLIGHTING_COLORS,
 )
-from src.app.presentation.styles.constants import COLORS, MATERIAL_COLORS
-from src.app.presentation.styles.constants.status_colors import (
+from src.app.presentation.design_system.tokens import COLORS, MATERIAL_COLORS
+from src.app.presentation.design_system.tokens.status_colors import (
     ERROR_COLOR_HEX,
     STATUS_COLORS,
     TEST_STATUS_COLORS,

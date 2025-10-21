@@ -4,7 +4,7 @@ Config Dialog Button Styles.
 Includes all button variants: primary, secondary, save, cancel, reset, danger.
 """
 
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
+from src.app.presentation.design_system.tokens.colors import MATERIAL_COLORS
 
 CONFIG_BUTTON_STYLES = f"""
 QPushButton {{

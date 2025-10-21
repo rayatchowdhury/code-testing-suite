@@ -5,7 +5,7 @@ Centralized styles for test detail view dialogs (Comparator, Validator, Benchmar
 These dialogs show detailed information when a test card is clicked.
 """
 
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
+from src.app.presentation.design_system.tokens.colors import MATERIAL_COLORS
 
 # Dialog Background
 TEST_DETAIL_DIALOG_STYLE = f"""

@@ -5,7 +5,7 @@ Container styling for the unified status view widget.
 Uses Material Design principles for consistency with the app's overall design.
 """
 
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
+from src.app.presentation.design_system.tokens.colors import MATERIAL_COLORS
 
 # ============================================================================
 # STATUS VIEW CONTAINER

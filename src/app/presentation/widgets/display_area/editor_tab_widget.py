@@ -12,7 +12,7 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QMessageBox, QPushButton, QTabWidget, QVBoxLayout, QWidget
 
 from src.app.presentation.styles.components.editor import get_tab_style
-from src.app.presentation.widgets.display_area_widgets.editor import EditorWidget
+from src.app.presentation.widgets.display_area.editor import EditorWidget
 
 class EditorTab(QWidget):
     """Individual editor tab containing an EditorWidget."""

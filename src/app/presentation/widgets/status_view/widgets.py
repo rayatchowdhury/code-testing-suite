@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout, QWidget
 )
 
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
+from src.app.presentation.design_system.tokens.colors import MATERIAL_COLORS
 from src.app.presentation.styles.fonts.emoji import set_emoji_font
 from src.app.presentation.styles.components.status_view.status_widgets_styles import (
     STATUS_HEADER_SECTION_STYLE,

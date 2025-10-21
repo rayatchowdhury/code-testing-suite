@@ -15,7 +15,7 @@ from src.app.presentation.base.test_window_base import TestWindowBase
 from src.app.presentation.widgets.display_area import DisplayArea
 from src.app.presentation.widgets.testing_content_widget import TestingContentWidget
 from src.app.presentation.widgets.sidebar import Sidebar
-from src.app.presentation.widgets.sidebar_widgets import TestCountSlider
+from src.app.presentation.widgets.sidebar import TestCountSlider
 
 class ComparatorWindow(TestWindowBase):
     """Comparator window - migrated to TestWindowBase."""

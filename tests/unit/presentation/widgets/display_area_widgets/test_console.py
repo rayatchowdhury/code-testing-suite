@@ -12,7 +12,7 @@ import pytest
 from PySide6.QtGui import QColor, QTextCursor
 from PySide6.QtWidgets import QPlainTextEdit
 
-from src.app.presentation.widgets.display_area_widgets.console import ConsoleOutput
+from src.app.presentation.widgets.display_area.console import ConsoleOutput
 
 
 class TestConsoleInitialization:

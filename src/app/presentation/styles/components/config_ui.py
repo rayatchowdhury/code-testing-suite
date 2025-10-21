@@ -2,7 +2,7 @@
 Config UI component styles
 """
 
-from src.app.presentation.styles.constants import MATERIAL_COLORS
+from src.app.presentation.design_system.tokens import MATERIAL_COLORS
 
 # Error Dialog Styles
 ERROR_DIALOG_STYLE = f"""

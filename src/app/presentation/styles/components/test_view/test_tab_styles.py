@@ -6,7 +6,7 @@ Comprehensive styling for TestTabWidget component including tab containers,
 file buttons, language selectors, and context menus.
 """
 
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
+from src.app.presentation.design_system.tokens.colors import MATERIAL_COLORS
 
 
 # ============================================================================

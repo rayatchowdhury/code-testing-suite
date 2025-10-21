@@ -5,7 +5,7 @@ Test View Control and Status Component Styles.
 Includes styling for status dialogs, compilation dialogs, and status utility functions.
 """
 
-from src.app.presentation.styles.constants.status_colors import ERROR_COLOR_HEX
+from src.app.presentation.design_system.tokens.status_colors import ERROR_COLOR_HEX
 from src.app.presentation.styles.style import MATERIAL_COLORS
 from src.app.presentation.styles.helpers.common_styles import bold_label
 

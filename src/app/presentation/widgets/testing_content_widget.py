@@ -20,9 +20,9 @@ from src.app.presentation.styles.components.code_editor_display_area import (
     OUTER_PANEL_STYLE,
     SPLITTER_STYLE,
 )
-from src.app.presentation.widgets.display_area_widgets.console import ConsoleWidget
-from src.app.presentation.widgets.display_area_widgets.editor import EditorWidget
-from src.app.presentation.widgets.display_area_widgets.test_tab_widget import (
+from src.app.presentation.widgets.display_area.console import ConsoleWidget
+from src.app.presentation.widgets.display_area.editor import EditorWidget
+from src.app.presentation.widgets.display_area.test_tab_widget import (
     TestTabWidget,
 )
 from src.app.shared.constants import WORKSPACE_DIR

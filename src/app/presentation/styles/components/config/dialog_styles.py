@@ -5,7 +5,7 @@ Dialog-level styling including container, scroll areas, and section frames.
 """
 
 from src.app.presentation.styles.components.scrollbar import SCROLLBAR_STYLE
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
+from src.app.presentation.design_system.tokens.colors import MATERIAL_COLORS
 
 CONFIG_DIALOG_CONTAINER_STYLE = f"""
 QDialog {{

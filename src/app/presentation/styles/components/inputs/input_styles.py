@@ -5,7 +5,7 @@ Centralized styles for input widgets including QLineEdit, QSpinBox, QDoubleSpinB
 and QComboBox. Used across sidebar widgets and configuration dialogs.
 """
 
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
+from src.app.presentation.design_system.tokens.colors import MATERIAL_COLORS
 
 
 # QGroupBox style for titled input sections (Time/Memory limits)

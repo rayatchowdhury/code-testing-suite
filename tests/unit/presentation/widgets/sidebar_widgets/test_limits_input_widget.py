@@ -13,7 +13,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QValidator
 from PySide6.QtWidgets import QGroupBox, QLineEdit
 
-from src.app.presentation.widgets.sidebar_widgets.limits_input_widget import (
+from src.app.presentation.widgets.sidebar.limits_input import (
     LimitsInputWidget,
 )
 

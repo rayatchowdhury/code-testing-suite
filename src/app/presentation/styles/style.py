@@ -9,7 +9,7 @@ from src.app.presentation.styles.components import (
     SPLITTER_STYLE,
     get_tab_style,
 )
-from src.app.presentation.styles.constants import COLORS, MATERIAL_COLORS
+from src.app.presentation.design_system.tokens import COLORS, MATERIAL_COLORS
 
 # Simplified DISPLAY_AREA_STYLE
 DISPLAY_AREA_STYLE = f"""

@@ -26,7 +26,7 @@ from src.app.presentation.styles.components.config_ui import (
     CONFIG_DIALOG_TITLE_STYLE,
     SECTION_INFO_LABEL_STYLE,
 )
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
+from src.app.presentation.design_system.tokens.colors import MATERIAL_COLORS
 from src.app.shared.constants import SETTINGS_ICON
 
 

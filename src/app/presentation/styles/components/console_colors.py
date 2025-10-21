@@ -2,7 +2,7 @@
 Console color definitions for different types of output
 """
 
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
+from src.app.presentation.design_system.tokens.colors import MATERIAL_COLORS
 
 # Console output color scheme
 CONSOLE_COLORS = {

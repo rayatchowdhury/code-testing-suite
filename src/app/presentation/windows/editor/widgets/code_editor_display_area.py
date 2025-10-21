@@ -17,10 +17,10 @@ from src.app.presentation.styles.components.code_editor_display_area import (
     SPLITTER_STYLE,
 )
 from src.app.presentation.styles.style import MATERIAL_COLORS
-from src.app.presentation.widgets.display_area_widgets.ai_panel import AIPanel
-from src.app.presentation.widgets.display_area_widgets.console import ConsoleWidget
-from src.app.presentation.widgets.display_area_widgets.editor import EditorWidget
-from src.app.presentation.widgets.display_area_widgets.editor_tab_widget import (
+from src.app.presentation.widgets.display_area.ai_panel import AIPanel
+from src.app.presentation.widgets.display_area.console import ConsoleWidget
+from src.app.presentation.widgets.display_area.editor import EditorWidget
+from src.app.presentation.widgets.display_area.editor_tab_widget import (
     EditorTabWidget,
 )
 

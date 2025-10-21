@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 from PySide6.QtWidgets import QLineEdit, QPushButton
 
-from src.app.presentation.widgets.display_area_widgets.ai_panel import (
+from src.app.presentation.widgets.display_area.ai_panel import (
     AIActionButton,
     AICustomCommandInput,
     AIPanel,

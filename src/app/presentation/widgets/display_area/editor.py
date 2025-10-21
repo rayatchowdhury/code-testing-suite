@@ -35,8 +35,8 @@ from src.app.presentation.styles.components.editor import (
     EDITOR_WIDGET_STYLE,
     get_editor_style,
 )
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
-from src.app.presentation.styles.constants.editor_colors import EDITOR_COLORS
+from src.app.presentation.design_system.tokens.colors import MATERIAL_COLORS
+from src.app.presentation.design_system.tokens.editor_colors import EDITOR_COLORS
 from src.app.shared.utils.file_operations import FileOperations
 
 # Lazy imports for heavy components
@@ -102,7 +102,7 @@ def _import_editor_ai():
 def _import_ai_panel():
     global _ai_panel
     if _ai_panel is None:
-        from src.app.presentation.widgets.display_area_widgets.ai_panel import AIPanel
+        from src.app.presentation.widgets.display_area.ai_panel import AIPanel
 
         _ai_panel = AIPanel
     return _ai_panel

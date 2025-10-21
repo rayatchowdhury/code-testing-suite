@@ -5,7 +5,7 @@ These functions provide simple, reusable style snippets that can be composed
 together to build consistent styling across the application.
 """
 
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
+from src.app.presentation.design_system.tokens.colors import MATERIAL_COLORS
 
 
 def bold_label(font_size: int = 14, color: str = None) -> str:

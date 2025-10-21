@@ -34,7 +34,7 @@ from src.app.presentation.styles.components.test_view import (
     LANGUAGE_LABEL_STYLE,
     LANGUAGE_CONTEXT_MENU_STYLE,
 )
-from src.app.presentation.styles.constants import MATERIAL_COLORS
+from src.app.presentation.design_system.tokens import MATERIAL_COLORS
 from src.app.shared.constants import WORKSPACE_DIR
 from src.app.shared.constants.paths import get_workspace_file_path
 from src.app.shared.utils.workspace_utils import ensure_test_type_directory

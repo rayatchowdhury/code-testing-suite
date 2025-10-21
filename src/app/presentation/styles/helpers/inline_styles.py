@@ -2,8 +2,8 @@
 Common inline style helpers for frequently used style combinations
 """
 
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
-from src.app.presentation.styles.constants.status_colors import ERROR_COLOR_HEX
+from src.app.presentation.design_system.tokens.colors import MATERIAL_COLORS
+from src.app.presentation.design_system.tokens.status_colors import ERROR_COLOR_HEX
 
 # Common error label styles (used in detailed_results_widget.py)
 ERROR_LABEL_STYLE = f"color: {MATERIAL_COLORS['error']};"

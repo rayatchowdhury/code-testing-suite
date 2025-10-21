@@ -4,7 +4,7 @@ Config Dialog Input Field Styles.
 Includes styling for QComboBox, QLineEdit, QSpinBox, and QCheckBox.
 """
 
-from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
+from src.app.presentation.design_system.tokens.colors import MATERIAL_COLORS
 
 CONFIG_INPUT_STYLES = f"""
 QComboBox, QLineEdit, QSpinBox {{
