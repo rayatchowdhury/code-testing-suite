@@ -142,20 +142,6 @@ class Benchmarker(BaseRunner):
             max_workers,
         )
 
-    def _create_test_status_window(self):
-        """Create benchmark-specific status window"""
-        from src.app.presentation.views.benchmarker.benchmark_status_window import (
-            BenchmarkStatusWindow,
-        )
-
-        status_window = BenchmarkStatusWindow()
-        # Configure status window with benchmark-specific parameters
-        status_window.workspace_dir = self.workspace_dir
-        status_window.time_limit = self.time_limit / 1000.0  # Convert to seconds
-        status_window.memory_limit = self.memory_limit
-        status_window.test_count = self.test_count
-        return status_window
-
     def _connect_worker_signals(self, worker):
         """Connect benchmark-specific signals"""
         # Call parent to connect common signals

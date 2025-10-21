@@ -13,10 +13,10 @@ from PySide6.QtWidgets import (
 
 from src.app.presentation.windows.results.widgets.results_widget import ResultsWidget
 from src.app.presentation.widgets.sidebar import Sidebar
-from src.app.presentation.window_controller.base_window import SidebarWindowBase
+from src.app.presentation.base.content_window_base import ContentWindowBase
 from src.app.presentation.services import export_test_cases_to_zip, create_export_summary
 
-class ResultsWindow(SidebarWindowBase):
+class ResultsWindow(ContentWindowBase):
     """Window to display test results and analytics"""
 
     def __init__(self, parent=None):

@@ -18,12 +18,12 @@ from PySide6.QtWidgets import QPushButton
 
 from src.app.presentation.widgets.display_area import DisplayArea
 from src.app.presentation.widgets.sidebar import Sidebar
-from src.app.presentation.window_controller.base_window import SidebarWindowBase
+from src.app.presentation.base.content_window_base import ContentWindowBase
 
 from .widgets.content import get_document_data
 from .widgets.document import create_help_document
 
-class HelpCenterWindow(SidebarWindowBase):
+class HelpCenterWindow(ContentWindowBase):
     def __init__(self, parent=None):
         super().__init__(parent, title=None)
 

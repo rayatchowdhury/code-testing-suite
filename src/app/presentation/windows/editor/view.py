@@ -23,11 +23,11 @@ from src.app.presentation.windows.editor.widgets.code_editor_display_area import
     CodeEditorDisplayArea,
 )
 from src.app.presentation.widgets.sidebar import Sidebar
-from src.app.presentation.window_controller.base_window import SidebarWindowBase
+from src.app.presentation.base.content_window_base import ContentWindowBase
 from src.app.shared.constants import EDITOR_STATE_FILE
 from src.app.shared.utils.file_operations import FileOperations
 
-class CodeEditorWindow(SidebarWindowBase):
+class CodeEditorWindow(ContentWindowBase):
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -358,9 +358,9 @@ class CodeEditorWindow(SidebarWindowBase):
                     new_tab.editor.currentFilePath = file_path
                     new_tab.editor.codeEditor.setPlainText(content)
                     new_tab.editor.codeEditor._setup_syntax_highlighting(file_path)
-                    self.editor_display.updateTabTitle(
-                        self.editor_display.tab_widget.count() - 1
-                    )
+                    # Update tab title to reflect file path
+                    tab_index = self.editor_display.tab_widget.count() - 1
+                    self.editor_display.editor_tabs._update_tab_title(tab_index)
 
         except Exception as e:
             logger.error(f"Error loading editor state: {e}", exc_info=True)

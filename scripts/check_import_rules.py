@@ -107,6 +107,14 @@ class ImportRuleChecker:
 
         # Rule 3 (Strict mode): Windows should only import allowed modules
         if self.strict and "presentation.windows" in importer:
+            # Allow windows to import from their own package (e.g., main/view.py → main/widgets/*)
+            importer_window = self._extract_window_name(importer)
+            imported_window = self._extract_window_name(imported)
+            
+            # If importing from same window package, allow it
+            if importer_window and imported_window and importer_window == imported_window:
+                return  # Same window package - allowed
+            
             allowed_prefixes = [
                 "src.app.presentation.widgets",
                 "src.app.presentation.base",
@@ -115,6 +123,8 @@ class ImportRuleChecker:
                 "src.app.presentation.design_system",
                 "src.app.presentation.styles",
                 "src.app.presentation.viewmodels",
+                "src.app.presentation.window_controller",
+                "src.app.presentation.services",
                 "src.app.core",
                 "src.app.persistence",
                 "src.app.shared",
