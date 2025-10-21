@@ -1,0 +1,863 @@
+# Presentation Structure Analysis (2025-10-21 18:33 )
+
+## Summary Statistics
+
+- **Total Python Files**: 125
+- **Total Classes**: 91
+- **Total Functions**: 20
+- **Total Signals**: 46
+- **Total Lines of Code**: 19,640
+
+## Directory Structure
+
+```
+presentation/
+├── base/                     # Base classes and protocols
+├── design_system/           # Design tokens and QSS
+│   └── tokens/              # Color, spacing, status tokens
+├── dialogs/                 # Dialog windows
+│   └── result_detail/       # Test result detail dialog
+├── navigation/              # Navigation router
+├── services/                # Singleton services
+├── styles/                  # Component styles
+│   ├── components/          # Per-component QSS
+│   ├── fonts/               # Font resources
+│   └── helpers/             # Style utilities
+├── views/                   # Legacy window views (deprecated)
+├── widgets/                 # Reusable widgets
+│   ├── display_area/        # Editor, console, AI panel
+│   ├── sidebar/             # Sidebar components
+│   └── status_view/         # Status display widgets
+├── windows/                 # Per-window packages (MVVM)
+│   ├── benchmarker/
+│   ├── comparator/
+│   ├── editor/
+│   ├── help_center/
+│   ├── main/
+│   ├── results/
+│   └── validator/
+└── window_controller/       # Window management
+```
+
+## Per-File Inventory
+
+### `src\app\presentation\__init__.py`
+
+**Functions:**
+- `get_main_window()` (line 8)
+- `get_sidebar_window_base()` (line 14)
+
+*Summary: 2 functions, 24 lines*
+
+### `src\app\presentation\base\__init__.py`
+
+*Summary: Module file, 14 lines*
+
+### `src\app\presentation\base\content_window_base.py`
+
+**Classes:**
+- `ContentWindowBase` extends WindowBase (line 17)
+
+*Summary: 1 class, 160 lines*
+
+### `src\app\presentation\base\protocols.py`
+
+**Classes:**
+- `TestRunner` extends Protocol (line 19)
+- `TestCard` extends Protocol (line 76)
+- `TestDetailDialog` extends Protocol (line 108)
+- `NavigationManager` extends Protocol (line 131)
+
+*Summary: 4 classes, 168 lines*
+
+### `src\app\presentation\base\status_view_base.py`
+
+**Classes:**
+- `StatusViewBase` extends QWidget (line 14)
+
+**Signals:**
+- `stopRequested` in `StatusViewBase` (line 62)
+- `backRequested` in `StatusViewBase` (line 63)
+- `runRequested` in `StatusViewBase` (line 64)
+
+*Summary: 1 class, 3 signals, 267 lines*
+
+### `src\app\presentation\base\test_window_base.py`
+
+**Classes:**
+- `TestWindowBase` extends ContentWindowBase (line 15)
+
+*Summary: 1 class, 462 lines*
+
+### `src\app\presentation\base\window_base.py`
+
+**Classes:**
+- `WindowBase` extends QWidget (line 15)
+
+**Signals:**
+- `windowShown` in `WindowBase` (line 36)
+- `windowClosed` in `WindowBase` (line 37)
+
+*Summary: 1 class, 2 signals, 176 lines*
+
+### `src\app\presentation\design_system\__init__.py`
+
+*Summary: Module file, 9 lines*
+
+### `src\app\presentation\design_system\tokens\__init__.py`
+
+*Summary: Module file, 3 lines*
+
+### `src\app\presentation\design_system\tokens\colors.py`
+
+*Summary: Module file, 66 lines*
+
+### `src\app\presentation\design_system\tokens\editor_colors.py`
+
+*Summary: Module file, 8 lines*
+
+### `src\app\presentation\design_system\tokens\spacing.py`
+
+*Summary: Module file, 110 lines*
+
+### `src\app\presentation\design_system\tokens\status_colors.py`
+
+*Summary: Module file, 43 lines*
+
+### `src\app\presentation\dialogs\result_detail\__init__.py`
+
+*Summary: Module file, 11 lines*
+
+### `src\app\presentation\dialogs\result_detail\view.py`
+
+**Classes:**
+- `DetailedResultDialog` extends QDialog (line 53)
+
+**Signals:**
+- `loadToTestRequested` in `DetailedResultDialog` (line 70)
+- `backRequested` in `DetailedResultDialog` (line 71)
+
+*Summary: 1 class, 2 signals, 654 lines*
+
+### `src\app\presentation\dialogs\result_detail\viewmodel.py`
+
+**Classes:**
+- `DetailedResultViewModel` (line 15)
+
+*Summary: 1 class, 206 lines*
+
+### `src\app\presentation\navigation\__init__.py`
+
+*Summary: Module file, 9 lines*
+
+### `src\app\presentation\navigation\router.py`
+
+**Classes:**
+- `NavigationRouter` extends QObject (line 15)
+
+**Signals:**
+- `windowChangeRequested` in `NavigationRouter` (line 43)
+- `navigationCompleted` in `NavigationRouter` (line 44)
+- `navigationFailed` in `NavigationRouter` (line 45)
+
+*Summary: 1 class, 3 signals, 198 lines*
+
+### `src\app\presentation\services\__init__.py`
+
+*Summary: Module file, 18 lines*
+
+### `src\app\presentation\services\error_handler_service.py`
+
+**Classes:**
+- `ErrorSeverity` extends Enum (line 15)
+- `ErrorHandlerService` extends QObject (line 23)
+
+**Signals:**
+- `errorOccurred` in `ErrorHandlerService` (line 53)
+
+*Summary: 2 classes, 1 signal, 120 lines*
+
+### `src\app\presentation\services\export_service.py`
+
+**Functions:**
+- `export_test_cases_to_zip()` (line 10)
+- `create_export_summary()` (line 58)
+
+*Summary: 2 functions, 90 lines*
+
+### `src\app\presentation\services\navigation_service.py`
+
+**Classes:**
+- `NavigationService` extends QObject (line 11)
+
+**Signals:**
+- `windowChangeRequested` in `NavigationService` (line 36)
+
+*Summary: 1 class, 1 signal, 111 lines*
+
+### `src\app\presentation\styles\__init__.py`
+
+*Summary: Module file, 49 lines*
+
+### `src\app\presentation\styles\components\__init__.py`
+
+*Summary: Module file, 108 lines*
+
+### `src\app\presentation\styles\components\ai_panel.py`
+
+*Summary: Module file, 168 lines*
+
+### `src\app\presentation\styles\components\code_editor_display_area.py`
+
+*Summary: Module file, 27 lines*
+
+### `src\app\presentation\styles\components\config\__init__.py`
+
+*Summary: Module file, 27 lines*
+
+### `src\app\presentation\styles\components\config\button_styles.py`
+
+*Summary: Module file, 149 lines*
+
+### `src\app\presentation\styles\components\config\dialog_styles.py`
+
+*Summary: Module file, 80 lines*
+
+### `src\app\presentation\styles\components\config\input_styles.py`
+
+*Summary: Module file, 143 lines*
+
+### `src\app\presentation\styles\components\config\label_styles.py`
+
+*Summary: Module file, 40 lines*
+
+### `src\app\presentation\styles\components\config_ui.py`
+
+**Functions:**
+- `get_success_status_style()` (line 110)
+
+*Summary: 1 function, 123 lines*
+
+### `src\app\presentation\styles\components\console.py`
+
+*Summary: Module file, 121 lines*
+
+### `src\app\presentation\styles\components\console_colors.py`
+
+*Summary: Module file, 28 lines*
+
+### `src\app\presentation\styles\components\dialogs\test_detail_styles.py`
+
+**Functions:**
+- `get_test_label_style()` (line 18)
+- `get_status_label_style()` (line 26)
+- `get_header_frame_style()` (line 45)
+- `get_validator_log_style()` (line 116)
+- `get_performance_summary_style()` (line 140)
+
+*Summary: 5 functions, 162 lines*
+
+### `src\app\presentation\styles\components\editor.py`
+
+**Functions:**
+- `get_editor_style()` (line 207)
+- `get_tab_style()` (line 219)
+
+*Summary: 2 functions, 261 lines*
+
+### `src\app\presentation\styles\components\inputs\__init__.py`
+
+*Summary: Module file, 21 lines*
+
+### `src\app\presentation\styles\components\inputs\input_styles.py`
+
+*Summary: Module file, 313 lines*
+
+### `src\app\presentation\styles\components\results.py`
+
+*Summary: Module file, 229 lines*
+
+### `src\app\presentation\styles\components\scrollbar.py`
+
+*Summary: Module file, 29 lines*
+
+### `src\app\presentation\styles\components\sidebar.py`
+
+*Summary: Module file, 254 lines*
+
+### `src\app\presentation\styles\components\sidebar_dividers.py`
+
+*Summary: Module file, 53 lines*
+
+### `src\app\presentation\styles\components\splitter.py`
+
+*Summary: Module file, 17 lines*
+
+### `src\app\presentation\styles\components\status_view\__init__.py`
+
+*Summary: Module file, 94 lines*
+
+### `src\app\presentation\styles\components\status_view\status_cards.py`
+
+**Functions:**
+- `get_test_card_style()` (line 90)
+
+*Summary: 1 function, 180 lines*
+
+### `src\app\presentation\styles\components\status_view\status_containers.py`
+
+*Summary: Module file, 24 lines*
+
+### `src\app\presentation\styles\components\status_view\status_widgets_styles.py`
+
+**Functions:**
+- `get_progress_segment_style()` (line 181)
+
+*Summary: 1 function, 317 lines*
+
+### `src\app\presentation\styles\components\syntax_highlighting.py`
+
+*Summary: Module file, 29 lines*
+
+### `src\app\presentation\styles\components\test_view\__init__.py`
+
+*Summary: Module file, 63 lines*
+
+### `src\app\presentation\styles\components\test_view\test_control_styles.py`
+
+**Functions:**
+- `get_status_label_style()` (line 118)
+
+*Summary: 1 function, 135 lines*
+
+### `src\app\presentation\styles\components\test_view\test_editor_styles.py`
+
+*Summary: Module file, 105 lines*
+
+### `src\app\presentation\styles\components\test_view\test_tab_styles.py`
+
+*Summary: Module file, 208 lines*
+
+### `src\app\presentation\styles\fonts\emoji.py`
+
+**Functions:**
+- `set_emoji_font()` (line 16)
+
+*Summary: 1 function, 27 lines*
+
+### `src\app\presentation\styles\helpers\__init__.py`
+
+*Summary: Module file, 11 lines*
+
+### `src\app\presentation\styles\helpers\common_styles.py`
+
+**Functions:**
+- `bold_label()` (line 11)
+- `error_text()` (line 29)
+
+*Summary: 2 functions, 48 lines*
+
+### `src\app\presentation\styles\helpers\inline_styles.py`
+
+**Functions:**
+- `get_status_label_style()` (line 18)
+- `build_status_style()` (line 23)
+
+*Summary: 2 functions, 31 lines*
+
+### `src\app\presentation\styles\style.py`
+
+*Summary: Module file, 36 lines*
+
+### `src\app\presentation\styles\syntaxhighlighter.py`
+
+**Classes:**
+- `CPPSyntaxHighlighter` extends QSyntaxHighlighter (line 14)
+- `PythonSyntaxHighlighter` extends QSyntaxHighlighter (line 273)
+- `JavaSyntaxHighlighter` extends QSyntaxHighlighter (line 412)
+
+*Summary: 3 classes, 550 lines*
+
+### `src\app\presentation\views\__init__.py`
+
+*Summary: Module file, 49 lines*
+
+### `src\app\presentation\views\benchmarker\__init__.py`
+
+*Summary: Module file, 4 lines*
+
+### `src\app\presentation\views\benchmarker\benchmarker_window.py`
+
+**Classes:**
+- `BenchmarkerWindow` extends TestWindowBase (line 38)
+
+*Summary: 1 class, 169 lines*
+
+### `src\app\presentation\views\code_editor\__init__.py`
+
+*Summary: Module file, 4 lines*
+
+### `src\app\presentation\views\code_editor\code_editor_display_area.py`
+
+**Classes:**
+- `CodeEditorDisplayArea` extends QWidget (line 27)
+
+**Signals:**
+- `filePathChanged` in `CodeEditorDisplayArea` (line 28)
+
+*Summary: 1 class, 1 signal, 174 lines*
+
+### `src\app\presentation\views\code_editor\code_editor_window.py`
+
+**Classes:**
+- `CodeEditorWindow` extends SidebarWindowBase (line 31)
+
+*Summary: 1 class, 368 lines*
+
+### `src\app\presentation\views\comparator\__init__.py`
+
+*Summary: Module file, 4 lines*
+
+### `src\app\presentation\views\comparator\comparator_window.py`
+
+**Classes:**
+- `ComparatorWindow` extends TestWindowBase (line 20)
+
+*Summary: 1 class, 154 lines*
+
+### `src\app\presentation\views\help_center\__init__.py`
+
+*Summary: Module file, 10 lines*
+
+### `src\app\presentation\views\main_window\__init__.py`
+
+*Summary: Module file, 20 lines*
+
+### `src\app\presentation\views\main_window\content.py`
+
+*Summary: Module file, 77 lines*
+
+### `src\app\presentation\views\main_window\document.py`
+
+**Classes:**
+- `MainWindowDocument` extends QWidget (line 75)
+- `ClickableCard` extends QFrame (line 144)
+- `ClickableCTA` extends QFrame (line 208)
+- `GlassmorphismDocument` extends MainWindowDocument (line 226)
+
+*Summary: 4 classes, 453 lines*
+
+### `src\app\presentation\views\main_window\main_window.py`
+
+**Classes:**
+- `MainWindowConfig` (line 28)
+- `MainWindowContent` extends SidebarWindowBase (line 57)
+- `UnsavedChangesHandler` (line 208)
+- `MainWindow` extends QMainWindow (line 295)
+
+**Signals:**
+- `button_clicked` in `MainWindowContent` (line 60)
+
+*Summary: 4 classes, 1 signal, 359 lines*
+
+### `src\app\presentation\views\results\__init__.py`
+
+*Summary: Module file, 5 lines*
+
+### `src\app\presentation\views\results\detailed_results_window.py`
+
+**Error**: invalid syntax (detailed_results_window.py, line 618)
+
+### `src\app\presentation\views\results\results_window.py`
+
+**Classes:**
+- `ResultsWindow` extends SidebarWindowBase (line 19)
+
+*Summary: 1 class, 359 lines*
+
+### `src\app\presentation\views\validator\__init__.py`
+
+*Summary: Module file, 5 lines*
+
+### `src\app\presentation\views\validator\validator_window.py`
+
+**Classes:**
+- `ValidatorWindow` extends TestWindowBase (line 20)
+
+*Summary: 1 class, 153 lines*
+
+### `src\app\presentation\widgets\__init__.py`
+
+*Summary: Module file, 31 lines*
+
+### `src\app\presentation\widgets\display_area\__init__.py`
+
+*Summary: Module file, 26 lines*
+
+### `src\app\presentation\widgets\display_area\ai_panel.py`
+
+**Classes:**
+- `AIActionButton` extends QPushButton (line 19)
+- `AICustomCommandInput` extends QFrame (line 26)
+- `AIPanel` extends QWidget (line 53)
+
+**Signals:**
+- `commandSubmitted` in `AICustomCommandInput` (line 27)
+- `analysisRequested` in `AIPanel` (line 55)
+- `issuesRequested` in `AIPanel` (line 56)
+- `tipsRequested` in `AIPanel` (line 57)
+- `documentRequested` in `AIPanel` (line 58)
+- `generateRequested` in `AIPanel` (line 59)
+- `customCommandRequested` in `AIPanel` (line 60)
+
+*Summary: 3 classes, 7 signals, 293 lines*
+
+### `src\app\presentation\widgets\display_area\console.py`
+
+**Classes:**
+- `ConsoleWidget` extends QWidget (line 17)
+
+**Signals:**
+- `inputSubmitted` in `ConsoleWidget` (line 18)
+- `inputRequested` in `ConsoleWidget` (line 19)
+
+*Summary: 1 class, 2 signals, 245 lines*
+
+### `src\app\presentation\widgets\display_area\display_area.py`
+
+**Classes:**
+- `DisplayArea` extends QWidget (line 6)
+
+*Summary: 1 class, 22 lines*
+
+### `src\app\presentation\widgets\display_area\editor.py`
+
+**Classes:**
+- `AIWorkerThread` extends QThread (line 110)
+- `CodeEditor` extends QPlainTextEdit (line 178)
+- `LineNumberArea` extends QWidget (line 362)
+- `EditorWidget` extends QWidget (line 373)
+
+**Signals:**
+- `responseReady` in `AIWorkerThread` (line 114)
+- `errorOccurred` in `AIWorkerThread` (line 115)
+- `filePathChanged` in `EditorWidget` (line 374)
+- `fileSaved` in `EditorWidget` (line 375)
+- `textChanged` in `EditorWidget` (line 376)
+
+*Summary: 4 classes, 5 signals, 826 lines*
+
+### `src\app\presentation\widgets\display_area\editor_tab_widget.py`
+
+**Classes:**
+- `EditorTab` extends QWidget (line 17)
+- `EditorTabWidget` extends QWidget (line 27)
+
+**Signals:**
+- `filePathChanged` in `EditorTabWidget` (line 36)
+- `currentTabChanged` in `EditorTabWidget` (line 37)
+- `tabClosed` in `EditorTabWidget` (line 38)
+
+*Summary: 2 classes, 3 signals, 291 lines*
+
+### `src\app\presentation\widgets\display_area\test_tab_widget.py`
+
+**Classes:**
+- `TestTabWidget` extends QWidget (line 42)
+
+**Signals:**
+- `fileChanged` in `TestTabWidget` (line 51)
+- `tabClicked` in `TestTabWidget` (line 52)
+- `languageChanged` in `TestTabWidget` (line 53)
+- `filesManifestChanged` in `TestTabWidget` (line 56)
+
+*Summary: 1 class, 4 signals, 812 lines*
+
+### `src\app\presentation\widgets\display_area_widgets\__init__.py`
+
+*Summary: Module file, 31 lines*
+
+### `src\app\presentation\widgets\sidebar\__init__.py`
+
+*Summary: Module file, 11 lines*
+
+### `src\app\presentation\widgets\sidebar\limits_input.py`
+
+**Classes:**
+- `LimitsInputWidget` extends QWidget (line 27)
+
+**Signals:**
+- `timeLimitChanged` in `LimitsInputWidget` (line 35)
+- `memoryLimitChanged` in `LimitsInputWidget` (line 36)
+
+*Summary: 1 class, 2 signals, 167 lines*
+
+### `src\app\presentation\widgets\sidebar\sidebar.py`
+
+**Classes:**
+- `SidebarSection` extends QFrame (line 32)
+- `Sidebar` extends QWidget (line 49)
+
+**Signals:**
+- `button_clicked` in `Sidebar` (line 50)
+
+*Summary: 2 classes, 1 signal, 295 lines*
+
+### `src\app\presentation\widgets\sidebar\test_count_slider.py`
+
+**Classes:**
+- `TestCountSlider` extends QWidget (line 21)
+
+**Signals:**
+- `valueChanged` in `TestCountSlider` (line 32)
+
+*Summary: 1 class, 1 signal, 149 lines*
+
+### `src\app\presentation\widgets\status_view\__init__.py`
+
+*Summary: Module file, 56 lines*
+
+### `src\app\presentation\widgets\status_view\cards.py`
+
+**Classes:**
+- `ComparatorTestCard` extends BaseTestCard (line 11)
+- `ValidatorTestCard` extends BaseTestCard (line 24)
+- `BenchmarkerTestCard` extends BaseTestCard (line 37)
+
+*Summary: 3 classes, 48 lines*
+
+### `src\app\presentation\widgets\status_view\models.py`
+
+**Classes:**
+- `TestType` extends Enum (line 12)
+- `TestResult` (line 19)
+- `TestExecutionState` (line 98)
+- `TestStatistics` (line 170)
+
+*Summary: 4 classes, 180 lines*
+
+### `src\app\presentation\widgets\status_view\presets.py`
+
+**Classes:**
+- `StatusViewPreset` (line 15)
+
+*Summary: 1 class, 81 lines*
+
+### `src\app\presentation\widgets\status_view\view.py`
+
+**Classes:**
+- `StatusView` extends QWidget (line 30)
+
+**Signals:**
+- `stopRequested` in `StatusView` (line 52)
+- `backRequested` in `StatusView` (line 53)
+- `runRequested` in `StatusView` (line 54)
+
+*Summary: 1 class, 3 signals, 432 lines*
+
+### `src\app\presentation\widgets\status_view\viewmodel.py`
+
+**Classes:**
+- `StatusViewModel` (line 21)
+
+*Summary: 1 class, 297 lines*
+
+### `src\app\presentation\widgets\status_view\widgets.py`
+
+**Classes:**
+- `ProgressRing` extends QWidget (line 58)
+- `StatusHeaderSection` extends QWidget (line 146)
+- `WorkerProgressBar` extends QWidget (line 278)
+- `PerformancePanelSection` extends QWidget (line 552)
+- `VisualProgressBarSection` extends QWidget (line 616)
+- `TestResultsCardsSection` extends QWidget (line 717)
+- `BaseTestCard` extends QFrame (line 832)
+
+**Signals:**
+- `clicked` in `BaseTestCard` (line 835)
+
+*Summary: 7 classes, 1 signal, 889 lines*
+
+### `src\app\presentation\widgets\test_detail_view.py`
+
+**Classes:**
+- `TestDetailDialog` extends QDialog (line 34)
+- `ComparatorDetailDialog` extends TestDetailDialog (line 164)
+- `ValidatorDetailDialog` extends TestDetailDialog (line 246)
+- `BenchmarkerDetailDialog` extends TestDetailDialog (line 387)
+
+*Summary: 4 classes, 498 lines*
+
+### `src\app\presentation\widgets\testing_content_widget.py`
+
+**Classes:**
+- `TestingContentWidget` extends QWidget (line 30)
+
+**Signals:**
+- `filePathChanged` in `TestingContentWidget` (line 44)
+
+*Summary: 1 class, 1 signal, 220 lines*
+
+### `src\app\presentation\window_controller\__init__.py`
+
+*Summary: Module file, 28 lines*
+
+### `src\app\presentation\window_controller\base_window.py`
+
+**Classes:**
+- `SidebarWindowBase` extends QWidget (line 8)
+
+*Summary: 1 class, 155 lines*
+
+### `src\app\presentation\window_controller\window_management.py`
+
+**Classes:**
+- `WindowFactory` (line 15)
+- `WindowManager` extends QStackedWidget (line 172)
+
+*Summary: 2 classes, 251 lines*
+
+### `src\app\presentation\windows\benchmarker\__init__.py`
+
+*Summary: Module file, 10 lines*
+
+### `src\app\presentation\windows\benchmarker\view.py`
+
+**Classes:**
+- `BenchmarkerWindow` extends TestWindowBase (line 38)
+
+*Summary: 1 class, 169 lines*
+
+### `src\app\presentation\windows\comparator\__init__.py`
+
+*Summary: Module file, 10 lines*
+
+### `src\app\presentation\windows\comparator\view.py`
+
+**Classes:**
+- `ComparatorWindow` extends TestWindowBase (line 20)
+
+*Summary: 1 class, 154 lines*
+
+### `src\app\presentation\windows\editor\__init__.py`
+
+*Summary: Module file, 10 lines*
+
+### `src\app\presentation\windows\editor\view.py`
+
+**Classes:**
+- `CodeEditorWindow` extends SidebarWindowBase (line 31)
+
+*Summary: 1 class, 368 lines*
+
+### `src\app\presentation\windows\editor\widgets\__init__.py`
+
+*Summary: Module file, 1 lines*
+
+### `src\app\presentation\windows\editor\widgets\code_editor_display_area.py`
+
+**Classes:**
+- `CodeEditorDisplayArea` extends QWidget (line 27)
+
+**Signals:**
+- `filePathChanged` in `CodeEditorDisplayArea` (line 28)
+
+*Summary: 1 class, 1 signal, 174 lines*
+
+### `src\app\presentation\windows\help_center\__init__.py`
+
+*Summary: Module file, 10 lines*
+
+### `src\app\presentation\windows\help_center\view.py`
+
+**Classes:**
+- `HelpCenterWindow` extends SidebarWindowBase (line 26)
+
+*Summary: 1 class, 77 lines*
+
+### `src\app\presentation\windows\help_center\widgets\__init__.py`
+
+*Summary: Module file, 1 lines*
+
+### `src\app\presentation\windows\help_center\widgets\content.py`
+
+**Classes:**
+- `HelpSection` (line 10)
+
+*Summary: 1 class, 374 lines*
+
+### `src\app\presentation\windows\help_center\widgets\document.py`
+
+**Classes:**
+- `HelpDocument` extends QWidget (line 63)
+- `TerminalDocsWidget` extends HelpDocument (line 131)
+
+*Summary: 2 classes, 326 lines*
+
+### `src\app\presentation\windows\main\__init__.py`
+
+*Summary: Module file, 19 lines*
+
+### `src\app\presentation\windows\main\view.py`
+
+**Classes:**
+- `MainWindowConfig` (line 28)
+- `MainWindowContent` extends SidebarWindowBase (line 57)
+- `UnsavedChangesHandler` (line 208)
+- `MainWindow` extends QMainWindow (line 293)
+
+**Signals:**
+- `button_clicked` in `MainWindowContent` (line 60)
+
+*Summary: 4 classes, 1 signal, 357 lines*
+
+### `src\app\presentation\windows\main\widgets\__init__.py`
+
+*Summary: Module file, 1 lines*
+
+### `src\app\presentation\windows\main\widgets\content.py`
+
+*Summary: Module file, 77 lines*
+
+### `src\app\presentation\windows\main\widgets\document.py`
+
+**Classes:**
+- `MainWindowDocument` extends QWidget (line 75)
+- `ClickableCard` extends QFrame (line 144)
+- `ClickableCTA` extends QFrame (line 198)
+- `GlassmorphismDocument` extends MainWindowDocument (line 220)
+
+*Summary: 4 classes, 447 lines*
+
+### `src\app\presentation\windows\results\__init__.py`
+
+*Summary: Module file, 10 lines*
+
+### `src\app\presentation\windows\results\view.py`
+
+**Classes:**
+- `ResultsWindow` extends SidebarWindowBase (line 19)
+
+*Summary: 1 class, 359 lines*
+
+### `src\app\presentation\windows\results\widgets\__init__.py`
+
+*Summary: Module file, 1 lines*
+
+### `src\app\presentation\windows\results\widgets\results_widget.py`
+
+**Classes:**
+- `ResultsWidget` extends QWidget (line 50)
+
+*Summary: 1 class, 634 lines*
+
+### `src\app\presentation\windows\validator\__init__.py`
+
+*Summary: Module file, 10 lines*
+
+### `src\app\presentation\windows\validator\view.py`
+
+**Classes:**
+- `ValidatorWindow` extends TestWindowBase (line 20)
+
+*Summary: 1 class, 153 lines*

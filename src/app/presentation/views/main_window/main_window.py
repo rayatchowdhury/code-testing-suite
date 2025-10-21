@@ -127,7 +127,7 @@ class MainWindowContent(SidebarWindowBase):
             return
 
         try:
-            from src.app.presentation.windows.main.widgets.document import (
+            from src.app.presentation.views.main_window.document import (
                 create_main_window_document,
             )
 
@@ -219,12 +219,14 @@ class UnsavedChangesHandler:
         try:
             current = window_manager.get_current_window()
 
-            # Check if current window is code editor by duck typing (avoids direct window import)
-            # Code editor has editor_display attribute with has_editor property
+            # Import here to avoid circular imports
+            from src.app.presentation.views.code_editor.code_editor_window import (
+                CodeEditorWindow,
+            )
+
             if not (
                 current
-                and hasattr(current, "editor_display")
-                and hasattr(current.editor_display, "has_editor")
+                and isinstance(current, CodeEditorWindow)
                 and current.editor_display.has_editor
             ):
                 return True
@@ -309,12 +311,16 @@ class MainWindow(QMainWindow):
             WindowManager,
         )
         from src.app.presentation.navigation.router import NavigationRouter
+        from src.app.presentation.services.navigation_service import NavigationService
 
         self.window_manager = WindowManager(self)
         
         # Create injectable router
         self.router = NavigationRouter(self.window_manager, parent=self)
         self.window_manager.router = self.router
+        
+        # Keep NavigationService for backward compatibility during migration
+        NavigationService.instance().set_window_manager(self.window_manager)
         
         self.setCentralWidget(self.window_manager)
         self.window_manager.show_window("main")

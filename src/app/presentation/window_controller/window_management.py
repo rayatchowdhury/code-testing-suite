@@ -176,9 +176,14 @@ class WindowManager(QStackedWidget):
         super().__init__(parent)
         self.windows = {}
         self.current_window = None
-        self.window_history = []  # Add navigation history
+        self.router = None  # Will be set by MainWindow
+        # Removed window_history - NavigationRouter handles history tracking
+    
+    def get_navigation_router(self):
+        """Get the NavigationRouter instance if available."""
+        return self.router
 
-    def show_window(self, window_name, **kwargs):
+    def show_window(self, window_name, _add_to_history=True, **kwargs):
         """Show a window, create if doesn't exist"""
         try:
             if window_name not in self.windows:
@@ -199,33 +204,12 @@ class WindowManager(QStackedWidget):
             window.show()
             self.setCurrentWidget(window)
 
-            # Only add to history if there's a current window and it's different
-            if self.current_window and self.current_window != window_name:
-                # Add to history unless it would create a duplicate with the last entry
-                if (
-                    not self.window_history
-                    or self.window_history[-1] != self.current_window
-                ):
-                    self.window_history.append(self.current_window)
-
             self.current_window = window_name
             return True
 
         except Exception as e:
             logger.error(f"Error showing window '{window_name}': {e}", exc_info=True)
             return False
-
-    def go_back(self):
-        """Navigate back to previous window"""
-        if not self.window_history:
-            return False
-
-        previous_window = self.window_history.pop()
-        self.show_window(previous_window)
-        self.current_window = previous_window
-        # Remove the last entry to prevent duplicates
-        self.window_history = self.window_history[:-1]
-        return True
 
     def get_current_window(self):
         """Get the currently active window"""
@@ -235,10 +219,6 @@ class WindowManager(QStackedWidget):
         """Clean up a window's resources"""
         try:
             if window_name in self.windows:
-                # Also clean up from history
-                self.window_history = [
-                    w for w in self.window_history if w != window_name
-                ]
                 window = self.windows[window_name]
                 if hasattr(window, "cleanup"):
                     window.cleanup()

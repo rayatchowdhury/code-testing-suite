@@ -119,9 +119,9 @@ class NavigationRouter(QObject):
             # Get previous window from history
             previous_window = self._history.pop()
             
-            # Navigate without adding to history (already in history)
+            # Navigate without adding to history (_add_to_history=False)
             if self._window_manager:
-                success = self._window_manager.show_window(previous_window)
+                success = self._window_manager.show_window(previous_window, _add_to_history=False)
                 
                 if success:
                     logger.debug(f"NavigationRouter: Navigated back to '{previous_window}'")

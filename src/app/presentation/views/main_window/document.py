@@ -10,7 +10,7 @@ from PySide6.QtCore import *
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
-from src.app.presentation.design_system.tokens.colors import MATERIAL_COLORS
+from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
 from .content import FEATURE_DATA, WELCOME_TITLE, WELCOME_SUBTITLE, CTA_TITLE, CTA_SUBTITLE
 
 logger = logging.getLogger(__name__)
@@ -184,13 +184,23 @@ class ClickableCard(QFrame):
                         logger.error(f"Error opening config: {e}", exc_info=True)
                 elif window_name:
                     try:
+                        # Use NavigationRouter instead of WindowManager directly
+                        # This ensures navigation history is tracked properly
+                        print(f"🎯 CARD CLICKED: '{self.feature_name}' -> window_name='{window_name}'")
+                        logger.debug(f"🎯 Card clicked: '{self.feature_name}' -> window_name='{window_name}'")
                         router = main_window.window_manager.get_navigation_router()
+                        print(f"   Router found: {router is not None}")
                         if router:
+                            print(f"✅ Using NavigationRouter to navigate to '{window_name}'")
+                            logger.debug(f"✅ Using NavigationRouter to navigate to '{window_name}'")
                             router.navigate_to(window_name)
                         else:
-                            logger.warning(f"Router not available for navigation to {window_name}")
+                            print(f"⚠️ Router not available, using direct WindowManager navigation")
+                            logger.warning(f"⚠️ Router not available, using direct WindowManager navigation")
+                            # Fallback to direct navigation if router not available
                             main_window.window_manager.show_window(window_name)
                     except Exception as e:
+                        print(f"❌ ERROR navigating to {window_name}: {e}")
                         logger.error(f"Error navigating to {window_name}: {e}", exc_info=True)
         
         super().mousePressEvent(event)
@@ -207,11 +217,7 @@ class ClickableCTA(QFrame):
                 if hasattr(current, 'parent') and current.parent:
                     main_window = current.parent
                     if hasattr(main_window, 'window_manager'):
-                        router = main_window.window_manager.get_navigation_router()
-                        if router:
-                            router.navigate_to("help_center")
-                        else:
-                            main_window.window_manager.show_window("help_center")
+                        main_window.window_manager.show_window("help_center")
                         break
                 current = current.parentWidget()
         

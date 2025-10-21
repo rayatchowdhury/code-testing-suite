@@ -15,11 +15,12 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import QEvent
 from PySide6.QtGui import QCloseEvent
+from src.app.presentation.services.navigation_service import NavigationService
 
 logger = logging.getLogger(__name__)
 
 from src.app.core.tools.compiler_runner import CompilerRunner
-from src.app.presentation.windows.editor.widgets.code_editor_display_area import (
+from src.app.presentation.views.code_editor.code_editor_display_area import (
     CodeEditorDisplayArea,
 )
 from src.app.presentation.widgets.sidebar import Sidebar
