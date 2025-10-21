@@ -105,16 +105,15 @@ class BenchmarkerWindow(TestWindowBase):
         )
 
     def _create_status_view(self):
-        """Create BenchmarkerStatusView with limits."""
-        from src.app.presentation.views.benchmarker.benchmarker_status_view import (
-            BenchmarkerStatusView,
-        )
+        """Create unified StatusView with benchmarker preset (Phase 3)."""
+        from src.app.presentation.widgets.status_view import StatusView, BENCHMARKER_PRESET
 
-        return BenchmarkerStatusView(
+        status_view = StatusView(BENCHMARKER_PRESET, parent=self)
+        status_view.set_benchmarker_limits(
             time_limit_ms=self.limits_widget.get_time_limit(),
-            memory_limit_mb=self.limits_widget.get_memory_limit(),
-            parent=self,
+            memory_limit_mb=self.limits_widget.get_memory_limit()
         )
+        return status_view
 
     def _get_runner_attribute_name(self) -> str:
         """Return runner attribute name."""

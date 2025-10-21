@@ -20,7 +20,7 @@ from src.app.presentation.styles.components.code_editor_display_area import (
     OUTER_PANEL_STYLE,
     SPLITTER_STYLE,
 )
-from src.app.presentation.widgets.display_area_widgets.console import ConsoleOutput
+from src.app.presentation.widgets.display_area_widgets.console import ConsoleWidget
 from src.app.presentation.widgets.display_area_widgets.editor import EditorWidget
 from src.app.presentation.widgets.display_area_widgets.test_tab_widget import (
     TestTabWidget,
@@ -121,7 +121,7 @@ class TestingContentWidget(QWidget):
 
         outer_layout.addWidget(self.test_tabs)
 
-        self.console = ConsoleOutput()
+        self.console = ConsoleWidget()
         self.console.setMinimumWidth(200)
 
         self.splitter.addWidget(outer_panel)

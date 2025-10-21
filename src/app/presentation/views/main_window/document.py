@@ -428,11 +428,11 @@ class GlassmorphismDocument(MainWindowDocument):
 # FACTORY FUNCTION
 # =============================================================================
 
-def create_main_window_document() -> GlassmorphismWidget:
+def create_main_window_document() -> GlassmorphismDocument:
     """
     Create the main window welcome document with glassmorphism design
     
     Returns:
         Styled document widget
     """
-    return GlassmorphismWidget()
+    return GlassmorphismDocument()

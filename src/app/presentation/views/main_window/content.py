@@ -70,11 +70,6 @@ FEATURE_DATA: List[Tuple[str, str, List[str]]] = [
     ),
 ]
 
-
-]
-
-]
-
 # Welcome titles
 WELCOME_TITLE = "CODE TESTING SUITE"
 WELCOME_SUBTITLE = ">> SYSTEM READY"

@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from src.app.presentation.views.results.results_widget import TestResultsWidget
+from src.app.presentation.views.results.results_widget import ResultsWidget
 from src.app.presentation.widgets.sidebar import Sidebar
 from src.app.presentation.window_controller.base_window import SidebarWindowBase
 from src.app.presentation.services import export_test_cases_to_zip, create_export_summary
@@ -40,7 +40,7 @@ class ResultsWindow(SidebarWindowBase):
         back_btn, options_btn = self.create_footer_buttons()
         self.sidebar.setup_horizontal_footer_buttons(back_btn, options_btn)
 
-        self.display_area = TestResultsWidget()
+        self.display_area = ResultsWidget()
 
         self.setup_splitter(self.sidebar, self.display_area)
 

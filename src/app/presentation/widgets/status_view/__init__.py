@@ -1,15 +1,20 @@
 """
 Status View Module
 
-Provides presenter-based architecture for status views with proper separation:
+Provides MVVM-based architecture for status views with proper separation:
 - Models: Data structures (TestResult, TestExecutionState)
-- Presenter: Coordination logic
+- ViewModel: Coordination logic (renamed from Presenter in Phase 3)
 - Widgets: Pure UI components
 - Cards: Domain-specific test result cards
+- Presets: Configuration for different test types
+
+Phase 3: Unified status view with preset-based configuration.
 """
 
 from .models import TestResult, TestExecutionState, TestStatistics, TestType
-from .presenter import StatusViewPresenter
+from .viewmodel import StatusViewModel
+from .presets import StatusViewPreset, BENCHMARKER_PRESET, COMPARATOR_PRESET, VALIDATOR_PRESET
+from .view import StatusView
 from .widgets import (
     StatusHeaderSection,
     PerformancePanelSection,
@@ -19,14 +24,25 @@ from .widgets import (
 )
 from .cards import ComparatorTestCard, ValidatorTestCard, BenchmarkerTestCard
 
+# Backward compatibility alias
+StatusViewPresenter = StatusViewModel
+
 __all__ = [
     # Models
     'TestResult',
     'TestExecutionState',
     'TestStatistics',
     'TestType',
-    # Presenter
-    'StatusViewPresenter',
+    # ViewModel
+    'StatusViewModel',
+    'StatusViewPresenter',  # Backward compatibility
+    # View
+    'StatusView',
+    # Presets
+    'StatusViewPreset',
+    'BENCHMARKER_PRESET',
+    'COMPARATOR_PRESET',
+    'VALIDATOR_PRESET',
     # Widgets
     'StatusHeaderSection',
     'PerformancePanelSection',

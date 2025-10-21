@@ -193,8 +193,10 @@ class MainWindowContent(SidebarWindowBase):
         )
 
         try:
-            if self.router:
-                self.router.navigate_to(window_name)
+            # Get router from parent (MainWindow) - parent is already the object, not a method
+            router = getattr(self.parent, 'router', None) if self.parent else None
+            if router:
+                router.navigate_to(window_name)
         except Exception as e:
             logger.error(f"Error navigating to {window_name}: {e}", exc_info=True)
 

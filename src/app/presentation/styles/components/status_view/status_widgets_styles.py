@@ -73,10 +73,7 @@ StatusHeaderSection {{
 }}
 """
 
-
 # ============================================================================
-"""
-
 # Performance Panel Styles
 # ============================================================================
 
@@ -179,8 +176,6 @@ VisualProgressBarSection {{
     border-bottom: 1px solid {MATERIAL_COLORS['border']};
     border-left: 3px solid {MATERIAL_COLORS['accent']};
 }}
-"""
-
 """
 
 def get_progress_segment_style(state: str, position: str = 'middle') -> str:

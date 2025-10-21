@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 from src.app.core.tools.compiler_runner import CompilerRunner
 from src.app.presentation.views.code_editor.code_editor_display_area import (
-    CodeEditorDisplay,
+    CodeEditorDisplayArea,
 )
 from src.app.presentation.widgets.sidebar import Sidebar
 from src.app.presentation.window_controller.base_window import SidebarWindowBase
@@ -62,7 +62,7 @@ class CodeEditorWindow(SidebarWindowBase):
         self.sidebar.setup_horizontal_footer_buttons(back_btn, options_btn)
 
         # Create editor display
-        self.editor_display = CodeEditorDisplay()
+        self.editor_display = CodeEditorDisplayArea()
 
         # Setup splitter
         self.setup_splitter(self.sidebar, self.editor_display)

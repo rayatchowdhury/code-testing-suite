@@ -18,7 +18,7 @@ from src.app.presentation.styles.components.code_editor_display_area import (
 )
 from src.app.presentation.styles.style import MATERIAL_COLORS
 from src.app.presentation.widgets.display_area_widgets.ai_panel import AIPanel
-from src.app.presentation.widgets.display_area_widgets.console import ConsoleOutput
+from src.app.presentation.widgets.display_area_widgets.console import ConsoleWidget
 from src.app.presentation.widgets.display_area_widgets.editor import EditorWidget
 from src.app.presentation.widgets.display_area_widgets.editor_tab_widget import (
     EditorTabWidget,
@@ -71,7 +71,7 @@ class CodeEditorDisplayArea(QWidget):
         outer_layout.addWidget(left_panel)
 
         # Setup console
-        self.console = ConsoleOutput()
+        self.console = ConsoleWidget()
         self.console.setMinimumWidth(200)
 
         # Add panels to splitter

@@ -148,13 +148,19 @@ class WindowBase(QWidget):
             return self._router
         
         # Traverse up the parent chain to find router
-        current = self.parent()
+        # parent() is a QWidget method, not a property
+        current = self.parent() if callable(getattr(self, 'parent', None)) else getattr(self, 'parent', None)
         while current:
             if hasattr(current, 'router') and current.router is not None:
                 return current.router
             if hasattr(current, '_router') and current._router is not None:
                 return current._router
-            current = current.parent() if hasattr(current, 'parent') else None
+            # Get next parent - check if parent() is callable
+            if hasattr(current, 'parent'):
+                parent_method = getattr(current, 'parent')
+                current = parent_method() if callable(parent_method) else parent_method
+            else:
+                current = None
         
         # No router found
         return None

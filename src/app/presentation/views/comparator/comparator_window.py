@@ -76,9 +76,9 @@ class ComparatorWindow(TestWindowBase):
         )
     
     def _create_status_view(self):
-        """Create ComparatorStatusView."""
-        from src.app.presentation.views.comparator.comparator_status_view import ComparatorStatusView
-        return ComparatorStatusView(parent=self)
+        """Create unified StatusView with comparator preset (Phase 3)."""
+        from src.app.presentation.widgets.status_view import StatusView, COMPARATOR_PRESET
+        return StatusView(COMPARATOR_PRESET, parent=self)
     
     def _get_runner_attribute_name(self) -> str:
         """Return 'comparator' (same pattern as benchmarker)"""

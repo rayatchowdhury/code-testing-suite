@@ -1,0 +1,1 @@
+"""Integration tests for unified StatusView (Phase 3)."""

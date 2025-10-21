@@ -21,6 +21,27 @@ class SidebarWindowBase(QWidget):
 
         if title:
             self.init_sidebar(title)
+    
+    @property
+    def router(self):
+        """
+        Get navigation router from parent chain.
+        Provides access to NavigationRouter for window navigation.
+        """
+        # Check if we have our own router
+        if hasattr(self, '_router'):
+            return self._router
+        
+        # Get router from parent
+        if self.parent and hasattr(self.parent, 'router'):
+            return self.parent.router
+        
+        return None
+    
+    @router.setter
+    def router(self, value):
+        """Set navigation router."""
+        self._router = value
 
     def init_sidebar(self, title):
         """Initialize sidebar with title and common features"""

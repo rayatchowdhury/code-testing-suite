@@ -17,7 +17,7 @@ from src.app.presentation.views.main_window.main_window import (
 )
 
 # Results components
-from src.app.presentation.views.results.results_widget import TestResultsWidget
+from src.app.presentation.views.results.results_widget import ResultsWidget
 from src.app.presentation.views.results.results_window import ResultsWindow
 from src.app.presentation.views.validator.validator_window import ValidatorWindow
 from src.app.presentation.window_controller.base_window import SidebarWindowBase

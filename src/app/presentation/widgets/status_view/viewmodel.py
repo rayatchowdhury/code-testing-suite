@@ -1,28 +1,32 @@
 """
-Status View Presenter
+Status View ViewModel
 
-Implements Presenter pattern to coordinate between:
+Implements ViewModel pattern to coordinate between:
 - TestExecutionState (model)
-- StatusViewWidgets (view components)
-- Domain-specific status views (controllers)
+- StatusView (view components)
+- Test execution workflows
 
 Responsibility: Translate state changes into widget update calls.
 Does NOT contain business logic or UI rendering code.
+
+Phase 3: Renamed from presenter.py to viewmodel.py for MVVM consistency.
 """
 
 from typing import Optional
 from PySide6.QtCore import QTimer
 
 from .models import TestResult, TestExecutionState, TestStatistics
+from .presets import StatusViewPreset
 
-class BaseStatusViewPresenter:
+class StatusViewModel:
     """
-    Presenter for status view coordination.
+    ViewModel for status view coordination.
     
     Separates concerns:
     - State management (TestExecutionState)
     - Widget manipulation (knows how to update widgets)
     - Event translation (domain events → widget updates)
+    - Configuration via preset (Phase 3)
     """
     
     def __init__(
@@ -31,23 +35,26 @@ class BaseStatusViewPresenter:
         performance,  # PerformancePanelSection
         progress_bar,  # VisualProgressBarSection
         cards_section,  # TestResultsCardsSection
-        test_type: str = "comparator"
+        preset: Optional[StatusViewPreset] = None,
+        test_type: str = "comparator"  # Fallback if preset not provided
     ):
         """
-        Initialize presenter with widget references.
+        Initialize viewmodel with widget references and configuration preset.
         
         Args:
             header: Status header widget
             performance: Performance panel widget
             progress_bar: Visual progress bar widget
             cards_section: Test cards section widget
-            test_type: Type of test ("comparator", "validator", "benchmarker")
+            preset: Configuration preset for test type
+            test_type: Type of test (fallback if preset not provided)
         """
         self.header = header
         self.performance = performance
         self.progress_bar = progress_bar
         self.cards_section = cards_section
-        self.test_type = test_type
+        self.preset = preset
+        self.test_type = preset.test_type if preset else test_type
         
         self.state = TestExecutionState()
         self._active_tests = {}  # {test_number: (worker_id, start_time)}

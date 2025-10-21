@@ -76,9 +76,9 @@ class ValidatorWindow(TestWindowBase):
         )
     
     def _create_status_view(self):
-        """Create ValidatorStatusView."""
-        from src.app.presentation.views.validator.validator_status_view import ValidatorStatusView
-        return ValidatorStatusView(parent=self)
+        """Create unified StatusView with validator preset (Phase 3)."""
+        from src.app.presentation.widgets.status_view import StatusView, VALIDATOR_PRESET
+        return StatusView(VALIDATOR_PRESET, parent=self)
     
     def _get_runner_attribute_name(self) -> str:
         """Return 'validator_runner' (NOTE: different from benchmarker!)"""
