@@ -9,13 +9,11 @@ from dataclasses import dataclass, field
 from typing import Dict, Any, Optional
 from enum import Enum
 
-
 class TestType(Enum):
     """Test execution types"""
     COMPARATOR = "comparator"
     VALIDATOR = "validator"
     BENCHMARKER = "benchmarker"
-
 
 @dataclass(frozen=True)
 class TestResult:
@@ -96,7 +94,6 @@ class TestResult:
             }
         )
 
-
 @dataclass
 class TestExecutionState:
     """
@@ -168,7 +165,6 @@ class TestExecutionState:
         if speed == 0:
             return 0.0
         return (self.total_tests - self.completed_tests) / speed
-
 
 @dataclass
 class TestStatistics:

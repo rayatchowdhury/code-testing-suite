@@ -39,7 +39,6 @@ from src.app.presentation.styles.helpers.inline_styles import (
 from src.app.presentation.styles.helpers.common_styles import error_text
 from src.app.presentation.styles.style import MATERIAL_COLORS
 
-
 class TestCaseDetailWidget(QWidget):
     """Widget to display detailed information about a single test case"""
 
@@ -52,7 +51,6 @@ class TestCaseDetailWidget(QWidget):
             self._setup_error_ui(str(e))
 
     def _setup_error_ui(self, error_message):
-        """Setup UI when there's an error in test case data"""
         layout = QVBoxLayout(self)
         layout.setContentsMargins(16, 16, 16, 16)
 
@@ -116,7 +114,6 @@ class TestCaseDetailWidget(QWidget):
         layout.addWidget(tab_widget)
 
     def _create_io_tab(self):
-        """Create input/output comparison tab"""
         widget = QWidget()
         layout = QVBoxLayout(widget)
         layout.setContentsMargins(8, 8, 8, 8)
@@ -204,7 +201,6 @@ class TestCaseDetailWidget(QWidget):
         return widget
 
     def _create_mismatch_tab(self):
-        """Create detailed mismatch analysis tab"""
         widget = QWidget()
         layout = QVBoxLayout(widget)
         layout.setContentsMargins(8, 8, 8, 8)
@@ -368,7 +364,6 @@ class TestCaseDetailWidget(QWidget):
 
         return widget
 
-
 class FilesSnapshotWidget(QWidget):
     """Widget to display all files that were part of the test"""
 
@@ -381,7 +376,6 @@ class FilesSnapshotWidget(QWidget):
             self._setup_error_ui(str(e))
 
     def _setup_error_ui(self, error_message):
-        """Setup UI when there's an error in files data"""
         layout = QVBoxLayout(self)
         layout.setContentsMargins(16, 16, 16, 16)
 
@@ -485,7 +479,6 @@ class FilesSnapshotWidget(QWidget):
             layout.addWidget(error_label)
 
     def _create_code_tab(self, code_content):
-        """Create a tab with syntax-highlighted code"""
         widget = QWidget()
         layout = QVBoxLayout(widget)
         layout.setContentsMargins(8, 8, 8, 8)
@@ -516,7 +509,6 @@ class FilesSnapshotWidget(QWidget):
 
         return widget
 
-
 class DetailedResultsWidget(QWidget):
     """Comprehensive results viewer with all test details"""
 
@@ -530,7 +522,6 @@ class DetailedResultsWidget(QWidget):
             self._setup_error_ui(str(e))
 
     def _setup_error_ui(self, error_message):
-        """Setup UI when there's a critical error"""
         layout = QVBoxLayout(self)
         layout.setContentsMargins(16, 16, 16, 16)
 
@@ -579,7 +570,6 @@ class DetailedResultsWidget(QWidget):
         layout.addWidget(self.main_tabs)
 
     def _create_overview_tab(self):
-        """Create overview tab with summary information"""
         widget = QWidget()
         layout = QVBoxLayout(widget)
         layout.setContentsMargins(16, 16, 16, 16)
@@ -644,7 +634,6 @@ class DetailedResultsWidget(QWidget):
         return widget
 
     def _create_test_cases_tab(self):
-        """Create tab with detailed test case information"""
         widget = QWidget()
         layout = QVBoxLayout(widget)
         layout.setContentsMargins(8, 8, 8, 8)
@@ -658,7 +647,6 @@ class DetailedResultsWidget(QWidget):
         return widget
 
     def _create_files_tab(self):
-        """Create tab with code files snapshot"""
         widget = QWidget()
         layout = QVBoxLayout(widget)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -669,7 +657,6 @@ class DetailedResultsWidget(QWidget):
         return widget
 
     def _create_analysis_tab(self):
-        """Create tab with mismatch analysis and insights"""
         widget = QWidget()
         layout = QVBoxLayout(widget)
         layout.setContentsMargins(16, 16, 16, 16)
@@ -679,7 +666,6 @@ class DetailedResultsWidget(QWidget):
         return widget
 
     def _load_data(self):
-        """Load and display the detailed test data"""
         try:
             # Parse test details
             test_details = []
@@ -732,7 +718,6 @@ class DetailedResultsWidget(QWidget):
             self.analysis_container.addWidget(error_label)
 
     def _load_test_cases(self, test_details):
-        """Load individual test case widgets"""
         try:
             container = QWidget()
             layout = QVBoxLayout(container)
@@ -779,14 +764,12 @@ class DetailedResultsWidget(QWidget):
             self.test_cases_scroll.setWidget(error_container)
 
     def _load_analysis(self, analysis_data):
-        """Load analysis and insights"""
         if self.test_result.test_type in ["stress", "comparison"]:
             self._load_stress_analysis(analysis_data)
         elif self.test_result.test_type in ["tle", "benchmark"]:
             self._load_benchmark_analysis(analysis_data)
 
     def _load_stress_analysis(self, analysis_data):
-        """Load comparison test specific analysis"""
         analysis_card = QWidget()
         analysis_card.setStyleSheet(RESULTS_CARD_STYLE)
         layout = QVBoxLayout(analysis_card)
@@ -809,7 +792,6 @@ class DetailedResultsWidget(QWidget):
         self.analysis_container.addWidget(analysis_card)
 
     def _load_benchmark_analysis(self, analysis_data):
-        """Load benchmark test specific analysis"""
         analysis_card = QWidget()
         analysis_card.setStyleSheet(RESULTS_CARD_STYLE)
         layout = QVBoxLayout(analysis_card)

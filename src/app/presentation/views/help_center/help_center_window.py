@@ -23,7 +23,6 @@ from src.app.presentation.window_controller.base_window import SidebarWindowBase
 from .content import get_document_data
 from .document import create_help_document
 
-
 class HelpCenterWindow(SidebarWindowBase):
     def __init__(self, parent=None):
         super().__init__(parent, title=None)

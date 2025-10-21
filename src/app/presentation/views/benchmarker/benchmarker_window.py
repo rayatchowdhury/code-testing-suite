@@ -35,7 +35,6 @@ from src.app.presentation.widgets.sidebar_widgets import (
     TestCountSlider,
 )
 
-
 class BenchmarkerWindow(TestWindowBase):
     """
     Benchmarker window - uses TestWindowBase for shared test execution logic.
@@ -54,30 +53,23 @@ class BenchmarkerWindow(TestWindowBase):
     """
     
     def __init__(self, parent=None):
-        # Initialize base class
         super().__init__(parent)
 
-        # Create sidebar
         self.sidebar = Sidebar("Benchmarker")
-
-        # Add resource limits input section
         limits_section = self.sidebar.add_section("Resource Limits")
         self.limits_widget = LimitsInputWidget()
         self.limits_widget.timeLimitChanged.connect(self.handle_time_limit_changed)
         self.limits_widget.memoryLimitChanged.connect(self.handle_memory_limit_changed)
         limits_section.layout().addWidget(self.limits_widget)
 
-        # Add test count slider
         test_count_section = self.sidebar.add_section("Number of Tests")
         self.test_count_slider = TestCountSlider(mode="benchmarker")
         self.test_count_slider.valueChanged.connect(self.handle_test_count_changed)
         test_count_section.layout().addWidget(self.test_count_slider)
 
-        # Add action buttons using base class helper
         self.action_section = self.sidebar.add_section("Actions")
         self._setup_standard_sidebar(self.action_section)
 
-        # Create display area and testing content
         self.display_area = DisplayArea()
         
         tab_config = {
@@ -169,10 +161,10 @@ class BenchmarkerWindow(TestWindowBase):
         self.benchmarker.run_benchmark_test(test_count, time_limit, memory_limit)
 
     def handle_time_limit_changed(self, value):
-        print(f"Time limit changed to: {value} ms")
+        pass
 
     def handle_memory_limit_changed(self, value):
-        print(f"Memory limit changed to: {value} MB")
+        pass
 
     def handle_test_count_changed(self, value):
-        print(f"Test count changed to: {value} tests")
+        pass

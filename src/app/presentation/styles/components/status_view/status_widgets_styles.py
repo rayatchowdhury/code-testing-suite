@@ -75,7 +75,9 @@ StatusHeaderSection {{
 
 
 # ============================================================================
-# PERFORMANCE PANEL STYLES
+"""
+
+# Performance Panel Styles
 # ============================================================================
 
 PERFORMANCE_PANEL_SUMMARY_LABEL_STYLE = f"""
@@ -179,7 +181,9 @@ VisualProgressBarSection {{
 }}
 """
 
-def get_progress_segment_style(state: str = 'default', position: str = 'middle') -> str:
+"""
+
+def get_progress_segment_style(state: str, position: str = 'middle') -> str:
     """
     Get progress segment style based on state and position.
     

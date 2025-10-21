@@ -17,7 +17,6 @@ from src.app.presentation.widgets.testing_content_widget import TestingContentWi
 from src.app.presentation.widgets.sidebar import Sidebar
 from src.app.presentation.widgets.sidebar_widgets import TestCountSlider
 
-
 class ValidatorWindow(TestWindowBase):
     """Validator window - migrated to TestWindowBase."""
     
@@ -147,9 +146,7 @@ class ValidatorWindow(TestWindowBase):
         self.validator_runner.run_validation_test(test_count)
     
     def handle_test_count_changed(self, value):
-        """Handle the slider value change."""
-        print(f"Test count changed to: {value}")
-        # You can store this value or use it in your validation testing logic
+        pass
     
     def handle_validate_options(self):
         """Add your validate options handling logic here."""

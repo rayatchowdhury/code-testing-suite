@@ -7,14 +7,12 @@ These dialogs show detailed information when a test card is clicked.
 
 from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
 
-
 # Dialog Background
 TEST_DETAIL_DIALOG_STYLE = f"""
 QDialog {{
     background: {MATERIAL_COLORS['background']};
 }}
 """
-
 
 # Header Styles
 def get_test_label_style() -> str:
@@ -44,7 +42,6 @@ def get_status_label_style(passed: bool) -> str:
         font-size: 18px;
     """
 
-
 def get_header_frame_style(passed: bool) -> str:
     """
     Style for header frame container
@@ -67,7 +64,6 @@ def get_header_frame_style(passed: bool) -> str:
         }}
     """
 
-
 # Metrics Panel Styles
 TEST_DETAIL_METRICS_LABEL_STYLE = """
     font-size: 14px;
@@ -81,7 +77,6 @@ QFrame {{
     border-radius: 6px;
 }}
 """
-
 
 # Button Styles
 TEST_DETAIL_CLOSE_BUTTON_STYLE = f"""
@@ -99,13 +94,11 @@ QPushButton:hover {{
 }}
 """
 
-
 # Content Section Styles
 TEST_DETAIL_SECTION_LABEL_STYLE = """
     font-weight: bold;
     font-size: 14px;
 """
-
 
 # Text Edit Styles (for input/output display)
 TEST_DETAIL_TEXT_EDIT_MONOSPACE_STYLE = f"""
@@ -119,7 +112,6 @@ QTextEdit {{
     font-size: 12px;
 }}
 """
-
 
 def get_validator_log_style(passed: bool) -> str:
     """
@@ -144,7 +136,6 @@ def get_validator_log_style(passed: bool) -> str:
             line-height: 1.5;
         }}
     """
-
 
 def get_performance_summary_style(passed: bool) -> str:
     """

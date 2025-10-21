@@ -5,24 +5,20 @@ from PySide6.QtWidgets import QHBoxLayout, QPushButton, QSplitter, QWidget
 from src.app.presentation.styles.fonts.emoji import set_emoji_font
 from src.app.presentation.styles.style import SPLITTER_STYLE
 
-
 class SidebarWindowBase(QWidget):
     def __init__(self, parent=None, title=None):
         super().__init__(parent)
         self.parent = parent
         self.has_unsaved_changes = False
 
-        # Setup layout
         self.setLayout(QHBoxLayout())
         self.layout().setContentsMargins(0, 0, 0, 0)
         self.layout().setSpacing(0)
 
-        # Create splitter
         self.splitter = QSplitter(Qt.Horizontal)
         self.splitter.setStyleSheet(SPLITTER_STYLE)  # Add this line
         self.layout().addWidget(self.splitter)
 
-        # Initialize sidebar and display area if title is provided
         if title:
             self.init_sidebar(title)
 

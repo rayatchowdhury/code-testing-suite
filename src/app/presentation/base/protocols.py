@@ -15,7 +15,6 @@ Analysis completed from:
 from typing import Protocol, runtime_checkable, Optional
 from PySide6.QtCore import Signal
 
-
 @runtime_checkable
 class TestRunner(Protocol):
     """

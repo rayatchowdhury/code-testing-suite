@@ -135,22 +135,17 @@ class DetailedResultsWidget(QWidget):
         self._show_page(0)
 
     def _show_page(self, page_index: int):
-        """Show specific page in content stack"""
         self.current_page = page_index
         self.content_stack.setCurrentIndex(page_index)
 
     def _create_content_pages(self):
-        """Create stacked pages for sidebar navigation
-
-        Updated: 4 content pages (removed export page, now a button)
-        """
+        """Create 4 content pages: summary, code, passed tests, failed tests."""
         self.content_stack.addWidget(self._create_summary_page())
         self.content_stack.addWidget(self._create_code_page())
         self.content_stack.addWidget(self._create_passed_tests_page())
         self.content_stack.addWidget(self._create_failed_tests_page())
 
     def _create_summary_page(self):
-        """Create summary statistics page"""
         page = QWidget()
         layout = QVBoxLayout(page)
         layout.setContentsMargins(24, 24, 24, 24)
@@ -239,10 +234,7 @@ class DetailedResultsWidget(QWidget):
         return page
 
     def _create_code_page(self):
-        """Code files page with tabs for each file
-
-        Phase 5 (Task 4): Separate tabs for generator, test, correct, validator code
-        """
+        """Code files page with tabs for generator, test, correct, validator."""
         page = QWidget()
         layout = QVBoxLayout(page)
         layout.setContentsMargins(24, 24, 24, 24)
@@ -320,7 +312,6 @@ class DetailedResultsWidget(QWidget):
         return page
 
     def _create_code_viewer(self, code: str):
-        """Create code viewer widget"""
         viewer = QTextEdit()
         viewer.setPlainText(str(code))
         viewer.setReadOnly(True)
@@ -347,21 +338,14 @@ class DetailedResultsWidget(QWidget):
         return viewer
 
     def _create_passed_tests_page(self):
-        """Page showing only passed tests
-
-        Phase 5 (Task 5): Filtered view of passed tests only
-        """
+        """Page showing only passed tests."""
         return self._create_test_list_page(passed_only=True)
 
     def _create_failed_tests_page(self):
-        """Page showing only failed tests
-
-        Phase 5 (Task 5): Filtered view of failed tests with error details
-        """
+        """Page showing only failed tests with error details."""
         return self._create_test_list_page(passed_only=False)
 
     def _create_test_list_page(self, passed_only: bool):
-        """Create page with filtered test list"""
         page = QWidget()
         layout = QVBoxLayout(page)
         layout.setContentsMargins(24, 24, 24, 24)
@@ -428,11 +412,9 @@ class DetailedResultsWidget(QWidget):
         return page
 
     def _test_passed(self, test: dict) -> bool:
-        """Check if test passed"""
         return test.get("passed", test.get("status", "").lower() == "pass")
 
     def _create_test_case_widget(self, test: dict, show_errors: bool = False):
-        """Create widget for single test case"""
         widget = QFrame()
         widget.setStyleSheet(RESULTS_CARD_STYLE)
         layout = QVBoxLayout(widget)
@@ -508,7 +490,6 @@ class DetailedResultsWidget(QWidget):
         return widget
 
     def _show_export_message(self):
-        """Export current test result as ZIP"""
         try:
             # Ask user for save location
             default_name = f"test_export_{self.test_result.project_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip"
@@ -549,11 +530,7 @@ class DetailedResultsWidget(QWidget):
             )
 
     def _load_to_test(self):
-        """Load code files into the appropriate test window.
-
-        NEW APPROACH: Simply writes files to workspace and lets the window read them.
-        No complex widget navigation needed - windows automatically load from workspace.
-        """
+        """Load code files to workspace - windows automatically read from workspace."""
         try:
             from src.app.persistence.database import FilesSnapshot
             from src.app.shared.constants import WORKSPACE_DIR
@@ -652,7 +629,6 @@ class DetailedResultsWidget(QWidget):
             )
 
     def _detect_language(self, files_snapshot: dict) -> str:
-        """Detect programming language from file extensions or keys"""
         # Check for language-specific keys
         for key in files_snapshot.keys():
             if key.endswith(".py") or "py" in key.lower():
@@ -679,7 +655,6 @@ class DetailedResultsWidget(QWidget):
     # Helper methods for UI elements
 
     def _create_info_label(self, label: str, value: str, color: str = None):
-        """Create info label with label and value"""
         widget = QWidget()
         layout = QHBoxLayout(widget)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -704,7 +679,6 @@ class DetailedResultsWidget(QWidget):
         return widget
 
     def _create_section_label(self, text: str, color: str = None):
-        """Create section label"""
         label = QLabel(text)
         label_color = color if color else MATERIAL_COLORS["on_surface"]
         label.setStyleSheet(
@@ -716,7 +690,6 @@ class DetailedResultsWidget(QWidget):
         return label
 
     def _create_divider(self):
-        """Create horizontal divider"""
         line = QFrame()
         line.setFrameShape(QFrame.Shape.HLine)
         line.setStyleSheet(RESULTS_SEPARATOR_STYLE)

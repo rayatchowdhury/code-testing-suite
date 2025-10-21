@@ -3,6 +3,7 @@ Main Window Document - Glassmorphism Terminal/Glitch Design Layout
 Self-contained document widget with embedded theme and styling
 """
 
+import logging
 from typing import List, Tuple
 
 from PySide6.QtCore import *
@@ -12,6 +13,7 @@ from PySide6.QtWidgets import *
 from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
 from .content import FEATURE_DATA, WELCOME_TITLE, WELCOME_SUBTITLE, CTA_TITLE, CTA_SUBTITLE
 
+logger = logging.getLogger(__name__)
 
 # =============================================================================
 # LOCAL CONSTANTS (using centralized MATERIAL_COLORS)
@@ -65,7 +67,6 @@ SURFACE_COLORS = {
     "border": "rgba(255, 255, 255, 0.15)",
     "border_hover": "rgba(255, 255, 255, 0.5)",
 }
-
 
 # =============================================================================
 # BASE DOCUMENT WIDGET
@@ -136,7 +137,6 @@ class MainWindowDocument(QWidget):
         QTimer.singleShot(ANIMATION["fade_start_delay"], anim.start)
         self._fade_anim = anim  # Keep reference
 
-
 # =============================================================================
 # GLASSMORPHISM IMPLEMENTATION
 # =============================================================================
@@ -181,15 +181,14 @@ class ClickableCard(QFrame):
                         config_dialog = ConfigView(main_window)
                         config_dialog.exec()
                     except Exception as e:
-                        print(f"Error opening config: {e}")
+                        logger.error(f"Error opening config: {e}", exc_info=True)
                 elif window_name:
                     try:
                         main_window.window_manager.show_window(window_name)
                     except Exception as e:
-                        print(f"Error navigating to {window_name}: {e}")
+                        logger.error(f"Error navigating to {window_name}: {e}", exc_info=True)
         
         super().mousePressEvent(event)
-
 
 class ClickableCTA(QFrame):
     """Clickable CTA that opens Help Center"""
@@ -209,8 +208,7 @@ class ClickableCTA(QFrame):
         
         super().mousePressEvent(event)
 
-
-class GlassmorphismWidget(MainWindowDocument):
+class GlassmorphismDocument(MainWindowDocument):
     """Glassmorphism terminal/glitch aesthetic for main window"""
     
     def build_content(self) -> QWidget:
@@ -425,7 +423,6 @@ class GlassmorphismWidget(MainWindowDocument):
         font = QFont(family, -1, weight)
         font.setPixelSize(FONTS["sizes"][size_key])
         return font
-
 
 # =============================================================================
 # FACTORY FUNCTION

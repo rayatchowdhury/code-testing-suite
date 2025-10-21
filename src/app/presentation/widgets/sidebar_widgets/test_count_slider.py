@@ -18,7 +18,6 @@ from src.app.presentation.styles.components.inputs.input_styles import (
 )
 from src.app.presentation.styles.style import MATERIAL_COLORS
 
-
 class TestCountSlider(QWidget):
     """
     A reusable slider widget for selecting number of test cases.

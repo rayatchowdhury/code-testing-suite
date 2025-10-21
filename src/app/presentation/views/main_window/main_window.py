@@ -11,6 +11,7 @@ Features:
 - Unsaved changes detection on exit
 """
 
+import logging
 import sys
 from typing import Optional
 
@@ -18,10 +19,11 @@ from PySide6.QtCore import QTimer, Signal
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QMainWindow, QMessageBox, QPushButton
 
+logger = logging.getLogger(__name__)
+
 from src.app.presentation.widgets.display_area import DisplayArea
 from src.app.presentation.widgets.sidebar import Sidebar
 from src.app.presentation.window_controller.base_window import SidebarWindowBase
-
 
 class MainWindowConfig:
     """Configuration constants for the main window"""
@@ -52,7 +54,6 @@ class MainWindowConfig:
     CONTENT_INIT_DELAY = 0
     SPLITTER_UPDATE_DELAY = 100
 
-
 class MainWindowContent(SidebarWindowBase):
     """Main window content with sidebar navigation and display area"""
 
@@ -72,19 +73,16 @@ class MainWindowContent(SidebarWindowBase):
         """Create and configure the sidebar with all sections and buttons"""
         self.sidebar = Sidebar(MainWindowConfig.WINDOW_TITLE)
 
-        # Create sections and buttons from configuration
         for section_name, buttons in MainWindowConfig.SIDEBAR_SECTIONS.items():
             section = self.sidebar.add_section(section_name)
             for button_name in buttons:
                 self.sidebar.add_button(button_name, section)
 
-        # Add footer elements
         self.sidebar.add_results_button()
         self.sidebar.add_footer_button_divider()
         self.sidebar.add_help_button()
         self.sidebar.add_footer_divider()
 
-        # Create footer buttons
         exit_btn = self._create_footer_button("Exit", self._handle_exit_request)
         options_btn = self._create_options_button()
 
@@ -138,7 +136,7 @@ class MainWindowContent(SidebarWindowBase):
             self._content_initialized = True
 
         except Exception as e:
-            print(f"Error initializing content widget: {e}")
+            logger.error(f"Error initializing content widget: {e}", exc_info=True)
 
     def _handle_exit_request(self) -> None:
         """Handle exit request from footer button"""
@@ -182,12 +180,12 @@ class MainWindowContent(SidebarWindowBase):
             config_dialog = ConfigView(self)
             config_dialog.exec()
         except Exception as e:
-            print(f"Error opening options dialog: {e}")
+            logger.error(f"Error opening options dialog: {e}", exc_info=True)
 
     def _navigate_to_window(self, button_text: str) -> None:
         """Navigate to the specified window"""
         if not (self.parent and hasattr(self.parent, "window_manager")):
-            print(f"Cannot navigate to {button_text}: No window manager available")
+            logger.warning(f"Cannot navigate to {button_text}: No window manager available")
             return
 
         window_name = MainWindowConfig.WINDOW_MAPPING.get(
@@ -198,13 +196,12 @@ class MainWindowContent(SidebarWindowBase):
             from src.app.presentation.services.navigation_service import NavigationService
             NavigationService.instance().navigate_to(window_name)
         except Exception as e:
-            print(f"Error navigating to {window_name}: {e}")
+            logger.error(f"Error navigating to {window_name}: {e}", exc_info=True)
 
     # Deprecated method kept for backwards compatibility
     def handle_exit(self) -> None:
         """Handle exit button click (deprecated - use _handle_exit_request)"""
         self._handle_exit_request()
-
 
 class UnsavedChangesHandler:
     """Handles checking and saving unsaved changes in the code editor"""
@@ -244,7 +241,7 @@ class UnsavedChangesHandler:
             )
 
         except Exception as e:
-            print(f"Error checking unsaved changes: {e}")
+            logger.error(f"Error checking unsaved changes: {e}", exc_info=True)
             return True
 
     @staticmethod
@@ -289,10 +286,9 @@ class UnsavedChangesHandler:
                 if not tab.editor.saveFile():
                     return False
             except Exception as e:
-                print(f"Error saving file at tab {tab_index}: {e}")
+                logger.error(f"Error saving file at tab {tab_index}: {e}", exc_info=True)
                 return False
         return True
-
 
 class MainWindow(QMainWindow):
     """Main application window with window management and cleanup handling"""
@@ -316,7 +312,6 @@ class MainWindow(QMainWindow):
 
         self.window_manager = WindowManager(self)
         
-        # Phase 4C: Register WindowManager with NavigationService
         NavigationService.instance().set_window_manager(self.window_manager)
         
         self.setCentralWidget(self.window_manager)
@@ -353,4 +348,4 @@ class MainWindow(QMainWindow):
             QTimer.singleShot(0, self.window_manager.cleanup_all)
 
         except Exception as e:
-            print(f"Error during cleanup: {e}")
+            logger.error(f"Error during cleanup: {e}", exc_info=True)

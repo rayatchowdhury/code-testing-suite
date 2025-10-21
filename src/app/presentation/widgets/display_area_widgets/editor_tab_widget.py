@@ -14,7 +14,6 @@ from PySide6.QtWidgets import QMessageBox, QPushButton, QTabWidget, QVBoxLayout,
 from src.app.presentation.styles.components.editor import get_tab_style
 from src.app.presentation.widgets.display_area_widgets.editor import EditorWidget
 
-
 class EditorTab(QWidget):
     """Individual editor tab containing an EditorWidget."""
 
@@ -24,7 +23,6 @@ class EditorTab(QWidget):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self.editor)
-
 
 class EditorTabWidget(QWidget):
     """

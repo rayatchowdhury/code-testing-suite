@@ -6,7 +6,6 @@ Centralized storage for all help documentation
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
-
 @dataclass
 class HelpSection:
     """Data structure for a help section"""
@@ -19,7 +18,6 @@ class HelpSection:
         """Ensure items is always a list"""
         if self.items is None:
             self.items = []
-
 
 HELP_DOCUMENTS: Dict[str, Dict[str, any]] = {
     "Introduction": {
@@ -345,7 +343,6 @@ HELP_DOCUMENTS: Dict[str, Dict[str, any]] = {
     },
 }
 
-
 def get_document_data(topic: str) -> Dict[str, any]:
     """
     Get document data for a specific topic
@@ -371,7 +368,6 @@ def get_document_data(topic: str) -> Dict[str, any]:
             )
         ],
     }
-
 
 def get_available_topics() -> List[str]:
     """Get list of all available help topics"""

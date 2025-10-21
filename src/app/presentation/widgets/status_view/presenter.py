@@ -15,8 +15,7 @@ from PySide6.QtCore import QTimer
 
 from .models import TestResult, TestExecutionState, TestStatistics
 
-
-class StatusViewPresenter:
+class BaseStatusViewPresenter:
     """
     Presenter for status view coordination.
     

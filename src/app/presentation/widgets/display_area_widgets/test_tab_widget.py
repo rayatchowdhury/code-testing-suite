@@ -6,9 +6,12 @@ This widget provides a consistent tab interface for switching between different
 code files in test windows (Comparator, Validator, Benchmarker).
 """
 
+import logging
 import os
 
 from PySide6.QtCore import Qt, Signal
+
+logger = logging.getLogger(__name__)
 from PySide6.QtGui import QCursor
 from PySide6.QtWidgets import (
     QHBoxLayout,
@@ -35,7 +38,6 @@ from src.app.presentation.styles.constants import MATERIAL_COLORS
 from src.app.shared.constants import WORKSPACE_DIR
 from src.app.shared.constants.paths import get_workspace_file_path
 from src.app.shared.utils.workspace_utils import ensure_test_type_directory
-
 
 class TestTabWidget(QWidget):
     """
@@ -157,7 +159,6 @@ class TestTabWidget(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        # Create button panel with background
         button_panel = QWidget()
         # button_panel.setMinimumHeight(40)  # Set minimum height for button panel
         button_panel.setStyleSheet(TEST_VIEW_BUTTON_PANEL_STYLE)
@@ -165,7 +166,6 @@ class TestTabWidget(QWidget):
         button_layout.setContentsMargins(8, 8, 8, 8)  # Reduced padding for edge-to-edge
         button_layout.setSpacing(7)  # Reduced spacing for better space utilization
 
-        # Create tab buttons
         for tab_name in self.tab_config.keys():
             if self.multi_language:
                 # Create custom tab widget with responsive design
@@ -216,17 +216,14 @@ class TestTabWidget(QWidget):
 
                 lang_layout.addWidget(lang_label)
 
-                # Add widgets to tab layout - button expands, language selector fixed
                 tab_layout.addWidget(btn, 1)  # Button gets all available space
                 tab_layout.addWidget(lang_container, 0)  # Language selector fixed width
 
-                # Store references
                 self.file_buttons[tab_name] = btn
                 setattr(btn, "language_label", lang_label)
                 setattr(btn, "tab_container", tab_widget)
                 tab_widget.setProperty("hasUnsavedChanges", False)
 
-                # Add tab widget to layout with equal stretch
                 button_layout.addWidget(tab_widget, 1)  # Each tab gets equal space
             else:
                 # Legacy single-language button with stretching support
@@ -344,8 +341,8 @@ class TestTabWidget(QWidget):
                 os.makedirs(os.path.dirname(file_path), exist_ok=True)
                 with open(file_path, "w", encoding="utf-8") as f:
                     f.write(default_content)
-                print(
-                    f"  → Created new {new_language.upper()} file: {os.path.basename(file_path)}"
+                logger.info(
+                    f"Created new {new_language.upper()} file: {os.path.basename(file_path)}"
                 )
 
             # Emit signals to reload file content
@@ -553,10 +550,10 @@ class TestTabWidget(QWidget):
                 with open(template_path, "r", encoding="utf-8") as f:
                     return f.read()
             else:
-                print(f"Template file not found: {template_path}")
+                logger.warning(f"Template file not found: {template_path}")
                 # Fall through to fallback
         except Exception as e:
-            print(f"Error reading template file {template_path}: {e}")
+            logger.error(f"Error reading template file {template_path}: {e}", exc_info=True)
             # Fall through to fallback
 
         # Fallback to basic template if file not found or read error

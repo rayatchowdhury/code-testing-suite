@@ -24,7 +24,6 @@ from src.app.presentation.styles.components.inputs.input_styles import (
     INPUT_DIVIDER_STYLE,
 )
 
-
 class LimitsInputWidget(QWidget):
     """
     A reusable widget for inputting time and memory limits.

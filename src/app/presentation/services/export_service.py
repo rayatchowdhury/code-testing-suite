@@ -7,7 +7,6 @@ Provides reusable functions for exporting test results to ZIP files.
 
 import json
 
-
 def export_test_cases_to_zip(zipf, test_details: str):
     """
     Export test cases to ZIP file in organized folders.
@@ -55,7 +54,6 @@ def export_test_cases_to_zip(zipf, test_details: str):
             f"{folder}/test_{test_num}.txt",
             test_content.encode("utf-8"),
         )
-
 
 def create_export_summary(test_result) -> str:
     """

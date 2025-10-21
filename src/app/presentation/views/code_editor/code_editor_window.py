@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 from datetime import datetime
 
@@ -16,6 +17,8 @@ from PySide6.QtCore import QEvent
 from PySide6.QtGui import QCloseEvent
 from src.app.presentation.services.navigation_service import NavigationService
 
+logger = logging.getLogger(__name__)
+
 from src.app.core.tools.compiler_runner import CompilerRunner
 from src.app.presentation.views.code_editor.code_editor_display_area import (
     CodeEditorDisplay,
@@ -24,7 +27,6 @@ from src.app.presentation.widgets.sidebar import Sidebar
 from src.app.presentation.window_controller.base_window import SidebarWindowBase
 from src.app.shared.constants import EDITOR_STATE_FILE
 from src.app.shared.utils.file_operations import FileOperations
-
 
 class CodeEditorWindow(SidebarWindowBase):
     def __init__(self, parent=None):
@@ -321,7 +323,7 @@ class CodeEditorWindow(SidebarWindowBase):
             try:
                 self.db_manager.save_session(session)
             except Exception as e:
-                print(f"Error saving session to database: {e}")
+                logger.error(f"Error saving session to database: {e}", exc_info=True)
 
     def load_editor_state(self):
         """Load previously opened files"""
@@ -342,7 +344,7 @@ class CodeEditorWindow(SidebarWindowBase):
                         with open(file_path, "r", encoding="utf-8") as f:
                             content = f.read()
                     except Exception as e:
-                        print(f"Error reading file {file_path}: {e}")
+                        logger.error(f"Error reading file {file_path}: {e}", exc_info=True)
                         continue
 
                     # Create new tab for each file
@@ -357,5 +359,5 @@ class CodeEditorWindow(SidebarWindowBase):
                     )
 
         except Exception as e:
-            print(f"Error loading editor state: {e}")
+            logger.error(f"Error loading editor state: {e}", exc_info=True)
             return  # Show welcome screen on error

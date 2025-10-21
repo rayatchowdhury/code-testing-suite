@@ -47,8 +47,7 @@ from src.app.presentation.styles.components.results import (
 )
 from src.app.presentation.styles.style import MATERIAL_COLORS
 
-
-class TestResultsWidget(QWidget):
+class ResultsWidget(QWidget):
     """Widget to display test results from database"""
 
     def __init__(self, parent=None):
@@ -132,7 +131,6 @@ class TestResultsWidget(QWidget):
         filters_row1.addWidget(refresh_btn)
         filters_row1.addStretch()
 
-        # Second row: Search filters (Phase 4 Issue #12)
         filters_row2 = QHBoxLayout()
         filters_row2.setSpacing(16)
 
@@ -218,7 +216,7 @@ class TestResultsWidget(QWidget):
 
         # Results table
         self.results_table = QTableWidget()
-        self.results_table.setColumnCount(10)  # Phase 4: Added Delete column
+        self.results_table.setColumnCount(10)
         self.results_table.setHorizontalHeaderLabels(
             [
                 "Date",
@@ -299,9 +297,6 @@ class TestResultsWidget(QWidget):
             label.setStyleSheet(RESULTS_LABEL_STAT_STYLE)
             overall_layout.addWidget(label)
 
-        # Phase 3 (Issue #36): Removed success rate progress bar
-        # The text label already shows success rate percentage
-
         stats_layout.addWidget(overall_card)
 
         # Test type breakdown card
@@ -334,17 +329,10 @@ class TestResultsWidget(QWidget):
 
         layout.addLayout(stats_layout)
 
-        # Phase 3 (Issue #35): Removed Recent Activity card
-        # This was redundant with the main Results table tab
-
         return widget
 
     def _load_results(self):
-        """Load test results from database
-
-        Phase 4 (Issue #10): Optimized to use SQL-based date filtering
-        instead of Python post-processing for better performance.
-        """
+        """Load test results from database"""
         # Get filter values
         test_type = self._get_test_type_filter()
         days_filter = self._get_days_filter()
@@ -352,7 +340,7 @@ class TestResultsWidget(QWidget):
         # Load results with SQL-based filtering
         results = self.db_manager.get_test_results(
             test_type=test_type,
-            days=days_filter,  # Phase 4: Pass days to SQL query
+            days=days_filter,
             limit=100,
         )
 
@@ -363,11 +351,11 @@ class TestResultsWidget(QWidget):
         """Get the test type filter value"""
         type_text = self.test_type_combo.currentText()
         if type_text == "Comparison Tests":
-            return "comparison"  # Phase 1: Using new standardized naming
+            return "comparison"
         if type_text == "Benchmark Tests":
-            return "benchmark"  # Phase 1: Using new standardized naming
+            return "benchmark"
         if type_text == "Validator Tests":
-            return "validator"  # Phase 3 (Issue #18): Added validator support
+            return "validator"
         return None
 
     def _get_days_filter(self):
@@ -383,8 +371,7 @@ class TestResultsWidget(QWidget):
 
     def _get_status_filter(self):
         """Get the status filter value
-
-        Phase 4 (Issue #12): Added status filtering support
+        
         Returns: 'passed', 'failed', or None for all results
         """
         status_text = self.status_combo.currentText()
@@ -395,11 +382,7 @@ class TestResultsWidget(QWidget):
         return None
 
     def _perform_search(self):
-        """Perform comprehensive search with all filters
-
-        Phase 4 (Issue #12): Comprehensive search functionality
-        combining test type, date range, project name, file name, and status filters.
-        """
+        """Perform comprehensive search with all filters"""
         # Get all filter values
         test_type = self._get_test_type_filter()
         days_filter = self._get_days_filter()
@@ -421,10 +404,7 @@ class TestResultsWidget(QWidget):
         self._update_statistics(results)
 
     def _clear_search(self):
-        """Clear all search filters and reload
-
-        Phase 4 (Issue #12): Clear search functionality
-        """
+        """Clear all search filters and reload"""
         self.project_search.clear()
         self.file_search.clear()
         self.status_combo.setCurrentIndex(0)  # Reset to "All"
@@ -440,9 +420,7 @@ class TestResultsWidget(QWidget):
                 "%Y-%m-%d %H:%M"
             )
             date_item = QTableWidgetItem(date_str)
-            date_item.setData(
-                1, result.id
-            )  # Phase 4: Store result ID for export/delete
+            date_item.setData(1, result.id)
             self.results_table.setItem(row, 0, date_item)
 
             # Test type
@@ -496,7 +474,6 @@ class TestResultsWidget(QWidget):
             )
             self.results_table.setCellWidget(row, 8, detail_btn)
 
-            # Delete button (Phase 4 Issue #14)
             delete_btn = QPushButton("Delete")
             delete_btn.setStyleSheet(RESULTS_BUTTON_STYLE)
             delete_btn.clicked.connect(
@@ -508,11 +485,7 @@ class TestResultsWidget(QWidget):
         self.current_results = results
 
     def _show_detailed_view(self, test_result):
-        """Show detailed view for a specific test result
-
-        Phase 5 (Issue #34): Integrates into parent window's display area
-        following the same pattern as status views in comparator/validator/benchmarker
-        """
+        """Show detailed view for a specific test result"""
         try:
             # Get parent window using stored reference (not self.parent() which returns splitter)
             parent_window = getattr(self, "results_window", None)
@@ -543,9 +516,7 @@ class TestResultsWidget(QWidget):
 
     def _delete_selected_result(self, result_id: int):
         """Delete a selected test result with confirmation
-
-        Phase 4 (Issue #14): Delete functionality for individual test results
-
+        
         Args:
             result_id: The ID of the test result to delete
         """
@@ -586,7 +557,6 @@ class TestResultsWidget(QWidget):
             self.total_tests_label.setText("Total Tests: 0")
             self.success_rate_label.setText("Success Rate: 0%")
             self.avg_time_label.setText("Average Time: 0s")
-            # Phase 3 (Issue #36): Removed success_progress.setValue(0)
             self.compare_tests_label.setText("Comparison Tests: 0")
             self.benchmark_tests_label.setText("Benchmark Tests: 0")
             self.validator_tests_label.setText("Validator Tests: 0")
@@ -610,16 +580,9 @@ class TestResultsWidget(QWidget):
         self.total_tests_label.setText(f"Total Tests: {total_tests}")
         self.success_rate_label.setText(f"Success Rate: {success_rate:.1f}%")
         self.avg_time_label.setText(f"Average Time: {avg_time:.2f}s")
-        # Phase 3 (Issue #36): Removed success_progress.setValue(int(success_rate))
         self.compare_tests_label.setText(f"Comparison Tests: {comparison_count}")
         self.benchmark_tests_label.setText(f"Benchmark Tests: {benchmark_count}")
         self.validator_tests_label.setText(f"Validator Tests: {validator_count}")
-
-        # Phase 3 (Issue #35): Removed _update_recent_activity call
-        # Recent Activity card was removed as redundant
-
-    # Phase 3 (Issue #35): Removed _update_recent_activity() method
-    # Recent Activity table was removed as redundant with main Results table
 
     def _filter_results(self):
         """Handle filter changes"""

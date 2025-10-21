@@ -29,7 +29,6 @@ from src.app.presentation.styles.components.sidebar_dividers import (
     SIDEBAR_VERTICAL_FOOTER_DIVIDER_STYLE,
 )
 
-
 class SidebarSection(QFrame):
     def __init__(self, title, parent=None):
         super().__init__(parent)
@@ -47,7 +46,6 @@ class SidebarSection(QFrame):
     def add_widget(self, widget):
         self.layout().addWidget(widget)
 
-
 class Sidebar(QWidget):
     button_clicked = Signal(str)
 
@@ -56,12 +54,10 @@ class Sidebar(QWidget):
         self.setObjectName("sidebar")
         self.setStyleSheet(SIDEBAR_STYLE)
 
-        # Set consistent size constraints
         self.setMinimumWidth(250)
         self.setMaximumWidth(350)
         self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
 
-        # Create main layout
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
@@ -82,7 +78,6 @@ class Sidebar(QWidget):
 
         main_layout.addWidget(self.header)
 
-        # Add divider after header
         self.add_divider(main_layout)
 
         # 2. Scrollable Content Section
@@ -94,7 +89,6 @@ class Sidebar(QWidget):
         scroll.setStyleSheet(SCROLLBAR_STYLE)
         scroll.setFrameShape(QFrame.NoFrame)  # Add this line
 
-        # Create content widget for scroll area
         self.content = QWidget()
         self.content.setObjectName("sidebar_content")
         self.content_layout = QVBoxLayout(self.content)
@@ -113,34 +107,28 @@ class Sidebar(QWidget):
         footer_layout.setSpacing(0)
         self.back_button = None
 
-        # Add divider before adding footer
         self.add_divider(main_layout)
 
-        # Now add the footer
         main_layout.addWidget(self.footer)
 
     def add_divider(self, layout):
         """Add a visually appealing horizontal divider line with padding."""
-        # Create container for the divider section with background
         container = QWidget()
         container.setStyleSheet(SIDEBAR_DIVIDER_CONTAINER_STYLE)
         container_layout = QVBoxLayout(container)
         container_layout.setContentsMargins(0, 0, 0, 0)
         container_layout.setSpacing(0)
 
-        # Add top spacing
         top_space = QWidget()
         top_space.setFixedHeight(10)
         top_space.setStyleSheet(SIDEBAR_DIVIDER_SPACE_STYLE)
         container_layout.addWidget(top_space)
 
-        # Create a widget to serve as the divider
         line_widget = QWidget()
         line_widget.setFixedHeight(3)
         line_widget.setStyleSheet(SIDEBAR_MAIN_DIVIDER_STYLE)
         container_layout.addWidget(line_widget)
 
-        # Add bottom spacing
         bottom_space = QWidget()
         bottom_space.setFixedHeight(10)
         bottom_space.setStyleSheet(SIDEBAR_DIVIDER_SPACE_STYLE)
@@ -151,26 +139,22 @@ class Sidebar(QWidget):
 
     def add_footer_divider(self):
         """Add a divider in the footer with the same style as the main divider"""
-        # Create container for the footer divider section
         container = QWidget()
         container.setStyleSheet(SIDEBAR_FOOTER_CONTAINER_STYLE)
         container_layout = QVBoxLayout(container)
         container_layout.setContentsMargins(0, 0, 0, 0)
         container_layout.setSpacing(0)
 
-        # Add top spacing
         top_space = QWidget()
         top_space.setFixedHeight(1)
         top_space.setStyleSheet(SIDEBAR_FOOTER_SPACE_STYLE)
         container_layout.addWidget(top_space)
 
-        # Create a widget to serve as the divider
         line_widget = QWidget()
         line_widget.setFixedHeight(1)
         line_widget.setStyleSheet(SIDEBAR_FOOTER_DIVIDER_STYLE)
         container_layout.addWidget(line_widget)
 
-        # Add bottom spacing
         bottom_space = QWidget()
         bottom_space.setFixedHeight(2)
         bottom_space.setStyleSheet(SIDEBAR_FOOTER_SPACE_STYLE)

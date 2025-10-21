@@ -16,14 +16,12 @@ from PySide6.QtWidgets import (
 
 from src.app.presentation.styles.components import AI_PANEL_STYLE, CUSTOM_COMMAND_STYLE
 
-
 class AIActionButton(QPushButton):
     def __init__(self, text, parent=None):
         super().__init__(text, parent)
         self.setObjectName("ai_button")
         self.setFixedHeight(24)  # Reduced height
         self.setCursor(Qt.PointingHandCursor)
-
 
 class AICustomCommandInput(QFrame):
     commandSubmitted = Signal(str)
@@ -51,7 +49,6 @@ class AICustomCommandInput(QFrame):
         if command:
             self.commandSubmitted.emit(command)
             self.input.clear()
-
 
 class AIPanel(QWidget):
     # Define signals for each action

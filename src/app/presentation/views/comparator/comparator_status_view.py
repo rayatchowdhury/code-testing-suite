@@ -11,8 +11,7 @@ from src.app.presentation.base.status_view_base import StatusViewBase
 from src.app.presentation.widgets.status_view import TestResult, ComparatorTestCard
 from src.app.presentation.widgets.test_detail_view import ComparatorDetailDialog
 
-
-class ComparatorStatusView(StatusViewBase):
+class ComparatorStatusView(BaseStatusView):
     """
     Comparator-specific status view.
     

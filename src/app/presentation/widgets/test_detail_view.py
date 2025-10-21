@@ -31,7 +31,6 @@ from src.app.presentation.styles.components.dialogs.test_detail_styles import (
     get_performance_summary_style,
 )
 
-
 class TestDetailDialog(QDialog):
     """
     Base detail view dialog for test cards.
@@ -162,7 +161,6 @@ class TestDetailDialog(QDialog):
         """Apply dialog styling"""
         self.setStyleSheet(TEST_DETAIL_DIALOG_STYLE)
 
-
 class ComparatorDetailDialog(TestDetailDialog):
     """Detail view for comparator test cards"""
 
@@ -244,7 +242,6 @@ class ComparatorDetailDialog(TestDetailDialog):
     def _style_text_edit(self, edit: QTextEdit):
         """Apply consistent styling to text edits"""
         edit.setStyleSheet(TEST_DETAIL_TEXT_EDIT_MONOSPACE_STYLE)
-
 
 class ValidatorDetailDialog(TestDetailDialog):
     """Detail view for validator test cards"""
@@ -386,7 +383,6 @@ class ValidatorDetailDialog(TestDetailDialog):
         else:
             # Input/Output sections use monospace font
             edit.setStyleSheet(TEST_DETAIL_TEXT_EDIT_MONOSPACE_STYLE)
-
 
 class BenchmarkerDetailDialog(TestDetailDialog):
     """Detail view for benchmarker test cards"""

@@ -12,7 +12,6 @@ from PySide6.QtWidgets import *
 from src.app.presentation.styles.constants.colors import MATERIAL_COLORS
 from .content import HelpSection
 
-
 # =============================================================================
 # LOCAL CONSTANTS (using centralized MATERIAL_COLORS)
 # =============================================================================
@@ -56,7 +55,6 @@ UI = {
 
 # Surface color (semi-transparent overlay)
 SURFACE_COLOR = "rgba(255, 255, 255, 0.03)"
-
 
 # =============================================================================
 # BASE DOCUMENT WIDGET
@@ -125,7 +123,6 @@ class HelpDocument(QWidget):
         anim.setEndValue(1)
         QTimer.singleShot(ANIMATION["fade_start_delay"], anim.start)
         self._fade_anim = anim  # Keep reference
-
 
 # =============================================================================
 # TERMINAL DOCS IMPLEMENTATION
@@ -310,7 +307,6 @@ class TerminalDocsWidget(HelpDocument):
         font = QFont(family, -1, weight)
         font.setPixelSize(FONTS["sizes"][size_key])
         return font
-
 
 # =============================================================================
 # FACTORY FUNCTION

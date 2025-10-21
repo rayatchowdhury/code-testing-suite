@@ -27,7 +27,6 @@ from src.app.presentation.widgets.display_area_widgets.test_tab_widget import (
 )
 from src.app.shared.constants import WORKSPACE_DIR
 
-
 class TestingContentWidget(QWidget):
     """
     Unified content widget for test windows (Benchmarker, Validator, Comparator).
@@ -74,11 +73,9 @@ class TestingContentWidget(QWidget):
         self.default_tab = default_tab
         self.compiler_runner_class = compiler_runner_class
 
-        # Initialize UI
         self._setup_ui()
         self._connect_signals()
 
-        # Initialize compiler runner if provided
         if compiler_runner_class:
             self.compiler_runner = compiler_runner_class(self.console)
 
@@ -94,13 +91,11 @@ class TestingContentWidget(QWidget):
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
 
-        # Create splitter
         self.splitter = QSplitter(Qt.Horizontal)
         self.splitter.setStyleSheet(SPLITTER_STYLE)
         self.splitter.setChildrenCollapsible(False)
         self.splitter.setHandleWidth(0)
 
-        # Create outer panel
         outer_panel = QWidget()
         outer_panel.setMinimumWidth(400)
         outer_panel.setStyleSheet(OUTER_PANEL_STYLE)
@@ -108,10 +103,8 @@ class TestingContentWidget(QWidget):
         outer_layout.setContentsMargins(3, 3, 3, 3)
         outer_layout.setSpacing(0)
 
-        # Create editor
         self.editor = EditorWidget()
 
-        # Create test tabs widget with multi-language support
         self.test_tabs = TestTabWidget(
             parent=self,
             tab_config=self.tab_config,
@@ -121,53 +114,41 @@ class TestingContentWidget(QWidget):
             test_type=self.test_type,
         )
 
-        # Set editor as the content widget for tabs
         self.test_tabs.set_content_widget(self.editor)
 
-        # Initialize AI panel with appropriate type
         self.ai_panel = self.editor.get_ai_panel()
         self.ai_panel.set_panel_type(self.ai_panel_type)
 
-        # Add test tabs to outer panel
         outer_layout.addWidget(self.test_tabs)
 
-        # Setup console
         self.console = ConsoleOutput()
         self.console.setMinimumWidth(200)
 
-        # Add panels to splitter
         self.splitter.addWidget(outer_panel)
         self.splitter.addWidget(self.console)
 
-        # Configure splitter
         self.splitter.setCollapsible(0, False)
         self.splitter.setCollapsible(1, True)
         self.splitter.setSizes([700, 300])
 
-        # Set splitter as main widget
         main_layout.addWidget(self.splitter)
 
     def _connect_signals(self):
         """Connect UI signals to their handlers."""
-        # Connect test tabs signals
         self.test_tabs.fileChanged.connect(self._handle_file_changed)
         self.test_tabs.tabClicked.connect(self._handle_tab_clicked)
         self.test_tabs.languageChanged.connect(self._handle_language_changed)
 
-        # Connect console compile & run button
         self.console.compile_run_btn.clicked.connect(self.compile_and_run_code)
 
-        # Connect editor signals
         self.editor.fileSaved.connect(self.handle_file_saved)
         self.editor.textChanged.connect(self._handle_text_changed)
 
-        # Connect AI panel refresh to editor file changes (if method exists)
         if hasattr(self.ai_panel, "refresh_context"):
             self.filePathChanged.connect(self.ai_panel.refresh_context)
 
     def _handle_file_changed(self, file_path):
         """Handle file change from test tabs."""
-        # Load file in editor
         self.editor.openFile(file_path)
         # Mark tab as saved since we just loaded an existing file
         self.test_tabs.mark_current_tab_saved()
@@ -186,8 +167,6 @@ class TestingContentWidget(QWidget):
 
     def _handle_language_changed(self, tab_name, language):
         """Handle language switching in tabs."""
-        print(f"{self.test_type.capitalize()}: Switched {tab_name} to {language.upper()}")
-        # Update AI panel context if needed
         if hasattr(self.ai_panel, "refresh_context"):
             self.ai_panel.refresh_context()
 

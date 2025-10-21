@@ -48,7 +48,6 @@ _syntax_highlighters = None
 _editor_ai = None
 _ai_panel = None
 
-
 def _import_markdown():
     global _markdown
     if _markdown is None:
@@ -64,7 +63,6 @@ def _import_markdown():
             _markdown = plain_text_fallback
     return _markdown
 
-
 def _import_pygments():
     global _pygments_highlight, _pygments_formatter, _pygments_lexer
     if _pygments_highlight is None:
@@ -76,7 +74,6 @@ def _import_pygments():
         _pygments_formatter = HtmlFormatter
         _pygments_lexer = get_lexer_by_name
     return _pygments_highlight, _pygments_formatter, _pygments_lexer
-
 
 def _import_syntax_highlighters():
     global _syntax_highlighters
@@ -94,7 +91,6 @@ def _import_syntax_highlighters():
         }
     return _syntax_highlighters
 
-
 def _import_editor_ai():
     global _editor_ai
     if _editor_ai is None:
@@ -103,7 +99,6 @@ def _import_editor_ai():
         _editor_ai = EditorAI
     return _editor_ai
 
-
 def _import_ai_panel():
     global _ai_panel
     if _ai_panel is None:
@@ -111,7 +106,6 @@ def _import_ai_panel():
 
         _ai_panel = AIPanel
     return _ai_panel
-
 
 class AIWorkerThread(QThread):
     """Thread for processing AI requests without blocking the UI."""
@@ -180,7 +174,6 @@ class AIWorkerThread(QThread):
             self.errorOccurred.emit(
                 f"AI processing failed: {str(e)}\n\nDetails:\n{error_details}", "Error"
             )
-
 
 class CodeEditor(QPlainTextEdit):
     def __init__(self):
@@ -366,7 +359,6 @@ class CodeEditor(QPlainTextEdit):
                 break
         return indent
 
-
 class LineNumberArea(QWidget):
     def __init__(self, editor):
         super().__init__(editor)
@@ -377,7 +369,6 @@ class LineNumberArea(QWidget):
 
     def paintEvent(self, event):
         self.codeEditor.lineNumberAreaPaintEvent(event)
-
 
 class EditorWidget(QWidget):
     filePathChanged = Signal()

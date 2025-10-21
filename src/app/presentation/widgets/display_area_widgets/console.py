@@ -14,8 +14,7 @@ from src.app.presentation.styles import CONSOLE_STYLE, MATERIAL_COLORS
 from src.app.presentation.styles.components.console_colors import CONSOLE_COLORS
 from src.app.presentation.styles.components.scrollbar import SCROLLBAR_STYLE
 
-
-class ConsoleOutput(QWidget):
+class ConsoleWidget(QWidget):
     inputSubmitted = Signal(str)
     inputRequested = Signal()  # Add this signal
 
@@ -24,21 +23,17 @@ class ConsoleOutput(QWidget):
         self.setObjectName("console_widget")
         self.setStyleSheet(CONSOLE_STYLE)  # Single style import includes container
 
-        # Create a container with dark glassmorphism
         self.container = QWidget()
         self.container.setObjectName("console_container")
 
         container_layout = QVBoxLayout(self.container)
         container_layout.setContentsMargins(0, 0, 0, 0)
 
-        # Setup the console UI inside the container
         self.setObjectName("console_widget")
 
-        # Initialize layout
         self.layout = QVBoxLayout()
         self.layout.setContentsMargins(0, 0, 0, 0)
 
-        # Create a container widget for content
         content_widget = QWidget()
         content_widget.setObjectName("console_content")
         content_layout = QVBoxLayout(content_widget)

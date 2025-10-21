@@ -12,7 +12,6 @@ from PySide6.QtGui import QShowEvent
 from .content_window_base import ContentWindowBase
 from .protocols import TestRunner
 
-
 class TestWindowBase(ContentWindowBase):
     """
     Base class for Benchmarker, Validator, Comparator windows.
@@ -59,12 +58,6 @@ class TestWindowBase(ContentWindowBase):
     """
     
     def __init__(self, parent=None):
-        """
-        Initialize TestWindowBase.
-        
-        Args:
-            parent: Parent widget
-        """
         super().__init__(parent)
         self._runner: Optional[TestRunner] = None
         self._status_view: Optional['QWidget'] = None
@@ -79,56 +72,28 @@ class TestWindowBase(ContentWindowBase):
     
     @abstractmethod
     def _create_runner(self) -> TestRunner:
-        """
-        Create specific runner (Benchmarker, Validator, Comparator).
-        
-        Returns:
-            TestRunner instance
-        """
+        """Create specific runner (Benchmarker, Validator, Comparator)."""
         pass
     
     @abstractmethod
     def _create_status_view(self) -> 'QWidget':
-        """
-        Create specific status view.
-        
-        Returns:
-            Status view widget
-        """
+        """Create specific status view."""
         pass
     
     @abstractmethod
     def _get_runner_attribute_name(self) -> str:
-        """
-        Get the attribute name for the runner.
-        
-        Returns:
-            "benchmarker", "validator_runner", or "comparator"
-        """
+        """Return runner attribute name: 'benchmarker', 'validator_runner', or 'comparator'."""
         pass
     
     @abstractmethod
     def _get_run_method_name(self) -> str:
-        """
-        Get the run method name for the runner.
-        
-        Returns:
-            "run_benchmark_test", "run_validation_test", or "run_comparison_test"
-        """
+        """Return run method name: 'run_benchmark_test', 'run_validation_test', or 'run_comparison_test'."""
         pass
     
     # ===== SHARED IMPLEMENTATION (588 lines extracted) =====
     
     def _setup_standard_sidebar(self, action_section):
-        """
-        Setup standard sidebar buttons (Compile, Run, Results, Help, Back, Options).
-        
-        This consolidates duplicated sidebar setup code from all test windows.
-        
-        Args:
-            action_section: The action section widget to add buttons to
-        """
-        # Add Compile and Run buttons
+        """Setup standard sidebar buttons (Compile, Run, Results, Help, Back, Options)."""
         for button_text in ["Compile", "Run"]:
             btn = self.sidebar.add_button(button_text, action_section)
             btn.clicked.connect(
@@ -139,7 +104,6 @@ class TestWindowBase(ContentWindowBase):
             elif button_text == "Run":
                 self.run_btn = btn
 
-        # Add standard footer buttons
         self.sidebar.add_results_button()
         self.sidebar.add_footer_button_divider()
         self.sidebar.add_help_button()
@@ -149,13 +113,10 @@ class TestWindowBase(ContentWindowBase):
         self.sidebar.setup_horizontal_footer_buttons(back_btn, options_btn)
     
     def _check_unsaved_changes(self) -> bool:
-        """
-        Check for unsaved changes and prompt user to save.
-        
-        This consolidates duplicated unsaved changes logic from all test windows.
+        """Check for unsaved changes and prompt user to save.
         
         Returns:
-            bool: True if we should proceed (saved or discarded), False if cancelled
+            True if should proceed (saved/discarded), False if cancelled
         """
         for btn_name, btn in self.testing_content.file_buttons.items():
             if btn.property("hasUnsavedChanges"):
@@ -180,26 +141,16 @@ class TestWindowBase(ContentWindowBase):
         return True
     
     def _finalize_window_setup(self):
-        """
-        Finalize window setup after creating display area and testing content.
-        
-        This consolidates duplicated window setup code from all test windows.
-        Connects signals and initializes the tool.
-        """
-        # Setup splitter with sidebar and display area
+        """Finalize window setup - connect signals and initialize tool."""
         self.setup_splitter(self.sidebar, self.display_area)
 
-        # Connect signals
         self.sidebar.button_clicked.connect(self.handle_button_click)
 
-        # Initialize tool with multi-language support
         self._initialize_tool()
 
-        # Connect filesManifestChanged signal to reinitialize tool
         self.testing_content.test_tabs.filesManifestChanged.connect(self._on_files_changed)
     
     def _initialize_tool(self):
-        """Initialize or reinitialize the tool with current file manifest."""
         # Disconnect old runner's signals if it exists
         runner_attr = self._get_runner_attribute_name()
         if hasattr(self, runner_attr) and getattr(self, runner_attr):
@@ -212,31 +163,25 @@ class TestWindowBase(ContentWindowBase):
                 # Signals may already be disconnected or object deleted
                 pass
 
-        # Load configuration
         config = self._load_config()
 
-        # Get file manifest from test tabs
         manifest = self.testing_content.test_tabs.get_compilation_manifest()
         files = manifest["files"]
 
-        # Create runner using template method
         runner = self._create_runner()
         
         # Store runner with appropriate attribute name
         setattr(self, runner_attr, runner)
         self._runner = runner
         
-        # Connect compilation output to console
         runner.compilationOutput.connect(
             self.testing_content.console.displayOutput
         )
 
-        # Connect runner signals to handle UI state changes
         runner.testingStarted.connect(self._on_testing_started)
         runner.testingCompleted.connect(self._on_testing_completed)
     
     def _load_config(self):
-        """Load configuration for multi-language compilation."""
         try:
             from src.app.core.config import ConfigManager
 
@@ -247,12 +192,11 @@ class TestWindowBase(ContentWindowBase):
             return {}
     
     def _on_files_changed(self):
-        """Handle file manifest changes (language switches)."""
         # Reinitialize tool with new file configuration
         self._initialize_tool()
     
     def showEvent(self, event: 'QShowEvent'):
-        """Handle window show event - reload AI config and refresh AI panels."""
+        """Reload AI config and refresh AI panels."""
         super().showEvent(event)
         # Reload AI configuration to pick up any changes made while window was closed
         try:
@@ -263,7 +207,6 @@ class TestWindowBase(ContentWindowBase):
             pass  # AI module not available
     
     def _on_testing_started(self):
-        """Handle testing started signal - create and show status view."""
         # Create status view using template method
         status_view = self._create_status_view()
 
@@ -274,16 +217,13 @@ class TestWindowBase(ContentWindowBase):
         # Replace Results button with Save button (Phase 2: Issue #39)
         self.sidebar.replace_results_with_save_button()
 
-        # Store reference
         self.status_view = status_view
         self.current_status_view = status_view
 
-        # Get worker and connect signals
         worker = runner.get_current_worker()
         if worker and status_view:
             self._connect_worker_to_status_view(worker, status_view)
 
-            # Connect allTestsCompleted to switch buttons
             try:
                 if hasattr(worker, "allTestsCompleted"):
                     worker.allTestsCompleted.connect(self._switch_to_completed_mode)
@@ -301,12 +241,10 @@ class TestWindowBase(ContentWindowBase):
         self._switch_to_test_mode()
     
     def _on_testing_completed(self):
-        """Handle testing completed signal - switch to completed mode but stay in status view."""
         # When tests are stopped, switch to Run button but keep status view open
         self._switch_to_completed_mode()
     
     def _switch_to_test_mode(self):
-        """Hide Compile and Run buttons, show Stop button when tests start."""
         self.status_view_active = True
 
         # Hide Compile button during test execution
@@ -318,7 +256,6 @@ class TestWindowBase(ContentWindowBase):
             self.run_btn.hide()
 
         if not self.stop_btn:
-            # Create Stop button dynamically
             from PySide6.QtWidgets import QPushButton
             self.stop_btn = self.sidebar.add_button("Stop", self.action_section)
             self.stop_btn.clicked.connect(lambda: self.handle_action_button("Stop"))
@@ -331,12 +268,10 @@ class TestWindowBase(ContentWindowBase):
             self.rerun_btn.hide()
     
     def _switch_to_completed_mode(self):
-        """Show Run button after tests complete (while viewing status)."""
         # Hide Stop button
         if self.stop_btn:
             self.stop_btn.hide()
 
-        # Create and show Rerun button
         if not hasattr(self, "rerun_btn") or not self.rerun_btn:
             from PySide6.QtWidgets import QPushButton
             self.rerun_btn = self.sidebar.add_button("Run", self.action_section)
@@ -346,7 +281,6 @@ class TestWindowBase(ContentWindowBase):
             self.rerun_btn.show()
     
     def _handle_rerun_tests(self):
-        """Handle rerun button click - trigger test execution again."""
         if hasattr(self, "current_status_view") and self.current_status_view:
             # Emit runRequested signal from status view
             self.current_status_view.runRequested.emit()
@@ -354,7 +288,6 @@ class TestWindowBase(ContentWindowBase):
             self._switch_to_test_mode()
     
     def _restore_normal_mode(self):
-        """Full restoration when returning to test window - show all buttons."""
         self.status_view_active = False
 
         # Restore Results button (Phase 2: Issue #39)
@@ -380,20 +313,16 @@ class TestWindowBase(ContentWindowBase):
         self.refresh_ai_panels()
     
     def enable_save_button(self):
-        """Enable the Save button after tests complete (Phase 2: Issue #39)."""
         self.sidebar.enable_save_button()
     
     def mark_results_saved(self):
-        """Mark results as saved in the UI (Phase 2: Issue #39)."""
         self.sidebar.mark_results_saved()
     
     def refresh_ai_panels(self):
-        """Refresh AI panel visibility based on current configuration."""
         if hasattr(self.testing_content, "ai_panel"):
             self.testing_content.ai_panel.refresh_visibility()
     
     def handle_button_click(self, button_text: str):
-        """Handle sidebar button clicks."""
         if button_text == "Back":
             # If status view is active, restore it instead of navigating away
             if self.status_view_active:
@@ -414,20 +343,11 @@ class TestWindowBase(ContentWindowBase):
             super().handle_button_click(button_text)
     
     def _get_runner(self):
-        """Get the test runner instance."""
         runner_attr = self._get_runner_attribute_name()
         return getattr(self, runner_attr) if hasattr(self, runner_attr) else None
     
     def _integrate_status_view(self, status_view):
-        """
-        Integrate status view into display area.
-
-        This method handles the display area manipulation when switching to
-        test execution view. Hides the testing content without deleting it.
-
-        Args:
-            status_view: The status view widget to display
-        """
+        """Integrate status view into display area (hides testing content without deleting)."""
         if not hasattr(self, "display_area"):
             return
 
@@ -456,12 +376,7 @@ class TestWindowBase(ContentWindowBase):
             status_view.show()
     
     def _restore_display_area(self):
-        """
-        Restore original display area content.
-
-        This method handles the display area manipulation when returning from
-        test execution view. Restores the testing content without recreating it.
-        """
+        """Restore original display area content (without recreating)."""
         if not hasattr(self, "display_area"):
             return
 
@@ -485,15 +400,7 @@ class TestWindowBase(ContentWindowBase):
         self._original_display_content.show()
     
     def _connect_worker_to_status_view(self, worker, status_view):
-        """
-        Connect worker signals to status view.
-
-        This centralizes the signal connection logic for status views.
-
-        Args:
-            worker: Test worker instance
-            status_view: Status view widget instance
-        """
+        """Connect worker signals to status view."""
         # Check if worker is valid (not deleted)
         if not worker:
             return
@@ -541,21 +448,15 @@ class TestWindowBase(ContentWindowBase):
             status_view.runRequested.connect(self._on_run_requested)
     
     def _on_stop_requested(self):
-        """Handle stop request from status view - stop the runner."""
         runner = self._get_runner()
         if runner and hasattr(runner, "stop"):
             runner.stop()
     
     def _on_back_requested(self):
-        """Handle back request from status view - restore display area."""
         self._restore_display_area()
         self._restore_normal_mode()
     
     def _on_run_requested(self):
-        """
-        Handle run request from status view - re-run tests.
-
-        Subclasses should override to implement their specific test execution.
-        """
+        """Override in subclasses to implement test execution."""
         # Override in subclasses
         pass

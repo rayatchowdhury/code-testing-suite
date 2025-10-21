@@ -24,8 +24,7 @@ from src.app.presentation.widgets.display_area_widgets.editor_tab_widget import 
     EditorTabWidget,
 )
 
-
-class CodeEditorDisplay(QWidget):
+class CodeEditorDisplayArea(QWidget):
     filePathChanged = Signal()
 
     def __init__(self, parent=None):

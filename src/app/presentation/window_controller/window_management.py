@@ -5,10 +5,12 @@ This module provides window factory and manager functionality for creating
 and managing application windows without circular import dependencies.
 """
 
+import logging
 from typing import Optional, Type
 
 from PySide6.QtWidgets import QStackedWidget, QWidget
 
+logger = logging.getLogger(__name__)
 
 class WindowFactory:
     """Factory for creating window instances without circular imports."""
@@ -57,10 +59,10 @@ class WindowFactory:
                 window_class = creator()
                 return window_class(parent)
             except Exception as e:
-                print(f"Error creating window '{window_name}': {e}")
+                logger.error(f"Error creating window '{window_name}': {e}", exc_info=True)
                 return None
 
-        print(f"Unknown window type: {window_name}")
+        logger.warning(f"Unknown window type: {window_name}")
         return None
 
     @classmethod
@@ -81,7 +83,7 @@ class WindowFactory:
             try:
                 return creator()
             except Exception as e:
-                print(f"Error getting window class '{window_name}': {e}")
+                logger.error(f"Error getting window class '{window_name}': {e}", exc_info=True)
                 return None
         return None
 
@@ -167,7 +169,6 @@ class WindowFactory:
         cls._window_creators.clear()
         cls._registered = False
 
-
 class WindowManager(QStackedWidget):
     """Manages application window instances and navigation."""
 
@@ -188,7 +189,7 @@ class WindowManager(QStackedWidget):
 
                 # Validate window is a QWidget
                 if not isinstance(window, QWidget):
-                    print(f"Error: Created window '{window_name}' is not a QWidget")
+                    logger.error(f"Error: Created window '{window_name}' is not a QWidget")
                     return False
 
                 self.windows[window_name] = window
@@ -211,7 +212,7 @@ class WindowManager(QStackedWidget):
             return True
 
         except Exception as e:
-            print(f"Error showing window '{window_name}': {e}")
+            logger.error(f"Error showing window '{window_name}': {e}", exc_info=True)
             return False
 
     def go_back(self):

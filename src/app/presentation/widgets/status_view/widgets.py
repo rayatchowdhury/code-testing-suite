@@ -549,7 +549,6 @@ class WorkerProgressBar(QWidget):
             self._create_idle_state()
             self.current_stage = None
 
-
 class PerformancePanelSection(QWidget):
     """Collapsible performance panel"""
     

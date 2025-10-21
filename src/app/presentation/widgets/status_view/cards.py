@@ -8,7 +8,6 @@ These are thin wrappers around BaseTestCard.
 from .widgets import BaseTestCard
 from .models import TestResult
 
-
 class ComparatorTestCard(BaseTestCard):
     """Card for comparator tests"""
     
@@ -22,7 +21,6 @@ class ComparatorTestCard(BaseTestCard):
         )
         self.result = result
 
-
 class ValidatorTestCard(BaseTestCard):
     """Card for validator tests"""
     
@@ -35,7 +33,6 @@ class ValidatorTestCard(BaseTestCard):
             parent=parent
         )
         self.result = result
-
 
 class BenchmarkerTestCard(BaseTestCard):
     """Card for benchmarker tests"""

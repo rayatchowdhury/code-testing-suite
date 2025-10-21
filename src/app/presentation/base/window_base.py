@@ -5,9 +5,12 @@ WindowBase provides fundamental lifecycle management, error handling
 integration, and signal management for all windows.
 """
 
+import logging
+
 from PySide6.QtWidgets import QWidget
 from PySide6.QtCore import Signal
 
+logger = logging.getLogger(__name__)
 
 class WindowBase(QWidget):
     """
@@ -122,4 +125,4 @@ class WindowBase(QWidget):
             )
         except ImportError:
             # Fallback if service not available
-            print(f"{title}: {error}")
+            logger.error(f"{title}: {error}", exc_info=True)

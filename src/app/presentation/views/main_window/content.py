@@ -71,7 +71,11 @@ FEATURE_DATA: List[Tuple[str, str, List[str]]] = [
 ]
 
 
-# Main window welcome text
+]
+
+]
+
+# Welcome titles
 WELCOME_TITLE = "CODE TESTING SUITE"
 WELCOME_SUBTITLE = ">> SYSTEM READY"
 CTA_TITLE = ">> SELECT FEATURE TO BEGIN"

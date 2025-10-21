@@ -11,8 +11,7 @@ from src.app.presentation.base.status_view_base import StatusViewBase
 from src.app.presentation.widgets.status_view import TestResult, ValidatorTestCard
 from src.app.presentation.widgets.test_detail_view import ValidatorDetailDialog
 
-
-class ValidatorStatusView(StatusViewBase):
+class ValidatorStatusView(BaseStatusView):
     """
     Validator-specific status view.
     

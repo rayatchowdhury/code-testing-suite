@@ -1,0 +1,182 @@
+================================================================================
+🔍 CODE COMPLEXITY ANALYSIS
+================================================================================
+
+📊 SUMMARY:
+   Total items: 35
+   Files analyzed: 26
+   Average complexity: 16.8
+   Max complexity: 43
+
+   Grade distribution:
+      F: 1 items - Untestable - Refactor immediately!
+      E: 1 items - Extremely complex - Maintenance nightmare
+      D: 6 items - Very complex - Refactor soon
+      C: 27 items - Complex, high risk - Consider refactoring
+
+================================================================================
+📋 COMPLEXITY GRADES
+================================================================================
+
+   A (1-5):    Simple, low risk - Easy to maintain
+   B (6-10):   More complex, moderate risk - Acceptable
+   C (11-20):  Complex, high risk - Consider refactoring
+   D (21-30):  Very complex, very high risk - Refactor soon
+   E (31-40):  Extremely complex - Maintenance nightmare
+   F (41+):    Untestable - Refactor immediately!
+
+================================================================================
+📋 DETAILED BREAKDOWN (sorted by grade)
+================================================================================
+
+
+🔸 GRADE F: Untestable - Refactor immediately!
+--------------------------------------------------------------------------------
+   src\app\core\tools\specialized\validator_test_worker.py:102
+      function: _run_single_test
+      Complexity: 43 (Grade F)
+
+
+🔸 GRADE E: Extremely complex - Maintenance nightmare
+--------------------------------------------------------------------------------
+   src\app\core\tools\specialized\comparison_test_worker.py:100
+      function: _run_single_test
+      Complexity: 40 (Grade E)
+
+
+🔸 GRADE D: Very complex - Refactor soon
+--------------------------------------------------------------------------------
+   src\app\core\tools\specialized\benchmark_test_worker.py:108
+      function: _run_single_test
+      Complexity: 27 (Grade D)
+
+   src\app\core\config\core\config_handler.py:88
+      function: _validate_config_structure
+      Complexity: 27 (Grade D)
+
+   src\app\core\tools\comparator.py:99
+      function: _create_test_result
+      Complexity: 24 (Grade D)
+
+   src\app\presentation\views\results\detailed_results_widget.py:206
+      function: _create_mismatch_tab
+      Complexity: 23 (Grade D)
+
+   src\app\core\tools\validator.py:86
+      function: _create_test_result
+      Complexity: 21 (Grade D)
+
+   src\app\core\tools\base\process_executor.py:47
+      function: run_with_monitoring
+      Complexity: 21 (Grade D)
+
+
+🔸 GRADE C: Complex, high risk - Consider refactoring
+--------------------------------------------------------------------------------
+   src\app\presentation\widgets\display_area_widgets\test_tab_widget.py:378
+      function: _handle_tab_click
+      Complexity: 19 (Grade C)
+
+   src\app\core\tools\benchmarker.py:168
+      function: _create_test_result
+      Complexity: 19 (Grade C)
+
+   src\app\presentation\views\results\detailed_results_window.py:654
+      function: _detect_language
+      Complexity: 17 (Grade C)
+
+   src\app\presentation\base\test_window_base.py:487
+      function: _connect_worker_to_status_view
+      Complexity: 16 (Grade C)
+
+   src\app\presentation\views\results\detailed_results_widget.py:392
+      function: _setup_ui
+      Complexity: 16 (Grade C)
+
+   src\app\presentation\widgets\display_area_widgets\editor.py:297
+      function: keyPressEvent
+      Complexity: 15 (Grade C)
+
+   src\app\core\tools\base\base_compiler.py:138
+      function: _parallel_compile_all
+      Complexity: 15 (Grade C)
+
+   src\app\presentation\base\test_window_base.py:421
+      function: _integrate_status_view
+      Complexity: 14 (Grade C)
+
+   src\app\persistence\database\database_manager.py:842
+      function: migrate_old_results_to_new_format
+      Complexity: 14 (Grade C)
+
+   src\app\persistence\database\database_manager.py:1160
+      function: create_files_snapshot
+      Complexity: 14 (Grade C)
+
+   src\app\core\ai\gemini_client\gemini_client.py:111
+      function: _make_api_request
+      Complexity: 14 (Grade C)
+
+   src\app\presentation\views\code_editor\code_editor_window.py:161
+      function: handle_button_click
+      Complexity: 13 (Grade C)
+
+   src\app\presentation\views\results\results_widget.py:583
+      function: _update_statistics
+      Complexity: 13 (Grade C)
+
+   src\app\presentation\views\results\results_window.py:350
+      function: _load_code_into_window
+      Complexity: 13 (Grade C)
+
+   src\app\core\tools\compiler_runner.py:372
+      function: _cleanup_worker
+      Complexity: 13 (Grade C)
+
+   src\app\core\ai\core\editor_ai.py:136
+      function: process_code
+      Complexity: 13 (Grade C)
+
+   src\app\presentation\window_controller\window_management.py:233
+      function: cleanup_window
+      Complexity: 12 (Grade C)
+
+   src\app\presentation\views\results\detailed_results_widget.py:118
+      function: _create_io_tab
+      Complexity: 12 (Grade C)
+
+   src\app\persistence\database\database_manager.py:360
+      function: get_test_results
+      Complexity: 12 (Grade C)
+
+   src\app\core\tools\base\base_runner.py:248
+      function: save_test_results_to_database
+      Complexity: 12 (Grade C)
+
+   src\app\shared\utils\workspace_utils.py:106
+      function: is_flat_workspace_structure
+      Complexity: 11 (Grade C)
+
+   src\app\presentation\widgets\display_area_widgets\editor.py:130
+      function: run
+      Complexity: 11 (Grade C)
+
+   src\app\presentation\views\main_window\document.py:151
+      function: mousePressEvent
+      Complexity: 11 (Grade C)
+
+   src\app\presentation\views\results\detailed_results_widget.py:681
+      function: _load_data
+      Complexity: 11 (Grade C)
+
+   src\app\presentation\views\results\results_window.py:73
+      function: export_results
+      Complexity: 11 (Grade C)
+
+   src\app\persistence\database\services\database_stats_service.py:21
+      function: get_database_stats
+      Complexity: 11 (Grade C)
+
+   src\app\core\tools\base\process_executor.py:184
+      function: run_with_temp_files
+      Complexity: 11 (Grade C)
