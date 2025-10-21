@@ -158,11 +158,9 @@ class ResultsWindow(SidebarWindowBase):
 
     def show_detailed_view(self, test_result):
         """Show detailed view for test result (replaces sidebar and display area)."""
-        from src.app.presentation.views.results.detailed_results_window import (
-            DetailedResultsWidget,
-        )
+        from src.app.presentation.dialogs.result_detail import DetailedResultDialog
 
-        detailed_view = DetailedResultsWidget(test_result, parent=self)
+        detailed_view = DetailedResultDialog(test_result, parent=self)
 
         detailed_view.backRequested.connect(self._on_detailed_back_requested)
 
