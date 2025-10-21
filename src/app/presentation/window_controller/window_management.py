@@ -92,49 +92,49 @@ class WindowFactory:
         """Register default window creators with lazy imports."""
 
         def _create_main_window():
-            from src.app.presentation.views.main_window.main_window import (
+            from src.app.presentation.windows.main import (
                 MainWindowContent,
             )
 
             return MainWindowContent
 
         def _create_code_editor():
-            from src.app.presentation.views.code_editor.code_editor_window import (
+            from src.app.presentation.windows.editor import (
                 CodeEditorWindow,
             )
 
             return CodeEditorWindow
 
         def _create_comparator():
-            from src.app.presentation.views.comparator.comparator_window import (
+            from src.app.presentation.windows.comparator import (
                 ComparatorWindow,
             )
 
             return ComparatorWindow
 
         def _create_benchmarker():
-            from src.app.presentation.views.benchmarker.benchmarker_window import (
+            from src.app.presentation.windows.benchmarker import (
                 BenchmarkerWindow,
             )
 
             return BenchmarkerWindow
 
         def _create_validator():
-            from src.app.presentation.views.validator.validator_window import (
+            from src.app.presentation.windows.validator import (
                 ValidatorWindow,
             )
 
             return ValidatorWindow
 
         def _create_help_center():
-            from src.app.presentation.views.help_center.help_center_window import (
+            from src.app.presentation.windows.help_center import (
                 HelpCenterWindow,
             )
 
             return HelpCenterWindow
 
         def _create_results():
-            from src.app.presentation.views.results.results_window import ResultsWindow
+            from src.app.presentation.windows.results import ResultsWindow
 
             return ResultsWindow
 

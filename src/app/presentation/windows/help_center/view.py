@@ -20,8 +20,8 @@ from src.app.presentation.widgets.display_area import DisplayArea
 from src.app.presentation.widgets.sidebar import Sidebar
 from src.app.presentation.window_controller.base_window import SidebarWindowBase
 
-from .content import get_document_data
-from .document import create_help_document
+from .widgets.content import get_document_data
+from .widgets.document import create_help_document
 
 class HelpCenterWindow(SidebarWindowBase):
     def __init__(self, parent=None):

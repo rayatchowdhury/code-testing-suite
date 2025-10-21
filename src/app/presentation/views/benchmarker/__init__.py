@@ -1,4 +1,4 @@
 # Benchmarker package for Code Testing Suite
-from src.app.presentation.views.benchmarker.benchmarker_window import BenchmarkerWindow
+from src.app.presentation.windows.benchmarker import BenchmarkerWindow
 
 __all__ = ["BenchmarkerWindow"]

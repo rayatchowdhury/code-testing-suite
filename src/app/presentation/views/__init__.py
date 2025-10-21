@@ -5,21 +5,21 @@ This package contains all the GUI windows and their components.
 """
 
 # Specific view window exports
-from src.app.presentation.views.benchmarker.benchmarker_window import BenchmarkerWindow
-from src.app.presentation.views.code_editor.code_editor_window import CodeEditorWindow
-from src.app.presentation.views.comparator.comparator_window import ComparatorWindow
-from src.app.presentation.views.help_center.help_center_window import HelpCenterWindow
+from src.app.presentation.windows.benchmarker import BenchmarkerWindow
+from src.app.presentation.windows.editor import CodeEditorWindow
+from src.app.presentation.windows.comparator import ComparatorWindow
+from src.app.presentation.windows.help_center import HelpCenterWindow
 
 # Main window exports
-from src.app.presentation.views.main_window.main_window import (
+from src.app.presentation.windows.main import (
     MainWindow,
     MainWindowContent,
 )
 
 # Results components
-from src.app.presentation.views.results.results_widget import ResultsWidget
-from src.app.presentation.views.results.results_window import ResultsWindow
-from src.app.presentation.views.validator.validator_window import ValidatorWindow
+from src.app.presentation.windows.results.widgets.results_widget import ResultsWidget
+from src.app.presentation.windows.results import ResultsWindow
+from src.app.presentation.windows.validator import ValidatorWindow
 from src.app.presentation.window_controller.base_window import SidebarWindowBase
 
 # Window management

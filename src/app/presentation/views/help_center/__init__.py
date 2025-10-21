@@ -1,6 +1,6 @@
-# Help Center package for Code Testing Suite
-from .content import HelpSection, get_available_topics, get_document_data
-from .help_center_window import HelpCenterWindow
+# Backwards compatibility - import from new location
+from src.app.presentation.windows.help_center.widgets.content import HelpSection, get_available_topics, get_document_data
+from src.app.presentation.windows.help_center import HelpCenterWindow
 
 __all__ = [
     "HelpCenterWindow",

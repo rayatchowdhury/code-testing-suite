@@ -1,4 +1,4 @@
 # Comparator package for Code Testing Suite
-from src.app.presentation.views.comparator.comparator_window import ComparatorWindow
+from src.app.presentation.windows.comparator import ComparatorWindow
 
 __all__ = ["ComparatorWindow"]

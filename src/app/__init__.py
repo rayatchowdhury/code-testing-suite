@@ -12,7 +12,7 @@ __author__ = "Code Testing Suite Team"
 # Lazy imports - only import when accessed
 def get_main_window():
     """Lazy import of MainWindow"""
-    from src.app.presentation.views.main_window.main_window import MainWindow
+    from src.app.presentation.windows.main import MainWindow
 
     return MainWindow
 

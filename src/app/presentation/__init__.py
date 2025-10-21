@@ -7,7 +7,7 @@ This module contains the user interface components and view logic.
 # Lazy imports to avoid circular dependencies
 def get_main_window():
     """Lazy import of MainWindow"""
-    from src.app.presentation.views.main_window.main_window import MainWindow
+    from src.app.presentation.windows.main import MainWindow
 
     return MainWindow
 

@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from src.app.presentation.views.results.results_widget import ResultsWidget
+from src.app.presentation.windows.results.widgets.results_widget import ResultsWidget
 from src.app.presentation.widgets.sidebar import Sidebar
 from src.app.presentation.window_controller.base_window import SidebarWindowBase
 from src.app.presentation.services import export_test_cases_to_zip, create_export_summary

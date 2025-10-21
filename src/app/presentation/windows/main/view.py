@@ -127,7 +127,7 @@ class MainWindowContent(SidebarWindowBase):
             return
 
         try:
-            from src.app.presentation.views.main_window.document import (
+            from src.app.presentation.windows.main.widgets.document import (
                 create_main_window_document,
             )
 
@@ -219,14 +219,12 @@ class UnsavedChangesHandler:
         try:
             current = window_manager.get_current_window()
 
-            # Import here to avoid circular imports
-            from src.app.presentation.views.code_editor.code_editor_window import (
-                CodeEditorWindow,
-            )
-
+            # Check if current window is code editor by duck typing (avoids direct window import)
+            # Code editor has editor_display attribute with has_editor property
             if not (
                 current
-                and isinstance(current, CodeEditorWindow)
+                and hasattr(current, "editor_display")
+                and hasattr(current.editor_display, "has_editor")
                 and current.editor_display.has_editor
             ):
                 return True

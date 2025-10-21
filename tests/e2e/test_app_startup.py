@@ -36,7 +36,7 @@ class TestApplicationImports:
     def test_can_import_main_window(self):
         """Main window module should be importable."""
         try:
-            from src.app.presentation.views.main_window.main_window import MainWindow
+            from src.app.presentation.windows.main import MainWindow
 
             assert MainWindow is not None
         except ImportError as e:
