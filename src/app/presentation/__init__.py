@@ -11,14 +11,8 @@ def get_main_window():
 
     return MainWindow
 
-def get_sidebar_window_base():
-    """Lazy import of SidebarWindowBase"""
-    from src.app.presentation._deprecated.base_window import SidebarWindowBase
 
-    return SidebarWindowBase
+# Import design_system and widgets modules
+from src.app.presentation import design_system, widgets
 
-# Widgets module - this is safe to import directly
-# Styles module - this is safe to import directly
-from src.app.presentation import styles, widgets
-
-__all__ = ["get_main_window", "get_sidebar_window_base", "styles", "widgets"]
+__all__ = ["get_main_window", "design_system", "widgets"]
