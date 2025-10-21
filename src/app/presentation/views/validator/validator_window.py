@@ -136,8 +136,8 @@ class ValidatorWindow(TestWindowBase):
         elif button_text == "Results":
             # Navigate to results window
             if self.can_close():
-                from src.app.presentation.services.navigation_service import NavigationService
-                NavigationService.instance().navigate_to("results")
+                if self.router:
+                    self.router.navigate_to("results")
     
     def _on_run_requested(self):
         """Handle run request from status view - re-run validation tests."""

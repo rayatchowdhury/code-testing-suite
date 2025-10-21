@@ -288,6 +288,50 @@ def requires_java():
 # ============================================================================
 
 
+# ============================================================================
+# Navigation Router Fixtures
+# ============================================================================
+
+
+@pytest.fixture
+def mock_router():
+    """
+    Create a mock NavigationRouter for testing.
+    
+    Returns:
+        Mock router with common methods stubbed
+    """
+    from unittest.mock import Mock
+    
+    router = Mock()
+    router.navigate_to = Mock(return_value=True)
+    router.go_back = Mock(return_value=True)
+    router.can_go_back = Mock(return_value=False)
+    router.current_window = Mock(return_value="main")
+    router.clear_history = Mock()
+    router.get_history = Mock(return_value=[])
+    
+    return router
+
+
+@pytest.fixture
+def mock_window_manager():
+    """
+    Create a mock WindowManager for testing.
+    
+    Returns:
+        Mock window manager with show_window stubbed
+    """
+    from unittest.mock import Mock
+    
+    manager = Mock()
+    manager.show_window = Mock(return_value=True)
+    manager.current_window = "main"
+    manager.go_back = Mock(return_value=True)
+    
+    return manager
+
+
 @pytest.fixture(autouse=True)
 def cleanup_test_files():
     """

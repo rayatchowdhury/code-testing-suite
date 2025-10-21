@@ -613,10 +613,9 @@ class DetailedResultsWidget(QWidget):
             )
 
             # Optionally open the target window
-            from src.app.presentation.services.navigation_service import NavigationService
-            NavigationService.instance().navigate_to(test_subdir)
-
-        except json.JSONDecodeError as e:
+            
+            if self.router:
+                self.router.navigate_to(test_subdir)        except json.JSONDecodeError as e:
             QMessageBox.critical(
                 self, "Error", f"Failed to parse code files from test result:\n{str(e)}"
             )

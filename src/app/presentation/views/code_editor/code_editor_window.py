@@ -129,7 +129,8 @@ class CodeEditorWindow(SidebarWindowBase):
         """Handle window close event with improved unsaved changes check"""
         if not self.editor_display.has_editor:
             event.accept()
-            NavigationService.instance().navigate_to("main")
+            if self.router:
+                self.router.navigate_to("main")
             return
 
         # Check for any unsaved changes
@@ -143,7 +144,8 @@ class CodeEditorWindow(SidebarWindowBase):
         if not has_unsaved:
             self.cleanup()
             event.accept()
-            NavigationService.instance().navigate_to("main")
+            if self.router:
+                self.router.navigate_to("main")
             return
 
         # Handle unsaved changes
@@ -152,17 +154,20 @@ class CodeEditorWindow(SidebarWindowBase):
             self.save_editor_state()
             self.cleanup()
             event.accept()
-            NavigationService.instance().navigate_to("main")
+            if self.router:
+                self.router.navigate_to("main")
         elif result == QMessageBox.Discard:
             self.cleanup()
             event.accept()
-            NavigationService.instance().navigate_to("main")
+            if self.router:
+                self.router.navigate_to("main")
         else:  # Cancel or save failed
             event.ignore()
 
     def handle_button_click(self, button_text):
         if button_text == "Help Center":
-            NavigationService.instance().navigate_to("help_center")
+            if self.router:
+                self.router.navigate_to("help_center")
         elif button_text == "Back":
             self.close()  # This will trigger closeEvent
         elif button_text == "New File":

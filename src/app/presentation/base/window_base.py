@@ -126,3 +126,45 @@ class WindowBase(QWidget):
         except ImportError:
             # Fallback if service not available
             logger.error(f"{title}: {error}", exc_info=True)
+    
+    @property
+    def router(self):
+        """
+        Get navigation router via parent traversal.
+        
+        Enables nested widgets to access router without direct injection.
+        Traverses up the parent chain to find a widget with a router.
+        
+        Returns:
+            NavigationRouter or None if not found
+            
+        Usage:
+            # In any window or nested widget:
+            if self.router:
+                self.router.navigate_to("main")
+        """
+        # Check if we have our own router
+        if hasattr(self, '_router'):
+            return self._router
+        
+        # Traverse up the parent chain to find router
+        current = self.parent()
+        while current:
+            if hasattr(current, 'router') and current.router is not None:
+                return current.router
+            if hasattr(current, '_router') and current._router is not None:
+                return current._router
+            current = current.parent() if hasattr(current, 'parent') else None
+        
+        # No router found
+        return None
+    
+    @router.setter
+    def router(self, value):
+        """
+        Set navigation router.
+        
+        Args:
+            value: NavigationRouter instance
+        """
+        self._router = value

@@ -218,8 +218,8 @@ class ResultsWindow(SidebarWindowBase):
 
         if button_text == "Help Center":
             if self.can_close():
-                from src.app.presentation.services.navigation_service import NavigationService
-                NavigationService.instance().navigate_to("help_center")
+                if self.router:
+                    self.router.navigate_to("help_center")
         else:
             super().handle_button_click(button_text)
 
@@ -232,9 +232,8 @@ class ResultsWindow(SidebarWindowBase):
             language = load_data["language"]
             files = load_data["files"]
 
-            from src.app.presentation.services.navigation_service import NavigationService
             
-            show_result = NavigationService.instance().navigate_to(window_name)
+            show_result = self.router.navigate_to(window_name) if self.router else False
 
             if not show_result:
                 QMessageBox.critical(

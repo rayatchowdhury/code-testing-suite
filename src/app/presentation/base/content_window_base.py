@@ -118,9 +118,9 @@ class ContentWindowBase(WindowBase):
     def _handle_back_click(self):
         """Handle Back button - checks can_close() before navigating."""
         if self.can_close():
-            from src.app.presentation.services.navigation_service import NavigationService
-            if not NavigationService.instance().go_back():
-                NavigationService.instance().navigate_to("main")
+            if self.router and not self.router.go_back():
+                if self.router:
+                    self.router.navigate_to("main")
     
     def _handle_options_click(self):
         """Show configuration dialog."""

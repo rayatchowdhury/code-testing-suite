@@ -193,8 +193,8 @@ class MainWindowContent(SidebarWindowBase):
         )
 
         try:
-            from src.app.presentation.services.navigation_service import NavigationService
-            NavigationService.instance().navigate_to(window_name)
+            if self.router:
+                self.router.navigate_to(window_name)
         except Exception as e:
             logger.error(f"Error navigating to {window_name}: {e}", exc_info=True)
 
@@ -308,10 +308,16 @@ class MainWindow(QMainWindow):
         from src.app.presentation.window_controller.window_management import (
             WindowManager,
         )
+        from src.app.presentation.navigation.router import NavigationRouter
         from src.app.presentation.services.navigation_service import NavigationService
 
         self.window_manager = WindowManager(self)
         
+        # Create injectable router
+        self.router = NavigationRouter(self.window_manager, parent=self)
+        self.window_manager.router = self.router
+        
+        # Keep NavigationService for backward compatibility during migration
         NavigationService.instance().set_window_manager(self.window_manager)
         
         self.setCentralWidget(self.window_manager)

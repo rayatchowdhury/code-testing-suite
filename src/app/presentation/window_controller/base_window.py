@@ -80,9 +80,9 @@ class SidebarWindowBase(QWidget):
     def handle_button_click(self, button_text):
         if button_text == "Back":
             if self.can_close():
-                from src.app.presentation.services.navigation_service import NavigationService
-                if not NavigationService.instance().go_back():
-                    NavigationService.instance().navigate_to("main")
+                if self.router and not self.router.go_back():
+                    if self.router:
+                        self.router.navigate_to("main")
         elif button_text == "Options":
             # Lazy import to avoid slow startup
             from src.app.core.config import ConfigView
