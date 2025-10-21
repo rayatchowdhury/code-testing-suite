@@ -13,7 +13,7 @@ def get_main_window():
 
 def get_sidebar_window_base():
     """Lazy import of SidebarWindowBase"""
-    from src.app.presentation.window_controller.base_window import SidebarWindowBase
+    from src.app.presentation._deprecated.base_window import SidebarWindowBase
 
     return SidebarWindowBase
 

@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 from src.app.presentation.widgets.display_area import DisplayArea
 from src.app.presentation.widgets.sidebar import Sidebar
-from src.app.presentation.window_controller.base_window import SidebarWindowBase
+from src.app.presentation._deprecated.base_window import SidebarWindowBase
 
 class MainWindowConfig:
     """Configuration constants for the main window"""
@@ -305,7 +305,7 @@ class MainWindow(QMainWindow):
 
     def _setup_window_manager(self) -> None:
         """Setup window manager and show main content"""
-        from src.app.presentation.window_controller.window_management import (
+        from src.app.presentation.navigation.window_manager import (
             WindowManager,
         )
         from src.app.presentation.navigation.router import NavigationRouter
