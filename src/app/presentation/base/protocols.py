@@ -166,3 +166,29 @@ class NavigationManager(Protocol):
             Window name or None if no window active
         """
         ...
+
+
+@runtime_checkable
+class CleanableWindow(Protocol):
+    """
+    Protocol for windows that require cleanup on close.
+    
+    Windows implementing this protocol can perform custom cleanup
+    operations (e.g., stopping workers, closing connections, saving state).
+    
+    WindowManager will call cleanup() before destroying the window.
+    """
+    
+    def cleanup(self) -> None:
+        """
+        Clean up window resources before destruction.
+        
+        This method should:
+        - Stop any running workers/threads
+        - Close database connections
+        - Save unsaved state
+        - Release any held resources
+        
+        Exceptions raised here will be logged but won't prevent cleanup.
+        """
+        ...

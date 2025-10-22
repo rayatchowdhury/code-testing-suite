@@ -10,7 +10,11 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from src.app.presentation.shared.design_system.styles.components import CONSOLE_STYLE
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QTextEdit
+
+# Import style directly from individual module (not via __init__.py)
+from src.app.presentation.shared.design_system.styles.components.console import CONSOLE_STYLE
 from src.app.presentation.shared.design_system.tokens import MATERIAL_COLORS
 from src.app.presentation.shared.design_system.styles.components.console_colors import CONSOLE_COLORS
 from src.app.presentation.shared.design_system.styles.components.scrollbar import SCROLLBAR_STYLE

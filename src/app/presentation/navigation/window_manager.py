@@ -11,6 +11,8 @@ from typing import Optional, Type
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QStackedWidget, QWidget
 
+from src.app.presentation.base.protocols import CleanableWindow
+
 logger = logging.getLogger(__name__)
 
 
@@ -308,7 +310,7 @@ class WindowManager(QStackedWidget):
         Clean up a window's resources and remove from cache.
         
         Steps:
-        1. Call window's cleanup() method if it exists
+        1. Call window's cleanup() method if it implements CleanableWindow
         2. Switch away from window if it's currently displayed
         3. Remove from Qt stack and cache
         4. Schedule Qt deletion
@@ -322,12 +324,14 @@ class WindowManager(QStackedWidget):
             
             window = self.windows[window_name]
             
-            # Call window-specific cleanup
-            if hasattr(window, "cleanup"):
+            # Call window-specific cleanup if it implements CleanableWindow protocol
+            if isinstance(window, CleanableWindow):
                 try:
                     window.cleanup()
-                except (RuntimeError, AttributeError) as e:
-                    logger.warning(f"Error in window cleanup for '{window_name}': {e}")
+                    logger.debug(f"Called cleanup() for window '{window_name}'")
+                except Exception as e:
+                    # Broad catch to prevent cleanup failure from blocking window destruction
+                    logger.warning(f"Error in window cleanup for '{window_name}': {e}", exc_info=True)
             
             # Switch away from window if currently displayed
             if window == self.currentWidget():
@@ -340,8 +344,9 @@ class WindowManager(QStackedWidget):
             
             logger.debug(f"Cleaned up window: '{window_name}'")
             
-        except RuntimeError as e:
-            logger.warning(f"Runtime error during cleanup of '{window_name}': {e}")
+        except Exception as e:
+            # Catch all exceptions to prevent one failing cleanup from blocking others
+            logger.error(f"Error during cleanup of '{window_name}': {e}", exc_info=True)
     
     def _switch_to_fallback_window(self, excluding_window: str) -> None:
         """

@@ -1,17 +1,17 @@
-from src.app.presentation.shared.design_system.styles.components import (
-    AI_PANEL_STYLE,
-    CONSOLE_STYLE,
-    CUSTOM_COMMAND_STYLE,
-    EDITOR_WIDGET_STYLE,
-    SCROLLBAR_STYLE,
-    SIDEBAR_BUTTON_STYLE,
-    SIDEBAR_STYLE,
-    SPLITTER_STYLE,
-    get_tab_style,
-)
-from src.app.presentation.shared.design_system.tokens import COLORS, SPACING, STATUS_COLORS
+"""
+Central style module.
 
-# Simplified DISPLAY_AREA_STYLE
+WARNING: This module should ONLY contain lightweight, frequently-used styles.
+Do NOT import heavy component styles here - they should be imported directly
+where needed.
+
+For component-specific styles, import from:
+  src.app.presentation.shared.design_system.styles.components.{component_name}
+"""
+
+from src.app.presentation.shared.design_system.tokens import COLORS
+
+# Simplified DISPLAY_AREA_STYLE - only what's needed for DisplayArea
 DISPLAY_AREA_STYLE = f"""
 QWidget#display_area {{
     background-color: {COLORS['background']};
@@ -19,18 +19,8 @@ QWidget#display_area {{
 }}
 """
 
-# Export all styles
+# Export only the lightweight styles that are used everywhere
 __all__ = [
-    "COLORS",
-    "MATERIAL_COLORS",
-    "SCROLLBAR_STYLE",
-    "SIDEBAR_STYLE",
-    "SIDEBAR_BUTTON_STYLE",
-    "SPLITTER_STYLE",
     "DISPLAY_AREA_STYLE",
-    "CONSOLE_STYLE",
-    "EDITOR_WIDGET_STYLE",
-    "get_tab_style",
-    "AI_PANEL_STYLE",
-    "CUSTOM_COMMAND_STYLE",
+    "COLORS",
 ]

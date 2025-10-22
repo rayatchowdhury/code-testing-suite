@@ -14,8 +14,10 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from src.app.presentation.shared.design_system.styles.components import (
-    SCROLLBAR_STYLE,
+# Import styles directly from individual modules (not via __init__.py)
+# This avoids loading all other style modules at startup
+from src.app.presentation.shared.design_system.styles.components.scrollbar import SCROLLBAR_STYLE
+from src.app.presentation.shared.design_system.styles.components.sidebar import (
     SIDEBAR_BUTTON_STYLE,
     SIDEBAR_STYLE,
 )

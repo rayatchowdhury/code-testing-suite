@@ -1,60 +1,78 @@
-from src.app.presentation.shared.design_system.styles.components.ai_panel import (
-    AI_PANEL_STYLE,
-    CUSTOM_COMMAND_STYLE,
-)
-from src.app.presentation.shared.design_system.styles.components.config_ui import (
-    CONFIG_DIALOG_TITLE_STYLE,
-    ERROR_DIALOG_STYLE,
-    INFO_MESSAGE_STYLE,
-    SECTION_INFO_LABEL_STYLE,
-    SUCCESS_MESSAGE_STYLE,
-    get_success_status_style,
-)
-from src.app.presentation.shared.design_system.styles.components.console import CONSOLE_STYLE
-from src.app.presentation.shared.design_system.styles.components.editor import (
-    AI_DIALOG_STYLE,
-    EDITOR_WIDGET_STYLE,
-    get_editor_style,
-    get_tab_style,
-)
-from src.app.presentation.shared.design_system.styles.components.results import (
-    RESULTS_BUTTON_STYLE,
-    RESULTS_CARD_STYLE,
-    RESULTS_COMBO_STYLE,
-    RESULTS_FILTERS_PANEL_STYLE,
-    RESULTS_LABEL_DETAILS_STYLE,
-    RESULTS_LABEL_FILTER_STYLE,
-    RESULTS_LABEL_STAT_STYLE,
-    RESULTS_LABEL_TITLE_STYLE,
-    RESULTS_PROGRESS_BAR_STYLE,
-    RESULTS_TAB_WIDGET_STYLE,
-    RESULTS_TABLE_SMALL_STYLE,
-    RESULTS_TABLE_STYLE,
-    RESULTS_TEXT_EDIT_STYLE,
-)
-from src.app.presentation.shared.design_system.styles.components.scrollbar import SCROLLBAR_STYLE
-from src.app.presentation.shared.design_system.styles.components.sidebar import (
-    SIDEBAR_BUTTON_STYLE,
-    SIDEBAR_STYLE,
-)
-from src.app.presentation.shared.design_system.styles.components.splitter import SPLITTER_STYLE
-from src.app.presentation.shared.design_system.styles.components.test_view import (
-    TEST_VIEW_BUTTON_PANEL_STYLE,
-    TEST_VIEW_COMPILATION_CLOSE_BUTTON_STYLE,
-    TEST_VIEW_COMPILATION_DETAIL_LABEL_STYLE,
-    TEST_VIEW_COMPILATION_PROGRESS_BAR_STYLE,
-    TEST_VIEW_COMPILATION_STATUS_DIALOG_STYLE,
-    TEST_VIEW_COMPILATION_STATUS_LABEL_STYLE,
-    TEST_VIEW_CONTENT_PANEL_STYLE,
-    TEST_VIEW_FILE_BUTTON_STYLE,
-    TEST_VIEW_HISTORY_ITEM_STYLE,
-    TEST_VIEW_SLIDER_STYLE,
-    TEST_VIEW_SLIDER_VALUE_LABEL_STYLE,
-    TEST_VIEW_STATUS_DIALOG_STYLE,
-    TEST_VIEW_STATUS_LABEL_STYLE,
-    TEST_VIEW_TIME_LABEL_STYLE,
-    get_status_label_style,
-)
+"""Design system component styles.
+
+Note: Uses lazy imports to avoid loading all style modules at startup.
+Only load styles when they're actually needed.
+
+IMPORTANT: If you need just one or two styles, import directly from the
+individual module instead of this __init__.py:
+
+  # GOOD - Direct import (fast)
+  from src.app.presentation.shared.design_system.styles.components.sidebar import SIDEBAR_STYLE
+  
+  # BAD - Via __init__.py (loads ALL styles)
+  from src.app.presentation.shared.design_system.styles.components import SIDEBAR_STYLE
+"""
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.app.presentation.shared.design_system.styles.components.ai_panel import (
+        AI_PANEL_STYLE,
+        CUSTOM_COMMAND_STYLE,
+    )
+    from src.app.presentation.shared.design_system.styles.components.config_ui import (
+        CONFIG_DIALOG_TITLE_STYLE,
+        ERROR_DIALOG_STYLE,
+        INFO_MESSAGE_STYLE,
+        SECTION_INFO_LABEL_STYLE,
+        SUCCESS_MESSAGE_STYLE,
+        get_success_status_style,
+    )
+    from src.app.presentation.shared.design_system.styles.components.console import CONSOLE_STYLE
+    from src.app.presentation.shared.design_system.styles.components.editor import (
+        AI_DIALOG_STYLE,
+        EDITOR_WIDGET_STYLE,
+        get_editor_style,
+        get_tab_style,
+    )
+    from src.app.presentation.shared.design_system.styles.components.results import (
+        RESULTS_BUTTON_STYLE,
+        RESULTS_CARD_STYLE,
+        RESULTS_COMBO_STYLE,
+        RESULTS_FILTERS_PANEL_STYLE,
+        RESULTS_LABEL_DETAILS_STYLE,
+        RESULTS_LABEL_FILTER_STYLE,
+        RESULTS_LABEL_STAT_STYLE,
+        RESULTS_LABEL_TITLE_STYLE,
+        RESULTS_PROGRESS_BAR_STYLE,
+        RESULTS_TAB_WIDGET_STYLE,
+        RESULTS_TABLE_SMALL_STYLE,
+        RESULTS_TABLE_STYLE,
+        RESULTS_TEXT_EDIT_STYLE,
+    )
+    from src.app.presentation.shared.design_system.styles.components.scrollbar import SCROLLBAR_STYLE
+    from src.app.presentation.shared.design_system.styles.components.sidebar import (
+        SIDEBAR_BUTTON_STYLE,
+        SIDEBAR_STYLE,
+    )
+    from src.app.presentation.shared.design_system.styles.components.splitter import SPLITTER_STYLE
+    from src.app.presentation.shared.design_system.styles.components.test_view import (
+        TEST_VIEW_BUTTON_PANEL_STYLE,
+        TEST_VIEW_COMPILATION_CLOSE_BUTTON_STYLE,
+        TEST_VIEW_COMPILATION_DETAIL_LABEL_STYLE,
+        TEST_VIEW_COMPILATION_PROGRESS_BAR_STYLE,
+        TEST_VIEW_COMPILATION_STATUS_DIALOG_STYLE,
+        TEST_VIEW_COMPILATION_STATUS_LABEL_STYLE,
+        TEST_VIEW_CONTENT_PANEL_STYLE,
+        TEST_VIEW_FILE_BUTTON_STYLE,
+        TEST_VIEW_HISTORY_ITEM_STYLE,
+        TEST_VIEW_SLIDER_STYLE,
+        TEST_VIEW_SLIDER_VALUE_LABEL_STYLE,
+        TEST_VIEW_STATUS_DIALOG_STYLE,
+        TEST_VIEW_STATUS_LABEL_STYLE,
+        TEST_VIEW_TIME_LABEL_STYLE,
+        get_status_label_style,
+    )
 
 __all__ = [
     "SCROLLBAR_STYLE",
@@ -81,7 +99,6 @@ __all__ = [
     "RESULTS_LABEL_FILTER_STYLE",
     "RESULTS_LABEL_STAT_STYLE",
     "RESULTS_LABEL_DETAILS_STYLE",
-    # Test view styles (shared across comparator, benchmarker, validator)
     "TEST_VIEW_BUTTON_PANEL_STYLE",
     "TEST_VIEW_FILE_BUTTON_STYLE",
     "TEST_VIEW_CONTENT_PANEL_STYLE",
@@ -96,9 +113,7 @@ __all__ = [
     "TEST_VIEW_SLIDER_VALUE_LABEL_STYLE",
     "TEST_VIEW_STATUS_LABEL_STYLE",
     "TEST_VIEW_TIME_LABEL_STYLE",
-    "get_history_label_style",
     "get_status_label_style",
-    # Config UI styles
     "ERROR_DIALOG_STYLE",
     "CONFIG_DIALOG_TITLE_STYLE",
     "SUCCESS_MESSAGE_STYLE",
@@ -106,3 +121,118 @@ __all__ = [
     "SECTION_INFO_LABEL_STYLE",
     "get_success_status_style",
 ]
+
+def __getattr__(name: str):
+    """Lazy import styles on first access."""
+    # Scrollbar styles
+    if name == "SCROLLBAR_STYLE":
+        from src.app.presentation.shared.design_system.styles.components.scrollbar import SCROLLBAR_STYLE
+        return SCROLLBAR_STYLE
+    
+    # Sidebar styles
+    elif name in ("SIDEBAR_STYLE", "SIDEBAR_BUTTON_STYLE"):
+        from src.app.presentation.shared.design_system.styles.components.sidebar import (
+            SIDEBAR_BUTTON_STYLE,
+            SIDEBAR_STYLE,
+        )
+        return locals()[name]
+    
+    # Splitter styles
+    elif name == "SPLITTER_STYLE":
+        from src.app.presentation.shared.design_system.styles.components.splitter import SPLITTER_STYLE
+        return SPLITTER_STYLE
+    
+    # Console styles
+    elif name == "CONSOLE_STYLE":
+        from src.app.presentation.shared.design_system.styles.components.console import CONSOLE_STYLE
+        return CONSOLE_STYLE
+    
+    # Editor styles
+    elif name in ("EDITOR_WIDGET_STYLE", "AI_DIALOG_STYLE", "get_editor_style", "get_tab_style"):
+        from src.app.presentation.shared.design_system.styles.components.editor import (
+            AI_DIALOG_STYLE,
+            EDITOR_WIDGET_STYLE,
+            get_editor_style,
+            get_tab_style,
+        )
+        return locals()[name]
+    
+    # AI Panel styles
+    elif name in ("AI_PANEL_STYLE", "CUSTOM_COMMAND_STYLE"):
+        from src.app.presentation.shared.design_system.styles.components.ai_panel import (
+            AI_PANEL_STYLE,
+            CUSTOM_COMMAND_STYLE,
+        )
+        return locals()[name]
+    
+    # Results styles
+    elif name in (
+        "RESULTS_COMBO_STYLE", "RESULTS_BUTTON_STYLE", "RESULTS_TAB_WIDGET_STYLE",
+        "RESULTS_TABLE_STYLE", "RESULTS_TABLE_SMALL_STYLE", "RESULTS_TEXT_EDIT_STYLE",
+        "RESULTS_PROGRESS_BAR_STYLE", "RESULTS_FILTERS_PANEL_STYLE", "RESULTS_CARD_STYLE",
+        "RESULTS_LABEL_TITLE_STYLE", "RESULTS_LABEL_FILTER_STYLE", "RESULTS_LABEL_STAT_STYLE",
+        "RESULTS_LABEL_DETAILS_STYLE"
+    ):
+        from src.app.presentation.shared.design_system.styles.components.results import (
+            RESULTS_BUTTON_STYLE,
+            RESULTS_CARD_STYLE,
+            RESULTS_COMBO_STYLE,
+            RESULTS_FILTERS_PANEL_STYLE,
+            RESULTS_LABEL_DETAILS_STYLE,
+            RESULTS_LABEL_FILTER_STYLE,
+            RESULTS_LABEL_STAT_STYLE,
+            RESULTS_LABEL_TITLE_STYLE,
+            RESULTS_PROGRESS_BAR_STYLE,
+            RESULTS_TAB_WIDGET_STYLE,
+            RESULTS_TABLE_SMALL_STYLE,
+            RESULTS_TABLE_STYLE,
+            RESULTS_TEXT_EDIT_STYLE,
+        )
+        return locals()[name]
+    
+    # Test view styles
+    elif name in (
+        "TEST_VIEW_BUTTON_PANEL_STYLE", "TEST_VIEW_FILE_BUTTON_STYLE",
+        "TEST_VIEW_CONTENT_PANEL_STYLE", "TEST_VIEW_STATUS_DIALOG_STYLE",
+        "TEST_VIEW_HISTORY_ITEM_STYLE", "TEST_VIEW_COMPILATION_STATUS_DIALOG_STYLE",
+        "TEST_VIEW_COMPILATION_STATUS_LABEL_STYLE", "TEST_VIEW_COMPILATION_PROGRESS_BAR_STYLE",
+        "TEST_VIEW_COMPILATION_DETAIL_LABEL_STYLE", "TEST_VIEW_COMPILATION_CLOSE_BUTTON_STYLE",
+        "TEST_VIEW_SLIDER_STYLE", "TEST_VIEW_SLIDER_VALUE_LABEL_STYLE",
+        "TEST_VIEW_STATUS_LABEL_STYLE", "TEST_VIEW_TIME_LABEL_STYLE",
+        "get_status_label_style"
+    ):
+        from src.app.presentation.shared.design_system.styles.components.test_view import (
+            TEST_VIEW_BUTTON_PANEL_STYLE,
+            TEST_VIEW_COMPILATION_CLOSE_BUTTON_STYLE,
+            TEST_VIEW_COMPILATION_DETAIL_LABEL_STYLE,
+            TEST_VIEW_COMPILATION_PROGRESS_BAR_STYLE,
+            TEST_VIEW_COMPILATION_STATUS_DIALOG_STYLE,
+            TEST_VIEW_COMPILATION_STATUS_LABEL_STYLE,
+            TEST_VIEW_CONTENT_PANEL_STYLE,
+            TEST_VIEW_FILE_BUTTON_STYLE,
+            TEST_VIEW_HISTORY_ITEM_STYLE,
+            TEST_VIEW_SLIDER_STYLE,
+            TEST_VIEW_SLIDER_VALUE_LABEL_STYLE,
+            TEST_VIEW_STATUS_DIALOG_STYLE,
+            TEST_VIEW_STATUS_LABEL_STYLE,
+            TEST_VIEW_TIME_LABEL_STYLE,
+            get_status_label_style,
+        )
+        return locals()[name]
+    
+    # Config UI styles
+    elif name in (
+        "ERROR_DIALOG_STYLE", "CONFIG_DIALOG_TITLE_STYLE", "SUCCESS_MESSAGE_STYLE",
+        "INFO_MESSAGE_STYLE", "SECTION_INFO_LABEL_STYLE", "get_success_status_style"
+    ):
+        from src.app.presentation.shared.design_system.styles.components.config_ui import (
+            CONFIG_DIALOG_TITLE_STYLE,
+            ERROR_DIALOG_STYLE,
+            INFO_MESSAGE_STYLE,
+            SECTION_INFO_LABEL_STYLE,
+            SUCCESS_MESSAGE_STYLE,
+            get_success_status_style,
+        )
+        return locals()[name]
+    
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
