@@ -14,7 +14,7 @@ from PySide6.QtCore import Signal
 
 from src.app.core.tools.base.base_runner import BaseRunner
 from src.app.core.tools.specialized.comparison_test_worker import ComparisonTestWorker
-from src.app.persistence.database import TestResult
+from src.app.database import TestResult
 
 
 class Comparator(BaseRunner):

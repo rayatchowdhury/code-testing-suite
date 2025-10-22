@@ -13,12 +13,12 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from src.app.persistence.database.connection import DatabaseConnection
-from src.app.persistence.database.models import Session, TestResult
-from src.app.persistence.database.repositories.test_result_repository import (
+from src.app.database.connection import DatabaseConnection
+from src.app.database.models import Session, TestResult
+from src.app.database.repositories.test_result_repository import (
     TestResultRepository,
 )
-from src.app.persistence.database.services.database_stats_service import (
+from src.app.database.services.database_stats_service import (
     DatabaseStatsService,
 )
 from tests.fixtures.database_fixtures import ResultBuilder, create_sample_test_result

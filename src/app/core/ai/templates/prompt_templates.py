@@ -343,11 +343,11 @@ class PromptTemplates:
         if not template:
             raise ValueError(f"Unknown code action: {action}")
 
-            return cls.CODE_BASE.format(
-                instruction=template["instruction"].format(**kwargs),
-                guidelines=template["guidelines"],
-                code=code,
-            )
+        return cls.CODE_BASE.format(
+            instruction=template["instruction"].format(**kwargs),
+            guidelines=template["guidelines"],
+            code=code,
+        )
 
     @classmethod
     def get_custom_prompt(cls, command: str, code: str) -> str:

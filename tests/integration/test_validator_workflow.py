@@ -19,7 +19,7 @@ import pytest
 from PySide6.QtCore import QCoreApplication
 
 from src.app.core.tools.validator import ValidatorRunner
-from src.app.persistence.database import DatabaseManager
+from src.app.database import DatabaseManager
 from tests.fixtures.code_samples import CPP_VALIDATOR_SET
 
 

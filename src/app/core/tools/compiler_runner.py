@@ -13,6 +13,10 @@ from PySide6.QtCore import (
     Slot,
 )
 
+from src.app.core.config.core import ConfigManager
+from src.app.core.tools.base.language_compilers import LanguageCompilerFactory
+from src.app.core.tools.base.language_detector import Language, LanguageDetector
+
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -31,38 +35,129 @@ class CompilerWorker(QObject):
         self.current_file = None
         self.current_program = None
         self._error_emitted = False
-        self.language_handlers = {
-            "cpp": self._handle_cpp,
-            "h": self._handle_cpp,
-            "hpp": self._handle_cpp,
-            "py": self._handle_python,
-            "java": self._handle_java,
-        }
+        
+        # Initialize config-driven compilation
+        self.config_manager = ConfigManager.instance()
+        self.language_detector = LanguageDetector()
+        self.language_compilers = {}  # Cache of language -> compiler instances
+        
+        logger.info("CompilerWorker initialized with config-driven compilation")
 
     @Slot(str)
     def compile_and_run(self, filepath):
-        """Main entry point for compilation and execution"""
+        """Main entry point for compilation and execution using config-driven approach"""
         self.mutex.lock()
         try:
             logger.debug(f"Starting compilation for {filepath}")
-            ext = filepath.lower().split(".")[-1]
-            handler = self.language_handlers.get(ext)
-
-            if handler:
-                handler(filepath)
-            else:
+            
+            # Detect language from file
+            language = self.language_detector.detect_from_extension(filepath)
+            
+            if language == Language.UNKNOWN:
                 self.error.emit(("Unsupported file type\n", "error"))
                 self.finished.emit()
+                return
+            
+            # Get or create language-specific compiler with current config
+            if language not in self.language_compilers:
+                config = self.config_manager.load_config()
+                lang_config = self._get_language_config(config, language)
+                self.language_compilers[language] = LanguageCompilerFactory.create_compiler(
+                    language, lang_config
+                )
+            
+            compiler = self.language_compilers[language]
+            
+            # Handle compilation based on language
+            if compiler.needs_compilation():
+                success, message = self._compile_file(filepath, compiler, language)
+                if not success:
+                    self.error.emit((message, "error"))
+                    self.finished.emit()
+                    return
+            else:
+                # Interpreted language - just validate syntax if needed
+                self._emit_status(f"✓ {os.path.basename(filepath)} ready to run", "success")
+            
+            # Execute the program
+            self._execute_file(filepath, compiler, language)
+            
         except Exception as e:
             logger.error(f"Compilation error: {str(e)}")
             self.error.emit((f"Error: {str(e)}\n", "error"))
             self.finished.emit()
         finally:
             self.mutex.unlock()
+    
+    def _get_language_config(self, config, language):
+        """Extract language-specific config from main config"""
+        languages_config = config.get("languages", {})
+        return languages_config.get(language.value, {})
 
     def _emit_status(self, message, format_type="info", newlines=1):
         """Helper method to emit formatted status messages"""
         self.output.emit((message + "\n" * newlines, format_type))
+    
+    def _compile_file(self, filepath, compiler, language):
+        """
+        Compile a file using config-driven compiler settings.
+        
+        Args:
+            filepath: Source file path
+            compiler: Language-specific compiler instance
+            language: Language enum
+        
+        Returns:
+            Tuple[bool, str]: (success, message)
+        """
+        basename = os.path.basename(filepath)
+        executable_path = compiler.get_executable_path(filepath)
+        exe_basename = os.path.basename(executable_path)
+        
+        # Check if recompilation is needed
+        if self._is_executable_up_to_date(filepath, executable_path):
+            self._emit_status(f"✅ {exe_basename} is up-to-date, skipping compilation", "success")
+            return True, "Up to date"
+        
+        # Compile using language-specific compiler with config-driven settings
+        self._emit_status(f"🔨 Compiling {basename}...")
+        
+        success, output = compiler.compile(
+            source_file=filepath,
+            output_file=executable_path,
+            timeout=30
+        )
+        
+        if success:
+            self._emit_status("✅ Compilation successful!", "success")
+            return True, output
+        else:
+            return False, f"Compilation Error in {basename}:\n{output}\n"
+    
+    def _execute_file(self, filepath, compiler, language):
+        """Execute a compiled/interpreted file"""
+        basename = os.path.basename(filepath)
+        executable_path = compiler.get_executable_path(filepath)
+        exe_basename = os.path.basename(executable_path)
+        
+        self._emit_status(f"🚀 Running {exe_basename}...", "info", 2)
+        self._emit_status("----------------------------", "info", 2)
+        
+        # Get execution command from compiler
+        if language == Language.JAVA:
+            # Extract class name for Java
+            classname = os.path.splitext(basename)[0]
+            command = compiler.get_executable_command(executable_path, class_name=classname)
+        else:
+            command = compiler.get_executable_command(executable_path)
+        
+        # Execute the command
+        if len(command) > 1:
+            # Command with arguments (e.g., python script.py, java -cp . ClassName)
+            self._run_process(command[0], command[1:])
+        else:
+            # Direct execution (e.g., ./program.exe)
+            self._run_executable(command[0])
 
     def _is_executable_up_to_date(self, source_file, executable_file):
         """Check if executable is newer than source file"""
@@ -82,104 +177,12 @@ class CompilerWorker(QObject):
         except OSError:
             return False  # If we can't check timestamps, be safe and recompile
 
-    def _handle_cpp(self, filepath):
-        """Handle C++ compilation and execution with optimizations"""
-        basename = os.path.basename(filepath)
-        exe_name = os.path.splitext(filepath)[0] + (".exe" if os.name == "nt" else "")
-        exe_basename = os.path.basename(exe_name)
-
-        # Check if recompilation is needed
-        if self._is_executable_up_to_date(filepath, exe_name):
-            self._emit_status(
-                f"✅ {exe_basename} is up-to-date, skipping compilation", "success"
-            )
-        else:
-            self._emit_status(f"🔨 Compiling {basename} with optimizations...")
-
-            # Create compile process with optimization flags
-            compile_process = QProcess()
-            compile_process.setProgram("g++")
-
-            # Optimized compiler flags for better performance
-            optimized_args = [
-                filepath,
-                "-o",
-                exe_name,
-                "-O2",  # Level 2 optimization
-                "-march=native",  # Optimize for current CPU
-                "-mtune=native",  # Tune for current CPU
-                "-pipe",  # Use pipes instead of temp files
-                "-std=c++17",  # Modern C++ standard
-                "-Wall",  # Enable warnings
-            ]
-
-            compile_process.setArguments(optimized_args)
-            compile_process.start()
-            compile_process.waitForFinished(
-                15000
-            )  # 15 second timeout for optimized compilation
-
-            if compile_process.exitCode() != 0:
-                error_output = compile_process.readAllStandardError().data().decode()
-                self.error.emit(
-                    (f"Compilation Error in {basename}:\n{error_output}\n", "error")
-                )
-                self.finished.emit()
-                return
-
-            self._emit_status(
-                "✅ Compilation successful with optimizations!", "success"
-            )
-
-        self._emit_status(f"🚀 Running optimized program {exe_basename}...", "info", 2)
-        self._emit_status("----------------------------", "info", 2)
-        self._run_executable(exe_name)
-
-    def _handle_python(self, filepath):
-        """Handle Python script execution"""
-        basename = os.path.basename(filepath)
-        self._emit_status(f"Running Python script {basename}...", "info", 2)
-        self._emit_status("---------------------------------", "info", 2)
-        self._run_process("python", [filepath])
-
-    def _check_java_class_name(self, filepath, classname):
-        """Validate Java class name matches file name"""
-        try:
-            with open(filepath, "r") as f:
-                content = f.read()
-                valid_names = [classname, classname.capitalize()]
-                if not any(f"class {name}" in content for name in valid_names):
-                    self.error.emit(
-                        (
-                            f"Error: Java class name must match the file name '{classname}'\n",
-                            "error",
-                        )
-                    )
-                    return False
-            return True
-        except Exception as e:
-            self.error.emit((f"Error reading file: {str(e)}\n", "error"))
-            return False
-
-    def _handle_java(self, filepath):
-        """Handle Java compilation and execution"""
-        basename = os.path.basename(filepath)
-        classname = os.path.splitext(basename)[0]
-        directory = os.path.dirname(filepath) or "."
-
-        if not self._check_java_class_name(filepath, classname):
-            self.finished.emit()
-            return
-
-        self._emit_status(f"Running Java program {basename}...", "info", 2)
-        self._emit_status("---------------------------------------", "info", 2)
-
-        original_dir = os.getcwd()
-        try:
-            os.chdir(directory)
-            self._run_process("java", [filepath])
-        finally:
-            os.chdir(original_dir)
+    @Slot()
+    def reload_config(self):
+        """Reload configuration and recreate language compilers"""
+        logger.info("Reloading compiler configuration")
+        self.language_compilers.clear()
+        # Compilers will be recreated on next compile_and_run call with fresh config
 
     def _handle_error(self, error_type, basename, details=""):
         """Helper method for error handling"""
@@ -504,3 +507,13 @@ class CompilerRunner(QObject):
         QMetaObject.invokeMethod(
             self.worker, "compile_and_run", Qt.QueuedConnection, Q_ARG(str, filepath)
         )
+    
+    def reload_config(self):
+        """Reload configuration for the worker"""
+        if self.worker:
+            # Use QueuedConnection to avoid blocking the main thread
+            # Worker will clear compilers on next compile_and_run call
+            QMetaObject.invokeMethod(
+                self.worker, "reload_config", Qt.QueuedConnection
+            )
+            logger.info("CompilerRunner config reload queued")

@@ -95,13 +95,13 @@ class ImportRuleChecker:
                     )
                 )
 
-        # Rule 2: Widgets may NOT import windows/*
-        if "presentation.widgets" in importer and "presentation.windows" in imported:
+        # Rule 2: Components may NOT import windows/*
+        if "presentation.shared.components" in importer and "presentation.windows" in imported:
             violations.append(
                 (
                     str(file_path),
-                    "no-widgets-to-windows",
-                    f"Widget imports window: {imported}",
+                    "no-components-to-windows",
+                    f"Component imports window: {imported}",
                 )
             )
 
@@ -116,17 +116,14 @@ class ImportRuleChecker:
                 return  # Same window package - allowed
             
             allowed_prefixes = [
-                "src.app.presentation.widgets",
+                "src.app.presentation.shared.components",
+                "src.app.presentation.shared.dialogs",
                 "src.app.presentation.base",
                 "src.app.presentation.navigation",
-                "src.app.presentation.dialogs",
-                "src.app.presentation.design_system",
-                "src.app.presentation.styles",
-                "src.app.presentation.viewmodels",
-                "src.app.presentation.window_controller",
+                "src.app.presentation.shared.design_system",
                 "src.app.presentation.services",
                 "src.app.core",
-                "src.app.persistence",
+                "src.app.database",
                 "src.app.shared",
                 "PySide6",
                 "typing",

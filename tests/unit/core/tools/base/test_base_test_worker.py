@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 from PySide6.QtCore import QObject, Signal
 
-from src.app.core.tools.base.base_test_worker import BaseTestWorker
+from src.app.core.tools.specialized.base_test_worker import BaseTestWorker
 
 
 class ConcreteTestWorker(BaseTestWorker):

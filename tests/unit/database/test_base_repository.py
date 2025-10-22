@@ -14,10 +14,10 @@ from typing import List, Optional
 
 import pytest
 
-from src.app.persistence.database.connection import DatabaseConnection
-from src.app.persistence.database.exceptions import RepositoryError
-from src.app.persistence.database.models import TestResult
-from src.app.persistence.database.repositories.base_repository import BaseRepository
+from src.app.database.connection import DatabaseConnection
+from src.app.database.exceptions import RepositoryError
+from src.app.database.models import TestResult
+from src.app.database.repositories.base_repository import BaseRepository
 
 
 # Create concrete implementation for testing

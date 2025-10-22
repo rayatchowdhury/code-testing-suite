@@ -448,6 +448,33 @@ class BaseCompiler(QObject):
 
         compiler = self.language_compilers[language]
         return compiler.get_executable_command(executable_path, **kwargs)
+    
+    def reload_config(self, new_config: Optional[Dict[str, Any]] = None):
+        """
+        Reload configuration and recreate all language compilers.
+        
+        This allows hot-reloading of compiler settings without restarting the application.
+        All cached language compilers are cleared and will be recreated with new config
+        on next compilation.
+        
+        Args:
+            new_config: Optional new configuration dict. If None, will reload from ConfigManager.
+        """
+        if new_config is not None:
+            self.config = new_config
+        else:
+            # Reload from ConfigManager singleton
+            from src.app.core.config.core import ConfigManager
+            config_manager = ConfigManager.instance()
+            self.config = config_manager.load_config()
+        
+        # Clear cached compilers - they'll be recreated with new config
+        self.language_compilers.clear()
+        
+        # Update language detector config
+        self.language_detector = LanguageDetector(self.config)
+        
+        logger.info(f"BaseCompiler config reloaded for {self.test_type}")
 
     def get_file_language(self, file_key: str) -> Language:
         """

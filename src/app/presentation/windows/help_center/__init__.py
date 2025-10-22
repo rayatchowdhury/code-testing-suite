@@ -1,10 +1,10 @@
 """
-HelpCenter Window Package
+Help Center Window Package
 
 Phase 5: Per-Window Packaging
-Help Center Window with documentation and tutorials
+Help Center window for documentation and guides
 """
 
-from src.app.presentation.windows.help_center.widgets.view import HelpCenterWindow
+from src.app.presentation.windows.help_center.view import HelpCenterWindow
 
 __all__ = ["HelpCenterWindow"]

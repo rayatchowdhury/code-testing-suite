@@ -18,7 +18,7 @@ from PySide6.QtCore import Signal
 from src.app.core.tools.base.base_runner import BaseRunner
 from src.app.core.tools.compiler_runner import CompilerRunner
 from src.app.core.tools.specialized.benchmark_test_worker import BenchmarkTestWorker
-from src.app.persistence.database import TestResult
+from src.app.database import TestResult
 
 logger = logging.getLogger(__name__)
 

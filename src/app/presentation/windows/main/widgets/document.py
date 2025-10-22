@@ -6,11 +6,19 @@ Self-contained document widget with embedded theme and styling
 import logging
 from typing import List, Tuple
 
-from PySide6.QtCore import *
-from PySide6.QtGui import *
-from PySide6.QtWidgets import *
+from PySide6.QtCore import Qt, QTimer, QPropertyAnimation
+from PySide6.QtGui import QFont
+from PySide6.QtWidgets import (
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QGridLayout,
+    QScrollArea,
+    QLabel,
+    QFrame,
+)
 
-from src.app.presentation.design_system.tokens.colors import MATERIAL_COLORS
+from src.app.presentation.shared.design_system.tokens.colors import MATERIAL_COLORS
 from .content import FEATURE_DATA, WELCOME_TITLE, WELCOME_SUBTITLE, CTA_TITLE, CTA_SUBTITLE
 
 logger = logging.getLogger(__name__)
@@ -177,10 +185,10 @@ class ClickableCard(QFrame):
                 if window_name == "config":
                     # Special case for configuration
                     try:
-                        from src.app.core.config import ConfigView
+                        from src.app.presentation.windows.config_options import ConfigView
                         config_dialog = ConfigView(main_window)
                         config_dialog.exec()
-                    except Exception as e:
+                    except (ImportError, RuntimeError) as e:
                         logger.error(f"Error opening config: {e}", exc_info=True)
                 elif window_name:
                     try:
@@ -190,7 +198,7 @@ class ClickableCard(QFrame):
                         else:
                             logger.warning(f"Router not available for navigation to {window_name}")
                             main_window.window_manager.show_window(window_name)
-                    except Exception as e:
+                    except (AttributeError, RuntimeError) as e:
                         logger.error(f"Error navigating to {window_name}: {e}", exc_info=True)
         
         super().mousePressEvent(event)

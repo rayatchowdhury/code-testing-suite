@@ -5,11 +5,18 @@ Self-contained document widget with embedded theme and styling
 
 from typing import List
 
-from PySide6.QtCore import *
-from PySide6.QtGui import *
-from PySide6.QtWidgets import *
+from PySide6.QtCore import Qt, QTimer, QPropertyAnimation
+from PySide6.QtGui import QFont
+from PySide6.QtWidgets import (
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QScrollArea,
+    QLabel,
+    QFrame,
+)
 
-from src.app.presentation.design_system.tokens.colors import MATERIAL_COLORS
+from src.app.presentation.shared.design_system.tokens.colors import MATERIAL_COLORS
 from .content import HelpSection
 
 # =============================================================================

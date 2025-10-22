@@ -7,7 +7,7 @@ Tests the preset-based StatusView that replaces per-tool status views.
 
 import pytest
 from PySide6.QtCore import Qt
-from src.app.presentation.widgets.status_view import (
+from src.app.presentation.shared.components.status_view import (
     StatusView,
     StatusViewPreset,
     BENCHMARKER_PRESET,

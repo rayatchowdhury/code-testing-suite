@@ -5,13 +5,12 @@ Services provide centralized functionality that windows and widgets
 can consume without tight coupling.
 """
 
-from .export_service import export_test_cases_to_zip, create_export_summary
+from .error_handler_service import ErrorHandlerService, ErrorSeverity
+from .results_export_service import export_test_cases_to_zip, create_export_summary
 
 __all__ = [
     "ErrorHandlerService",
-    "ConfigService",
-    "StateService",
-    "TestExecutionService",
+    "ErrorSeverity",
     "export_test_cases_to_zip",
     "create_export_summary",
 ]

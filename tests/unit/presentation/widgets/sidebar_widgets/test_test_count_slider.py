@@ -12,7 +12,7 @@ import pytest
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLineEdit, QSlider
 
-from src.app.presentation.widgets.sidebar.test_count_slider import (
+from src.app.presentation.shared.components.sidebar.test_count_slider import (
     TestCountSlider,
 )
 

@@ -44,7 +44,7 @@ class TestApplicationImports:
 
     def test_can_import_database_manager(self):
         """Database manager should be importable."""
-        from src.app.persistence.database.database_manager import DatabaseManager
+        from src.app.database.database_manager import DatabaseManager
 
         assert DatabaseManager is not None
 
@@ -98,7 +98,7 @@ class TestDatabaseInitialization:
 
     def test_database_can_be_created(self, temp_workspace):
         """Database should initialize without errors."""
-        from src.app.persistence.database.database_manager import DatabaseManager
+        from src.app.database.database_manager import DatabaseManager
 
         db_path = temp_workspace / "test.db"
         db_manager = DatabaseManager(str(db_path))
@@ -108,7 +108,7 @@ class TestDatabaseInitialization:
 
     def test_database_creates_required_tables(self, temp_workspace):
         """Database should create all required tables."""
-        from src.app.persistence.database.database_manager import DatabaseManager
+        from src.app.database.database_manager import DatabaseManager
 
         db_path = temp_workspace / "test.db"
         db_manager = DatabaseManager(str(db_path))
@@ -119,7 +119,7 @@ class TestDatabaseInitialization:
 
     def test_database_can_be_reopened(self, temp_workspace):
         """Database should be reopenable after creation."""
-        from src.app.persistence.database.database_manager import DatabaseManager
+        from src.app.database.database_manager import DatabaseManager
 
         db_path = temp_workspace / "test.db"
 
@@ -133,7 +133,7 @@ class TestDatabaseInitialization:
 
     def test_database_handles_concurrent_access(self, temp_workspace):
         """Multiple DatabaseManager instances should work with same file."""
-        from src.app.persistence.database.database_manager import DatabaseManager
+        from src.app.database.database_manager import DatabaseManager
 
         db_path = temp_workspace / "test.db"
 

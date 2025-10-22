@@ -13,7 +13,7 @@ from dataclasses import asdict
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 
-from src.app.persistence.database.models import TestResult
+from src.app.database.models import TestResult
 
 
 class ResultBuilder:

@@ -118,3 +118,156 @@ class ErrorHandlerService(QObject):
                 QMessageBox.warning(parent, title, message)
             else:
                 QMessageBox.information(parent, title, message)
+    
+    def show_error(
+        self,
+        title: str,
+        message: str,
+        parent: Optional[QWidget] = None,
+        log: bool = True
+    ):
+        """
+        Show error dialog (convenience method).
+        
+        Args:
+            title: Dialog title
+            message: Error message
+            parent: Parent widget for dialog
+            log: Whether to log the error
+        """
+        if log:
+            logging.error(f"{title}: {message}")
+        
+        self.errorOccurred.emit(title, message, ErrorSeverity.ERROR)
+        
+        if parent:
+            QMessageBox.critical(parent, title, message)
+    
+    def show_warning(
+        self,
+        title: str,
+        message: str,
+        parent: Optional[QWidget] = None,
+        log: bool = True
+    ):
+        """
+        Show warning dialog (convenience method).
+        
+        Args:
+            title: Dialog title
+            message: Warning message
+            parent: Parent widget for dialog
+            log: Whether to log the warning
+        """
+        if log:
+            logging.warning(f"{title}: {message}")
+        
+        self.errorOccurred.emit(title, message, ErrorSeverity.WARNING)
+        
+        if parent:
+            QMessageBox.warning(parent, title, message)
+    
+    def show_info(
+        self,
+        title: str,
+        message: str,
+        parent: Optional[QWidget] = None,
+        log: bool = True
+    ):
+        """
+        Show information dialog (convenience method).
+        
+        Args:
+            title: Dialog title
+            message: Information message
+            parent: Parent widget for dialog
+            log: Whether to log the message
+        """
+        if log:
+            logging.info(f"{title}: {message}")
+        
+        self.errorOccurred.emit(title, message, ErrorSeverity.INFO)
+        
+        if parent:
+            QMessageBox.information(parent, title, message)
+    
+    def show_success(
+        self,
+        title: str,
+        message: str,
+        parent: Optional[QWidget] = None,
+        log: bool = True
+    ):
+        """
+        Show success message (convenience method, uses information dialog).
+        
+        Args:
+            title: Dialog title
+            message: Success message
+            parent: Parent widget for dialog
+            log: Whether to log the message
+        """
+        if log:
+            logging.info(f"{title}: {message}")
+        
+        self.errorOccurred.emit(title, message, ErrorSeverity.INFO)
+        
+        if parent:
+            QMessageBox.information(parent, title, message)
+    
+    def ask_question(
+        self,
+        title: str,
+        message: str,
+        buttons: QMessageBox.StandardButtons = QMessageBox.Yes | QMessageBox.No,
+        default_button: QMessageBox.StandardButton = QMessageBox.No,
+        parent: Optional[QWidget] = None
+    ) -> int:
+        """
+        Show question dialog and return user choice.
+        
+        Args:
+            title: Dialog title
+            message: Question message
+            buttons: Button combination (e.g., Yes|No, Ok|Cancel)
+            default_button: Default selected button
+            parent: Parent widget for dialog
+            
+        Returns:
+            QMessageBox.StandardButton value (Yes, No, Ok, Cancel, etc.)
+        """
+        if parent:
+            return QMessageBox.question(
+                parent,
+                title,
+                message,
+                buttons,
+                default_button
+            )
+        return QMessageBox.No  # Safe default if no parent
+    
+    def ask_save_discard_cancel(
+        self,
+        title: str,
+        message: str,
+        parent: Optional[QWidget] = None
+    ) -> int:
+        """
+        Show save/discard/cancel dialog (convenience method).
+        
+        Args:
+            title: Dialog title
+            message: Message asking about saving
+            parent: Parent widget for dialog
+            
+        Returns:
+            QMessageBox.Save, QMessageBox.Discard, or QMessageBox.Cancel
+        """
+        if parent:
+            return QMessageBox.question(
+                parent,
+                title,
+                message,
+                QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel
+            )
+        return QMessageBox.Cancel  # Safe default if no parent

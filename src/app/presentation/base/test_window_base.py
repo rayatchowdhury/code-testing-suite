@@ -5,12 +5,15 @@ TestWindowBase consolidates 588 lines of duplicated code from test windows,
 providing template methods for subclasses to customize behavior.
 """
 
+import logging
 from abc import abstractmethod
-from typing import Optional, TYPE_CHECKING
+from typing import Optional
 from PySide6.QtWidgets import QWidget, QPushButton
 from PySide6.QtGui import QShowEvent
 from .content_window_base import ContentWindowBase
 from .protocols import TestRunner
+
+logger = logging.getLogger(__name__)
 
 class TestWindowBase(ContentWindowBase):
     """
@@ -60,13 +63,13 @@ class TestWindowBase(ContentWindowBase):
     def __init__(self, parent=None):
         super().__init__(parent)
         self._runner: Optional[TestRunner] = None
-        self._status_view: Optional['QWidget'] = None
         self.compile_btn: Optional['QPushButton'] = None
         self.run_btn: Optional['QPushButton'] = None
         self.stop_btn: Optional['QPushButton'] = None
         self.rerun_btn: Optional['QPushButton'] = None
         self.status_view_active = False
         self.current_status_view: Optional['QWidget'] = None
+        self._original_display_content: Optional['QWidget'] = None
     
     # ===== TEMPLATE METHODS (must override) =====
     
@@ -118,15 +121,17 @@ class TestWindowBase(ContentWindowBase):
         Returns:
             True if should proceed (saved/discarded), False if cancelled
         """
+        from src.app.presentation.services import ErrorHandlerService
+        error_service = ErrorHandlerService.instance()
+        
         for btn_name, btn in self.testing_content.file_buttons.items():
             if btn.property("hasUnsavedChanges"):
                 from PySide6.QtWidgets import QMessageBox
                 
-                reply = QMessageBox.question(
-                    self,
+                reply = error_service.ask_save_discard_cancel(
                     "Unsaved Changes",
                     f"Do you want to save changes to {btn_name}?",
-                    QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel,
+                    self
                 )
 
                 if reply == QMessageBox.Save:
@@ -153,8 +158,8 @@ class TestWindowBase(ContentWindowBase):
     def _initialize_tool(self):
         # Disconnect old runner's signals if it exists
         runner_attr = self._get_runner_attribute_name()
-        if hasattr(self, runner_attr) and getattr(self, runner_attr):
-            old_runner = getattr(self, runner_attr)
+        old_runner = getattr(self, runner_attr, None)
+        if old_runner is not None:
             try:
                 old_runner.compilationOutput.disconnect()
                 old_runner.testingStarted.disconnect()
@@ -187,7 +192,7 @@ class TestWindowBase(ContentWindowBase):
 
             config_manager = ConfigManager()
             return config_manager.load_config()
-        except Exception as e:
+        except (ImportError, AttributeError, FileNotFoundError, OSError) as e:
             # Fallback to empty config if loading fails
             return {}
     
@@ -217,7 +222,6 @@ class TestWindowBase(ContentWindowBase):
         # Replace Results button with Save button (Phase 2: Issue #39)
         self.sidebar.replace_results_with_save_button()
 
-        self.status_view = status_view
         self.current_status_view = status_view
 
         worker = runner.get_current_worker()
@@ -225,14 +229,16 @@ class TestWindowBase(ContentWindowBase):
             self._connect_worker_to_status_view(worker, status_view)
 
             try:
-                if hasattr(worker, "allTestsCompleted"):
-                    worker.allTestsCompleted.connect(self._switch_to_completed_mode)
-            except RuntimeError:
-                pass  # Worker deleted, ignore
+                # Connect allTestsCompleted signal if it exists
+                worker.allTestsCompleted.connect(self._switch_to_completed_mode)
+            except (RuntimeError, AttributeError):
+                pass  # Worker deleted or signal doesn't exist, ignore
 
             # Notify view that tests are starting
-            if hasattr(status_view, "on_tests_started"):
+            try:
                 status_view.on_tests_started(self.test_count_slider.value())
+            except AttributeError:
+                pass  # Method doesn't exist on this status view
 
         # Integrate status view into display area
         self._integrate_status_view(status_view)
@@ -245,69 +251,55 @@ class TestWindowBase(ContentWindowBase):
         self._switch_to_completed_mode()
     
     def _switch_to_test_mode(self):
+        """Switch UI to test execution mode: show Stop, hide Compile/Run/Rerun."""
         self.status_view_active = True
 
-        # Hide Compile button during test execution
-        if self.compile_btn:
-            self.compile_btn.hide()
+        # Hide normal buttons
+        for btn in [self.compile_btn, self.run_btn, self.rerun_btn]:
+            if btn:
+                btn.hide()
 
-        # Hide Run button
-        if self.run_btn:
-            self.run_btn.hide()
-
+        # Create and show Stop button
         if not self.stop_btn:
-            from PySide6.QtWidgets import QPushButton
             self.stop_btn = self.sidebar.add_button("Stop", self.action_section)
             self.stop_btn.clicked.connect(lambda: self.handle_action_button("Stop"))
-
-        if self.stop_btn:
-            self.stop_btn.show()
-
-        # Hide rerun button during test execution
-        if hasattr(self, "rerun_btn") and self.rerun_btn:
-            self.rerun_btn.hide()
+        self.stop_btn.show()
     
     def _switch_to_completed_mode(self):
+        """Switch UI to completed mode: show Rerun, hide Stop."""
         # Hide Stop button
         if self.stop_btn:
             self.stop_btn.hide()
 
-        if not hasattr(self, "rerun_btn") or not self.rerun_btn:
-            from PySide6.QtWidgets import QPushButton
+        # Create and show Rerun button
+        if not self.rerun_btn:
             self.rerun_btn = self.sidebar.add_button("Run", self.action_section)
             self.rerun_btn.clicked.connect(self._handle_rerun_tests)
-
-        if self.rerun_btn:
-            self.rerun_btn.show()
+        self.rerun_btn.show()
     
     def _handle_rerun_tests(self):
-        if hasattr(self, "current_status_view") and self.current_status_view:
+        if self.current_status_view is not None:
             # Emit runRequested signal from status view
             self.current_status_view.runRequested.emit()
             # Switch back to test mode (show Stop button)
             self._switch_to_test_mode()
     
     def _restore_normal_mode(self):
+        """Restore UI to normal mode: show Compile/Run, hide Stop/Rerun, restore Results button."""
         self.status_view_active = False
 
         # Restore Results button (Phase 2: Issue #39)
         self.sidebar.restore_results_button()
 
-        # Show Compile button (back in test window)
-        if self.compile_btn:
-            self.compile_btn.show()
+        # Show normal buttons
+        for btn in [self.compile_btn, self.run_btn]:
+            if btn:
+                btn.show()
 
-        # Show Run button
-        if self.run_btn:
-            self.run_btn.show()
-
-        # Hide Stop button
-        if self.stop_btn:
-            self.stop_btn.hide()
-
-        # Hide rerun button (back in test window)
-        if hasattr(self, "rerun_btn") and self.rerun_btn:
-            self.rerun_btn.hide()
+        # Hide test execution buttons
+        for btn in [self.stop_btn, self.rerun_btn]:
+            if btn:
+                btn.hide()
 
         # Refresh AI panels with current configuration
         self.refresh_ai_panels()
@@ -319,85 +311,74 @@ class TestWindowBase(ContentWindowBase):
         self.sidebar.mark_results_saved()
     
     def refresh_ai_panels(self):
-        if hasattr(self.testing_content, "ai_panel"):
+        # testing_content always has ai_panel attribute
+        if self.testing_content.ai_panel is not None:
             self.testing_content.ai_panel.refresh_visibility()
     
     def handle_button_click(self, button_text: str):
-        if button_text == "Back":
-            # If status view is active, restore it instead of navigating away
-            if self.status_view_active:
-                self._on_back_requested()
+        # Back button when status view is active - restore display instead of navigating
+        if button_text == "Back" and self.status_view_active:
+            # Check if tests are running and show warning
+            if self._is_test_running():
+                logger.debug("Back from status view blocked - tests running")
+                from src.app.presentation.services import ErrorHandlerService
+                error_service = ErrorHandlerService.instance()
+                error_service.show_warning(
+                    "Tests Running",
+                    "Cannot navigate while tests are running.\n\nPlease stop the current test execution first.",
+                    self
+                )
                 return
-
-        # Handle Save button (Phase 2: Issue #39)
-        if button_text == "Save":
-            if self.status_view:
-                self.status_view.save_to_database()
+            self._on_back_requested()
             return
 
+        # Save button - save current test results to database
+        if button_text == "Save":
+            if self.current_status_view:
+                self.current_status_view.save_to_database()
+            return
+
+        # Help Center - check if tests running before navigating
         if button_text == "Help Center":
-            if self.can_close():
-                if self.router:
-                    self.router.navigate_to("help_center")
-        else:
-            super().handle_button_click(button_text)
+            if self._is_test_running():
+                logger.debug("Help Center navigation blocked - tests running")
+                from src.app.presentation.services import ErrorHandlerService
+                error_service = ErrorHandlerService.instance()
+                error_service.show_warning(
+                    "Tests Running",
+                    "Cannot navigate while tests are running.\n\nPlease stop the current test execution first.",
+                    self
+                )
+                return
+            if self.can_close() and self.router:
+                self.router.navigate_to("help_center")
+            return
+        
+        # Delegate other buttons to parent
+        super().handle_button_click(button_text)
     
-    def _get_runner(self):
-        runner_attr = self._get_runner_attribute_name()
-        return getattr(self, runner_attr) if hasattr(self, runner_attr) else None
+    def _get_runner(self) -> Optional[TestRunner]:
+        """Get the test runner instance (unified access point)."""
+        return self._runner
     
     def _integrate_status_view(self, status_view):
         """Integrate status view into display area (hides testing content without deleting)."""
-        if not hasattr(self, "display_area"):
-            return
-
-        # Store original content for restoration (only if not already stored)
-        if (
-            not hasattr(self, "_original_display_content")
-            or self._original_display_content is None
-        ):
-            # Get the layout reference (new architecture uses property, old uses method)
-            layout = self.display_area.layout if hasattr(self.display_area, "layout") and not callable(self.display_area.layout) else self.display_area.layout()
-            if layout and layout.count() > 0:
-                self._original_display_content = layout.itemAt(0).widget()
-
-        # Remove current widget from layout without deleting it
-        layout = self.display_area.layout if hasattr(self.display_area, "layout") and not callable(self.display_area.layout) else self.display_area.layout()
-        if layout and layout.count() > 0:
-            current_widget = layout.itemAt(0).widget()
-            if current_widget:
-                layout.removeWidget(current_widget)
-                current_widget.setParent(None)
-                current_widget.hide()
-
-        # Add status view to display area
+        # display_area always exists from ContentWindowBase
+        # Swap content and store original for restoration
         if status_view:
-            layout.addWidget(status_view)
-            status_view.show()
+            old_widget = self.display_area.swap_content(status_view)
+            # Only store if not already stored
+            if self._original_display_content is None:
+                self._original_display_content = old_widget
     
     def _restore_display_area(self):
         """Restore original display area content (without recreating)."""
-        if not hasattr(self, "display_area"):
+        # display_area always exists from ContentWindowBase
+        if self._original_display_content is None:
             return
 
-        if not (
-            hasattr(self, "_original_display_content")
-            and self._original_display_content
-        ):
-            return
-
-        # Remove status view from layout
-        layout = self.display_area.layout if hasattr(self.display_area, "layout") and not callable(self.display_area.layout) else self.display_area.layout()
-        if layout and layout.count() > 0:
-            current_widget = layout.itemAt(0).widget()
-            if current_widget:
-                layout.removeWidget(current_widget)
-                current_widget.setParent(None)
-                current_widget.hide()
-
-        # Restore original display content
-        layout.addWidget(self._original_display_content)
-        self._original_display_content.show()
+        # Swap back to original content (status view is removed but not deleted)
+        self.display_area.swap_content(self._original_display_content)
     
     def _connect_worker_to_status_view(self, worker, status_view):
         """Connect worker signals to status view."""
@@ -407,50 +388,60 @@ class TestWindowBase(ContentWindowBase):
 
         try:
             # Connect to view lifecycle methods
-            if hasattr(worker, "testStarted") and hasattr(
-                status_view, "on_test_running"
-            ):
+            # Use try-except instead of hasattr for Qt signals
+            try:
                 worker.testStarted.connect(status_view.on_test_running)
-
-            if hasattr(worker, "testCompleted") and hasattr(
-                status_view, "on_test_completed"
-            ):
+            except AttributeError:
+                pass  # Signal/slot doesn't exist
+            
+            try:
                 worker.testCompleted.connect(status_view.on_test_completed)
-
-            if hasattr(worker, "allTestsCompleted") and hasattr(
-                status_view, "on_all_tests_completed"
-            ):
+            except AttributeError:
+                pass
+            
+            try:
                 worker.allTestsCompleted.connect(status_view.on_all_tests_completed)
+            except AttributeError:
+                pass
 
             # Connect worker tracking signals for real-time worker status
-            if hasattr(worker, "workerBusy") and hasattr(
-                status_view, "on_worker_busy"
-            ):
+            try:
                 worker.workerBusy.connect(status_view.on_worker_busy)
-
-            if hasattr(worker, "workerIdle") and hasattr(
-                status_view, "on_worker_idle"
-            ):
+            except AttributeError:
+                pass
+            
+            try:
                 worker.workerIdle.connect(status_view.on_worker_idle)
+            except AttributeError:
+                pass
         except RuntimeError:
             # Worker was deleted before we could connect - this is OK, just skip
             pass
 
         # Connect stop and back signals (these are safe as they're on the status view)
-        if hasattr(status_view, "stopRequested"):
+        try:
             status_view.stopRequested.connect(self._on_stop_requested)
-
-        if hasattr(status_view, "backRequested"):
+        except AttributeError:
+            pass
+        
+        try:
             status_view.backRequested.connect(self._on_back_requested)
+        except AttributeError:
+            pass
 
         # Connect run signal for re-running tests
-        if hasattr(status_view, "runRequested"):
+        try:
             status_view.runRequested.connect(self._on_run_requested)
+        except AttributeError:
+            pass
     
     def _on_stop_requested(self):
         runner = self._get_runner()
-        if runner and hasattr(runner, "stop"):
-            runner.stop()
+        if runner is not None:
+            try:
+                runner.stop()
+            except AttributeError:
+                pass  # Runner doesn't have stop method
     
     def _on_back_requested(self):
         self._restore_display_area()

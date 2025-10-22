@@ -13,8 +13,8 @@ from unittest.mock import Mock, patch, MagicMock
 from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox
 from PySide6.QtCore import Qt
 
-from src.app.persistence.database import TestResult
-from src.app.presentation.dialogs.result_detail import DetailedResultDialog, DetailedResultViewModel
+from src.app.database import TestResult
+from src.app.presentation.shared.dialogs.result_detail import DetailedResultDialog, DetailedResultViewModel
 
 
 @pytest.fixture
@@ -278,8 +278,8 @@ class TestDetailedResultDialogUI:
             # (In real test, we'd need to find the actual button)
             dialog.backRequested.emit()
 
-    @patch('src.app.presentation.dialogs.result_detail.view.QFileDialog.getSaveFileName')
-    @patch('src.app.presentation.dialogs.result_detail.view.QMessageBox.information')
+    @patch('src.app.presentation.shared.dialogs.result_detail.view.QFileDialog.getSaveFileName')
+    @patch('src.app.presentation.shared.dialogs.result_detail.view.QMessageBox.information')
     def test_export_results(self, mock_info, mock_file_dialog, dialog, tmp_path):
         """Test export functionality."""
         # Mock file dialog to return a path
@@ -299,9 +299,9 @@ class TestDetailedResultDialogUI:
         import os
         assert os.path.exists(test_file)
 
-    @patch('src.app.persistence.database.FilesSnapshot')
-    @patch('src.app.presentation.dialogs.result_detail.view.QMessageBox.question')
-    @patch('src.app.presentation.dialogs.result_detail.view.QMessageBox.information')
+    @patch('src.app.database.FilesSnapshot')
+    @patch('src.app.presentation.shared.dialogs.result_detail.view.QMessageBox.question')
+    @patch('src.app.presentation.shared.dialogs.result_detail.view.QMessageBox.information')
     def test_load_to_test_cancel(self, mock_info, mock_question, mock_snapshot, dialog):
         """Test load to test cancellation."""
         # Mock FilesSnapshot
@@ -323,7 +323,7 @@ class TestDetailedResultDialogUI:
         # Check info was not shown (cancelled)
         mock_info.assert_not_called()
 
-    @patch('src.app.presentation.dialogs.result_detail.view.QMessageBox.warning')
+    @patch('src.app.presentation.shared.dialogs.result_detail.view.QMessageBox.warning')
     def test_load_to_test_no_files(self, mock_warning, qtbot, sample_test_result):
         """Test load to test with no files."""
         # Create result with no files

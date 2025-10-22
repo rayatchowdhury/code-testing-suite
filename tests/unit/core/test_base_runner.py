@@ -14,7 +14,7 @@ import pytest
 from PySide6.QtCore import QThread, Signal
 
 from src.app.core.tools.base.base_runner import BaseRunner
-from src.app.persistence.database.models import TestResult
+from src.app.database.models import TestResult
 
 
 class ConcreteRunner(BaseRunner):

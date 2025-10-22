@@ -9,7 +9,7 @@ import json
 
 import pytest
 
-from src.app.persistence.database.models import (
+from src.app.database.models import (
     FilesSnapshot,
     ProjectData,
     Session,

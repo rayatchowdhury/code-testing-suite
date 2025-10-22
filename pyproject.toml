@@ -165,7 +165,7 @@ enable-plugin = [
 
 # Windows settings
 windows-console-mode = "disable"
-windows-icon-from-ico = "src/resources/icons/app_icon.png"
+windows-icon-from-ico = "src/app/resources/icons/app_icon.png"
 
 # Inclusions
 include-package = [
@@ -178,7 +178,7 @@ include-package = [
     "psutil"
 ]
 
-include-data-dir = "src/resources=resources"
+include-data-dir = "src/app/resources=resources"
 
 # Exclusions for smaller size
 nofollow-import-to = [

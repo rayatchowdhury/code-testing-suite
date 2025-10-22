@@ -19,7 +19,7 @@ import pytest
 from PySide6.QtCore import Signal
 
 from src.app.core.tools.comparator import Comparator
-from src.app.persistence.database.models import TestResult
+from src.app.database.models import TestResult
 
 
 @pytest.fixture

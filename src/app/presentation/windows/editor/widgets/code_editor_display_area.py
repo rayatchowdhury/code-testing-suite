@@ -12,15 +12,16 @@ from PySide6.QtWidgets import (
 )
 
 from src.app.core.tools.compiler_runner import CompilerRunner
-from src.app.presentation.design_system.styles.components.code_editor_display_area import (
+from src.app.presentation.shared.design_system.styles.components.code_editor_display_area import (
     OUTER_PANEL_STYLE,
     SPLITTER_STYLE,
 )
-from src.app.presentation.design_system.tokens import MATERIAL_COLORS
-from src.app.presentation.widgets.display_area.ai_panel import AIPanel
-from src.app.presentation.widgets.display_area.console import ConsoleWidget
-from src.app.presentation.widgets.display_area.editor import EditorWidget
-from src.app.presentation.widgets.display_area.editor_tab_widget import (
+from src.app.presentation.shared.design_system.tokens import MATERIAL_COLORS
+from src.app.presentation.shared.components.editor import AIPanel
+from src.app.presentation.shared.components.console import ConsoleWidget
+from src.app.presentation.shared.components.editor import EditorTabWidget
+from src.app.presentation.services import ErrorHandlerService
+from src.app.presentation.shared.components.editor import (
     EditorTabWidget,
 )
 
@@ -133,17 +134,17 @@ class CodeEditorDisplayArea(QWidget):
 
     def compile_and_run_code(self):
         """Compile and run the current code."""
+        error_service = ErrorHandlerService.instance()
         current_editor = self.editor_tabs.current_editor
         if not current_editor or not current_editor.currentFilePath:
             return
 
         # Check for unsaved changes before compiling
         if current_editor.codeEditor.document().isModified():
-            reply = QMessageBox.question(
-                self,
+            reply = error_service.ask_save_discard_cancel(
                 "Unsaved Changes",
                 "Do you want to save changes before compiling?",
-                QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel,
+                self
             )
 
             if reply == QMessageBox.Save:

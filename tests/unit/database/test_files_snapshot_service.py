@@ -13,8 +13,8 @@ from pathlib import Path
 
 import pytest
 
-from src.app.persistence.database.models import FilesSnapshot
-from src.app.persistence.database.services.files_snapshot_service import (
+from src.app.database.models import FilesSnapshot
+from src.app.database.services.files_snapshot_service import (
     FilesSnapshotService,
 )
 from tests.fixtures.database_fixtures import (

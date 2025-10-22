@@ -20,8 +20,8 @@ from pathlib import Path
 
 import pytest
 
-from src.app.persistence.database.database_manager import DatabaseError, DatabaseManager
-from src.app.persistence.database.models import (
+from src.app.database.database_manager import DatabaseError, DatabaseManager
+from src.app.database.models import (
     FilesSnapshot,
     ProjectData,
     Session,

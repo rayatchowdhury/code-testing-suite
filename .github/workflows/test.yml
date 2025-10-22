@@ -257,7 +257,7 @@ jobs:
       if: runner.os != 'Windows'
       run: |
         pyinstaller --name "CodeTestingSuite" --onedir --windowed --clean \
-          --add-data "src/resources:resources" \
+          --add-data "src/app/resources:resources" \
           --distpath dist/ \
           --workpath build/ \
           src/app/__main__.py
@@ -266,7 +266,7 @@ jobs:
     - name: Build application (Windows)
       if: runner.os == 'Windows'
       run: |
-        pyinstaller --name "CodeTestingSuite" --onedir --windowed --clean --add-data "src/resources;resources" --distpath dist/ --workpath build/ src/app/__main__.py
+        pyinstaller --name "CodeTestingSuite" --onedir --windowed --clean --add-data "src/app/resources;resources" --distpath dist/ --workpath build/ src/app/__main__.py
         if (Test-Path "CodeTestingSuite.spec") { Move-Item "CodeTestingSuite.spec" "build/" -Force }
         
     - name: Upload build artifacts

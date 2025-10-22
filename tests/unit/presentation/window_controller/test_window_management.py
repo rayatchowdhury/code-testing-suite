@@ -9,7 +9,7 @@ from unittest.mock import Mock, patch
 import pytest
 from PySide6.QtWidgets import QWidget
 
-from src.app.presentation.window_controller.window_management import (
+from src.app.presentation.navigation.window_manager import (
     WindowFactory,
     WindowManager,
 )

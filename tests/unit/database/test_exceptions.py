@@ -6,7 +6,7 @@ Tests exception hierarchy, error messages, and exception raising scenarios.
 
 import pytest
 
-from src.app.persistence.database.exceptions import (
+from src.app.database.exceptions import (
     ConnectionError,
     DatabaseError,
     RepositoryError,

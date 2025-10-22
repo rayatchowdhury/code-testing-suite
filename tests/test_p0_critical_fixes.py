@@ -27,11 +27,11 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from src.app.core.tools.base.process_executor import ProcessExecutor, ProcessResult
 from src.app.core.tools.compiler_runner import CompilerRunner
-from src.app.persistence.database.database_manager import (
+from src.app.database.database_manager import (
     DatabaseManager,
     ValidationError,
 )
-from src.app.persistence.database.models import TestResult
+from src.app.database.models import TestResult
 
 
 class TestP0Issue1_ZombieProcessLeak:

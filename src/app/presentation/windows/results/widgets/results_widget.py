@@ -1,22 +1,19 @@
 import json
 from datetime import datetime, timedelta
 
-from PySide6.QtCore import QDate, Qt, Signal
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QComboBox,
-    QDateEdit,
     QGroupBox,
     QHBoxLayout,
     QHeaderView,
     QLabel,
     QLineEdit,
     QMessageBox,
-    QProgressBar,
     QPushButton,
     QSpinBox,
     QSplitter,
-    QTabBar,
     QTableWidget,
     QTableWidgetItem,
     QTabWidget,
@@ -25,12 +22,12 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from src.app.persistence.database import DatabaseManager, TestResult
-from src.app.presentation.design_system.styles.components.code_editor_display_area import (
+from src.app.database import DatabaseManager, TestResult
+from src.app.presentation.shared.design_system.styles.components.code_editor_display_area import (
     OUTER_PANEL_STYLE,
     SPLITTER_STYLE,
 )
-from src.app.presentation.design_system.styles.components.results import (
+from src.app.presentation.shared.design_system.styles.components.results import (
     RESULTS_BUTTON_STYLE,
     RESULTS_CARD_STYLE,
     RESULTS_COMBO_STYLE,
@@ -45,7 +42,7 @@ from src.app.presentation.design_system.styles.components.results import (
     RESULTS_TABLE_STYLE,
     RESULTS_TEXT_EDIT_STYLE,
 )
-from src.app.presentation.design_system.tokens import MATERIAL_COLORS
+from src.app.presentation.shared.design_system.tokens import MATERIAL_COLORS
 
 class ResultsWidget(QWidget):
     """Widget to display test results from database"""
@@ -411,7 +408,10 @@ class ResultsWidget(QWidget):
         self._load_results()
 
     def _populate_results_table(self, results: list):
-        """Populate the results table with data"""
+        """Populate the results table with data (batched to prevent flickering)"""
+        # Disable updates during bulk population to prevent flickering
+        self.results_table.setUpdatesEnabled(False)
+        
         self.results_table.setRowCount(len(results))
 
         for row, result in enumerate(results):
@@ -483,6 +483,9 @@ class ResultsWidget(QWidget):
 
         # Store results for detail view
         self.current_results = results
+        
+        # Re-enable updates after bulk population - single repaint
+        self.results_table.setUpdatesEnabled(True)
 
     def _show_detailed_view(self, test_result):
         """Show detailed view for a specific test result"""
@@ -503,7 +506,7 @@ class ResultsWidget(QWidget):
 
             parent_window.show_detailed_view(test_result)
 
-        except Exception as e:
+        except (AttributeError, ValueError, RuntimeError) as e:
             # Show error dialog instead of crashing
             error_msg = QMessageBox(self)
             error_msg.setIcon(QMessageBox.Icon.Critical)
@@ -520,13 +523,14 @@ class ResultsWidget(QWidget):
         Args:
             result_id: The ID of the test result to delete
         """
+        error_service = ErrorHandlerService.instance()
         # Confirmation dialog
-        reply = QMessageBox.question(
-            self,
+        reply = error_service.ask_question(
             "Confirm Deletion",
             "Are you sure you want to delete this test result?\n\nThis action cannot be undone.",
             QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No,  # Default to No for safety
+            QMessageBox.No,
+            self
         )
 
         if reply == QMessageBox.Yes:
@@ -537,18 +541,18 @@ class ResultsWidget(QWidget):
                 if success:
                     # Refresh the results table
                     self._load_results()
-                    QMessageBox.information(
-                        self, "Success", "Test result deleted successfully."
+                    error_service.show_success(
+                        "Success", "Test result deleted successfully.", self
                     )
                 else:
-                    QMessageBox.warning(
-                        self,
+                    error_service.show_warning(
                         "Not Found",
                         "Test result not found. It may have already been deleted.",
+                        self
                     )
-            except Exception as e:
-                QMessageBox.critical(
-                    self, "Error", f"Failed to delete test result:\n{str(e)}"
+            except (OSError, RuntimeError, ValueError) as e:
+                error_service.show_error(
+                    "Error", f"Failed to delete test result:\n{str(e)}", self
                 )
 
     def _update_statistics(self, results: list):
@@ -628,7 +632,7 @@ Test Summary:
                         details += f"Test {i}: {'PASSED' if test_detail.get('passed', False) else 'FAILED'}\n"
                     if len(details_data) > 5:
                         details += f"... and {len(details_data) - 5} more tests\n"
-                except Exception:
+                except (json.JSONDecodeError, ValueError, KeyError):
                     details += "Test details: Available but could not parse\n"
 
             self.details_panel.setText(details)

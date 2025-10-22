@@ -16,8 +16,8 @@ from pathlib import Path
 
 import pytest
 
-from src.app.persistence.database.connection import DatabaseConnection
-from src.app.persistence.database.exceptions import ConnectionError, DatabaseError
+from src.app.database.connection import DatabaseConnection
+from src.app.database.exceptions import ConnectionError, DatabaseError
 
 
 @pytest.fixture
@@ -390,7 +390,7 @@ class TestBackwardCompatibility:
 
     def test_get_db_connection_function(self, temp_db):
         """Should support legacy get_db_connection() function."""
-        from src.app.persistence.database.connection import get_db_connection
+        from src.app.database.connection import get_db_connection
 
         # First, initialize with specific path
         DatabaseConnection(temp_db)

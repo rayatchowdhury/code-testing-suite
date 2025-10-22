@@ -20,20 +20,20 @@ from pathlib import Path
 
 import pytest
 
-from src.app.persistence.database.database_manager import DatabaseError, DatabaseManager
-from src.app.persistence.database.models import (
+from src.app.database.database_manager import DatabaseError, DatabaseManager
+from src.app.database.models import (
     FilesSnapshot,
     ProjectData,
     Session,
     TestResult,
 )
-from src.app.persistence.database.services.database_maintenance_service import (
+from src.app.database.services.database_maintenance_service import (
     DatabaseMaintenanceService,
 )
-from src.app.persistence.database.services.database_stats_service import (
+from src.app.database.services.database_stats_service import (
     DatabaseStatsService,
 )
-from src.app.persistence.database.services.files_snapshot_service import (
+from src.app.database.services.files_snapshot_service import (
     FilesSnapshotService,
 )
 from tests.fixtures.database_fixtures import (

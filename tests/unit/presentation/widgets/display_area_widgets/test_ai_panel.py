@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 from PySide6.QtWidgets import QLineEdit, QPushButton
 
-from src.app.presentation.widgets.display_area.ai_panel import (
+from src.app.presentation.shared.components.editor.ai_panel import (
     AIActionButton,
     AICustomCommandInput,
     AIPanel,
@@ -94,7 +94,7 @@ class TestAICustomCommandInput:
 
 
 @patch(
-    "src.app.presentation.widgets.display_area_widgets.ai_panel.AIPanel._should_show_ai_panel"
+    "src.app.presentation.shared.components.console.ai_panel.AIPanel._should_show_ai_panel"
 )
 class TestAIPanelInitialization:
     """Test AI panel initialization."""
@@ -139,7 +139,7 @@ class TestAIPanelInitialization:
 
 
 @patch(
-    "src.app.presentation.widgets.display_area_widgets.ai_panel.AIPanel._should_show_ai_panel"
+    "src.app.presentation.shared.components.console.ai_panel.AIPanel._should_show_ai_panel"
 )
 class TestAIPanelButtons:
     """Test AI panel button creation and configuration."""
@@ -191,7 +191,7 @@ class TestAIPanelButtons:
 
 
 @patch(
-    "src.app.presentation.widgets.display_area_widgets.ai_panel.AIPanel._should_show_ai_panel"
+    "src.app.presentation.shared.components.console.ai_panel.AIPanel._should_show_ai_panel"
 )
 class TestAIPanelSignals:
     """Test AI panel signal emission."""
@@ -257,7 +257,7 @@ class TestAIPanelSignals:
 
 
 @patch(
-    "src.app.presentation.widgets.display_area_widgets.ai_panel.AIPanel._should_show_ai_panel"
+    "src.app.presentation.shared.components.console.ai_panel.AIPanel._should_show_ai_panel"
 )
 class TestAIPanelEnableDisable:
     """Test enabling and disabling AI panel."""
@@ -312,7 +312,7 @@ class TestAIPanelEnableDisable:
 
 
 @patch(
-    "src.app.presentation.widgets.display_area_widgets.ai_panel.AIPanel._should_show_ai_panel"
+    "src.app.presentation.shared.components.console.ai_panel.AIPanel._should_show_ai_panel"
 )
 class TestAIPanelTypeChange:
     """Test changing panel type."""

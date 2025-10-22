@@ -4,9 +4,46 @@ from pathlib import Path
 from typing import Optional, Union
 
 from PySide6.QtWidgets import QFileDialog, QMessageBox
+from src.app.presentation.services import ErrorHandlerService
 
 
 class FileOperations:
+    """
+    Centralized file operations utility with consistent error handling.
+    
+    ## Usage Guidelines
+    
+    ### When to use FileOperations:
+    1. **User-facing file operations** - Opening/saving files via dialogs
+    2. **Application data files** - Config, state, session files
+    3. **Code editor files** - Loading/saving code files
+    4. **Any operation that needs error dialogs** - Automatic error handling with ErrorHandlerService
+    
+    ### When direct I/O is acceptable:
+    1. **Performance-critical loops** - Reading many files quickly
+    2. **Special encoding requirements** - Binary files, specific encodings
+    3. **Streaming operations** - Large files that need chunked reading
+    4. **Internal/temporary files** - Where user shouldn't see errors
+    
+    ### Best Practice:
+    - Default to FileOperations for consistency
+    - Use direct I/O only when you have a specific reason
+    - Always wrap direct I/O in proper try-except blocks
+    - Log errors appropriately when using direct I/O
+    
+    Example:
+        # Recommended - using FileOperations
+        content = FileOperations.read_file(path, parent_widget)
+        FileOperations.write_file(path, content, parent_widget)
+        
+        # Acceptable - direct I/O with proper error handling
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                content = f.read()
+        except (IOError, OSError) as e:
+            logger.error(f"Failed to read {path}: {e}")
+    """
+    
     FILE_FILTERS = (
         "Programming Files (*.cpp *.h *.hpp *.py *.java);;"
         "C++ Files (*.cpp *.h *.hpp);;"
@@ -37,7 +74,8 @@ class FileOperations:
             return True
         except Exception as e:
             if parent:
-                QMessageBox.critical(parent, "Error", f"Could not save file: {str(e)}")
+                error_service = ErrorHandlerService.instance()
+                error_service.show_error("Error", f"Could not save file: {str(e)}", parent)
             return False
 
     @staticmethod
@@ -75,6 +113,7 @@ class FileOperations:
     @staticmethod
     def open_file(parent):
         """Open file dialog and read selected file."""
+        error_service = ErrorHandlerService.instance()
         try:
             file_name, _ = QFileDialog.getOpenFileName(
                 parent, "Open File", "", FileOperations.FILE_FILTERS
@@ -92,17 +131,17 @@ class FileOperations:
                                 encoding="latin-1"
                             )
                         except Exception as e:
-                            QMessageBox.critical(
-                                parent, "Error", f"Could not decode file: {str(e)}"
+                            error_service.show_error(
+                                "Error", f"Could not decode file: {str(e)}", parent
                             )
                     except Exception as e:
-                        QMessageBox.critical(
-                            parent, "Error", f"Could not read file: {str(e)}"
+                        error_service.show_error(
+                            "Error", f"Could not read file: {str(e)}", parent
                         )
                 else:
-                    QMessageBox.critical(parent, "Error", "File not found")
+                    error_service.show_error("Error", "File not found", parent)
         except Exception as e:
-            QMessageBox.critical(parent, "Error", f"Error opening file: {str(e)}")
+            error_service.show_error("Error", f"Error opening file: {str(e)}", parent)
 
         return None, None
 
@@ -127,22 +166,24 @@ class FileOperations:
             return True
         except Exception as e:
             if parent:
-                QMessageBox.critical(parent, "Error", f"Could not write file: {str(e)}")
+                error_service = ErrorHandlerService.instance()
+                error_service.show_error("Error", f"Could not write file: {str(e)}", parent)
             return False
 
     @staticmethod
     def read_file(filepath, parent=None):
         """Read file content."""
+        error_service = ErrorHandlerService.instance()
         try:
             with open(filepath, "r", encoding="utf-8") as file:
                 return file.read()
         except FileNotFoundError:
             if parent:
-                QMessageBox.critical(parent, "Error", f"File not found: {filepath}")
+                error_service.show_error("Error", f"File not found: {filepath}", parent)
             raise
         except Exception as e:
             if parent:
-                QMessageBox.critical(parent, "Error", f"Could not read file: {str(e)}")
+                error_service.show_error("Error", f"Could not read file: {str(e)}", parent)
             raise
 
     @staticmethod
@@ -234,7 +275,8 @@ class FileOperations:
     @staticmethod
     def show_error_dialog(title, message, parent=None):
         """Show error dialog."""
-        QMessageBox.critical(parent, title, message)
+        error_service = ErrorHandlerService.instance()
+        error_service.show_error(title, message, parent)
 
     @staticmethod
     def format_file_size(size_bytes):

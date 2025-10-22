@@ -1,6 +1,7 @@
 """Database operations for configuration management."""
 
 from PySide6.QtWidgets import QInputDialog, QMessageBox
+from src.app.presentation.services import ErrorHandlerService
 
 
 class DatabaseOperations:
@@ -33,18 +34,18 @@ class DatabaseOperations:
 
     def cleanup_old_data(self):
         """Clean up old data with user confirmation"""
+        error_service = ErrorHandlerService.instance()
         try:
             # Get current stats
             stats = self.database_manager.get_database_stats()
             if not stats:
-                QMessageBox.warning(
-                    self.parent, "Error", "Could not retrieve database statistics"
+                error_service.show_warning(
+                    "Error", "Could not retrieve database statistics", self.parent
                 )
                 return
 
             # Show confirmation dialog
-            reply = QMessageBox.question(
-                self.parent,
+            reply = error_service.ask_question(
                 "Cleanup Old Data",
                 f"This will delete test results and sessions older than 30 days.\n\n"
                 f"Current database contents:\n"
@@ -54,6 +55,7 @@ class DatabaseOperations:
                 f"Continue with cleanup?",
                 QMessageBox.Yes | QMessageBox.No,
                 QMessageBox.No,
+                self.parent
             )
 
             if reply == QMessageBox.Yes:
@@ -75,46 +77,46 @@ class DatabaseOperations:
                         stats_before["sessions_count"] - stats_after["sessions_count"]
                     )
 
-                    QMessageBox.information(
-                        self.parent,
+                    error_service.show_success(
                         "Cleanup Complete",
                         f"Successfully cleaned up old data:\n"
                         f"• Deleted {deleted_tests} test results\n"
                         f"• Deleted {deleted_sessions} sessions",
+                        self.parent
                     )
 
                     # Refresh the stats display
                     self.refresh_database_stats()
                 else:
-                    QMessageBox.information(
-                        self.parent, "Cleanup Complete", "Data cleanup completed"
+                    error_service.show_success(
+                        "Cleanup Complete", "Data cleanup completed", self.parent
                     )
 
         except Exception as e:
-            QMessageBox.critical(
-                self.parent, "Cleanup Error", f"Failed to cleanup data: {str(e)}"
+            error_service.show_error(
+                "Cleanup Error", f"Failed to cleanup data: {str(e)}", self.parent
             )
 
     def delete_all_data(self):
         """Delete all data with strong confirmation"""
+        error_service = ErrorHandlerService.instance()
         try:
             # Get current stats
             stats = self.database_manager.get_database_stats()
             if not stats:
-                QMessageBox.warning(
-                    self.parent, "Error", "Could not retrieve database statistics"
+                error_service.show_warning(
+                    "Error", "Could not retrieve database statistics", self.parent
                 )
                 return
 
             if stats["test_results_count"] == 0 and stats["sessions_count"] == 0:
-                QMessageBox.information(
-                    self.parent, "No Data", "Database is already empty"
+                error_service.show_info(
+                    "No Data", "Database is already empty", self.parent
                 )
                 return
 
             # First confirmation
-            reply1 = QMessageBox.warning(
-                self.parent,
+            reply1 = error_service.ask_question(
                 "⚠️ DELETE ALL DATA",
                 f"🚨 WARNING: This will permanently delete ALL data!\n\n"
                 f"Current database contents:\n"
@@ -125,6 +127,7 @@ class DatabaseOperations:
                 f"Are you absolutely sure you want to continue?",
                 QMessageBox.Yes | QMessageBox.No,
                 QMessageBox.No,
+                self.parent
             )
 
             if reply1 != QMessageBox.Yes:
@@ -139,8 +142,8 @@ class DatabaseOperations:
             )
 
             if not ok or text.strip() != "DELETE ALL":
-                QMessageBox.information(
-                    self.parent, "Cancelled", "Data deletion cancelled"
+                error_service.show_info(
+                    "Cancelled", "Data deletion cancelled", self.parent
                 )
                 return
 
@@ -148,42 +151,42 @@ class DatabaseOperations:
             success = self.database_manager.delete_all_data(confirm=True)
 
             if success:
-                QMessageBox.information(
-                    self.parent,
+                error_service.show_success(
                     "✅ Data Deleted",
                     "All data has been successfully deleted from the database.\n"
                     "The database is now empty.",
+                    self.parent
                 )
                 # Refresh the stats display
                 self.refresh_database_stats()
             else:
-                QMessageBox.critical(
-                    self.parent,
+                error_service.show_error(
                     "Deletion Failed",
                     "Failed to delete data. Check console for details.",
+                    self.parent
                 )
 
         except Exception as e:
-            QMessageBox.critical(
-                self.parent, "Deletion Error", f"Failed to delete data: {str(e)}"
+            error_service.show_error(
+                "Deletion Error", f"Failed to delete data: {str(e)}", self.parent
             )
 
     def optimize_database(self):
         """Optimize database by reclaiming unused space"""
+        error_service = ErrorHandlerService.instance()
         try:
             # Get current stats
             stats = self.database_manager.get_database_stats()
             if not stats:
-                QMessageBox.warning(
-                    self.parent, "Error", "Could not retrieve database statistics"
+                error_service.show_warning(
+                    "Error", "Could not retrieve database statistics", self.parent
                 )
                 return
 
             current_size = stats["database_size_mb"]
 
             # Show confirmation
-            reply = QMessageBox.question(
-                self.parent,
+            reply = error_service.ask_question(
                 "Optimize Database",
                 f"This will optimize the database file and reclaim unused space.\n\n"
                 f"Current database size: {current_size} MB\n\n"
@@ -191,6 +194,7 @@ class DatabaseOperations:
                 f"Continue?",
                 QMessageBox.Yes | QMessageBox.No,
                 QMessageBox.Yes,
+                self.parent
             )
 
             if reply != QMessageBox.Yes:
@@ -205,35 +209,35 @@ class DatabaseOperations:
                 size_after = result["size_after_mb"]
 
                 if space_saved > 0.01:  # More than 10 KB saved
-                    QMessageBox.information(
-                        self.parent,
+                    error_service.show_success(
                         "✅ Optimization Complete",
                         f"Database successfully optimized!\n\n"
                         f"Before: {size_before} MB\n"
                         f"After: {size_after} MB\n"
                         f"Space saved: {space_saved} MB",
+                        self.parent
                     )
                 else:
-                    QMessageBox.information(
-                        self.parent,
+                    error_service.show_success(
                         "✅ Optimization Complete",
                         f"Database is already optimized.\n\n"
                         f"Current size: {size_after} MB\n"
                         f"No significant space to reclaim.",
+                        self.parent
                     )
 
                 # Refresh the stats display
                 self.refresh_database_stats()
             else:
-                QMessageBox.critical(
-                    self.parent,
+                error_service.show_error(
                     "Optimization Failed",
                     "Failed to optimize database. Check console for details.",
+                    self.parent
                 )
 
         except Exception as e:
-            QMessageBox.critical(
-                self.parent,
+            error_service.show_error(
                 "Optimization Error",
                 f"Failed to optimize database: {str(e)}",
+                self.parent
             )

@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, Mock
 import pytest
 from PySide6.QtWidgets import QMessageBox
 
-from src.app.presentation.widgets.unified_status_view import BaseStatusView
+from src.app.presentation.shared.components.status_view import BaseStatusView
 
 
 @pytest.fixture

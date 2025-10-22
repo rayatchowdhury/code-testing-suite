@@ -11,7 +11,7 @@ from unittest.mock import Mock
 import pytest
 from PySide6.QtWidgets import QLabel, QPushButton, QTextEdit
 
-from src.app.presentation.widgets.test_detail_view import (
+from src.app.presentation.shared.dialogs.test_detail import (
     BenchmarkerDetailDialog,
     ComparatorDetailDialog,
     TestDetailDialog,

@@ -96,7 +96,7 @@ class NavigationRouter(QObject):
                 self.navigationFailed.emit(window_name, "show_window returned False")
                 return False
                 
-        except Exception as e:
+        except (AttributeError, RuntimeError, ValueError) as e:
             logger.error(
                 f"NavigationRouter: Error navigating to '{window_name}': {e}",
                 exc_info=True
@@ -137,7 +137,7 @@ class NavigationRouter(QObject):
             
             return False
             
-        except Exception as e:
+        except (AttributeError, RuntimeError, IndexError) as e:
             logger.error(f"NavigationRouter: Error going back: {e}", exc_info=True)
             return False
     

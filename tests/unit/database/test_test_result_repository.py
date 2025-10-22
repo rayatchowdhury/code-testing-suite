@@ -13,10 +13,10 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from src.app.persistence.database.connection import DatabaseConnection
-from src.app.persistence.database.exceptions import RepositoryError
-from src.app.persistence.database.models import TestResult
-from src.app.persistence.database.repositories.test_result_repository import (
+from src.app.database.connection import DatabaseConnection
+from src.app.database.exceptions import RepositoryError
+from src.app.database.models import TestResult
+from src.app.database.repositories.test_result_repository import (
     TestResultRepository,
 )
 from tests.fixtures.database_fixtures import (

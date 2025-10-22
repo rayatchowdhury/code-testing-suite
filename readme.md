@@ -168,7 +168,7 @@ The application features a **modern, refactored database layer** with clean sepa
 
 **Quick Start:**
 ```python
-from src.app.persistence.database import DatabaseManager, TestResult
+from src.app.database import DatabaseManager, TestResult
 
 db = DatabaseManager()
 
@@ -197,7 +197,7 @@ class MyCustomRunner(BaseRunner):
 
 **Working with the database:**
 ```python
-from src.app.persistence.database import DatabaseManager, TestResult
+from src.app.database import DatabaseManager, TestResult
 
 db = DatabaseManager()
 

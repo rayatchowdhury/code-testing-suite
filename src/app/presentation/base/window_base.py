@@ -94,7 +94,7 @@ class WindowBase(QWidget):
         """
         pass
     
-    def can_close(self):
+    def can_close(self) -> bool:
         """
         Check if window can be closed safely.
         
@@ -102,9 +102,56 @@ class WindowBase(QWidget):
             bool: True if window can close, False to prevent closing
             
         Override in subclasses to check for unsaved changes or
-        confirm dangerous operations.
+        confirm dangerous operations. Always call super().can_close()
+        to ensure test running check is performed.
         """
+        # Check if tests are running
+        if self._is_test_running():
+            logger.warning(f"Cannot close {self.__class__.__name__} - tests are running")
+            from src.app.presentation.services import ErrorHandlerService
+            error_service = ErrorHandlerService.instance()
+            error_service.show_warning(
+                "Tests Running",
+                "Cannot close window while tests are running.\n\nPlease stop the current test execution first.",
+                self
+            )
+            return False
+        
         return not self.has_unsaved_changes
+    
+    def _is_test_running(self) -> bool:
+        """Check if any test execution is currently running."""
+        # Check test windows (Comparator, Benchmarker, Validator)
+        if hasattr(self, "_get_runner_attribute_name"):
+            runner_attr_name = self._get_runner_attribute_name()
+            if hasattr(self, runner_attr_name):
+                runner = getattr(self, runner_attr_name)
+                if runner and hasattr(runner, "worker") and runner.worker:
+                    if hasattr(runner, "thread") and runner.thread:
+                        try:
+                            if hasattr(runner.thread, "isRunning") and runner.thread.isRunning():
+                                logger.debug(f"{runner_attr_name} thread is running")
+                                return True
+                        except RuntimeError:
+                            # QThread object already deleted - not running
+                            pass
+        
+        # Check editor window (CompilerRunner)
+        if hasattr(self, "editor_display") and self.editor_display:
+            if hasattr(self.editor_display, "compiler_runner") and self.editor_display.compiler_runner:
+                if hasattr(self.editor_display.compiler_runner, "worker") and self.editor_display.compiler_runner.worker:
+                    if hasattr(self.editor_display.compiler_runner.worker, "process") and self.editor_display.compiler_runner.worker.process:
+                        from PySide6.QtCore import QProcess
+                        try:
+                            state = self.editor_display.compiler_runner.worker.process.state()
+                            if state == QProcess.ProcessState.Running:
+                                logger.debug("Compiler process is running")
+                                return True
+                        except RuntimeError:
+                            # QProcess object already deleted - not running
+                            pass
+        
+        return False
     
     def handle_error(self, error: Exception, title: str = "Error"):
         """

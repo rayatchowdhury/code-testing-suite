@@ -4,7 +4,7 @@ Phase 5: Per-Window Packaging
 Main application window with sidebar navigation and display area.
 """
 
-from src.app.presentation.windows.main.widgets.view import (
+from src.app.presentation.windows.main.view import (
     MainWindow,
     MainWindowContent,
     MainWindowConfig,

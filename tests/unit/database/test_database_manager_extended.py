@@ -18,8 +18,8 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from src.app.persistence.database.database_manager import DatabaseError, DatabaseManager
-from src.app.persistence.database.models import ProjectData, Session, TestResult
+from src.app.database.database_manager import DatabaseError, DatabaseManager
+from src.app.database.models import ProjectData, Session, TestResult
 
 # ============================================================================
 # Test Fixtures

@@ -12,7 +12,20 @@ def get_main_window():
     return MainWindow
 
 
-# Import design_system and widgets modules
-from src.app.presentation import design_system, widgets
+# Lazy module access to avoid circular imports
+def __getattr__(name):
+    if name == "design_system":
+        from src.app.presentation.shared import design_system
+        return design_system
+    elif name == "widgets":
+        # Backward compatibility: redirect to shared.components
+        from src.app.presentation.shared import components
+        return components
+    elif name == "dialogs":
+        # Backward compatibility: redirect to shared.dialogs
+        from src.app.presentation.shared import dialogs
+        return dialogs
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
-__all__ = ["get_main_window", "design_system", "widgets"]
+
+__all__ = ["get_main_window", "design_system", "widgets", "dialogs"]

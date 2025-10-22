@@ -12,7 +12,7 @@ import pytest
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QPushButton, QSplitter, QWidget
 
-from src.app.presentation.window_controller.base_window import SidebarWindowBase
+from src.app.presentation.base.window import SidebarWindowBase
 
 
 class TestBaseWindowInitialization:
@@ -91,8 +91,8 @@ class TestBaseWindowFooterButtons:
         assert "⚙" in options_btn.text()
 
 
-@patch("src.app.presentation.widgets.sidebar.Sidebar")
-@patch("src.app.presentation.widgets.display_area.DisplayArea")
+@patch("src.app.presentation.shared.components.sidebar.Sidebar")
+@patch("src.app.presentation.shared.components.layout.DisplayArea")
 class TestBaseWindowWithSidebar:
     """Test base window with sidebar initialization."""
 
@@ -131,8 +131,8 @@ class TestBaseWindowWithSidebar:
         mock_display_class.assert_called_once()
 
 
-@patch("src.app.presentation.widgets.sidebar.Sidebar")
-@patch("src.app.presentation.widgets.display_area.DisplayArea")
+@patch("src.app.presentation.shared.components.sidebar.Sidebar")
+@patch("src.app.presentation.shared.components.layout.DisplayArea")
 class TestBaseWindowSplitter:
     """Test splitter setup and configuration."""
 

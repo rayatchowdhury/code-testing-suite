@@ -88,7 +88,7 @@ class TestGetAppIcon:
     def test_get_app_icon_checks_multiple_fallbacks(self):
         """Test get_app_icon logic with multiple fallback paths."""
         icon_paths = [
-            "src/resources/icons/app_icon.png",
+            "src/app/resources/icons/app_icon.png",
             "resources/icons/app_icon.png",
             "icons/app_icon.png",
         ]

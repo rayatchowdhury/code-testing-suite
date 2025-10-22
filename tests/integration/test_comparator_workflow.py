@@ -21,7 +21,7 @@ import pytest
 from PySide6.QtCore import QCoreApplication
 
 from src.app.core.tools.comparator import Comparator
-from src.app.persistence.database import DatabaseManager
+from src.app.database import DatabaseManager
 from tests.fixtures.code_samples import (
     CPP_COMPARATOR_MATCHING,
     CPP_COMPARATOR_MISMATCHED,

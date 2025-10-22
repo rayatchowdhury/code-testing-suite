@@ -8,7 +8,7 @@ import pytest
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel, QPushButton
 
-from src.app.presentation.widgets.sidebar import Sidebar, SidebarSection
+from src.app.presentation.shared.components.sidebar import Sidebar, SidebarSection
 
 
 @pytest.fixture

@@ -23,9 +23,7 @@ from src.app.core.config import (
     ConfigManager,
     ConfigPersistence,
     ConfigSaveError,
-    ConfigView,
     DatabaseOperations,
-    ErrorDialog,
     GeminiConfig,
     GeminiConfigUI,
 )

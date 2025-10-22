@@ -14,7 +14,7 @@ from typing import Any, Dict, Optional
 from PySide6.QtCore import QObject, QThread, Signal
 
 from src.app.core.tools.base.base_compiler import BaseCompiler
-from src.app.persistence.database import DatabaseManager, TestResult
+from src.app.database import DatabaseManager, TestResult
 
 logger = logging.getLogger(__name__)
 
@@ -446,3 +446,27 @@ class BaseRunner(QObject):
         except (RuntimeError, AttributeError):
             # Skip cleanup if Qt objects are already deleted or worker not initialized
             pass
+    
+    def reload_config(self, new_config: Optional[Dict[str, Any]] = None):
+        """
+        Reload configuration for compiler and runner.
+        
+        This allows hot-reloading of compilation settings without restarting.
+        Updates the compiler configuration and clears any cached compilers.
+        
+        Args:
+            new_config: Optional new configuration dict. If None, will reload from ConfigManager.
+        """
+        if new_config is not None:
+            self.config = new_config
+        else:
+            # Reload from ConfigManager singleton
+            from src.app.core.config.core import ConfigManager
+            config_manager = ConfigManager.instance()
+            self.config = config_manager.load_config()
+        
+        # Reload compiler config
+        if hasattr(self, "compiler") and self.compiler:
+            self.compiler.reload_config(self.config)
+        
+        logger.info(f"{self.test_type} runner config reloaded")
